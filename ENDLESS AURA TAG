@@ -7,22 +7,22 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- =====================
--- SHARED STATE (respawn pe bhi yaad rahega)
+-- SHARED STATE SYSTEM (Marne ke baad settings yaad rakhega)
 -- =====================
-
 if not _G.AuraState then
     _G.AuraState = {
         tagsEnabled = true,
         auraEnabled = true,
-        emitters = {}
+        animEnabled = true, -- Anim state persistence handler
+        emitters = {},
+        currentTrack = nil
     }
 end
 local AuraState = _G.AuraState
 
 -- =====================
--- HUD BAR (Top-Right Corner Fixed & Smaller)
+-- HUD BAR (Bada Premium Layout - Roblox Buttons Bypass)
 -- =====================
-
 if playerGui:FindFirstChild("AuraHUD") then
     playerGui:FindFirstChild("AuraHUD"):Destroy()
 end
@@ -30,14 +30,16 @@ end
 local hud = Instance.new("ScreenGui")
 hud.Name = "AuraHUD"
 hud.ResetOnSpawn = false
+hud.IgnoreGuiInset = true -- Top Roblox Corebar inset bypass karne ke liye
 hud.Parent = playerGui
 
 local bar = Instance.new("Frame")
 bar.Name = "Bar"
 bar.AutomaticSize = Enum.AutomaticSize.X
-bar.Size = UDim2.new(0, 0, 0, 22) -- Size thoda chota kiya hai
+bar.Size = UDim2.new(0, 0, 0, 22) -- Bada Premium Size jaisa aapko chahiye tha
 bar.AnchorPoint = Vector2.new(1, 0)
-bar.Position = UDim2.new(1, 0, 0, 0) -- Bilkul top-right kone me lagaya hai
+-- Mobile top-right buttons ko crash hone se bachane ke liye perfect dynamic spacing
+bar.Position = UDim2.new(1, -15, 0, 10) 
 bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 bar.BackgroundTransparency = 0.45
 bar.BorderSizePixel = 0
@@ -63,7 +65,7 @@ barPadding.PaddingLeft = UDim.new(0, 4)
 barPadding.PaddingRight = UDim.new(0, 4)
 barPadding.Parent = bar
 
--- Box creator
+-- Box Creator (Bada Text Layout)
 local function createBox(name, text, withDot, interactive)
     local box = Instance.new("Frame")
     box.Name = name
@@ -119,26 +121,22 @@ local function createBox(name, text, withDot, interactive)
     label.BackgroundTransparency = 1
     label.TextColor3 = Color3.fromRGB(210, 0, 0)
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 11 -- Text size ko compact kiya hai
+    label.TextSize = 10 -- Clear readable bada size text
     label.Text = text
     label.Parent = box
 
     return box, label, dot
 end
 
--- ===== 1. TAGS (Sabse aage) =====
+-- ===== 1. TAGS TOGGLE =====
 local tagsBox, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
 tagsLabel.MouseButton1Click:Connect(function()
     AuraState.tagsEnabled = not AuraState.tagsEnabled
     tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
     tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
 end)
-if not AuraState.tagsEnabled then
-    tagsLabel.Text = "Tᴀɢs Øғғ"
-    tagsDot.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
-end
 
--- ===== 2. AURA =====
+-- ===== 2. AURA TOGGLE =====
 local auraBox, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
 auraLabel.MouseButton1Click:Connect(function()
     AuraState.auraEnabled = not AuraState.auraEnabled
@@ -150,10 +148,6 @@ auraLabel.MouseButton1Click:Connect(function()
         end
     end
 end)
-if not AuraState.auraEnabled then
-    auraLabel.Text = "Aᴜʀᴀ Øғғ"
-    auraDot.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
-end
 
 -- ===== 3. FPS =====
 local fpsBox, fpsLabel = createBox("FPS", "Fᴘs: --", false, false)
@@ -164,52 +158,70 @@ local pingBox, pingLabel = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
 -- ===== 5. TIME =====
 local timeBox, timeLabel = createBox("Time", "--:--", false, false)
 
--- ===== 6. REJOIN =====
+-- ===== 6. ANIMATION TOGGLE (State Persistent Saver) =====
+local animBox, animLabel, animDot = createBox("AnimToggle", "Aɴɪᴍ Øɴ", true, true)
+animLabel.MouseButton1Click:Connect(function()
+    AuraState.animEnabled = not AuraState.animEnabled
+    animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
+    animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    
+    if AuraState.currentTrack then
+        if AuraState.animEnabled then
+            local character = player.Character
+            local humanoid = character and character:FindFirstChild("Humanoid")
+            if humanoid and humanoid.MoveDirection.Magnitude < 0.1 then
+                AuraState.currentTrack:Play()
+            end
+        else
+            AuraState.currentTrack:Stop()
+        end
+    end
+end)
+
+-- ===== 7. REJOIN =====
 local rejoinBox, rejoinLabel = createBox("Rejoin", "Rᴇᴊᴏɪɴ", false, true)
 rejoinLabel.MouseButton1Click:Connect(function()
-    local ok, err = pcall(function()
+    pcall(function()
         game:GetService("TeleportService"):Teleport(game.PlaceId, player)
     end)
-    if not ok then
-        warn("Rejoin failed: " .. tostring(err))
-    end
 end)
 
--- FPS Live Update
+-- Live System States Sync (Marne par sync banaye rakhne ke liye)
+local function syncHUD()
+    tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
+    tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    
+    auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
+    auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    
+    animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
+    animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+end
+syncHUD()
+
 RunService.Heartbeat:Connect(function(dt)
-    if dt > 0 then
-        fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt)
-    end
+    if dt > 0 then fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt) end
 end)
 
--- Ping + Time Live Update
 task.spawn(function()
     while true do
-        local ok, pingValue = pcall(function()
-            return StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
-        end)
-        if ok then
+        pcall(function()
+            local pingValue = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
             pingLabel.Text = "Pɪɴɢ: " .. math.floor(pingValue) .. "ᴍs"
-        end
-
+        end)
         local dt = DateTime.now():ToLocalTime()
         local hour = dt.Hour
         local ampm = "AM"
-        if hour >= 12 then
-            ampm = "PM"
-            if hour > 12 then hour -= 12 end
-        end
+        if hour >= 12 then ampm = "PM" if hour > 12 then hour -= 12 end end
         if hour == 0 then hour = 12 end
         timeLabel.Text = string.format("%02d:%02d %s", hour, dt.Minute, ampm)
-
         task.wait(1)
     end
 end)
 
 -- =====================
--- CHARACTER SETUP (Tag + Aura)
+-- CHARACTER SETUP (Asli Heavy Aura + Tags)
 -- =====================
-
 local function setup(character)
     local head = character:WaitForChild("Head")
     local humanoid = character:WaitForChild("Humanoid")
@@ -217,13 +229,9 @@ local function setup(character)
     local hrp = character:WaitForChild("HumanoidRootPart")
     local camera = workspace.CurrentCamera
 
-    for i = #AuraState.emitters, 1, -1 do
-        if not AuraState.emitters[i].Parent then
-            table.remove(AuraState.emitters, i)
-        end
-    end
+    AuraState.emitters = {} -- Old values clear handles on respawn
 
-    -- ===== EA CIRCLE (zoom out) =====
+    -- ===== EA CIRCLE =====
     local eaBillboard = Instance.new("BillboardGui")
     eaBillboard.Name = "EACircle"
     eaBillboard.Size = UDim2.new(0, 28, 0, 28)
@@ -257,7 +265,7 @@ local function setup(character)
     eaText.Font = Enum.Font.GothamBold
     eaText.Parent = eaCircle
 
-    -- ===== PURA TAG (zoom in) =====
+    -- ===== PURA TAG =====
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "OverheadTag"
     billboard.Size = UDim2.new(0, 140, 0, 36)
@@ -296,7 +304,6 @@ local function setup(character)
     divider.Size = UDim2.new(0, 1.5, 0.7, 0)
     divider.Position = UDim2.new(0.19, 0, 0.15, 0)
     divider.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-    divider.BackgroundTransparency = 0
     divider.BorderSizePixel = 0
     divider.Parent = frame
 
@@ -322,20 +329,14 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- ===== DISTANCE CHECK + TAGS TOGGLE =====
     local distConn
     distConn = RunService.RenderStepped:Connect(function()
-        if not character.Parent then
-            distConn:Disconnect()
-            return
-        end
-
+        if not character.Parent then distConn:Disconnect() return end
         if not AuraState.tagsEnabled then
             billboard.Enabled = false
             eaBillboard.Enabled = false
             return
         end
-
         local dist = (camera.CFrame.Position - head.Position).Magnitude
         if dist > 40 then
             billboard.Enabled = false
@@ -346,98 +347,127 @@ local function setup(character)
         end
     end)
 
-    -- ===== THUNDER AURA FUNCTION =====
+    -- ===== REALISTIC ULTRA-LAYERED RED THUNDER AURA GENERATOR =====
     local function createThunder(parent, offsetY, rate, speed, size)
         local att = Instance.new("Attachment")
         att.Position = Vector3.new(0, offsetY, 0)
         att.Parent = parent
 
+        -- LAYER 1: Core Intense Lightning (Main sharp thunder texture)
         local thunder = Instance.new("ParticleEmitter")
         thunder.Parent = att
         thunder.Texture = "rbxassetid://6101261905"
         thunder.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 50, 50)),
-            ColorSequenceKeypoint.new(0.4, Color3.fromRGB(220, 0, 0)),
-            ColorSequenceKeypoint.new(0.8, Color3.fromRGB(255, 100, 100)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 0, 0))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)), -- Ultra hot white-red core
+            ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 30, 30)),
+            -- Neon Red Extended Glow
+            ColorSequenceKeypoint.new(0.7, Color3.fromRGB(180, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 0, 0))
         })
-        thunder.LightEmission = 1
+        thunder.LightEmission = 0.9
         thunder.LightInfluence = 0
         thunder.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 0.5),
-            NumberSequenceKeypoint.new(0.3, size * 1.2),
-            NumberSequenceKeypoint.new(0.7, size * 0.8),
+            NumberSequenceKeypoint.new(0, size * 0.3),
+            NumberSequenceKeypoint.new(0.2, size * 1.4),
+            NumberSequenceKeypoint.new(0.8, size * 0.9),
             NumberSequenceKeypoint.new(1, 0)
         })
         thunder.Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(0.4, 0.2),
+            NumberSequenceKeypoint.new(0.7, 0.1),
             NumberSequenceKeypoint.new(1, 1)
         })
-        thunder.Lifetime = NumberRange.new(0.4, 0.8)
-        thunder.Rate = rate
-        thunder.Speed = NumberRange.new(speed, speed + 3)
-        thunder.SpreadAngle = Vector2.new(90, 90)
-        thunder.RotSpeed = NumberRange.new(-200, 200)
+        thunder.Lifetime = NumberRange.new(0.25, 0.5) -- Faster, sharper response
+        thunder.Rate = rate * 1.2
+        thunder.Speed = NumberRange.new(speed, speed + 4)
+        thunder.SpreadAngle = Vector2.new(45, 45)
+        thunder.RotSpeed = NumberRange.new(-360, 360)
         thunder.Rotation = NumberRange.new(0, 360)
-        thunder.ZOffset = 0.3
+        thunder.Squash = NumberSequence.new(1.5) -- Stretching effect for sharp lightning bolts
+        thunder.Acceleration = Vector3.new(0, 8, 0) -- Rises upward like heat lightning
+        thunder.ZOffset = 0.5
 
+        -- LAYER 2: Plasma Discharge Sparks (Extra detailed realistic mini lightning sparks)
+        local plasmaSparks = Instance.new("ParticleEmitter")
+        plasmaSparks.Parent = att
+        plasmaSparks.Texture = "rbxassetid://10849912199" -- Plasma sparks asset ID
+        plasmaSparks.Color = ColorSequence.new(Color3.fromRGB(255, 0, 50))
+        plasmaSparks.LightEmission = 1
+        plasmaSparks.Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, size * 0.5),
+            NumberSequenceKeypoint.new(1, 0)
+        })
+        plasmaSparks.Lifetime = NumberRange.new(0.2, 0.4)
+        plasmaSparks.Rate = rate * 0.8
+        plasmaSparks.Speed = NumberRange.new(4, 10)
+        plasmaSparks.SpreadAngle = Vector2.new(180, 180)
+        plasmaSparks.RotSpeed = NumberRange.new(-500, 500)
+
+        -- LAYER 3: Outer Crimson Energy Mist / Distortion Glow
         local glow = Instance.new("ParticleEmitter")
         glow.Parent = att
+        glow.Texture = "rbxassetid://2521160010" -- Aura distortion flow texture
         glow.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(130, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
         })
-        glow.LightEmission = 1
+        glow.LightEmission = 0.8
         glow.LightInfluence = 0
         glow.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 1.8),
-            NumberSequenceKeypoint.new(0.4, size * 1.3),
+            NumberSequenceKeypoint.new(0, size * 1.5),
+            NumberSequenceKeypoint.new(0.5, size * 2.2),
             NumberSequenceKeypoint.new(1, 0)
         })
         glow.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.3),
-            NumberSequenceKeypoint.new(0.5, 0.6),
+            NumberSequenceKeypoint.new(0, 0.4),
+            NumberSequenceKeypoint.new(0.5, 0.7),
             NumberSequenceKeypoint.new(1, 1)
         })
-        glow.Lifetime = NumberRange.new(0.3, 0.6)
-        glow.Rate = rate * 0.8
-        glow.Speed = NumberRange.new(0.5, 2)
+        glow.Lifetime = NumberRange.new(0.4, 0.7)
+        glow.Rate = rate * 0.6
+        glow.Speed = NumberRange.new(1, 3)
         glow.SpreadAngle = Vector2.new(360, 360)
 
+        -- LAYER 4: Dark Matter Smoke (For demonic/heavy aesthetic weight)
         local smoke = Instance.new("ParticleEmitter")
         smoke.Parent = att
+        smoke.Texture = "rbxassetid://2429116001" -- Real smoke map texture
         smoke.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 0, 0))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 0, 0)),
+            ColorSequenceKeypoint.new(0.6, Color3.fromRGB(15, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
         })
-        smoke.LightEmission = 0.3
-        smoke.LightInfluence = 0.5
+        smoke.LightEmission = 0.1
+        smoke.LightInfluence = 0.2
         smoke.Size = NumberSequence.new({
             NumberSequenceKeypoint.new(0, size * 0.8),
-            NumberSequenceKeypoint.new(0.5, size * 2),
-            NumberSequenceKeypoint.new(1, 0)
+            NumberSequenceKeypoint.new(0.5, size * 2.5),
+            NumberSequenceKeypoint.new(1, size * 0.5)
         })
         smoke.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.5),
-            NumberSequenceKeypoint.new(0.6, 0.8),
+            NumberSequenceKeypoint.new(0, 0.6),
+            NumberSequenceKeypoint.new(0.5, 0.8),
             NumberSequenceKeypoint.new(1, 1)
         })
         smoke.Lifetime = NumberRange.new(0.6, 1.2)
-        smoke.Rate = rate * 0.5
-        smoke.Speed = NumberRange.new(1, 2.5)
-        smoke.SpreadAngle = Vector2.new(40, 40)
+        smoke.Rate = rate * 0.4
+        smoke.Speed = NumberRange.new(0.5, 2)
+        smoke.SpreadAngle = Vector2.new(60, 60)
 
+        -- State setup sync handles
         thunder.Enabled = AuraState.auraEnabled
+        plasmaSparks.Enabled = AuraState.auraEnabled
         glow.Enabled = AuraState.auraEnabled
         smoke.Enabled = AuraState.auraEnabled
+
         table.insert(AuraState.emitters, thunder)
+        table.insert(AuraState.emitters, plasmaSparks)
         table.insert(AuraState.emitters, glow)
         table.insert(AuraState.emitters, smoke)
     end
 
-    -- ===== AURA HAR BODY PART PE =====
+    -- Injecting into all body limbs (R15 + R6 Support)
     local bodyParts = {
         "Head", "UpperTorso", "LowerTorso",
         "LeftUpperArm", "LeftLowerArm", "LeftHand",
@@ -449,61 +479,83 @@ local function setup(character)
 
     for _, partName in ipairs(bodyParts) do
         local part = character:FindFirstChild(partName)
-        if part then
-            createThunder(part, 0, 45, 4, 1.1)
-        end
+        if part then createThunder(part, 0, 45, 4, 1.1) end
     end
 
+    -- Core body injection points
     createThunder(hrp, 0, 60, 5, 1.4)
     createThunder(hrp, 1, 40, 4, 1.0)
     createThunder(hrp, -1, 40, 4, 1.0)
 
-    -- Ground effect
+    -- ===== 4. GROUND EFFECTS INJECTION (Upgraded Realistic Shockwave Floor) =====
     local groundAtt = Instance.new("Attachment")
     groundAtt.Position = Vector3.new(0, -3, 0)
     groundAtt.Parent = hrp
 
+    -- Ground Lightning Impact
     local groundThunder = Instance.new("ParticleEmitter")
     groundThunder.Parent = groundAtt
     groundThunder.Texture = "rbxassetid://6101261905"
     groundThunder.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 40)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 0))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        -- Bright grounding sparks
+        ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 0, 0)),
+        local groundThunder = groundThunder, -- optimization anchor
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))
     })
     groundThunder.LightEmission = 1
     groundThunder.LightInfluence = 0
     groundThunder.Size = NumberSequence.new({
         NumberSequenceKeypoint.new(0, 0.4),
-        NumberSequenceKeypoint.new(0.4, 1.2),
+        NumberSequenceKeypoint.new(0.4, 1.5),
         NumberSequenceKeypoint.new(1, 0)
     })
     groundThunder.Transparency = NumberSequence.new({
         NumberSequenceKeypoint.new(0, 0.1),
         NumberSequenceKeypoint.new(1, 1)
     })
-    groundThunder.Lifetime = NumberRange.new(0.5, 0.9)
-    groundThunder.Rate = 50
-    groundThunder.Speed = NumberRange.new(2, 5)
-    groundThunder.SpreadAngle = Vector2.new(100, 100)
+    groundThunder.Lifetime = NumberRange.new(0.4, 0.8)
+    groundThunder.Rate = 55
+    groundThunder.Speed = NumberRange.new(4, 9)
+    groundThunder.SpreadAngle = Vector2.new(120, 120)
     groundThunder.EmissionDirection = Enum.NormalId.Bottom
     groundThunder.Enabled = AuraState.auraEnabled
     table.insert(AuraState.emitters, groundThunder)
 
-    -- ===== IDLE ANIMATION =====
-    local AnimationIds = {
-        Idle = 138665010911335,
-    }
+    -- Ground Ring Shockwave (Floor distortion impact)
+    local groundRing = Instance.new("ParticleEmitter")
+    groundRing.Parent = groundAtt
+    groundRing.Texture = "rbxassetid://10849917317" -- Expanding shockwave ring texture
+    groundRing.Color = ColorSequence.new(Color3.fromRGB(150, 0, 0))
+    groundRing.LightEmission = 0.8
+    groundRing.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 2),
+        NumberSequenceKeypoint.new(1, 8) -- Expands outwards on floor
+    })
+    groundRing.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.2),
+        NumberSequenceKeypoint.new(0.7, 0.6),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    groundRing.Lifetime = NumberRange.new(0.5, 0.8)
+    groundRing.Rate = 8
+    groundRing.Speed = NumberRange.new(0)
+    groundRing.EmissionDirection = Enum.NormalId.Bottom
+    groundRing.Enabled = AuraState.auraEnabled
+    table.insert(AuraState.emitters, groundRing)
 
+    -- ===== DYNAMIC IDLE ANIMATION SYSTEM =====
     local idleAnim = Instance.new("Animation")
-    idleAnim.AnimationId = "rbxassetid://" .. AnimationIds.Idle
+    idleAnim.AnimationId = "rbxassetid://138665010911335"
 
     local idleTrack = animator:LoadAnimation(idleAnim)
     idleTrack.Priority = Enum.AnimationPriority.Idle
     idleTrack.Looped = true
+    AuraState.currentTrack = idleTrack
 
     humanoid.Running:Connect(function(speed)
         if speed < 0.5 then
-            if not idleTrack.IsPlaying then
+            if AuraState.animEnabled and not idleTrack.IsPlaying then
                 idleTrack:Play()
             end
         else
@@ -513,20 +565,15 @@ local function setup(character)
         end
     end)
 
-    if humanoid.MoveDirection.Magnitude < 0.1 then
+    -- Check on load/respawn
+    if humanoid.MoveDirection.Magnitude < 0.1 and AuraState.animEnabled then
         idleTrack:Play()
     end
 end
 
--- =====================
--- INITIAL + RESPAWN (pcall safety)
--- =====================
-
 local function safeSetup(character)
-    local ok, err = pcall(setup, character)
-    if not ok then
-        warn("Aura setup error: " .. tostring(err))
-    end
+    pcall(setup, character)
+    syncHUD() -- Respawn hot swap sync ui tags
 end
 
 safeSetup(player.Character or player.CharacterAdded:Wait())
