@@ -20,181 +20,191 @@ end
 local AuraState = _G.AuraState
 
 -- =====================
--- HUD BAR (top-right corner)
+-- HUD BAR (Top-Right Corner Fixed & Smaller)
 -- =====================
 
-if not playerGui:FindFirstChild("AuraHUD") then
-    local hud = Instance.new("ScreenGui")
-    hud.Name = "AuraHUD"
-    hud.ResetOnSpawn = false
-    hud.Parent = playerGui
+if playerGui:FindFirstChild("AuraHUD") then
+    playerGui:FindFirstChild("AuraHUD"):Destroy()
+end
 
-    local bar = Instance.new("Frame")
-    bar.Name = "Bar"
-    bar.AutomaticSize = Enum.AutomaticSize.X
-    bar.Size = UDim2.new(0, 0, 0, 26)
-    bar.AnchorPoint = Vector2.new(1, 0)
-    bar.Position = UDim2.new(1, -8, 0, 8)
-    bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    bar.BackgroundTransparency = 0.45
-    bar.BorderSizePixel = 0
-    bar.Parent = hud
+local hud = Instance.new("ScreenGui")
+hud.Name = "AuraHUD"
+hud.ResetOnSpawn = false
+hud.Parent = playerGui
 
-    local barCorner = Instance.new("UICorner")
-    barCorner.CornerRadius = UDim.new(0, 10)
-    barCorner.Parent = bar
+local bar = Instance.new("Frame")
+bar.Name = "Bar"
+bar.AutomaticSize = Enum.AutomaticSize.X
+bar.Size = UDim2.new(0, 0, 0, 22) -- Size thoda chota kiya hai
+bar.AnchorPoint = Vector2.new(1, 0)
+bar.Position = UDim2.new(1, 0, 0, 0) -- Bilkul top-right kone me lagaya hai
+bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+bar.BackgroundTransparency = 0.45
+bar.BorderSizePixel = 0
+bar.Parent = hud
 
-    local barStroke = Instance.new("UIStroke")
-    barStroke.Color = Color3.fromRGB(200, 0, 0)
-    barStroke.Thickness = 1.4
-    barStroke.Parent = bar
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0, 6)
+barCorner.Parent = bar
 
-    local barLayout = Instance.new("UIListLayout")
-    barLayout.FillDirection = Enum.FillDirection.Horizontal
-    barLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-    barLayout.Padding = UDim.new(0, 4)
-    barLayout.Parent = bar
+local barStroke = Instance.new("UIStroke")
+barStroke.Color = Color3.fromRGB(200, 0, 0)
+barStroke.Thickness = 1.2
+barStroke.Parent = bar
 
-    local barPadding = Instance.new("UIPadding")
-    barPadding.PaddingLeft = UDim.new(0, 5)
-    barPadding.PaddingRight = UDim.new(0, 5)
-    barPadding.Parent = bar
+local barLayout = Instance.new("UIListLayout")
+barLayout.FillDirection = Enum.FillDirection.Horizontal
+barLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+barLayout.Padding = UDim.new(0, 3)
+barLayout.Parent = bar
 
-    -- Box creator
-    local function createBox(name, text, withDot, interactive)
-        local box = Instance.new("Frame")
-        box.Name = name
-        box.AutomaticSize = Enum.AutomaticSize.X
-        box.Size = UDim2.new(0, 0, 1, 0)
-        box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        box.BackgroundTransparency = 0.25
-        box.BorderSizePixel = 0
-        box.Parent = bar
+local barPadding = Instance.new("UIPadding")
+barPadding.PaddingLeft = UDim.new(0, 4)
+barPadding.PaddingRight = UDim.new(0, 4)
+barPadding.Parent = bar
 
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 6)
-        corner.Parent = box
+-- Box creator
+local function createBox(name, text, withDot, interactive)
+    local box = Instance.new("Frame")
+    box.Name = name
+    box.AutomaticSize = Enum.AutomaticSize.X
+    box.Size = UDim2.new(0, 0, 1, -4)
+    box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    box.BackgroundTransparency = 0.25
+    box.BorderSizePixel = 0
+    box.Parent = bar
 
-        local stroke = Instance.new("UIStroke")
-        stroke.Color = Color3.fromRGB(200, 0, 0)
-        stroke.Thickness = 1
-        stroke.Parent = box
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 4)
+    corner.Parent = box
 
-        local layout = Instance.new("UIListLayout")
-        layout.FillDirection = Enum.FillDirection.Horizontal
-        layout.VerticalAlignment = Enum.VerticalAlignment.Center
-        layout.Padding = UDim.new(0, 4)
-        layout.Parent = box
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(200, 0, 0)
+    stroke.Thickness = 1
+    stroke.Parent = box
 
-        local padding = Instance.new("UIPadding")
-        padding.PaddingLeft = UDim.new(0, 8)
-        padding.PaddingRight = UDim.new(0, 8)
-        padding.Parent = box
+    local layout = Instance.new("UIListLayout")
+    layout.FillDirection = Enum.FillDirection.Horizontal
+    layout.VerticalAlignment = Enum.VerticalAlignment.Center
+    layout.Padding = UDim.new(0, 3)
+    layout.Parent = box
 
-        local dot
-        if withDot then
-            dot = Instance.new("Frame")
-            dot.Size = UDim2.new(0, 6, 0, 6)
-            dot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-            dot.BorderSizePixel = 0
-            dot.Parent = box
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 6)
+    padding.PaddingRight = UDim.new(0, 6)
+    padding.Parent = box
 
-            local dc = Instance.new("UICorner")
-            dc.CornerRadius = UDim.new(1, 0)
-            dc.Parent = dot
-        end
+    local dot
+    if withDot then
+        dot = Instance.new("Frame")
+        dot.Size = UDim2.new(0, 5, 0, 5)
+        dot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+        dot.BorderSizePixel = 0
+        dot.Parent = box
 
-        local label
-        if interactive then
-            label = Instance.new("TextButton")
-            label.AutoButtonColor = false
-        else
-            label = Instance.new("TextLabel")
-        end
-        label.AutomaticSize = Enum.AutomaticSize.X
-        label.Size = UDim2.new(0, 0, 1, 0)
-        label.BackgroundTransparency = 1
-        label.TextColor3 = Color3.fromRGB(210, 0, 0)
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 13
-        label.Text = text
-        label.Parent = box
-
-        return box, label, dot
+        local dc = Instance.new("UICorner")
+        dc.CornerRadius = UDim.new(1, 0)
+        dc.Parent = dot
     end
 
-    -- ===== TAGS (sabse aage) =====
-    local tagsBox, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
-    tagsLabel.MouseButton1Click:Connect(function()
-        AuraState.tagsEnabled = not AuraState.tagsEnabled
-        tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
-        tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    end)
+    local label
+    if interactive then
+        label = Instance.new("TextButton")
+        label.AutoButtonColor = false
+    else
+        label = Instance.new("TextLabel")
+    end
+    label.AutomaticSize = Enum.AutomaticSize.X
+    label.Size = UDim2.new(0, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(210, 0, 0)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 11 -- Text size ko compact kiya hai
+    label.Text = text
+    label.Parent = box
 
-    -- ===== AURA =====
-    local auraBox, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
-    auraLabel.MouseButton1Click:Connect(function()
-        AuraState.auraEnabled = not AuraState.auraEnabled
-        auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
-        auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-        for _, emitter in ipairs(AuraState.emitters) do
-            if emitter and emitter.Parent then
-                emitter.Enabled = AuraState.auraEnabled
-            end
-        end
-    end)
-
-    -- ===== FPS =====
-    local fpsBox, fpsLabel = createBox("FPS", "Fᴘs: --", false, false)
-
-    -- ===== PING =====
-    local pingBox, pingLabel = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
-
-    -- ===== TIME =====
-    local timeBox, timeLabel = createBox("Time", "--:--", false, false)
-
-    -- ===== REJOIN =====
-    local rejoinBox, rejoinLabel = createBox("Rejoin", "Rᴇᴊᴏɪɴ", false, true)
-    rejoinLabel.MouseButton1Click:Connect(function()
-        local ok, err = pcall(function()
-            game:GetService("TeleportService"):Teleport(game.PlaceId, player)
-        end)
-        if not ok then
-            warn("Rejoin failed: " .. tostring(err))
-        end
-    end)
-
-    -- FPS live update
-    RunService.Heartbeat:Connect(function(dt)
-        if dt > 0 then
-            fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt)
-        end
-    end)
-
-    -- Ping + Time live update
-    task.spawn(function()
-        while true do
-            local ok, pingValue = pcall(function()
-                return StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
-            end)
-            if ok then
-                pingLabel.Text = "Pɪɴɢ: " .. math.floor(pingValue) .. "ᴍs"
-            end
-
-            local dt = DateTime.now():ToLocalTime()
-            local hour = dt.Hour
-            local ampm = "AM"
-            if hour >= 12 then
-                ampm = "PM"
-                if hour > 12 then hour -= 12 end
-            end
-            if hour == 0 then hour = 12 end
-            timeLabel.Text = string.format("%02d:%02d %s", hour, dt.Minute, ampm)
-
-            task.wait(1)
-        end
-    end)
+    return box, label, dot
 end
+
+-- ===== 1. TAGS (Sabse aage) =====
+local tagsBox, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
+tagsLabel.MouseButton1Click:Connect(function()
+    AuraState.tagsEnabled = not AuraState.tagsEnabled
+    tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
+    tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+end)
+if not AuraState.tagsEnabled then
+    tagsLabel.Text = "Tᴀɢs Øғғ"
+    tagsDot.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+end
+
+-- ===== 2. AURA =====
+local auraBox, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
+auraLabel.MouseButton1Click:Connect(function()
+    AuraState.auraEnabled = not AuraState.auraEnabled
+    auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
+    auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    for _, emitter in ipairs(AuraState.emitters) do
+        if emitter and emitter.Parent then
+            emitter.Enabled = AuraState.auraEnabled
+        end
+    end
+end)
+if not AuraState.auraEnabled then
+    auraLabel.Text = "Aᴜʀᴀ Øғғ"
+    auraDot.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+end
+
+-- ===== 3. FPS =====
+local fpsBox, fpsLabel = createBox("FPS", "Fᴘs: --", false, false)
+
+-- ===== 4. PING =====
+local pingBox, pingLabel = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
+
+-- ===== 5. TIME =====
+local timeBox, timeLabel = createBox("Time", "--:--", false, false)
+
+-- ===== 6. REJOIN =====
+local rejoinBox, rejoinLabel = createBox("Rejoin", "Rᴇᴊᴏɪɴ", false, true)
+rejoinLabel.MouseButton1Click:Connect(function()
+    local ok, err = pcall(function()
+        game:GetService("TeleportService"):Teleport(game.PlaceId, player)
+    end)
+    if not ok then
+        warn("Rejoin failed: " .. tostring(err))
+    end
+end)
+
+-- FPS Live Update
+RunService.Heartbeat:Connect(function(dt)
+    if dt > 0 then
+        fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt)
+    end
+end)
+
+-- Ping + Time Live Update
+task.spawn(function()
+    while true do
+        local ok, pingValue = pcall(function()
+            return StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
+        end)
+        if ok then
+            pingLabel.Text = "Pɪɴɢ: " .. math.floor(pingValue) .. "ᴍs"
+        end
+
+        local dt = DateTime.now():ToLocalTime()
+        local hour = dt.Hour
+        local ampm = "AM"
+        if hour >= 12 then
+            ampm = "PM"
+            if hour > 12 then hour -= 12 end
+        end
+        if hour == 0 then hour = 12 end
+        timeLabel.Text = string.format("%02d:%02d %s", hour, dt.Minute, ampm)
+
+        task.wait(1)
+    end
+end)
 
 -- =====================
 -- CHARACTER SETUP (Tag + Aura)
@@ -290,16 +300,16 @@ local function setup(character)
     divider.BorderSizePixel = 0
     divider.Parent = frame
 
-    local auraLabel = Instance.new("TextLabel")
-    auraLabel.Size = UDim2.new(0.79, 0, 0.54, 0)
-    auraLabel.Position = UDim2.new(0.21, 0, 0.02, 0)
-    auraLabel.BackgroundTransparency = 1
-    auraLabel.Text = "Eɴᴅʟᴇss Aᴜʀᴀ: Usᴇʀ"
-    auraLabel.TextColor3 = Color3.fromRGB(200, 0, 0)
-    auraLabel.TextScaled = true
-    auraLabel.Font = Enum.Font.GothamBold
-    auraLabel.TextXAlignment = Enum.TextXAlignment.Left
-    auraLabel.Parent = frame
+    local overheadAuraLabel = Instance.new("TextLabel")
+    overheadAuraLabel.Size = UDim2.new(0.79, 0, 0.54, 0)
+    overheadAuraLabel.Position = UDim2.new(0.21, 0, 0.02, 0)
+    overheadAuraLabel.BackgroundTransparency = 1
+    overheadAuraLabel.Text = "Eɴᴅʟᴇss Aᴜʀᴀ: Usᴇʀ"
+    overheadAuraLabel.TextColor3 = Color3.fromRGB(200, 0, 0)
+    overheadAuraLabel.TextScaled = true
+    overheadAuraLabel.Font = Enum.Font.GothamBold
+    overheadAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
+    overheadAuraLabel.Parent = frame
 
     local nameLabel = Instance.new("TextLabel")
     nameLabel.Size = UDim2.new(0.79, 0, 0.38, 0)
