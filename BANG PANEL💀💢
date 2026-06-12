@@ -3,17 +3,50 @@ local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService") 
 local Players = game:GetService("Players")
 
--- ANIMATION CONFIGURATION
+-- CONFIGURATIONS & SOUNDS
 local bangAnimId = "rbxassetid://5918726674"
 local activeTrack = nil
+local currentSoundObj = nil
+
+-- Sound IDs for Modes
+local soundNormal = "rbxassetid://95656642853883"
+local soundFaceBang = "rbxassetid://95656642853883"
+local soundAutoSwitch = "rbxassetid://136178701391977"
 
 local function getHumanoid()
     return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 end
 
-local function isR15()
-    local hum = getHumanoid()
-    return hum and hum.RigType == Enum.RigType.R15
+-- Function to handle Sound playing based on active Mode
+local function playModeSound(mode)
+    if currentSoundObj then 
+        currentSoundObj:Destroy() 
+        currentSoundObj = nil 
+    end
+    
+    local myHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return end
+    
+    local s = Instance.new("Sound")
+    s.Volume = 2
+    s.PlayOnRemove = false
+    s.Parent = myHRP
+    
+    if mode == "Normal" then
+        s.SoundId = soundNormal
+        s.Looped = true
+        s:Play()
+    elseif mode == "Face Bang" then
+        s.SoundId = soundFaceBang
+        s.Looped = true
+        s:Play()
+    elseif mode == "Auto Switch" then
+        s.SoundId = soundAutoSwitch
+        s.Looped = false -- Handled via 2-second logic loop below
+        s:Play()
+    end
+    
+    currentSoundObj = s
 end
 
 -- GLOBAL STORAGE FOR INSTANT DESTRUCTION & COUNTING
@@ -32,21 +65,13 @@ end
 
 -- 2ND EXECUTION: FULL DESTRUCTION PROTOCOL
 if _G.EndlessAuraStorage.ExecCount == 2 then
-    if _G.EndlessAuraStorage.CurrentGui then
-        _G.EndlessAuraStorage.CurrentGui:Destroy()
-        _G.EndlessAuraStorage.CurrentGui = nil
-    end
-    if _G.EndlessAuraStorage.ActiveConnection then
-        _G.EndlessAuraStorage.ActiveConnection:Disconnect()
-        _G.EndlessAuraStorage.ActiveConnection = nil
-    end
-    if _G.EndlessAuraStorage.PlatformPart then
-        _G.EndlessAuraStorage.PlatformPart:Destroy()
-        _G.EndlessAuraStorage.PlatformPart = nil
-    end
+    if _G.EndlessAuraStorage.CurrentGui then _G.EndlessAuraStorage.CurrentGui:Destroy() _G.EndlessAuraStorage.CurrentGui = nil end
+    if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end
+    if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end
     if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
     if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
     if activeTrack then activeTrack:Stop() activeTrack = nil end
+    if currentSoundObj then currentSoundObj:Destroy() currentSoundObj = nil end
     
     pcall(function()
         local torso = player.Character:FindFirstChild("Torso") or player.Character:FindFirstChild("LowerTorso")
@@ -63,7 +88,6 @@ if _G.EndlessAuraStorage.ExecCount >= 3 then
     _G.EndlessAuraStorage.ExecCount = 1
 end
 
--- CONFIGURATIONS
 local speedMultiplier = 17.4   
 local forwardBackRange = 1.1   
 local fixedUpOffset = 1.8      
@@ -71,13 +95,14 @@ local attachDistance = 0.4
 
 local targetMode = "Normal" 
 local isAttached = false
-local selectedPlayers = {} -- MULTI-TARGET LIST
+local selectedPlayers = {} 
 local currentTargetIndex = 1
 local lastTargetSwitchTime = 0
 local selectedPlayer = nil 
 
 local currentAutoSubMode = "Normal"
 local lastSwitchTime = 0
+local lastAutoSoundTime = 0
 
 -- Anti-Die System
 task.spawn(function()
@@ -96,7 +121,7 @@ task.spawn(function()
 end)
 
 -- ====================================================================
--- // ORIGINAL ENDLESS AURA GUI (MODIFIED FOR MULTI-SELECT) // --
+-- // GUI SYSTEM // --
 -- ====================================================================
 local screenGui = Instance.new("ScreenGui") 
 screenGui.Name = "DeltaGlassRoboticUI" 
@@ -228,6 +253,10 @@ modeBtn.MouseButton1Click:Connect(function()
         modeBtn.Text = "MODE // SYSTEM_NORMAL"
         modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     end
+    -- Dynamically change sound if already active
+    if isAttached then
+        playModeSound(targetMode)
+    end
 end)
 
 -- SLIDER GENERATOR
@@ -294,7 +323,7 @@ end
 createSlider(175, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
     speedMultiplier = v 
     if activeTrack then
-        activeTrack:AdjustSpeed(v / 5) -- Dynamic speed adjustment via slider
+        activeTrack:AdjustSpeed(v / 5)
     end
 end)
 createSlider(207, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
@@ -341,7 +370,6 @@ local function updateList()
                     btn.TextColor3 = Color3.fromRGB(0, 255, 150)
                 end
                 
-                -- Update Text box display
                 if #selectedPlayers > 0 then
                     textBox.Text = "Targets Selected: " .. tostring(#selectedPlayers)
                 else
@@ -359,27 +387,19 @@ end)
 updateList() 
 
 -- ====================================================================
--- // 99999999x MAX FORCE SERVER-SIDE ZERO DELAY PHYSICS ENGINE // --
+-- // PHYSICS ENGINE & LOOPS // --
 -- ====================================================================
 toggleButton.MouseButton1Click:Connect(function() 
     if isAttached then 
         isAttached = false 
-        if _G.EndlessAuraStorage.ActiveConnection then 
-            _G.EndlessAuraStorage.ActiveConnection:Disconnect() 
-            _G.EndlessAuraStorage.ActiveConnection = nil 
-        end 
-        if _G.EndlessAuraStorage.PlatformPart then 
-            _G.EndlessAuraStorage.PlatformPart:Destroy() 
-            _G.EndlessAuraStorage.PlatformPart = nil 
-        end 
+        if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end 
+        if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end 
         if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
         if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
         
-        -- Animation Off Trigger
-        if activeTrack then 
-            activeTrack:Stop() 
-            activeTrack = nil 
-        end
+        -- Stop Animation and Sounds
+        if activeTrack then activeTrack:Stop() activeTrack = nil end
+        if currentSoundObj then currentSoundObj:Destroy() currentSoundObj = nil end
         
         toggleButton.Text = "[ FUCK ON ]" 
         toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
@@ -389,9 +409,7 @@ toggleButton.MouseButton1Click:Connect(function()
             local torso = char:FindFirstChild("Torso") or char:FindFirstChild("LowerTorso")
             local rootJoint = torso and (torso:FindFirstChild("RootJoint") or char.HumanoidRootPart:FindFirstChild("RootJoint"))
             if rootJoint then rootJoint.C0 = CFrame.new() end
-            if char:FindFirstChild("Humanoid") then 
-                char.Humanoid.PlatformStand = false 
-            end
+            if char:FindFirstChild("Humanoid") then char.Humanoid.PlatformStand = false end
         end)
     elseif #selectedPlayers > 0 then 
         isAttached = true 
@@ -399,6 +417,7 @@ toggleButton.MouseButton1Click:Connect(function()
         toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
         lastSwitchTime = tick()
         lastTargetSwitchTime = tick()
+        lastAutoSoundTime = 0
         currentTargetIndex = 1
         selectedPlayer = selectedPlayers[currentTargetIndex]
         currentAutoSubMode = "Normal"
@@ -407,7 +426,7 @@ toggleButton.MouseButton1Click:Connect(function()
         local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
         if not myHRP then return end
 
-        -- Animation Play Trigger
+        -- Load Animation
         local hum = getHumanoid()
         if hum then
             local anim = Instance.new("Animation")
@@ -418,7 +437,10 @@ toggleButton.MouseButton1Click:Connect(function()
             activeTrack:AdjustSpeed(speedMultiplier / 5)
         end
 
-        -- Physics Object Injectors
+        -- Trigger Initial Sound
+        playModeSound(targetMode)
+
+        -- Injectors
         local bv = Instance.new("BodyVelocity")
         bv.MaxForce = Vector3.new(99999999, 99999999, 99999999)
         bv.Velocity = Vector3.new(0, 0, 0)
@@ -443,13 +465,11 @@ toggleButton.MouseButton1Click:Connect(function()
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            -- Multi Target Logic: Every 1 second switch to next target
+            -- Multi Target Logic (Every 1 Second)
             if tick() - lastTargetSwitchTime >= 1.0 then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
-                if currentTargetIndex > #selectedPlayers then
-                    currentTargetIndex = 1
-                end
+                if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end
                 selectedPlayer = selectedPlayers[currentTargetIndex]
             end
 
@@ -481,6 +501,12 @@ toggleButton.MouseButton1Click:Connect(function()
                     currentAutoSubMode = (currentAutoSubMode == "Normal") and "Face Bang" or "Normal"
                 end
                 currentModeToRun = currentAutoSubMode
+                
+                -- Mode 3 (Auto Switch) Sound loop check every 2 seconds
+                if tick() - lastAutoSoundTime >= 2.0 then
+                    lastAutoSoundTime = tick()
+                    if currentSoundObj then currentSoundObj:Play() end
+                end
             end
             
             local timeFactor = tick() * speedMultiplier
@@ -503,7 +529,7 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- POSITION SYNC VIA CRITICAL VELOCITY VECTORS
+            -- POSITION SYNC
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
             bv.Velocity = (targetCFrame.Position - myHRP.Position) * 120 
