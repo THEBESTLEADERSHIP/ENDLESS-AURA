@@ -13,7 +13,7 @@ sound1.SoundId = "rbxassetid://95656642853883"
 sound1.Volume = 2
 
 local sound2 = Instance.new("Sound")
-sound2.SoundId = "rbxassetid://95656642853883"
+sound2.SoundId = "rbxassetid://129697356456437"
 sound2.Volume = 2
 
 local sound3 = Instance.new("Sound")
