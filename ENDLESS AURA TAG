@@ -536,7 +536,6 @@ local function createRealisticAura(character)
 
     -- === TOP CROWN SPARKS (flying off the head) ===
     local headPart = character:FindFirstChild("Head")
-    iocal headPart = character:FindFirstChild("Head")
     if headPart then
         local topAtt = att(headPart, Vector3.new(0, 0.7, 0))
 
