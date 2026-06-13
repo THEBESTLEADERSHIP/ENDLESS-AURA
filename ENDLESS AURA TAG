@@ -1,14 +1,10 @@
--- =====================================================
--- ENDLESS AURA v2.0 | DELTA EXECUTOR OPTIMIZED
--- Realistic Aura + CoreGui HUD Bypass (Above Roblox Buttons)
--- =====================================================
+-- LocalScript
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StatsService = game:GetService("Stats")
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")       -- <- HUD yahan daalenge, Roblox buttons ke UPAR
 local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
 -- =====================
 -- SHARED STATE SYSTEM
@@ -19,100 +15,79 @@ if not _G.AuraState then
         auraEnabled = true,
         animEnabled = true,
         emitters = {},
-        lights = {},
         currentTrack = nil
     }
 end
 local AuraState = _G.AuraState
 
 -- =====================
--- HUD: CoreGui mein inject (Roblox TopBar ke UPAR)
--- Delta mein CoreGui allowed hai
+-- HUD BAR — CoreGui Bypass (Delta Compatible)
 -- =====================
-pcall(function()
-    if CoreGui:FindFirstChild("AuraHUD") then
-        CoreGui:FindFirstChild("AuraHUD"):Destroy()
-    end
-end)
+local CoreGui = game:GetService("CoreGui")
+
+if CoreGui:FindFirstChild("AuraHUD") then
+    CoreGui:FindFirstChild("AuraHUD"):Destroy()
+end
 
 local hud = Instance.new("ScreenGui")
 hud.Name = "AuraHUD"
 hud.ResetOnSpawn = false
 hud.IgnoreGuiInset = true
-hud.DisplayOrder = 999          -- Maximum layer, sab ke upar
+hud.DisplayOrder = 999
 hud.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Delta mein CoreGui parent set karo
-local hudParent = CoreGui
-pcall(function()
+-- Delta me CoreGui me inject karna allow hai
+local success = pcall(function()
     hud.Parent = CoreGui
 end)
-if not hud.Parent then
-    hud.Parent = player:WaitForChild("PlayerGui")
+if not success then
+    hud.Parent = playerGui
 end
 
--- =====================
--- BAR FRAME
--- =====================
 local bar = Instance.new("Frame")
 bar.Name = "Bar"
 bar.AutomaticSize = Enum.AutomaticSize.X
-bar.Size = UDim2.new(0, 0, 0, 24)
+bar.Size = UDim2.new(0, 0, 0, 22)
 bar.AnchorPoint = Vector2.new(1, 0)
-bar.Position = UDim2.new(1, -10, 0, 8)  -- Top-right, Roblox buttons ke upar
-bar.BackgroundColor3 = Color3.fromRGB(8, 0, 0)
-bar.BackgroundTransparency = 0.2
+bar.Position = UDim2.new(1, -10, 0, 8)
+bar.BackgroundColor3 = Color3.fromRGB(5, 0, 0)
+bar.BackgroundTransparency = 0.3
 bar.BorderSizePixel = 0
 bar.Parent = hud
 
-Instance.new("UICorner", bar).CornerRadius = UDim.new(0, 7)
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0, 7)
+barCorner.Parent = bar
 
 local barStroke = Instance.new("UIStroke")
 barStroke.Color = Color3.fromRGB(220, 20, 20)
-barStroke.Thickness = 1.4
+barStroke.Thickness = 1.3
 barStroke.Parent = bar
 
 local barLayout = Instance.new("UIListLayout")
 barLayout.FillDirection = Enum.FillDirection.Horizontal
 barLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-barLayout.Padding = UDim.new(0, 4)
+barLayout.Padding = UDim.new(0, 3)
 barLayout.Parent = bar
 
-local barPad = Instance.new("UIPadding")
-barPad.PaddingLeft = UDim.new(0, 5)
-barPad.PaddingRight = UDim.new(0, 5)
-barPad.Parent = bar
+local barPadding = Instance.new("UIPadding")
+barPadding.PaddingLeft = UDim.new(0, 5)
+barPadding.PaddingRight = UDim.new(0, 5)
+barPadding.Parent = bar
 
--- =====================
--- GLOW ANIMATION (Bar ko subtle pulse dega)
--- =====================
-task.spawn(function()
-    while hud and hud.Parent do
-        TweenService:Create(barStroke, TweenInfo.new(1.2, Enum.EasingStyle.Sine), {
-            Color = Color3.fromRGB(255, 60, 60)
-        }):Play()
-        task.wait(1.2)
-        TweenService:Create(barStroke, TweenInfo.new(1.2, Enum.EasingStyle.Sine), {
-            Color = Color3.fromRGB(140, 0, 0)
-        }):Play()
-        task.wait(1.2)
-    end
-end)
-
--- =====================
--- BOX CREATOR FUNCTION
--- =====================
 local function createBox(name, text, withDot, interactive)
     local box = Instance.new("Frame")
     box.Name = name
     box.AutomaticSize = Enum.AutomaticSize.X
     box.Size = UDim2.new(0, 0, 1, -4)
-    box.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
-    box.BackgroundTransparency = 0.1
+    box.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
+    box.BackgroundTransparency = 0.2
     box.BorderSizePixel = 0
     box.Parent = bar
 
-    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 5)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 4)
+    corner.Parent = box
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = Color3.fromRGB(180, 0, 0)
@@ -125,19 +100,21 @@ local function createBox(name, text, withDot, interactive)
     layout.Padding = UDim.new(0, 3)
     layout.Parent = box
 
-    local pad = Instance.new("UIPadding")
-    pad.PaddingLeft = UDim.new(0, 6)
-    pad.PaddingRight = UDim.new(0, 6)
-    pad.Parent = box
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 6)
+    padding.PaddingRight = UDim.new(0, 6)
+    padding.Parent = box
 
     local dot
     if withDot then
         dot = Instance.new("Frame")
         dot.Size = UDim2.new(0, 5, 0, 5)
-        dot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+        dot.BackgroundColor3 = Color3.fromRGB(0, 255, 80)
         dot.BorderSizePixel = 0
         dot.Parent = box
-        Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+        local dc = Instance.new("UICorner")
+        dc.CornerRadius = UDim.new(1, 0)
+        dc.Parent = dot
     end
 
     local label
@@ -156,420 +133,89 @@ local function createBox(name, text, withDot, interactive)
     label.Text = text
     label.Parent = box
 
-    return box, label, dot, stroke
+    return box, label, dot
 end
 
--- =====================
--- HUD BUTTONS
--- =====================
 local tagsBox, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
-local auraBox, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
-local fpsBox, fpsLabel           = createBox("FPS", "Fᴘs: --", false, false)
-local pingBox, pingLabel         = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
-local timeBox, timeLabel         = createBox("Time", "--:-- --", false, false)
-local animBox, animLabel, animDot = createBox("AnimToggle", "Aɴɪᴍ Øɴ", true, true)
-local rejoinBox, rejoinLabel     = createBox("Rejoin", "Rᴇᴊᴏɪɴ", false, true)
-
--- Tags Toggle
 tagsLabel.MouseButton1Click:Connect(function()
     AuraState.tagsEnabled = not AuraState.tagsEnabled
     tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
-    tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 80) or Color3.fromRGB(100, 0, 0)
 end)
 
--- Aura Toggle
+local auraBox, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
 auraLabel.MouseButton1Click:Connect(function()
     AuraState.auraEnabled = not AuraState.auraEnabled
     auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
-    auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    for _, em in ipairs(AuraState.emitters) do
-        pcall(function() if em and em.Parent then em.Enabled = AuraState.auraEnabled end end)
-    end
-    for _, lt in ipairs(AuraState.lights) do
-        pcall(function() if lt and lt.Parent then lt.Enabled = AuraState.auraEnabled end end)
+    auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 80) or Color3.fromRGB(100, 0, 0)
+    for _, emitter in ipairs(AuraState.emitters) do
+        if emitter and emitter.Parent then
+            emitter.Enabled = AuraState.auraEnabled
+        end
     end
 end)
 
--- Anim Toggle
+local fpsBox, fpsLabel = createBox("FPS", "Fᴘs: --", false, false)
+local pingBox, pingLabel = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
+local timeBox, timeLabel = createBox("Time", "--:--", false, false)
+
+local animBox, animLabel, animDot = createBox("AnimToggle", "Aɴɪᴍ Øɴ", true, true)
 animLabel.MouseButton1Click:Connect(function()
     AuraState.animEnabled = not AuraState.animEnabled
     animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
-    animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 80) or Color3.fromRGB(100, 0, 0)
     if AuraState.currentTrack then
         if AuraState.animEnabled then
-            local char = player.Character
-            local hum = char and char:FindFirstChild("Humanoid")
-            if hum and hum.MoveDirection.Magnitude < 0.1 then AuraState.currentTrack:Play() end
+            local character = player.Character
+            local humanoid = character and character:FindFirstChild("Humanoid")
+            if humanoid and humanoid.MoveDirection.Magnitude < 0.1 then
+                AuraState.currentTrack:Play()
+            end
         else
             AuraState.currentTrack:Stop()
         end
     end
 end)
 
--- Rejoin
+local rejoinBox, rejoinLabel = createBox("Rejoin", "Rᴇᴊᴏɪɴ", false, true)
 rejoinLabel.MouseButton1Click:Connect(function()
     pcall(function()
         game:GetService("TeleportService"):Teleport(game.PlaceId, player)
     end)
 end)
 
--- =====================
--- SYNC HUD STATE
--- =====================
 local function syncHUD()
-    tagsLabel.Text  = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
-    tagsDot.BackgroundColor3  = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    auraLabel.Text  = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
-    auraDot.BackgroundColor3  = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    animLabel.Text  = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
-    animDot.BackgroundColor3  = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
+    tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 80) or Color3.fromRGB(100, 0, 0)
+    auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
+    auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 80) or Color3.fromRGB(100, 0, 0)
+    animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
+    animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 80) or Color3.fromRGB(100, 0, 0)
 end
 syncHUD()
 
--- =====================
--- LIVE FPS + PING + TIME
--- =====================
 RunService.Heartbeat:Connect(function(dt)
-    if dt > 0 then
-        fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt)
-    end
+    if dt > 0 then fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt) end
 end)
 
 task.spawn(function()
     while true do
         pcall(function()
-            local ping = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
-            local col = Color3.fromRGB(0, 255, 100)
-            if ping > 150 then col = Color3.fromRGB(255, 200, 0) end
-            if ping > 300 then col = Color3.fromRGB(255, 50, 50) end
-            pingLabel.TextColor3 = col
-            pingLabel.Text = "Pɪɴɢ: " .. math.floor(ping) .. "ᴍs"
+            local pingValue = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
+            pingLabel.Text = "Pɪɴɢ: " .. math.floor(pingValue) .. "ᴍs"
         end)
         local dt = DateTime.now():ToLocalTime()
-        local h, m = dt.Hour, dt.Minute
-        local ap = h >= 12 and "PM" or "AM"
-        if h > 12 then h -= 12 elseif h == 0 then h = 12 end
-        timeLabel.Text = string.format("%02d:%02d %s", h, m, ap)
+        local hour = dt.Hour
+        local ampm = "AM"
+        if hour >= 12 then ampm = "PM" if hour > 12 then hour -= 12 end end
+        if hour == 0 then hour = 12 end
+        timeLabel.Text = string.format("%02d:%02d %s", hour, dt.Minute, ampm)
         task.wait(1)
     end
 end)
 
 -- =====================
--- REALISTIC AURA SYSTEM
--- =====================
-local function createRealisticAura(character)
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    AuraState.emitters = {}
-    AuraState.lights = {}
-
-    -- PointLight in HRP (dynamic flicker)
-    local mainLight = Instance.new("PointLight")
-    mainLight.Color = Color3.fromRGB(255, 30, 30)
-    mainLight.Brightness = 4
-    mainLight.Range = 16
-    mainLight.Enabled = AuraState.auraEnabled
-    mainLight.Parent = hrp
-    table.insert(AuraState.lights, mainLight)
-
-    -- Flicker task
-    task.spawn(function()
-        while mainLight and mainLight.Parent do
-            if AuraState.auraEnabled then
-                mainLight.Brightness = math.random(30, 50) / 10
-                mainLight.Range = math.random(13, 18)
-            end
-            task.wait(0.05 + math.random() * 0.07)
-        end
-    end)
-
-    -- AURA LAYER FUNCTION
-    -- layer = "core" | "mid" | "outer" | "ground" | "spark" | "ember"
-    local function makeEmitter(att, cfg)
-        local em = Instance.new("ParticleEmitter")
-        em.Parent = att
-        em.Texture             = cfg.tex    or "rbxassetid://6101261905"
-        em.Color               = cfg.color  or ColorSequence.new(Color3.fromRGB(255, 0, 0))
-        em.LightEmission       = cfg.le     or 1
-        em.LightInfluence      = cfg.li     or 0
-        em.Size                = cfg.size   or NumberSequence.new(1)
-        em.Transparency        = cfg.trans  or NumberSequence.new(0)
-        em.Lifetime            = cfg.life   or NumberRange.new(0.5, 1)
-        em.Rate                = cfg.rate   or 30
-        em.Speed               = cfg.speed  or NumberRange.new(1, 3)
-        em.SpreadAngle         = cfg.spread or Vector2.new(180, 180)
-        em.RotSpeed            = cfg.rotsp  or NumberRange.new(-180, 180)
-        em.Rotation            = NumberRange.new(0, 360)
-        em.ZOffset             = cfg.zoff   or 0
-        em.Enabled             = AuraState.auraEnabled
-        if cfg.dir then em.EmissionDirection = cfg.dir end
-        if cfg.wind then em.LockedToPart = false end
-        table.insert(AuraState.emitters, em)
-        return em
-    end
-
-    -- Attachment helper
-    local function att(parent, pos)
-        local a = Instance.new("Attachment")
-        a.Position = pos or Vector3.new(0,0,0)
-        a.Parent = parent
-        return a
-    end
-
-    -- === BODY PARTS AURA ===
-    local parts = {
-        "Head","UpperTorso","LowerTorso","HumanoidRootPart",
-        "LeftUpperArm","LeftLowerArm","LeftHand",
-        "RightUpperArm","RightLowerArm","RightHand",
-        "LeftUpperLeg","LeftLowerLeg","LeftFoot",
-        "RightUpperLeg","RightLowerLeg","RightFoot",
-        "Torso","Left Arm","Right Arm","Left Leg","Right Leg"
-    }
-
-    for _, pName in ipairs(parts) do
-        local part = character:FindFirstChild(pName)
-        if part then
-            local a = att(part)
-
-            -- CORE FLAME (tight, bright)
-            makeEmitter(a, {
-                tex    = "rbxassetid://6101261905",
-                color  = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0,   Color3.fromRGB(255, 255, 200)),
-                    ColorSequenceKeypoint.new(0.15, Color3.fromRGB(255, 120, 30)),
-                    ColorSequenceKeypoint.new(0.5,  Color3.fromRGB(220, 20, 20)),
-                    ColorSequenceKeypoint.new(1,    Color3.fromRGB(80, 0, 0))
-                }),
-                le = 1, li = 0,
-                size   = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 0.1),
-                    NumberSequenceKeypoint.new(0.2, 0.55),
-                    NumberSequenceKeypoint.new(0.7, 0.4),
-                    NumberSequenceKeypoint.new(1, 0)
-                }),
-                trans  = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 0.1),
-                    NumberSequenceKeypoint.new(0.5, 0.3),
-                    NumberSequenceKeypoint.new(1, 1)
-                }),
-                life   = NumberRange.new(0.25, 0.55),
-                rate   = 35,
-                speed  = NumberRange.new(2, 5),
-                spread = Vector2.new(50, 50),
-                rotsp  = NumberRange.new(-300, 300),
-                zoff   = 0.1
-            })
-
-            -- MID GLOW (wider, softer)
-            makeEmitter(a, {
-                tex    = "rbxassetid://244221613",  -- Soft glow texture
-                color  = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0,  Color3.fromRGB(255, 60, 0)),
-                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 0, 0)),
-                    ColorSequenceKeypoint.new(1,   Color3.fromRGB(60, 0, 0))
-                }),
-                le = 1, li = 0,
-                size   = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 0.8),
-                    NumberSequenceKeypoint.new(0.4, 1.2),
-                    NumberSequenceKeypoint.new(1, 0)
-                }),
-                trans  = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 0.4),
-                    NumberSequenceKeypoint.new(0.5, 0.65),
-                    NumberSequenceKeypoint.new(1, 1)
-                }),
-                life   = NumberRange.new(0.3, 0.7),
-                rate   = 20,
-                speed  = NumberRange.new(0.5, 2),
-                spread = Vector2.new(360, 360),
-                rotsp  = NumberRange.new(-100, 100),
-                zoff   = -0.1
-            })
-
-            -- EMBERS (realistic fire physics)
-            makeEmitter(a, {
-                tex    = "rbxassetid://6101261905",
-                color  = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0,   Color3.fromRGB(255, 220, 100)),
-                    ColorSequenceKeypoint.new(0.4,  Color3.fromRGB(255, 80, 0)),
-                    ColorSequenceKeypoint.new(1,    Color3.fromRGB(100, 0, 0))
-                }),
-                le = 1, li = 0,
-                size   = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 0.08),
-                    NumberSequenceKeypoint.new(0.3, 0.14),
-                    NumberSequenceKeypoint.new(1, 0)
-                }),
-                trans  = NumberSequence.new({
-                    NumberSequenceKeypoint.new(0, 0),
-                    NumberSequenceKeypoint.new(0.7, 0.3),
-                    NumberSequenceKeypoint.new(1, 1)
-                }),
-                life   = NumberRange.new(0.6, 1.4),
-                rate   = 15,
-                speed  = NumberRange.new(4, 9),
-                spread = Vector2.new(60, 60),
-                rotsp  = NumberRange.new(-400, 400),
-                zoff   = 0.2
-            })
-        end
-    end
-
-    -- === HRP CORE PILLAR (vertical energy column) ===
-    local hrpTop = att(hrp, Vector3.new(0, 1.2, 0))
-    local hrpBot = att(hrp, Vector3.new(0, -1.2, 0))
-    local hrpMid = att(hrp, Vector3.new(0, 0, 0))
-
-    -- Rising column particles
-    makeEmitter(hrpBot, {
-        tex    = "rbxassetid://6101261905",
-        color  = ColorSequence.new({
-            ColorSequenceKeypoint.new(0,   Color3.fromRGB(255, 255, 180)),
-            ColorSequenceKeypoint.new(0.2,  Color3.fromRGB(255, 60, 0)),
-            ColorSequenceKeypoint.new(0.7,  Color3.fromRGB(180, 0, 0)),
-            ColorSequenceKeypoint.new(1,    Color3.fromRGB(40, 0, 0))
-        }),
-        le = 1, li = 0,
-        size   = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.3),
-            NumberSequenceKeypoint.new(0.3, 1.6),
-            NumberSequenceKeypoint.new(0.8, 1.0),
-            NumberSequenceKeypoint.new(1, 0)
-        }),
-        trans  = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.0),
-            NumberSequenceKeypoint.new(0.5, 0.3),
-            NumberSequenceKeypoint.new(1, 1)
-        }),
-        life   = NumberRange.new(0.5, 1.0),
-        rate   = 60,
-        speed  = NumberRange.new(5, 10),
-        spread = Vector2.new(25, 25),
-        dir    = Enum.NormalId.Top,
-        rotsp  = NumberRange.new(-200, 200),
-        zoff   = 0.5
-    })
-
-    -- Outer energy ring
-    makeEmitter(hrpMid, {
-        tex    = "rbxassetid://6101261905",
-        color  = ColorSequence.new({
-            ColorSequenceKeypoint.new(0,  Color3.fromRGB(255, 100, 50)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 0, 0)),
-            ColorSequenceKeypoint.new(1,   Color3.fromRGB(50, 0, 0))
-        }),
-        le = 1, li = 0,
-        size   = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 2.5),
-            NumberSequenceKeypoint.new(0.3, 1.8),
-            NumberSequenceKeypoint.new(1, 0)
-        }),
-        trans  = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.55),
-            NumberSequenceKeypoint.new(0.5, 0.75),
-            NumberSequenceKeypoint.new(1, 1)
-        }),
-        life   = NumberRange.new(0.2, 0.5),
-        rate   = 45,
-        speed  = NumberRange.new(0.3, 1.5),
-        spread = Vector2.new(360, 360),
-        zoff   = -0.5
-    })
-
-    -- === GROUND SHOCKWAVE ===
-    local gAtt = att(hrp, Vector3.new(0, -3, 0))
-
-    -- Ground heat distortion
-    makeEmitter(gAtt, {
-        tex    = "rbxassetid://6101261905",
-        color  = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 50, 0)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0))
-        }),
-        le = 1, li = 0,
-        size   = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.1),
-            NumberSequenceKeypoint.new(0.3, 1.4),
-            NumberSequenceKeypoint.new(0.7, 2.5),
-            NumberSequenceKeypoint.new(1, 0)
-        }),
-        trans  = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.2),
-            NumberSequenceKeypoint.new(0.5, 0.6),
-            NumberSequenceKeypoint.new(1, 1)
-        }),
-        life   = NumberRange.new(0.4, 0.9),
-        rate   = 55,
-        speed  = NumberRange.new(1, 4),
-        spread = Vector2.new(120, 120),
-        dir    = Enum.NormalId.Bottom,
-        zoff   = 0.3
-    })
-
-    -- Ground dark smoke
-    makeEmitter(gAtt, {
-        tex    = "rbxassetid://1165774773",  -- Dark smoke
-        color  = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 0, 0))
-        }),
-        le = 0.3, li = 0.7,
-        size   = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.5),
-            NumberSequenceKeypoint.new(0.4, 3.0),
-            NumberSequenceKeypoint.new(1, 0)
-        }),
-        trans  = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.5),
-            NumberSequenceKeypoint.new(0.7, 0.85),
-            NumberSequenceKeypoint.new(1, 1)
-        }),
-        life   = NumberRange.new(0.8, 1.6),
-        rate   = 25,
-        speed  = NumberRange.new(0.5, 2),
-        spread = Vector2.new(80, 80),
-        rotsp  = NumberRange.new(-50, 50)
-    })
-
-    -- === TOP CROWN SPARKS (flying off the head) ===
-    local headPart = character:FindFirstChild("Head")
-    if headPart then
-        local topAtt = att(headPart, Vector3.new(0, 0.7, 0))
-
-        makeEmitter(topAtt, {
-            tex    = "rbxassetid://6101261905",
-            color  = ColorSequence.new({
-                ColorSequenceKeypoint.new(0,  Color3.fromRGB(255, 255, 100)),
-                ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 80, 0)),
-                ColorSequenceKeypoint.new(1,   Color3.fromRGB(180, 0, 0))
-            }),
-            le = 1, li = 0,
-            size   = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.06),
-                NumberSequenceKeypoint.new(0.2, 0.12),
-                NumberSequenceKeypoint.new(1, 0)
-            }),
-            trans  = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0),
-                NumberSequenceKeypoint.new(0.5, 0.2),
-                NumberSequenceKeypoint.new(1, 1)
-            }),
-            life   = NumberRange.new(0.8, 2.0),
-            rate   = 20,
-            speed  = NumberRange.new(8, 16),
-            spread = Vector2.new(35, 35),
-            dir    = Enum.NormalId.Top,
-            rotsp  = NumberRange.new(-500, 500),
-            zoff   = 0.3
-        })
-    end
-end
-
--- =====================
--- CHARACTER SETUP (Tags + Aura + Animation)
+-- CHARACTER SETUP — Demon Red Thunder Aura
 -- =====================
 local function setup(character)
     local head = character:WaitForChild("Head")
@@ -578,96 +224,73 @@ local function setup(character)
     local hrp = character:WaitForChild("HumanoidRootPart")
     local camera = workspace.CurrentCamera
 
-    -- REALISTIC AURA
-    createRealisticAura(character)
+    AuraState.emitters = {}
 
-    -- ===== EA CIRCLE (Distance me) =====
-    local eaBB = Instance.new("BillboardGui")
-    eaBB.Name = "EACircle"
-    eaBB.Size = UDim2.new(0, 30, 0, 30)
-    eaBB.StudsOffset = Vector3.new(0, 2.5, 0)
-    eaBB.AlwaysOnTop = true
-    eaBB.MaxDistance = 1000
-    eaBB.Parent = head
+    -- ===== EA CIRCLE =====
+    local eaBillboard = Instance.new("BillboardGui")
+    eaBillboard.Name = "EACircle"
+    eaBillboard.Size = UDim2.new(0, 28, 0, 28)
+    eaBillboard.StudsOffset = Vector3.new(0, 2.4, 0)
+    eaBillboard.AlwaysOnTop = true
+    eaBillboard.MaxDistance = 1000
+    eaBillboard.Parent = head
 
     local eaCircle = Instance.new("Frame")
-    eaCircle.Size = UDim2.new(1,0,1,0)
-    eaCircle.BackgroundColor3 = Color3.fromRGB(5, 0, 0)
-    eaCircle.BackgroundTransparency = 0.4
+    eaCircle.Size = UDim2.new(1, 0, 1, 0)
+    eaCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    eaCircle.BackgroundTransparency = 0.5
     eaCircle.BorderSizePixel = 0
-    eaCircle.Parent = eaBB
-    Instance.new("UICorner", eaCircle).CornerRadius = UDim.new(1, 0)
+    eaCircle.Parent = eaBillboard
+
+    local eaCircleCorner = Instance.new("UICorner")
+    eaCircleCorner.CornerRadius = UDim.new(1, 0)
+    eaCircleCorner.Parent = eaCircle
 
     local eaCircleStroke = Instance.new("UIStroke")
     eaCircleStroke.Color = Color3.fromRGB(200, 0, 0)
     eaCircleStroke.Thickness = 2
     eaCircleStroke.Parent = eaCircle
 
-    local eaTxt = Instance.new("TextLabel")
-    eaTxt.Size = UDim2.new(1,0,1,0)
-    eaTxt.BackgroundTransparency = 1
-    eaTxt.Text = "EA"
-    eaTxt.TextColor3 = Color3.fromRGB(220, 0, 0)
-    eaTxt.TextScaled = true
-    eaTxt.Font = Enum.Font.GothamBold
-    eaTxt.Parent = eaCircle
+    local eaText = Instance.new("TextLabel")
+    eaText.Size = UDim2.new(1, 0, 1, 0)
+    eaText.BackgroundTransparency = 1
+    eaText.Text = "EA"
+    eaText.TextColor3 = Color3.fromRGB(200, 0, 0)
+    eaText.TextScaled = true
+    eaText.Font = Enum.Font.GothamBold
+    eaText.Parent = eaCircle
 
-    -- Pulse animation on EA circle stroke
-    task.spawn(function()
-        while eaCircleStroke and eaCircleStroke.Parent do
-            TweenService:Create(eaCircleStroke, TweenInfo.new(0.9, Enum.EasingStyle.Sine), {
-                Thickness = 3.5
-            }):Play()
-            task.wait(0.9)
-            TweenService:Create(eaCircleStroke, TweenInfo.new(0.9, Enum.EasingStyle.Sine), {
-                Thickness = 1.2
-            }):Play()
-            task.wait(0.9)
-        end
-    end)
-
-    -- ===== FULL OVERHEAD TAG =====
-    local bb = Instance.new("BillboardGui")
-    bb.Name = "OverheadTag"
-    bb.Size = UDim2.new(0, 145, 0, 38)
-    bb.StudsOffset = Vector3.new(0, 3.0, 0)
-    bb.AlwaysOnTop = true
-    bb.MaxDistance = 1000
-    bb.Parent = head
+    -- ===== OVERHEAD TAG =====
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "OverheadTag"
+    billboard.Size = UDim2.new(0, 140, 0, 36)
+    billboard.StudsOffset = Vector3.new(0, 2.9, 0)
+    billboard.AlwaysOnTop = true
+    billboard.MaxDistance = 1000
+    billboard.Parent = head
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1,0,1,0)
-    frame.BackgroundColor3 = Color3.fromRGB(6, 0, 0)
-    frame.BackgroundTransparency = 0.3
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BackgroundTransparency = 0.4
     frame.BorderSizePixel = 0
-    frame.Parent = bb
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+    frame.Parent = billboard
 
-    local fStroke = Instance.new("UIStroke")
-    fStroke.Color = Color3.fromRGB(200, 0, 0)
-    fStroke.Thickness = 1.8
-    fStroke.Parent = frame
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(200, 0, 0)
+    stroke.Thickness = 1.8
+    stroke.Parent = frame
 
-    -- Tag stroke pulse
-    task.spawn(function()
-        while fStroke and fStroke.Parent do
-            TweenService:Create(fStroke, TweenInfo.new(1, Enum.EasingStyle.Sine), {
-                Color = Color3.fromRGB(255, 60, 60)
-            }):Play()
-            task.wait(1)
-            TweenService:Create(fStroke, TweenInfo.new(1, Enum.EasingStyle.Sine), {
-                Color = Color3.fromRGB(130, 0, 0)
-            }):Play()
-            task.wait(1)
-        end
-    end)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 5)
+    corner.Parent = frame
 
     local eaTagLabel = Instance.new("TextLabel")
     eaTagLabel.Size = UDim2.new(0.17, 0, 1, 0)
     eaTagLabel.Position = UDim2.new(0.01, 0, 0, 0)
     eaTagLabel.BackgroundTransparency = 1
     eaTagLabel.Text = "EA"
-    eaTagLabel.TextColor3 = Color3.fromRGB(210, 0, 0)
+    eaTagLabel.TextColor3 = Color3.fromRGB(200, 0, 0)
     eaTagLabel.TextScaled = true
     eaTagLabel.Font = Enum.Font.GothamBold
     eaTagLabel.Parent = frame
@@ -679,41 +302,273 @@ local function setup(character)
     divider.BorderSizePixel = 0
     divider.Parent = frame
 
-    local auraLabel2 = Instance.new("TextLabel")
-    auraLabel2.Size = UDim2.new(0.79, 0, 0.54, 0)
-    auraLabel2.Position = UDim2.new(0.21, 0, 0.02, 0)
-    auraLabel2.BackgroundTransparency = 1
-    auraLabel2.Text = "Eɴᴅʟᴇss Aᴜʀᴀ: Usᴇʀ"
-    auraLabel2.TextColor3 = Color3.fromRGB(210, 0, 0)
-    auraLabel2.TextScaled = true
-    auraLabel2.Font = Enum.Font.GothamBold
-    auraLabel2.TextXAlignment = Enum.TextXAlignment.Left
-    auraLabel2.Parent = frame
+    local overheadAuraLabel = Instance.new("TextLabel")
+    overheadAuraLabel.Size = UDim2.new(0.79, 0, 0.54, 0)
+    overheadAuraLabel.Position = UDim2.new(0.21, 0, 0.02, 0)
+    overheadAuraLabel.BackgroundTransparency = 1
+    overheadAuraLabel.Text = "Eɴᴅʟᴇss Aᴜʀᴀ: Usᴇʀ"
+    overheadAuraLabel.TextColor3 = Color3.fromRGB(200, 0, 0)
+    overheadAuraLabel.TextScaled = true
+    overheadAuraLabel.Font = Enum.Font.GothamBold
+    overheadAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
+    overheadAuraLabel.Parent = frame
 
-    local nameLabel2 = Instance.new("TextLabel")
-    nameLabel2.Size = UDim2.new(0.79, 0, 0.38, 0)
-    nameLabel2.Position = UDim2.new(0.21, 0, 0.57, 0)
-    nameLabel2.BackgroundTransparency = 1
-    nameLabel2.Text = "@" .. player.Name
-    nameLabel2.TextColor3 = Color3.fromRGB(255, 255, 255)
-    nameLabel2.TextScaled = true
-    nameLabel2.Font = Enum.Font.Gotham
-    nameLabel2.TextXAlignment = Enum.TextXAlignment.Left
-    nameLabel2.Parent = frame
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(0.79, 0, 0.38, 0)
+    nameLabel.Position = UDim2.new(0.21, 0, 0.57, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = "@" .. player.Name
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameLabel.TextScaled = true
+    nameLabel.Font = Enum.Font.Gotham
+    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    nameLabel.Parent = frame
 
-    -- Distance-based tag switching
     local distConn
     distConn = RunService.RenderStepped:Connect(function()
         if not character.Parent then distConn:Disconnect() return end
         if not AuraState.tagsEnabled then
-            bb.Enabled = false
-            eaBB.Enabled = false
+            billboard.Enabled = false
+            eaBillboard.Enabled = false
             return
         end
         local dist = (camera.CFrame.Position - head.Position).Magnitude
-        bb.Enabled = dist <= 40
-        eaBB.Enabled = dist > 40
+        if dist > 40 then
+            billboard.Enabled = false
+            eaBillboard.Enabled = true
+        else
+            billboard.Enabled = true
+            eaBillboard.Enabled = false
+        end
     end)
+
+    -- =====================
+    -- DEMON RED THUNDER AURA — Full Realistic 4-Layer System
+    -- =====================
+    local function createDemonThunder(parent, offsetY, rate, speed, size)
+        local att = Instance.new("Attachment")
+        att.Position = Vector3.new(0, offsetY, 0)
+        att.Parent = parent
+
+        -- Layer 1: Blood Lightning Bolts (jagged fast bolts)
+        local bolt = Instance.new("ParticleEmitter")
+        bolt.Parent = att
+        bolt.Texture = "rbxassetid://6101261905" -- Lightning bolt texture
+        bolt.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 0)),
+            ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 0, 30)),
+            ColorSequenceKeypoint.new(0.8, Color3.fromRGB(140, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0))
+        })
+        bolt.LightEmission = 1
+        bolt.LightInfluence = 0
+        bolt.Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, size * 0.3),
+            NumberSequenceKeypoint.new(0.15, size * 1.5),
+            NumberSequenceKeypoint.new(0.5, size * 1.0),
+            NumberSequenceKeypoint.new(0.85, size * 0.6),
+            NumberSequenceKeypoint.new(1, 0)
+        })
+        bolt.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(0.3, 0.1),
+            NumberSequenceKeypoint.new(0.7, 0.5),
+            NumberSequenceKeypoint.new(1, 1)
+        })
+        bolt.Lifetime = NumberRange.new(0.2, 0.5)
+        bolt.Rate = rate
+        bolt.Speed = NumberRange.new(speed, speed + 4)
+        bolt.SpreadAngle = Vector2.new(80, 80)
+        bolt.RotSpeed = NumberRange.new(-360, 360)
+        bolt.Rotation = NumberRange.new(0, 360)
+        bolt.ZOffset = 0.2
+        bolt.Enabled = AuraState.auraEnabled
+        table.insert(AuraState.emitters, bolt)
+
+        -- Layer 2: Demon Soul Fire (slow rising orange-red wisps)
+        local soul = Instance.new("ParticleEmitter")
+        soul.Parent = att
+        soul.Texture = "rbxassetid://1266170131" -- Soft glow/flame texture
+        soul.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 0)),
+            ColorSequenceKeypoint.new(0.3, Color3.fromRGB(200, 0, 0)),
+            ColorSequenceKeypoint.new(0.7, Color3.fromRGB(100, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 0, 0))
+        })
+        soul.LightEmission = 0.9
+        soul.LightInfluence = 0.1
+        soul.Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, size * 0.6),
+            NumberSequenceKeypoint.new(0.4, size * 1.8),
+            NumberSequenceKeypoint.new(0.8, size * 1.2),
+            NumberSequenceKeypoint.new(1, 0)
+        })
+        soul.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.2),
+            NumberSequenceKeypoint.new(0.5, 0.5),
+            NumberSequenceKeypoint.new(1, 1)
+        })
+        soul.Lifetime = NumberRange.new(0.5, 1.0)
+        soul.Rate = rate * 0.7
+        soul.Speed = NumberRange.new(1, 3)
+        soul.SpreadAngle = Vector2.new(30, 30)
+        soul.RotSpeed = NumberRange.new(-60, 60)
+        soul.Rotation = NumberRange.new(0, 360)
+        soul.Enabled = AuraState.auraEnabled
+        table.insert(AuraState.emitters, soul)
+
+        -- Layer 3: Dark Demon Smoke (thick heavy dark smoke billowing)
+        local smoke = Instance.new("ParticleEmitter")
+        smoke.Parent = att
+        smoke.Texture = "rbxassetid://8719525521" -- Dense smoke texture
+        smoke.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 0)),
+            ColorSequenceKeypoint.new(0.3, Color3.fromRGB(40, 0, 0)),
+            ColorSequenceKeypoint.new(0.7, Color3.fromRGB(15, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 0, 0))
+        })
+        smoke.LightEmission = 0.15
+        smoke.LightInfluence = 0.7
+        smoke.Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, size * 0.5),
+            NumberSequenceKeypoint.new(0.3, size * 2.5),
+            NumberSequenceKeypoint.new(0.7, size * 3.5),
+            NumberSequenceKeypoint.new(1, size * 4.0)
+        })
+        smoke.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.4),
+            NumberSequenceKeypoint.new(0.4, 0.65),
+            NumberSequenceKeypoint.new(0.8, 0.85),
+            NumberSequenceKeypoint.new(1, 1)
+        })
+        smoke.Lifetime = NumberRange.new(1.0, 2.0)
+        smoke.Rate = rate * 0.4
+        smoke.Speed = NumberRange.new(0.5, 2)
+        smoke.SpreadAngle = Vector2.new(20, 20)
+        smoke.RotSpeed = NumberRange.new(-20, 20)
+        smoke.Enabled = AuraState.auraEnabled
+        table.insert(AuraState.emitters, smoke)
+
+        -- Layer 4: Hellfire Embers (tiny sharp red sparks)
+        local ember = Instance.new("ParticleEmitter")
+        ember.Parent = att
+        ember.Texture = "rbxassetid://6442563724" -- Spark/ember texture
+        ember.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 120, 0)),
+            ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 30, 0)),
+            ColorSequenceKeypoint.new(0.8, Color3.fromRGB(180, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0))
+        })
+        ember.LightEmission = 1
+        ember.LightInfluence = 0
+        ember.Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, size * 0.15),
+            NumberSequenceKeypoint.new(0.5, size * 0.25),
+            NumberSequenceKeypoint.new(1, 0)
+        })
+        ember.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(0.6, 0.3),
+            NumberSequenceKeypoint.new(1, 1)
+        })
+        ember.Lifetime = NumberRange.new(0.3, 0.8)
+        ember.Rate = rate * 1.2
+        ember.Speed = NumberRange.new(speed * 0.5, speed + 6)
+        ember.SpreadAngle = Vector2.new(120, 120)
+        ember.RotSpeed = NumberRange.new(-500, 500)
+        ember.Rotation = NumberRange.new(0, 360)
+        ember.ZOffset = 0.4
+        ember.Enabled = AuraState.auraEnabled
+        table.insert(AuraState.emitters, ember)
+    end
+
+    -- R15 + R6 body parts
+    local bodyParts = {
+        "Head", "UpperTorso", "LowerTorso",
+        "LeftUpperArm", "LeftLowerArm", "LeftHand",
+        "RightUpperArm", "RightLowerArm", "RightHand",
+        "LeftUpperLeg", "LeftLowerLeg", "LeftFoot",
+        "RightUpperLeg", "RightLowerLeg", "RightFoot",
+        "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"
+    }
+
+    for _, partName in ipairs(bodyParts) do
+        local part = character:FindFirstChild(partName)
+        if part then createDemonThunder(part, 0, 40, 4, 1.0) end
+    end
+
+    -- Core HRP injection (heavy main aura source)
+    createDemonThunder(hrp, 0,  60, 5, 1.4)
+    createDemonThunder(hrp, 1,  35, 4, 1.0)
+    createDemonThunder(hrp, -1, 35, 4, 1.0)
+
+    -- ===== GROUND HELL EFFECT (bloodfire crawl at feet) =====
+    local groundAtt = Instance.new("Attachment")
+    groundAtt.Position = Vector3.new(0, -3, 0)
+    groundAtt.Parent = hrp
+
+    -- Ground blood lightning
+    local groundBolt = Instance.new("ParticleEmitter")
+    groundBolt.Parent = groundAtt
+    groundBolt.Texture = "rbxassetid://6101261905"
+    groundBolt.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 50, 0)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 0, 0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))
+    })
+    groundBolt.LightEmission = 1
+    groundBolt.LightInfluence = 0
+    groundBolt.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.3),
+        NumberSequenceKeypoint.new(0.3, 1.0),
+        NumberSequenceKeypoint.new(0.7, 0.6),
+        NumberSequenceKeypoint.new(1, 0)
+    })
+    groundBolt.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0),
+        NumberSequenceKeypoint.new(0.5, 0.3),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    groundBolt.Lifetime = NumberRange.new(0.4, 0.8)
+    groundBolt.Rate = 55
+    groundBolt.Speed = NumberRange.new(2, 6)
+    groundBolt.SpreadAngle = Vector2.new(110, 110)
+    groundBolt.EmissionDirection = Enum.NormalId.Bottom
+    groundBolt.RotSpeed = NumberRange.new(-300, 300)
+    groundBolt.Rotation = NumberRange.new(0, 360)
+    groundBolt.Enabled = AuraState.auraEnabled
+    table.insert(AuraState.emitters, groundBolt)
+
+    -- Ground dark smoke pool
+    local groundSmoke = Instance.new("ParticleEmitter")
+    groundSmoke.Parent = groundAtt
+    groundSmoke.Texture = "rbxassetid://8719525521"
+    groundSmoke.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 0, 0)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(20, 0, 0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 0, 0))
+    })
+    groundSmoke.LightEmission = 0.1
+    groundSmoke.LightInfluence = 0.8
+    groundSmoke.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1.0),
+        NumberSequenceKeypoint.new(0.4, 3.0),
+        NumberSequenceKeypoint.new(0.8, 4.5),
+        NumberSequenceKeypoint.new(1, 6.0)
+    })
+    groundSmoke.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.5),
+        NumberSequenceKeypoint.new(0.5, 0.75),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    groundSmoke.Lifetime = NumberRange.new(1.5, 2.5)
+    groundSmoke.Rate = 25
+    groundSmoke.Speed = NumberRange.new(0.2, 1.0)
+    groundSmoke.SpreadAngle = Vector2.new(60, 60)
+    groundSmoke.EmissionDirection = Enum.NormalId.Bottom
+    groundSmoke.Enabled = AuraState.auraEnabled
+    table.insert(AuraState.emitters, groundSmoke)
 
     -- ===== IDLE ANIMATION =====
     local idleAnim = Instance.new("Animation")
