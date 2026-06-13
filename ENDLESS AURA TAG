@@ -36,7 +36,6 @@ hud.IgnoreGuiInset = true
 hud.DisplayOrder = 999
 hud.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Delta me CoreGui me inject karna allow hai
 local success = pcall(function()
     hud.Parent = CoreGui
 end)
@@ -215,7 +214,7 @@ task.spawn(function()
 end)
 
 -- =====================
--- CHARACTER SETUP — Demon Red Thunder Aura
+-- CHARACTER SETUP
 -- =====================
 local function setup(character)
     local head = character:WaitForChild("Head")
@@ -343,147 +342,142 @@ local function setup(character)
     end)
 
     -- =====================
-    -- DEMON RED THUNDER AURA — Full Realistic 4-Layer System
+    -- DEMON THUNDER AURA — 4 Layer
     -- =====================
     local function createDemonThunder(parent, offsetY, rate, speed, size)
         local att = Instance.new("Attachment")
         att.Position = Vector3.new(0, offsetY, 0)
         att.Parent = parent
 
-        -- Layer 1: Blood Lightning Bolts (jagged fast bolts)
+        -- Layer 1: Main Thunder Bolt
         local bolt = Instance.new("ParticleEmitter")
         bolt.Parent = att
-        bolt.Texture = "rbxassetid://6101261905" -- Lightning bolt texture
+        bolt.Texture = "rbxassetid://9054118681"
         bolt.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 0)),
-            ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 0, 30)),
-            ColorSequenceKeypoint.new(0.8, Color3.fromRGB(140, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+            ColorSequenceKeypoint.new(0.1, Color3.fromRGB(255, 80, 80)),
+            ColorSequenceKeypoint.new(0.4, Color3.fromRGB(220, 0, 0)),
+            ColorSequenceKeypoint.new(0.8, Color3.fromRGB(120, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 0, 0))
         })
         bolt.LightEmission = 1
         bolt.LightInfluence = 0
         bolt.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 0.3),
-            NumberSequenceKeypoint.new(0.15, size * 1.5),
-            NumberSequenceKeypoint.new(0.5, size * 1.0),
-            NumberSequenceKeypoint.new(0.85, size * 0.6),
+            NumberSequenceKeypoint.new(0, size * 0.2),
+            NumberSequenceKeypoint.new(0.1, size * 1.6),
+            NumberSequenceKeypoint.new(0.5, size * 1.1),
+            NumberSequenceKeypoint.new(0.85, size * 0.5),
             NumberSequenceKeypoint.new(1, 0)
         })
         bolt.Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(0.3, 0.1),
+            NumberSequenceKeypoint.new(0.2, 0.05),
             NumberSequenceKeypoint.new(0.7, 0.5),
             NumberSequenceKeypoint.new(1, 1)
         })
-        bolt.Lifetime = NumberRange.new(0.2, 0.5)
+        bolt.Lifetime = NumberRange.new(0.15, 0.35)
         bolt.Rate = rate
-        bolt.Speed = NumberRange.new(speed, speed + 4)
-        bolt.SpreadAngle = Vector2.new(80, 80)
-        bolt.RotSpeed = NumberRange.new(-360, 360)
+        bolt.Speed = NumberRange.new(speed, speed + 5)
+        bolt.SpreadAngle = Vector2.new(75, 75)
+        bolt.RotSpeed = NumberRange.new(-400, 400)
         bolt.Rotation = NumberRange.new(0, 360)
-        bolt.ZOffset = 0.2
+        bolt.ZOffset = 0.3
         bolt.Enabled = AuraState.auraEnabled
         table.insert(AuraState.emitters, bolt)
 
-        -- Layer 2: Demon Soul Fire (slow rising orange-red wisps)
-        local soul = Instance.new("ParticleEmitter")
-        soul.Parent = att
-        soul.Texture = "rbxassetid://1266170131" -- Soft glow/flame texture
-        soul.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 0)),
-            ColorSequenceKeypoint.new(0.3, Color3.fromRGB(200, 0, 0)),
-            ColorSequenceKeypoint.new(0.7, Color3.fromRGB(100, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 0, 0))
+        -- Layer 2: Red Glow Halo
+        local glow = Instance.new("ParticleEmitter")
+        glow.Parent = att
+        glow.Texture = "rbxassetid://1166404687"
+        glow.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 50, 50)),
+            ColorSequenceKeypoint.new(0.4, Color3.fromRGB(180, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0))
         })
-        soul.LightEmission = 0.9
-        soul.LightInfluence = 0.1
-        soul.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 0.6),
-            NumberSequenceKeypoint.new(0.4, size * 1.8),
-            NumberSequenceKeypoint.new(0.8, size * 1.2),
+        glow.LightEmission = 1
+        glow.LightInfluence = 0
+        glow.Size = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, size * 2.0),
+            NumberSequenceKeypoint.new(0.5, size * 1.4),
             NumberSequenceKeypoint.new(1, 0)
         })
-        soul.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.2),
-            NumberSequenceKeypoint.new(0.5, 0.5),
+        glow.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.4),
+            NumberSequenceKeypoint.new(0.5, 0.65),
             NumberSequenceKeypoint.new(1, 1)
         })
-        soul.Lifetime = NumberRange.new(0.5, 1.0)
-        soul.Rate = rate * 0.7
-        soul.Speed = NumberRange.new(1, 3)
-        soul.SpreadAngle = Vector2.new(30, 30)
-        soul.RotSpeed = NumberRange.new(-60, 60)
-        soul.Rotation = NumberRange.new(0, 360)
-        soul.Enabled = AuraState.auraEnabled
-        table.insert(AuraState.emitters, soul)
+        glow.Lifetime = NumberRange.new(0.2, 0.45)
+        glow.Rate = rate * 0.6
+        glow.Speed = NumberRange.new(0.5, 2)
+        glow.SpreadAngle = Vector2.new(360, 360)
+        glow.Enabled = AuraState.auraEnabled
+        table.insert(AuraState.emitters, glow)
 
-        -- Layer 3: Dark Demon Smoke (thick heavy dark smoke billowing)
+        -- Layer 3: Dark Demon Smoke
         local smoke = Instance.new("ParticleEmitter")
         smoke.Parent = att
-        smoke.Texture = "rbxassetid://8719525521" -- Dense smoke texture
+        smoke.Texture = "rbxassetid://255662029"
         smoke.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 0)),
-            ColorSequenceKeypoint.new(0.3, Color3.fromRGB(40, 0, 0)),
-            ColorSequenceKeypoint.new(0.7, Color3.fromRGB(15, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 0, 0))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 0, 0)),
+            ColorSequenceKeypoint.new(0.4, Color3.fromRGB(30, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 0, 0))
         })
-        smoke.LightEmission = 0.15
-        smoke.LightInfluence = 0.7
+        smoke.LightEmission = 0.2
+        smoke.LightInfluence = 0.6
         smoke.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 0.5),
-            NumberSequenceKeypoint.new(0.3, size * 2.5),
-            NumberSequenceKeypoint.new(0.7, size * 3.5),
-            NumberSequenceKeypoint.new(1, size * 4.0)
+            NumberSequenceKeypoint.new(0, size * 0.6),
+            NumberSequenceKeypoint.new(0.3, size * 2.2),
+            NumberSequenceKeypoint.new(0.7, size * 3.0),
+            NumberSequenceKeypoint.new(1, size * 3.8)
         })
         smoke.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.4),
-            NumberSequenceKeypoint.new(0.4, 0.65),
-            NumberSequenceKeypoint.new(0.8, 0.85),
+            NumberSequenceKeypoint.new(0, 0.45),
+            NumberSequenceKeypoint.new(0.5, 0.7),
+            NumberSequenceKeypoint.new(0.85, 0.88),
             NumberSequenceKeypoint.new(1, 1)
         })
-        smoke.Lifetime = NumberRange.new(1.0, 2.0)
-        smoke.Rate = rate * 0.4
-        smoke.Speed = NumberRange.new(0.5, 2)
-        smoke.SpreadAngle = Vector2.new(20, 20)
-        smoke.RotSpeed = NumberRange.new(-20, 20)
+        smoke.Lifetime = NumberRange.new(0.9, 1.8)
+        smoke.Rate = rate * 0.45
+        smoke.Speed = NumberRange.new(0.4, 1.8)
+        smoke.SpreadAngle = Vector2.new(25, 25)
+        smoke.RotSpeed = NumberRange.new(-15, 15)
         smoke.Enabled = AuraState.auraEnabled
         table.insert(AuraState.emitters, smoke)
 
-        -- Layer 4: Hellfire Embers (tiny sharp red sparks)
+        -- Layer 4: Hellfire Embers
         local ember = Instance.new("ParticleEmitter")
         ember.Parent = att
-        ember.Texture = "rbxassetid://6442563724" -- Spark/ember texture
+        ember.Texture = "rbxassetid://6101261905"
         ember.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 120, 0)),
-            ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 30, 0)),
-            ColorSequenceKeypoint.new(0.8, Color3.fromRGB(180, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 0, 0))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 200)),
+            ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 100, 0)),
+            ColorSequenceKeypoint.new(0.6, Color3.fromRGB(220, 0, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))
         })
         ember.LightEmission = 1
         ember.LightInfluence = 0
         ember.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 0.15),
-            NumberSequenceKeypoint.new(0.5, size * 0.25),
+            NumberSequenceKeypoint.new(0, size * 0.12),
+            NumberSequenceKeypoint.new(0.4, size * 0.2),
             NumberSequenceKeypoint.new(1, 0)
         })
         ember.Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(0.6, 0.3),
+            NumberSequenceKeypoint.new(0.5, 0.2),
             NumberSequenceKeypoint.new(1, 1)
         })
-        ember.Lifetime = NumberRange.new(0.3, 0.8)
-        ember.Rate = rate * 1.2
-        ember.Speed = NumberRange.new(speed * 0.5, speed + 6)
-        ember.SpreadAngle = Vector2.new(120, 120)
-        ember.RotSpeed = NumberRange.new(-500, 500)
+        ember.Lifetime = NumberRange.new(0.25, 0.6)
+        ember.Rate = rate * 1.5
+        ember.Speed = NumberRange.new(speed * 0.6, speed + 7)
+        ember.SpreadAngle = Vector2.new(130, 130)
+        ember.RotSpeed = NumberRange.new(-600, 600)
         ember.Rotation = NumberRange.new(0, 360)
-        ember.ZOffset = 0.4
+        ember.ZOffset = 0.5
         ember.Enabled = AuraState.auraEnabled
         table.insert(AuraState.emitters, ember)
     end
 
-    -- R15 + R6 body parts
+    -- R15 + R6 all body parts
     local bodyParts = {
         "Head", "UpperTorso", "LowerTorso",
         "LeftUpperArm", "LeftLowerArm", "LeftHand",
@@ -498,39 +492,38 @@ local function setup(character)
         if part then createDemonThunder(part, 0, 40, 4, 1.0) end
     end
 
-    -- Core HRP injection (heavy main aura source)
     createDemonThunder(hrp, 0,  60, 5, 1.4)
     createDemonThunder(hrp, 1,  35, 4, 1.0)
     createDemonThunder(hrp, -1, 35, 4, 1.0)
 
-    -- ===== GROUND HELL EFFECT (bloodfire crawl at feet) =====
+    -- ===== GROUND EFFECT =====
     local groundAtt = Instance.new("Attachment")
     groundAtt.Position = Vector3.new(0, -3, 0)
     groundAtt.Parent = hrp
 
-    -- Ground blood lightning
     local groundBolt = Instance.new("ParticleEmitter")
     groundBolt.Parent = groundAtt
-    groundBolt.Texture = "rbxassetid://6101261905"
+    groundBolt.Texture = "rbxassetid://9054118681"
     groundBolt.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 50, 0)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 0, 0)),
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.2, Color3.fromRGB(255, 50, 0)),
+        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(200, 0, 0)),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))
     })
     groundBolt.LightEmission = 1
     groundBolt.LightInfluence = 0
     groundBolt.Size = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.3),
-        NumberSequenceKeypoint.new(0.3, 1.0),
-        NumberSequenceKeypoint.new(0.7, 0.6),
+        NumberSequenceKeypoint.new(0, 0.2),
+        NumberSequenceKeypoint.new(0.2, 1.2),
+        NumberSequenceKeypoint.new(0.6, 0.7),
         NumberSequenceKeypoint.new(1, 0)
     })
     groundBolt.Transparency = NumberSequence.new({
         NumberSequenceKeypoint.new(0, 0),
-        NumberSequenceKeypoint.new(0.5, 0.3),
+        NumberSequenceKeypoint.new(0.4, 0.2),
         NumberSequenceKeypoint.new(1, 1)
     })
-    groundBolt.Lifetime = NumberRange.new(0.4, 0.8)
+    groundBolt.Lifetime = NumberRange.new(0.3, 0.7)
     groundBolt.Rate = 55
     groundBolt.Speed = NumberRange.new(2, 6)
     groundBolt.SpreadAngle = Vector2.new(110, 110)
@@ -540,10 +533,9 @@ local function setup(character)
     groundBolt.Enabled = AuraState.auraEnabled
     table.insert(AuraState.emitters, groundBolt)
 
-    -- Ground dark smoke pool
     local groundSmoke = Instance.new("ParticleEmitter")
     groundSmoke.Parent = groundAtt
-    groundSmoke.Texture = "rbxassetid://8719525521"
+    groundSmoke.Texture = "rbxassetid://255662029"
     groundSmoke.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 0, 0)),
         ColorSequenceKeypoint.new(0.5, Color3.fromRGB(20, 0, 0)),
@@ -578,8 +570,8 @@ local function setup(character)
     idleTrack.Looped = true
     AuraState.currentTrack = idleTrack
 
-    humanoid.Running:Connect(function(speed)
-        if speed < 0.5 then
+    humanoid.Running:Connect(function(spd)
+        if spd < 0.5 then
             if AuraState.animEnabled and not idleTrack.IsPlaying then idleTrack:Play() end
         else
             if idleTrack.IsPlaying then idleTrack:Stop() end
