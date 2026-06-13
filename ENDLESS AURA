@@ -12,7 +12,7 @@ local player = Players.LocalPlayer
 local MASTER_ACC = "Nameless82872262"
 local CORRECT_KEY = "WHAT IS AURA"
 local CLICK_SOUND = "107406973902030" 
-local LOGO_IMAGE = "rbxassetid://129299711445020" -- Aapki provided image ID
+local LOGO_IMAGE = "rbxassetid://129299711445020"
 if not _G.AdminLogs then _G.AdminLogs = {} end
 
 -- Anti-Void Variables
@@ -25,7 +25,8 @@ if CoreGui:FindFirstChild("EndlessAura_Final") then
 end
 
 local sg = Instance.new("ScreenGui", CoreGui); sg.Name = "EndlessAura_Final"
-local Red, Black, White, Green = Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)
+local DarkRed = Color3.fromRGB(150, 0, 0) -- Naya Dark Red Colour jo Logo se Match karega
+local Black, White, Green = Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)
 
 -- // FUNCTIONS //
 local function SendPublicChat(msg)
@@ -39,7 +40,6 @@ local function SendPublicChat(msg)
     end)
 end
 
--- Universal Play Sound Function for Taps
 local function playS(id)
     local s = Instance.new("Sound", workspace)
     s.SoundId = "rbxassetid://"..(id or CLICK_SOUND)
@@ -84,26 +84,25 @@ end
 -- KEY SYSTEM
 -- ==========================================
 local KF = Instance.new("Frame", sg); KF.Size = UDim2.new(0, 340, 0, 440); KF.Position = UDim2.new(0.5, -170, 0.5, -220); KF.BackgroundColor3 = Black; KF.BackgroundTransparency = 0.2; makeDraggable(KF)
-Instance.new("UICorner", KF); local KS = Instance.new("UIStroke", KF); KS.Thickness = 3; KS.Color = Red
+Instance.new("UICorner", KF); local KS = Instance.new("UIStroke", KF); KS.Thickness = 3; KS.Color = DarkRed
 
--- Key System Logo Header
 local KeyLogo = Instance.new("ImageLabel", KF); KeyLogo.Size = UDim2.new(0, 40, 0, 40); KeyLogo.Position = UDim2.new(0.5, -20, 0, 10); KeyLogo.BackgroundTransparency = 1; KeyLogo.Image = LOGO_IMAGE
 
-local CloseKey = Instance.new("TextButton", KF); CloseKey.Size = UDim2.new(0,25,0,25); CloseKey.Position = UDim2.new(1,-30,0,5); CloseKey.Text = "X"; CloseKey.BackgroundColor3 = Red; CloseKey.TextColor3 = White; Instance.new("UICorner", CloseKey)
+local CloseKey = Instance.new("TextButton", KF); CloseKey.Size = UDim2.new(0,25,0,25); CloseKey.Position = UDim2.new(1,-30,0,5); CloseKey.Text = "X"; CloseKey.BackgroundColor3 = DarkRed; CloseKey.TextColor3 = White; Instance.new("UICorner", CloseKey)
 CloseKey.MouseButton1Click:Connect(function() 
     playS(CLICK_SOUND) 
     sg:Destroy() 
 end)
 
-local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = Red; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1
+local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = DarkRed; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1
 local Bio = Instance.new("TextLabel", KF); Bio.Text = "SCRIPT BY NAMELESS 💀\n\nKEY CHAIYE TO NAMELESS SE MANG\nKISMAT HOGI TO DEDEGA 😂"; Bio.Position = UDim2.new(0,0,0,95); Bio.Size = UDim2.new(1,0,0,60); Bio.TextColor3 = White; Bio.TextSize = 12; Bio.BackgroundTransparency = 1
 local Insta = Instance.new("TextLabel", KF); Insta.Text = "INSTAGRAM ID - ea_nameless\nFOLLOW KARLO WRNA ID BAN 💀"; Insta.Position = UDim2.new(0,0,0,165); Insta.Size = UDim2.new(1,0,0,40); Insta.TextColor3 = White; Insta.TextSize = 13; Insta.Font = Enum.Font.GothamBold; Insta.BackgroundTransparency = 1
 
 task.spawn(function()
-    while task.wait(0.5) do Insta.TextColor3 = (Insta.TextColor3 == Red and White or Red) end
+    while task.wait(0.5) do Insta.TextColor3 = (Insta.TextColor3 == DarkRed and White or DarkRed) end
 end)
 
-local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 45); KeyBox.Position = UDim2.new(0.5, -120, 0, 230); KeyBox.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyBox.PlaceholderText = "KEY DALO..."; KeyBox.TextColor3 = Red; KeyBox.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeyBox)
+local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 45); KeyBox.Position = UDim2.new(0.5, -120, 0, 230); KeyBox.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyBox.PlaceholderText = "KEY DALO..."; KeyBox.TextColor3 = DarkRed; KeyBox.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeyBox)
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
@@ -122,17 +121,25 @@ local function Initialize()
     end)
     
     local Main = Instance.new("Frame", sg); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Black; Main.BackgroundTransparency = 0.4; makeDraggable(Main)
-    Instance.new("UICorner", Main); local MS = Instance.new("UIStroke", Main); MS.Thickness = 2; MS.Color = Red
+    Instance.new("UICorner", Main); local MS = Instance.new("UIStroke", Main); MS.Thickness = 2; MS.Color = DarkRed
     
     -- Main Menu Header Logo
-    local MainLogo = Instance.new("ImageLabel", Main); MainLogo.Size = UDim2.new(0, 25, 0, 25); MainLogo.Position = UDim2.new(0, 10, 0, 8); MainLogo.BackgroundTransparency = 1; MainLogo.Image = LOGO_IMAGE
+    local MainLogo = Instance.new("ImageLabel", Main); MainLogo.Size = UDim2.new(0, 28, 0, 28); MainLogo.Position = UDim2.new(0, 10, 0, 6); MainLogo.BackgroundTransparency = 1; MainLogo.Image = LOGO_IMAGE
     
-    -- Adjusted Side Layout for Header Logo
-    local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 95, 1, -45); Side.Position = UDim2.new(0, 10, 0, 40); Side.BackgroundTransparency = 1; Instance.new("UIListLayout", Side).Padding = UDim.new(0, 4)
-    local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -45); Cont.Position = UDim2.new(0, 115, 0, 40); Cont.BackgroundTransparency = 1
+    -- Logo ke Right Side Me Stylized Text 'Eɴᴅʟᴇss Aᴜʀᴀ'
+    local LogoText = Instance.new("TextLabel", Main); LogoText.Size = UDim2.new(0, 200, 0, 28); LogoText.Position = UDim2.new(0, 43, 0, 5); LogoText.BackgroundTransparency = 1
+    LogoText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ"; LogoText.TextColor3 = DarkRed; LogoText.TextSize = 20; LogoText.Font = Enum.Font.GothamBlack; LogoText.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- [ DRAWN LINE ] - Tabs aur Content Area ke Uper Horizontal Divider Line
+    local TopLine = Instance.new("Frame", Main); TopLine.Size = UDim2.new(1, -20, 0, 2); TopLine.Position = UDim2.new(0, 10, 0, 38)
+    TopLine.BackgroundColor3 = DarkRed; TopLine.BorderSizePixel = 0
+    
+    -- Layout Positions Adjusted according to top line spacing
+    local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 95, 1, -50); Side.Position = UDim2.new(0, 10, 0, 45); Side.BackgroundTransparency = 1; Instance.new("UIListLayout", Side).Padding = UDim.new(0, 4)
+    local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 115, 0, 45); Cont.BackgroundTransparency = 1
     
     local function pg()
-        local p = Instance.new("ScrollingFrame", Cont); p.Size = UDim2.new(1, 0, 1, 0); p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 2; p.CanvasSize = UDim2.new(0,0,6,0); p.ScrollBarImageColor3 = Red
+        local p = Instance.new("ScrollingFrame", Cont); p.Size = UDim2.new(1, 0, 1, 0); p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 2; p.CanvasSize = UDim2.new(0,0,6,0); p.ScrollBarImageColor3 = DarkRed
         local grid = Instance.new("UIGridLayout", p); grid.CellSize = UDim2.new(0.47, 0, 0, 32); grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0); return p
     end
     
@@ -152,8 +159,8 @@ local function Initialize()
             for _,v in pairs(Cont:GetChildren()) do v.Visible = false end
             p.Visible = true
             for _,v in pairs(Side:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = White end end
-            b.TextColor3 = Red
-            if n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = Red end end
+            b.TextColor3 = DarkRed
+            if n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = DarkRed end end
         end)
     end
     
@@ -161,15 +168,15 @@ local function Initialize()
     if player.Name == MASTER_ACC then tab("🛡️ ADMIN", T_Adm) end; T1.Visible = true
     
     local function btn(txt, par, func, isLoad)
-        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and Red or White; b.Text = txt; b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
+        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = txt; b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND) 
-            if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and Red or White b.TextColor3 = b:GetAttribute("T") and White or Black end
+            if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
             func(b)
         end)
     end
     
-    -- TAB 1: INFO (Logo Integrated Inside)
+    -- TAB 1: INFO
     local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE
 
     local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top"
@@ -193,7 +200,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("🚀 Goto", T2, function() local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame end end, true)
     btn("🍆 Bang", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,1.1 + math.sin(tick()*30)*0.7) end task.wait() end end)
     btn("🍑 Front Bang", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-1.1 - math.sin(tick()*30)*0.7) * CFrame.Angles(0,math.pi,0) end task.wait() end end)
-    btn("🧒 Headsit", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.Head.CFrame * CFrame.new(0,0.5,0); player.Character.Humanoid.Sit = true end task.wait() end end)
+    btn("🧒 Headsit", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.Head.CFrame * CFrame.new(0,0.5,0); player.Character.Humanoid.Sit = true end task.wait() end end)
     btn("🦒 Front Headsit", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.Head.CFrame * CFrame.new(0,0.5,-0.6) * CFrame.Angles(0,math.pi,0); player.Character.Humanoid.Sit = true end task.wait() end end)
     btn("⬇️ Down", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0,-1.5,0) end task.wait() end end)
     btn("👅 Suck", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.2, -0.8) * CFrame.Angles(math.rad(90), 0, 0) end task.wait() end end)
@@ -268,9 +275,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         LogL.Text = t
     end)
     
-    -- NO BACKGROUND FLOATING LOGO BUTTON (👑 Emoji Replaced)
+    -- NO BACKGROUND FLOATING LOGO BUTTON
     local Logo = Instance.new("ImageButton", sg); Logo.Size = UDim2.new(0, 50, 0, 50); Logo.Position = UDim2.new(0, 10, 0.5, -25)
-    Logo.BackgroundTransparency = 1 -- Pure transparent background as requested
+    Logo.BackgroundTransparency = 1 
     Logo.Image = LOGO_IMAGE; makeDraggable(Logo)
     
     Logo.MouseButton1Click:Connect(function() 
