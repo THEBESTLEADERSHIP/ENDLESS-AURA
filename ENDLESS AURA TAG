@@ -5,17 +5,20 @@ local RunService = game:GetService("RunService")
 local StatsService = game:GetService("Stats")
 local TweenService = game:GetService("TweenService")
 local Debris = game:GetService("Debris")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- =====================
--- SHARED STATE SYSTEM (Marne ke baad settings yaad rakhega)
+-- SHARED STATE SYSTEM
 -- =====================
 if not _G.AuraState then
     _G.AuraState = {
         tagsEnabled = true,
         auraEnabled = true,
-        animEnabled = true, -- Anim state persistence handler
+        animEnabled = true,
+        spamEnabled = false, -- Default Spam Off rahega
         emitters = {},
         currentTrack = nil
     }
@@ -23,7 +26,7 @@ end
 local AuraState = _G.AuraState
 
 -- =====================
--- HUD BAR (Bada Premium Layout - Roblox Buttons Bypass)
+-- HUD BAR LAYOUT
 -- =====================
 if playerGui:FindFirstChild("AuraHUD") then
     playerGui:FindFirstChild("AuraHUD"):Destroy()
@@ -32,26 +35,25 @@ end
 local hud = Instance.new("ScreenGui")
 hud.Name = "AuraHUD"
 hud.ResetOnSpawn = false
-hud.IgnoreGuiInset = true -- Top Roblox Corebar inset bypass karne ke liye
-hud.DisplayOrder = 999999 -- Sabse top par dikhne ke liye taaki Roblox buttons ke upar layer bane
+hud.IgnoreGuiInset = true 
+hud.DisplayOrder = 9999999 -- Roblox core elements ke upar render hone ke liye highest priority
 hud.Parent = playerGui
 
--- Universal Sound Player Function
+-- Universal Sound Player
 local function playCustomSound(soundId)
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://" .. tostring(soundId)
     sound.Volume = 0.6
     sound.Parent = hud
     sound:Play()
-    Debris:AddItem(sound, 3) -- Play hone ke baad memory se delete handles
+    Debris:AddItem(sound, 3)
 end
 
 local bar = Instance.new("Frame")
 bar.Name = "Bar"
 bar.AutomaticSize = Enum.AutomaticSize.X
-bar.Size = UDim2.new(0, 0, 0, 24) -- Thoda bada premium size better visibility ke liye
+bar.Size = UDim2.new(0, 0, 0, 24)
 bar.AnchorPoint = Vector2.new(1, 0)
--- Mobile aur CoreGui bypass ke liye custom spacing (-45 se corner buttons bypass honge perfectly)
 bar.Position = UDim2.new(1, -45, 0, 6) 
 bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 bar.BackgroundTransparency = 0.45
@@ -78,7 +80,7 @@ barPadding.PaddingLeft = UDim.new(0, 6)
 barPadding.PaddingRight = UDim.new(0, 6)
 barPadding.Parent = bar
 
--- Box Creator (Bada Text Layout)
+-- Box Creator Utility
 local function createBox(name, text, withDot, interactive)
     local box = Instance.new("Frame")
     box.Name = name
@@ -113,7 +115,7 @@ local function createBox(name, text, withDot, interactive)
     if withDot then
         dot = Instance.new("Frame")
         dot.Size = UDim2.new(0, 5, 0, 5)
-        dot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+        dot.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
         dot.BorderSizePixel = 0
         dot.Parent = box
 
@@ -134,26 +136,25 @@ local function createBox(name, text, withDot, interactive)
     label.BackgroundTransparency = 1
     label.TextColor3 = Color3.fromRGB(210, 0, 0)
     label.Font = Enum.Font.GothamBold
-    label.TextSize = 10 -- Clear readable bada size text
+    label.TextSize = 10
     label.Text = text
     label.Parent = box
 
     return box, label, dot
 end
 
--- ===== 1. TAGS TOGGLE (With Sound) =====
-local tagsBox, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
+-- Toggles Setup
+local _, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
 tagsLabel.MouseButton1Click:Connect(function()
-    playCustomSound(107406973902030) -- Button Tap Sound
+    playCustomSound(107406973902030)
     AuraState.tagsEnabled = not AuraState.tagsEnabled
     tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
     tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
 end)
 
--- ===== 2. AURA TOGGLE (With Sound) =====
-local auraBox, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
+local _, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
 auraLabel.MouseButton1Click:Connect(function()
-    playCustomSound(107406973902030) -- Button Tap Sound
+    playCustomSound(107406973902030)
     AuraState.auraEnabled = not AuraState.auraEnabled
     auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
     auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
@@ -164,23 +165,16 @@ auraLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== 3. FPS =====
-local fpsBox, fpsLabel = createBox("FPS", "Fᴘs: --", false, false)
+local _, fpsLabel = createBox("FPS", "Fᴘs: --", false, false)
+local _, pingLabel = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
+local _, timeLabel = createBox("Time", "--:--", false, false)
 
--- ===== 4. PING =====
-local pingBox, pingLabel = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
-
--- ===== 5. TIME =====
-local timeBox, timeLabel = createBox("Time", "--:--", false, false)
-
--- ===== 6. ANIMATION TOGGLE (With Sound) =====
-local animBox, animLabel, animDot = createBox("AnimToggle", "Aɴɪᴍ Øɴ", true, true)
+local _, animLabel, animDot = createBox("AnimToggle", "Aɴɪᴍ Øɴ", true, true)
 animLabel.MouseButton1Click:Connect(function()
-    playCustomSound(107406973902030) -- Button Tap Sound
+    playCustomSound(107406973902030)
     AuraState.animEnabled = not AuraState.animEnabled
     animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
     animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    
     if AuraState.currentTrack then
         if AuraState.animEnabled then
             local character = player.Character
@@ -194,24 +188,53 @@ animLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== 7. REJOIN =====
-local rejoinBox, rejoinLabel = createBox("Rejoin", "Rᴇᴊᴏɪɴ", false, true)
-rejoinLabel.MouseButton1Click:Connect(function()
-    pcall(function()
-        game:GetService("TeleportService"):Teleport(game.PlaceId, player)
-    end)
+-- ===== NEW SPAM BUTTON SYSTEM =====
+local spamText = "SCRIPTER ]> NAMELESS 💢 \\\\ THEFAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢//SAB BACHE HO💢..."
+
+local function sendChatMessage(message)
+    -- Naye TextChatService aur purane SayMessageRequest dono ko support karta hai safe execution ke liye
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        local chatInputBarConfiguration = TextChatService:FindFirstChildOfClass("ChatInputBarConfiguration")
+        local targetChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if targetChannel then
+            targetChannel:SendAsync(message)
+        end
+    else
+        local sayMsgReq = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        if sayMsgReq then
+            sayMsgReq:FireServer(message, "All")
+        end
+    end
+end
+
+local _, spamLabel, spamDot = createBox("SpamToggle", "Sᴘᴀᴍ Øғғ", true, true)
+spamLabel.MouseButton1Click:Connect(function()
+    playCustomSound(107406973902030)
+    AuraState.spamEnabled = not AuraState.spamEnabled
+    spamLabel.Text = AuraState.spamEnabled and "Sᴘᴀᴍ Øɴ" or "Sᴘᴀᴍ Øғғ"
+    spamDot.BackgroundColor3 = AuraState.spamEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
 end)
 
--- Live System States Sync (Marne par sync banaye rakhne ke liye)
+-- Background thread looping for 2.6s spam
+task.spawn(function()
+    while true do
+        if AuraState.spamEnabled then
+            pcall(sendChatMessage, spamText)
+        end
+        task.wait(2.6)
+    end
+end)
+
+-- HUD Sync
 local function syncHUD()
     tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
     tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    
     auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
     auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    
     animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
     animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    spamLabel.Text = AuraState.spamEnabled and "Sᴘᴀᴍ Øɴ" or "Sᴘᴀᴍ Øғғ"
+    spamDot.BackgroundColor3 = AuraState.spamEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
 end
 syncHUD()
 
@@ -236,20 +259,27 @@ task.spawn(function()
 end)
 
 -- =====================
--- ROBLOX SIZE JOIN NOTIFICATION SYSTEM (With Sound)
+-- FRIEND-ONLY BYPASS NOTIFICATION SYSTEM
 -- =====================
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
 
-    -- Trigger Notification Alert Sound
+    -- Check if the joined player is a friend
+    local isFriend = false
+    pcall(function()
+        isFriend = player:IsFriendsWith(joinedPlayer.UserId)
+    end)
+    
+    if not isFriend then return end -- Agar friend nahi hai to skip pipeline
+
     playCustomSound(106544581344345)
 
     local notifFrame = Instance.new("Frame")
     notifFrame.Name = "JoinNotification"
-    -- Roblox standard native notification size (340 width, 64 height)
     notifFrame.Size = UDim2.new(0, 340, 0, 64)
     notifFrame.AnchorPoint = Vector2.new(0.5, 0)
-    notifFrame.Position = UDim2.new(0.5, 0, 0, -80) -- Upper hidden position
+    -- Positioned directly at safe core view area to overlay over native alerts
+    notifFrame.Position = UDim2.new(0.5, 0, 0, -80) 
     notifFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     notifFrame.BackgroundTransparency = 0.3
     notifFrame.BorderSizePixel = 0
@@ -260,11 +290,10 @@ local function showJoinNotification(joinedPlayer)
     notifCorner.Parent = notifFrame
 
     local notifStroke = Instance.new("UIStroke")
-    notifStroke.Color = Color3.fromRGB(220, 0, 0) -- RED BORDER
+    notifStroke.Color = Color3.fromRGB(220, 0, 0)
     notifStroke.Thickness = 1.8
     notifStroke.Parent = notifFrame
 
-    -- Bada Avatar Image Setup to match frame
     local avatarImg = Instance.new("ImageLabel")
     avatarImg.Size = UDim2.new(0, 46, 0, 46)
     avatarImg.Position = UDim2.new(0, 10, 0.5, -23)
@@ -281,26 +310,24 @@ local function showJoinNotification(joinedPlayer)
         avatarImg.Image = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
     end)
 
-    -- Large Readable Red Text Notification Label
     local txtLabel = Instance.new("TextLabel")
     txtLabel.Size = UDim2.new(1, -70, 1, 0)
     txtLabel.Position = UDim2.new(0, 66, 0, 0)
     txtLabel.BackgroundTransparency = 1
     txtLabel.Font = Enum.Font.GothamBold
     txtLabel.TextSize = 12
-    txtLabel.TextColor3 = Color3.fromRGB(255, 30, 30) -- RED TEXT
+    txtLabel.TextColor3 = Color3.fromRGB(255, 30, 30)
     txtLabel.TextXAlignment = Enum.TextXAlignment.Left
     txtLabel.TextWrapped = true
-    txtLabel.Text = "PLAYER HAS JOINED:\n@" .. joinedPlayer.Name
+    txtLabel.Text = "YOUR FRIEND JOINED:\n@" .. joinedPlayer.Name
     txtLabel.Parent = notifFrame
 
-    -- Dynamic Slide In Animation
+    -- Drops down completely clear over core headers
     local tweenIn = TweenService:Create(notifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, 0, 0, 14)
+        Position = UDim2.new(0.5, 0, 0, 35) -- Pulled down slightly more to completely visually overlay standard alerts
     })
     tweenIn:Play()
 
-    -- 4 Seconds display hold then slide up and destroy
     task.delay(4, function()
         if notifFrame and notifFrame.Parent then
             local tweenOut = TweenService:Create(notifFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
@@ -317,7 +344,7 @@ end
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
--- CHARACTER SETUP (Asli Heavy Aura + Tags)
+-- CHARACTER SETUP (Aura + Tags)
 -- =====================
 local function setup(character)
     local head = character:WaitForChild("Head")
@@ -326,9 +353,9 @@ local function setup(character)
     local hrp = character:WaitForChild("HumanoidRootPart")
     local camera = workspace.CurrentCamera
 
-    AuraState.emitters = {} -- Old values clear handles on respawn
+    AuraState.emitters = {}
 
-    -- ===== EA CIRCLE =====
+    -- EA CIRCLE
     local eaBillboard = Instance.new("BillboardGui")
     eaBillboard.Name = "EACircle"
     eaBillboard.Size = UDim2.new(0, 28, 0, 28)
@@ -362,7 +389,7 @@ local function setup(character)
     eaText.Font = Enum.Font.GothamBold
     eaText.Parent = eaCircle
 
-    -- ===== PURA TAG =====
+    -- OVERHEAD TAG
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "OverheadTag"
     billboard.Size = UDim2.new(0, 140, 0, 36)
@@ -444,13 +471,12 @@ local function setup(character)
         end
     end)
 
-    -- ===== EXACT HEAVY THREE-PART AURA GENERATOR =====
+    -- Aura Generator Function
     local function createThunder(parent, offsetY, rate, speed, size)
         local att = Instance.new("Attachment")
         att.Position = Vector3.new(0, offsetY, 0)
         att.Parent = parent
 
-        -- 1. Thunder Emitter
         local thunder = Instance.new("ParticleEmitter")
         thunder.Parent = att
         thunder.Texture = "rbxassetid://6101261905"
@@ -481,7 +507,6 @@ local function setup(character)
         thunder.Rotation = NumberRange.new(0, 360)
         thunder.ZOffset = 0.4
 
-        -- 2. Glow Emitter
         local glow = Instance.new("ParticleEmitter")
         glow.Parent = att
         glow.Color = ColorSequence.new({
@@ -506,7 +531,6 @@ local function setup(character)
         glow.Speed = NumberRange.new(1, 2.5)
         glow.SpreadAngle = Vector2.new(360, 360)
 
-        -- 3. Smoke Emitter
         local smoke = Instance.new("ParticleEmitter")
         smoke.Parent = att
         smoke.Color = ColorSequence.new({
@@ -530,7 +554,6 @@ local function setup(character)
         smoke.Speed = NumberRange.new(1, 3)
         smoke.SpreadAngle = Vector2.new(45, 45)
 
-        -- State setup sync handles
         thunder.Enabled = AuraState.auraEnabled
         glow.Enabled = AuraState.auraEnabled
         smoke.Enabled = AuraState.auraEnabled
@@ -540,18 +563,14 @@ local function setup(character)
         table.insert(AuraState.emitters, smoke)
     end
 
-    -- ===== LIMB SEPARATION SYSTEM =====
-    
-    -- 1. Normal/Base Parts (Head & Torso)
+    -- Base Parts Setup
     local baseParts = {"Head", "UpperTorso", "LowerTorso", "Torso"}
     for _, partName in ipairs(baseParts) do
         local part = character:FindFirstChild(partName)
-        if part then 
-            createThunder(part, 0, 50, 4, 1.1)
-        end
+        if part then createThunder(part, 0, 50, 4, 1.1) end
     end
 
-    -- 2. Heavy Parts (Hands and Legs) - Boosted
+    -- Limbs Setup
     local heavyParts = {
         "LeftUpperArm", "LeftLowerArm", "LeftHand", "Left Arm",
         "RightUpperArm", "RightLowerArm", "RightHand", "Right Arm",
@@ -560,17 +579,14 @@ local function setup(character)
     }
     for _, partName in ipairs(heavyParts) do
         local part = character:FindFirstChild(partName)
-        if part then 
-            createThunder(part, 0, 95, 5, 1.3)
-        end
+        if part then createThunder(part, 0, 95, 5, 1.3) end
     end
 
-    -- Core body injection points
     createThunder(hrp, 0, 65, 5, 1.4)
     createThunder(hrp, 1, 45, 4, 1.0)
     createThunder(hrp, -1, 45, 4, 1.0)
 
-    -- 4. Ground Effects
+    -- Ground Effects
     local groundAtt = Instance.new("Attachment")
     groundAtt.Position = Vector3.new(0, -3, 0)
     groundAtt.Parent = hrp
@@ -601,7 +617,7 @@ local function setup(character)
     groundThunder.Enabled = AuraState.auraEnabled
     table.insert(AuraState.emitters, groundThunder)
 
-    -- ===== DYNAMIC IDLE ANIMATION SYSTEM =====
+    -- Idle Animation System
     local idleAnim = Instance.new("Animation")
     idleAnim.AnimationId = "rbxassetid://138665010911335"
 
