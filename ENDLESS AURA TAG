@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StatsService = game:GetService("Stats")
 local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -34,6 +35,16 @@ hud.ResetOnSpawn = false
 hud.IgnoreGuiInset = true -- Top Roblox Corebar inset bypass karne ke liye
 hud.DisplayOrder = 999999 -- Sabse top par dikhne ke liye taaki Roblox buttons ke upar layer bane
 hud.Parent = playerGui
+
+-- Universal Sound Player Function
+local function playCustomSound(soundId)
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://" .. tostring(soundId)
+    sound.Volume = 0.6
+    sound.Parent = hud
+    sound:Play()
+    Debris:AddItem(sound, 3) -- Play hone ke baad memory se delete handles
+end
 
 local bar = Instance.new("Frame")
 bar.Name = "Bar"
@@ -130,17 +141,19 @@ local function createBox(name, text, withDot, interactive)
     return box, label, dot
 end
 
--- ===== 1. TAGS TOGGLE =====
+-- ===== 1. TAGS TOGGLE (With Sound) =====
 local tagsBox, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
 tagsLabel.MouseButton1Click:Connect(function()
+    playCustomSound(107406973902030) -- Button Tap Sound
     AuraState.tagsEnabled = not AuraState.tagsEnabled
     tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
     tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
 end)
 
--- ===== 2. AURA TOGGLE =====
+-- ===== 2. AURA TOGGLE (With Sound) =====
 local auraBox, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
 auraLabel.MouseButton1Click:Connect(function()
+    playCustomSound(107406973902030) -- Button Tap Sound
     AuraState.auraEnabled = not AuraState.auraEnabled
     auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
     auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
@@ -160,9 +173,10 @@ local pingBox, pingLabel = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
 -- ===== 5. TIME =====
 local timeBox, timeLabel = createBox("Time", "--:--", false, false)
 
--- ===== 6. ANIMATION TOGGLE (State Persistent Saver) =====
+-- ===== 6. ANIMATION TOGGLE (With Sound) =====
 local animBox, animLabel, animDot = createBox("AnimToggle", "Aɴɪᴍ Øɴ", true, true)
 animLabel.MouseButton1Click:Connect(function()
+    playCustomSound(107406973902030) -- Button Tap Sound
     AuraState.animEnabled = not AuraState.animEnabled
     animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
     animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
@@ -222,36 +236,38 @@ task.spawn(function()
 end)
 
 -- =====================
--- TOP-CENTRE JOIN NOTIFICATION SYSTEM
+-- ROBLOX SIZE JOIN NOTIFICATION SYSTEM (With Sound)
 -- =====================
 local function showJoinNotification(joinedPlayer)
-    -- Agar player khud join ho rha hai to notification nahi dikhana hai
     if joinedPlayer == player then return end
+
+    -- Trigger Notification Alert Sound
+    playCustomSound(106544581344345)
 
     local notifFrame = Instance.new("Frame")
     notifFrame.Name = "JoinNotification"
-    notifFrame.Size = UDim2.new(0, 260, 0, 38)
+    -- Roblox standard native notification size (340 width, 64 height)
+    notifFrame.Size = UDim2.new(0, 340, 0, 64)
     notifFrame.AnchorPoint = Vector2.new(0.5, 0)
-    -- Screen se upar hidden state me start hoga animation ke liye
-    notifFrame.Position = UDim2.new(0.5, 0, 0, -50) 
+    notifFrame.Position = UDim2.new(0.5, 0, 0, -80) -- Upper hidden position
     notifFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     notifFrame.BackgroundTransparency = 0.3
     notifFrame.BorderSizePixel = 0
     notifFrame.Parent = hud
 
     local notifCorner = Instance.new("UICorner")
-    notifCorner.CornerRadius = UDim.new(0, 6)
+    notifCorner.CornerRadius = UDim.new(0, 8)
     notifCorner.Parent = notifFrame
 
     local notifStroke = Instance.new("UIStroke")
     notifStroke.Color = Color3.fromRGB(220, 0, 0) -- RED BORDER
-    notifStroke.Thickness = 1.5
+    notifStroke.Thickness = 1.8
     notifStroke.Parent = notifFrame
 
-    -- Avatar Image Setup
+    -- Bada Avatar Image Setup to match frame
     local avatarImg = Instance.new("ImageLabel")
-    avatarImg.Size = UDim2.new(0, 28, 0, 28)
-    avatarImg.Position = UDim2.new(0, 6, 0.5, -14)
+    avatarImg.Size = UDim2.new(0, 46, 0, 46)
+    avatarImg.Position = UDim2.new(0, 10, 0.5, -23)
     avatarImg.BackgroundTransparency = 1
     avatarImg.BorderSizePixel = 0
     avatarImg.Parent = notifFrame
@@ -260,27 +276,27 @@ local function showJoinNotification(joinedPlayer)
     avatarCorner.CornerRadius = UDim.new(1, 0)
     avatarCorner.Parent = avatarImg
 
-    -- Avatar image fetch handle pcall me taaki asset fail hone par crash na ho
     pcall(function()
         local userId = joinedPlayer.UserId
         avatarImg.Image = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
     end)
 
-    -- Red Text Notification Label
+    -- Large Readable Red Text Notification Label
     local txtLabel = Instance.new("TextLabel")
-    txtLabel.Size = UDim2.new(1, -44, 1, 0)
-    txtLabel.Position = UDim2.new(0, 40, 0, 0)
+    txtLabel.Size = UDim2.new(1, -70, 1, 0)
+    txtLabel.Position = UDim2.new(0, 66, 0, 0)
     txtLabel.BackgroundTransparency = 1
     txtLabel.Font = Enum.Font.GothamBold
-    txtLabel.TextSize = 10
+    txtLabel.TextSize = 12
     txtLabel.TextColor3 = Color3.fromRGB(255, 30, 30) -- RED TEXT
     txtLabel.TextXAlignment = Enum.TextXAlignment.Left
+    txtLabel.TextWrapped = true
     txtLabel.Text = "PLAYER HAS JOINED:\n@" .. joinedPlayer.Name
     txtLabel.Parent = notifFrame
 
-    -- Smooth Drop-Down Animation (Top Centre Drop)
+    -- Dynamic Slide In Animation
     local tweenIn = TweenService:Create(notifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, 0, 0, 12)
+        Position = UDim2.new(0.5, 0, 0, 14)
     })
     tweenIn:Play()
 
@@ -288,7 +304,7 @@ local function showJoinNotification(joinedPlayer)
     task.delay(4, function()
         if notifFrame and notifFrame.Parent then
             local tweenOut = TweenService:Create(notifFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Position = UDim2.new(0.5, 0, 0, -50)
+                Position = UDim2.new(0.5, 0, 0, -80)
             })
             tweenOut:Play()
             tweenOut.Completed:Connect(function()
@@ -298,7 +314,6 @@ local function showJoinNotification(joinedPlayer)
     end)
 end
 
--- Player join event connection
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
@@ -525,9 +540,9 @@ local function setup(character)
         table.insert(AuraState.emitters, smoke)
     end
 
-    -- ===== LIMB SEPARATION SYSTEM (Hands & Legs me zyada aura) =====
+    -- ===== LIMB SEPARATION SYSTEM =====
     
-    -- 1. Normal/Base Parts (Head & Torso) - Texture balanced aur clear
+    -- 1. Normal/Base Parts (Head & Torso)
     local baseParts = {"Head", "UpperTorso", "LowerTorso", "Torso"}
     for _, partName in ipairs(baseParts) do
         local part = character:FindFirstChild(partName)
@@ -536,7 +551,7 @@ local function setup(character)
         end
     end
 
-    -- 2. Heavy Parts (Hands and Legs) - Thunder boosted on limbs
+    -- 2. Heavy Parts (Hands and Legs) - Boosted
     local heavyParts = {
         "LeftUpperArm", "LeftLowerArm", "LeftHand", "Left Arm",
         "RightUpperArm", "RightLowerArm", "RightHand", "Right Arm",
@@ -550,12 +565,12 @@ local function setup(character)
         end
     end
 
-    -- Core body injection points (HumanoidRootPart)
+    -- Core body injection points
     createThunder(hrp, 0, 65, 5, 1.4)
     createThunder(hrp, 1, 45, 4, 1.0)
     createThunder(hrp, -1, 45, 4, 1.0)
 
-    -- 4. Ground Effects Injection
+    -- 4. Ground Effects
     local groundAtt = Instance.new("Attachment")
     groundAtt.Position = Vector3.new(0, -3, 0)
     groundAtt.Parent = hrp
@@ -607,7 +622,6 @@ local function setup(character)
         end
     end)
 
-    -- Check on load/respawn
     if humanoid.MoveDirection.Magnitude < 0.1 and AuraState.animEnabled then
         idleTrack:Play()
     end
@@ -615,7 +629,7 @@ end
 
 local function safeSetup(character)
     pcall(setup, character)
-    syncHUD() -- Respawn hot swap sync ui tags
+    syncHUD()
 end
 
 safeSetup(player.Character or player.CharacterAdded:Wait())
