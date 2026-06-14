@@ -6,7 +6,8 @@ local Players = game:GetService("Players")
 -- ANIMATION & AUDIO CONFIGURATION
 local bangAnimId = "rbxassetid://5918726674"
 local activeTrack = nil
-local soundMuted = false -- Sound Toggle State Control
+local soundMuted = false 
+local animMuted = false -- Animation State Control
 
 -- SOUND SYSTEM INITIALIZATION
 local sound1 = Instance.new("Sound")
@@ -14,13 +15,17 @@ sound1.SoundId = "rbxassetid://95656642853883"
 sound1.Volume = 2
 
 local sound2 = Instance.new("Sound")
-sound2.SoundId = "rbxassetid://95656642853883"
+sound2.SoundId = "rbxassetid://78435052000321" -- UPDATED 2ND SOUND ID
 sound2.Volume = 2
 
 local sound3 = Instance.new("Sound")
 sound3.SoundId = "rbxassetid://136178701391977"
 sound3.Volume = 2
 sound3.Looped = true
+
+local leaveSound = Instance.new("Sound")
+leaveSound.SoundId = "rbxassetid://123737491492931" -- TARGET LEAVE SOUND
+leaveSound.Volume = 3
 
 local lastSoundTime = 0
 local soundGap = 7 
@@ -67,7 +72,13 @@ local function getHumanoid()
     return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 end
 
--- GLOBAL STORAGE FOR INSTANT DESTRUCTION & COUNTING
+-- TARGET MULTI SELECT REGISTRY
+local selectedPlayers = {} 
+local currentTargetIndex = 1
+local lastTargetSwitchTime = 0
+local selectedPlayer = nil 
+
+-- GLOBAL STORAGE INTERFERENCE FIXED (GUI REMOVAL REMOVED ON RE-EXECUTE)
 if not _G.EndlessAuraStorage then
     _G.EndlessAuraStorage = {
         ExecCount = 1,
@@ -81,66 +92,64 @@ else
     _G.EndlessAuraStorage.ExecCount = _G.EndlessAuraStorage.ExecCount + 1
 end
 
--- 2ND EXECUTION: FULL DESTRUCTION PROTOCOL
-if _G.EndlessAuraStorage.ExecCount == 2 then
-    if _G.EndlessAuraStorage.CurrentGui then
-        _G.EndlessAuraStorage.CurrentGui:Destroy()
-        _G.EndlessAuraStorage.CurrentGui = nil
-    end
-    if _G.EndlessAuraStorage.ActiveConnection then
-        _G.EndlessAuraStorage.ActiveConnection:Disconnect()
-        _G.EndlessAuraStorage.ActiveConnection = nil
-    end
-    if _G.EndlessAuraStorage.PlatformPart then
-        _G.EndlessAuraStorage.PlatformPart:Destroy()
-        _G.EndlessAuraStorage.PlatformPart = nil
-    end
-    if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
-    if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
-    if activeTrack then activeTrack:Stop() activeTrack = nil end
-    stopAllSounds()
-    
-    pcall(function()
-        local torso = player.Character:FindFirstChild("Torso") or player.Character:FindFirstChild("LowerTorso")
-        local rootJoint = torso and (torso:FindFirstChild("RootJoint") or player.Character.HumanoidRootPart:FindFirstChild("RootJoint"))
-        if rootJoint then rootJoint.C0 = CFrame.new() end
-    end)
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.PlatformStand = false
-    end
-    return 
-end
-
-if _G.EndlessAuraStorage.ExecCount >= 3 then
-    _G.EndlessAuraStorage.ExecCount = 1
-end
-
--- CONFIGURATIONS
-local speedMultiplier = 17.4   
-local forwardBackRange = 1.1   
-local fixedUpOffset = 1.8      
-local attachDistance = 0.4     
-
-local targetMode = "Normal" 
-local isAttached = false
-local selectedPlayers = {} 
-local currentTargetIndex = 1
-local lastTargetSwitchTime = 0
-local selectedPlayer = nil 
-
-local currentAutoSubMode = "Normal"
-local lastSwitchTime = 0
-
 pcall(function()
     sound1.Parent = game.CoreGui
     sound2.Parent = game.CoreGui
     sound3.Parent = game.CoreGui
+    leaveSound.Parent = game.CoreGui
+end)
+
+-- Target Leaved Notification Injector Engine
+local function showLeaveNotification(playerName)
+    task.spawn(function()
+        if not soundMuted then leaveSound:Play() end
+        
+        local notifGui = game.CoreGui:FindFirstChild("DeltaGlassRoboticUI")
+        if not notifGui then return end
+        
+        local alertFrame = Instance.new("Frame")
+        alertFrame.Size = UDim2.new(0, 250, 0, 50)
+        alertFrame.Position = UDim2.new(1, -270, 1, -120)
+        alertFrame.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
+        alertFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)
+        alertFrame.BorderSizePixel = 2
+        alertFrame.Parent = notifGui
+        
+        local alertText = Instance.new("TextLabel")
+        alertText.Size = UDim2.new(1, 0, 1, 0)
+        alertText.Text = "⚠️ TARGET ESCAPED:\n" .. playerName .. " LEFT THE SERVER!"
+        alertText.TextColor3 = Color3.fromRGB(255, 50, 50)
+        alertText.Font = Enum.Font.Code
+        alertText.TextSize = 11
+        alertText.BackgroundTransparency = 1
+        alertText.Parent = alertFrame
+        
+        -- Alert Flashing Effect
+        for i = 1, 6 do
+            alertFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+            task.wait(0.2)
+            alertFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)
+            task.wait(0.2)
+        end
+        alertFrame:Destroy()
+    end)
+end
+
+-- Player Leave Connection Monitor
+Players.PlayerRemoving:Connect(function(leftPlayer)
+    local idx = table.find(selectedPlayers, leftPlayer)
+    if idx then
+        table.remove(selectedPlayers, idx)
+        showLeaveNotification(leftPlayer.DisplayName)
+        if selectedPlayer == leftPlayer then
+            selectedPlayer = nil
+        end
+    end
 end)
 
 -- Anti-Die System
 task.spawn(function()
     while task.wait(0.5) do
-        if _G.EndlessAuraStorage.ExecCount == 2 then break end 
         pcall(function()
             if game.Workspace.FallenPartsDestroyHeight ~= -500000 then
                 game.Workspace.FallenPartsDestroyHeight = -500000
@@ -156,27 +165,35 @@ end)
 -- ====================================================================
 -- // BRANDED UPGRADED AUDIO CONTROLLED PANEL GUI // --
 -- ====================================================================
-local screenGui = Instance.new("ScreenGui") 
-screenGui.Name = "DeltaGlassRoboticUI" 
-screenGui.ResetOnSpawn = false 
-screenGui.Parent = game.CoreGui 
-_G.EndlessAuraStorage.CurrentGui = screenGui 
+local screenGui = game.CoreGui:FindFirstChild("DeltaGlassRoboticUI")
+if not screenGui then
+    screenGui = Instance.new("ScreenGui") 
+    screenGui.Name = "DeltaGlassRoboticUI" 
+    screenGui.ResetOnSpawn = false 
+    screenGui.Parent = game.CoreGui 
+    _G.EndlessAuraStorage.CurrentGui = screenGui 
+end
 
-local mainFrame = Instance.new("Frame") 
-mainFrame.Size = UDim2.new(0, 240, 0, 350) -- Adjusted wide size to fit header beautifully
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -175) 
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
-mainFrame.BackgroundTransparency = 0.45 
-mainFrame.BorderSizePixel = 2 
-mainFrame.BorderColor3 = Color3.fromRGB(255, 0, 50) 
-mainFrame.BorderMode = Enum.BorderMode.Inset 
-mainFrame.ClipsDescendants = true 
-mainFrame.Visible = true 
-mainFrame.Parent = screenGui 
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 4)
+local mainFrame = screenGui:FindFirstChild("MainFrame")
+if not mainFrame then
+    mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0, 250, 0, 360) 
+    mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180) 
+    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+    mainFrame.BackgroundTransparency = 0.45 
+    mainFrame.BorderSizePixel = 2 
+    mainFrame.BorderColor3 = Color3.fromRGB(255, 0, 50) 
+    mainFrame.BorderMode = Enum.BorderMode.Inset 
+    mainFrame.ClipsDescendants = true 
+    mainFrame.Visible = true 
+    mainFrame.Parent = screenGui 
+    Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 4)
+end
 
-local nameBoxFrame = Instance.new("Frame")
-nameBoxFrame.Size = UDim2.new(1, -12, 0, 30)
+local nameBoxFrame = mainFrame:FindFirstChild("NameBoxFrame") or Instance.new("Frame")
+nameBoxFrame.Name = "NameBoxFrame"
+nameBoxFrame.Size = UDim2.new(1, -12, 0, 34)
 nameBoxFrame.Position = UDim2.new(0, 6, 0, 6)
 nameBoxFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 5)
 nameBoxFrame.BackgroundTransparency = 0.3
@@ -184,30 +201,33 @@ nameBoxFrame.BorderSizePixel = 1
 nameBoxFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)
 nameBoxFrame.Parent = mainFrame
 
--- Custom Asset Branding Image Injector
-local brandingImg = Instance.new("ImageLabel")
-brandingImg.Size = UDim2.new(0, 20, 0, 20)
-brandingImg.Position = UDim2.new(0, 5, 0, 5)
+-- Custom Asset Branding Image Injector (BIGGER LARGER BRANDING LOGO)
+local brandingImg = nameBoxFrame:FindFirstChild("BrandingImg") or Instance.new("ImageLabel")
+brandingImg.Name = "BrandingImg"
+brandingImg.Size = UDim2.new(0, 24, 0, 24) -- Resized to look Bigger
+brandingImg.Position = UDim2.new(0, 6, 0, 5)
 brandingImg.Image = "rbxassetid://129299711445020"
 brandingImg.BackgroundTransparency = 1
 brandingImg.Parent = nameBoxFrame
 
-local nameText = Instance.new("TextLabel")
-nameText.Size = UDim2.new(1, -55, 1, 0)
-nameText.Position = UDim2.new(0, 28, 0, 0)
+local nameText = nameBoxFrame:FindFirstChild("NameText") or Instance.new("TextLabel")
+nameText.Name = "NameText"
+nameText.Size = UDim2.new(1, -85, 1, 0)
+nameText.Position = UDim2.new(0, 36, 0, 0)
 nameText.Text = "ENDLESS AURA BANG PANEL💀💢"
 nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
 nameText.Font = Enum.Font.Code 
-nameText.TextSize = 9 
+nameText.TextSize = 10 -- Increased Font Size slightly
 nameText.TextXAlignment = Enum.TextXAlignment.Left
 nameText.BackgroundTransparency = 1
 nameText.Parent = nameBoxFrame
 
 -- INVISIBLE BORDER SOUND TOGGLE BUTTON
-local soundToggleBtn = Instance.new("TextButton")
-soundToggleBtn.Size = UDim2.new(0, 24, 0, 24)
-soundToggleBtn.Position = UDim2.new(1, -26, 0, 3)
-soundToggleBtn.BackgroundTransparency = 1 -- Completely clean borderless background
+local soundToggleBtn = nameBoxFrame:FindFirstChild("SoundToggleBtn") or Instance.new("TextButton")
+soundToggleBtn.Name = "SoundToggleBtn"
+soundToggleBtn.Size = UDim2.new(0, 22, 0, 24)
+soundToggleBtn.Position = UDim2.new(1, -50, 0, 5)
+soundToggleBtn.BackgroundTransparency = 1 
 soundToggleBtn.BorderSizePixel = 0
 soundToggleBtn.Text = "🔊"
 soundToggleBtn.TextSize = 14
@@ -221,11 +241,45 @@ soundToggleBtn.MouseButton1Click:Connect(function()
         stopAllSounds()
     else
         soundToggleBtn.Text = "🔊"
-        if isAttached then lastSoundTime = 0 end -- Triggers immediate catch-up loop play
+        if isAttached then lastSoundTime = 0 end 
     end
 end)
 
-local toggleGuiBtn = Instance.new("TextButton")
+-- INVISIBLE BORDER ANIMATION TOGGLE BUTTON (👤 INTERFACE)
+local animToggleBtn = nameBoxFrame:FindFirstChild("AnimToggleBtn") or Instance.new("TextButton")
+animToggleBtn.Name = "AnimToggleBtn"
+animToggleBtn.Size = UDim2.new(0, 22, 0, 24)
+animToggleBtn.Position = UDim2.new(1, -24, 0, 5)
+animToggleBtn.BackgroundTransparency = 1 
+animToggleBtn.BorderSizePixel = 0
+animToggleBtn.Text = "👤"
+animToggleBtn.TextSize = 14
+animToggleBtn.TextColor3 = Color3.new(1, 1, 1)
+animToggleBtn.Parent = nameBoxFrame
+
+animToggleBtn.MouseButton1Click:Connect(function()
+    animMuted = not animMuted
+    if animMuted then
+        animToggleBtn.Text = "❌"
+        if activeTrack then activeTrack:Stop() end
+    else
+        animToggleBtn.Text = "👤"
+        if isAttached and not activeTrack then
+            local hum = getHumanoid()
+            if hum then
+                local anim = Instance.new("Animation")
+                anim.AnimationId = bangAnimId
+                activeTrack = hum:LoadAnimation(anim)
+                activeTrack.Looped = true
+                activeTrack:Play()
+                activeTrack:AdjustSpeed(speedMultiplier / 5)
+            end
+        end
+    end
+end)
+
+local toggleGuiBtn = screenGui:FindFirstChild("ToggleGuiBtn") or Instance.new("TextButton")
+toggleGuiBtn.Name = "ToggleGuiBtn"
 toggleGuiBtn.Size = UDim2.new(0, 70, 0, 30)
 toggleGuiBtn.Position = UDim2.new(0, 15, 1, -45) 
 toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
@@ -237,7 +291,6 @@ toggleGuiBtn.TextColor3 = Color3.fromRGB(255, 0, 50)
 toggleGuiBtn.Font = Enum.Font.Code
 toggleGuiBtn.TextSize = 12
 toggleGuiBtn.Parent = screenGui
-Instance.new("UICorner", toggleGuiBtn).CornerRadius = UDim.new(0, 4)
 
 toggleGuiBtn.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
@@ -266,9 +319,9 @@ userInputService.InputEnded:Connect(function(input)
 end)
 
 -- SEARCH BOX
-local textBox = Instance.new("TextBox") 
+local textBox = mainFrame:FindFirstChild("TextBox") or Instance.new("TextBox") 
 textBox.Size = UDim2.new(1, -16, 0, 26) 
-textBox.Position = UDim2.new(0, 8, 0, 44) 
+textBox.Position = UDim2.new(0, 8, 0, 48) 
 textBox.PlaceholderText = "> SEARCH MULTI TARGETS..." 
 textBox.Text = "" 
 textBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10) 
@@ -280,21 +333,32 @@ textBox.BorderColor3 = Color3.fromRGB(150, 0, 30)
 textBox.Parent = mainFrame 
 
 -- SCROLL LIST
-local scrollingFrame = Instance.new("ScrollingFrame") 
+local scrollingFrame = mainFrame:FindFirstChild("ScrollingFrame") or Instance.new("ScrollingFrame") 
 scrollingFrame.Size = UDim2.new(1, -16, 0, 65) 
-scrollingFrame.Position = UDim2.new(0, 8, 0, 76) 
+scrollingFrame.Position = UDim2.new(0, 8, 0, 80) 
 scrollingFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5) 
 scrollingFrame.BackgroundTransparency = 0.4
 scrollingFrame.ScrollBarThickness = 3 
 scrollingFrame.BorderColor3 = Color3.fromRGB(100, 0, 20) 
 scrollingFrame.Parent = mainFrame 
-local uiList = Instance.new("UIListLayout", scrollingFrame)
-uiList.Padding = UDim.new(0, 2)
+if not scrollingFrame:FindFirstChildOfClass("UIListLayout") then
+    local uiList = Instance.new("UIListLayout", scrollingFrame)
+    uiList.Padding = UDim.new(0, 2)
+end
 
 -- TARGET MODE BUTTON
-local modeBtn = Instance.new("TextButton")
+local speedMultiplier = 17.4   
+local forwardBackRange = 1.1   
+local fixedUpOffset = 1.8      
+local attachDistance = 0.4     
+local targetMode = "Normal" 
+local isAttached = false
+local currentAutoSubMode = "Normal"
+local lastSwitchTime = 0
+
+local modeBtn = mainFrame:FindFirstChild("ModeBtn") or Instance.new("TextButton")
 modeBtn.Size = UDim2.new(1, -16, 0, 24)
-modeBtn.Position = UDim2.new(0, 8, 0, 146)
+modeBtn.Position = UDim2.new(0, 8, 0, 152)
 modeBtn.Text = "MODE // SYSTEM_NORMAL"
 modeBtn.BackgroundColor3 = Color3.fromRGB(15, 5, 5)
 modeBtn.BackgroundTransparency = 0.3
@@ -382,17 +446,18 @@ local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callbac
     end)
 end
 
-createSlider(175, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
+createSlider(182, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
     speedMultiplier = v 
-    if activeTrack then
+    if activeTrack and not animMuted then
         activeTrack:AdjustSpeed(v / 5)
     end
 end)
-createSlider(207, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
-createSlider(239, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
-createSlider(271, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
+createSlider(214, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
+createSlider(246, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
+createSlider(278, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
 
-local toggleButton = Instance.new("TextButton") 
+local toggleButton = mainFrame:FindFirstChild("ToggleButton") or Instance.new("TextButton")
+toggleButton.Name = "ToggleButton"
 toggleButton.Size = UDim2.new(1, -16, 0, 32) 
 toggleButton.Position = UDim2.new(0, 8, 1, -38) 
 toggleButton.Text = "[ FUCK ON ]" 
@@ -495,14 +560,16 @@ toggleButton.MouseButton1Click:Connect(function()
         local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
         if not myHRP then return end
 
-        local hum = getHumanoid()
-        if hum then
-            local anim = Instance.new("Animation")
-            anim.AnimationId = bangAnimId
-            activeTrack = hum:LoadAnimation(anim)
-            activeTrack.Looped = true
-            activeTrack:Play()
-            activeTrack:AdjustSpeed(speedMultiplier / 5)
+        if not animMuted then
+            local hum = getHumanoid()
+            if hum then
+                local anim = Instance.new("Animation")
+                anim.AnimationId = bangAnimId
+                activeTrack = hum:LoadAnimation(anim)
+                activeTrack.Looped = true
+                activeTrack:Play()
+                activeTrack:AdjustSpeed(speedMultiplier / 5)
+            end
         end
 
         local bv = Instance.new("BodyVelocity")
