@@ -8,7 +8,7 @@ local starterGui = game:GetService("StarterGui")
 local bangAnimId = "rbxassetid://5918726674"
 local activeTrack = nil
 local soundMuted = false 
-local animMuted = false -- Animation Live Control State
+local animMuted = false 
 
 -- SOUND SYSTEM INITIALIZATION
 local sound1 = Instance.new("Sound")
@@ -16,7 +16,7 @@ sound1.SoundId = "rbxassetid://95656642853883"
 sound1.Volume = 2
 
 local sound2 = Instance.new("Sound")
-sound2.SoundId = "rbxassetid://78435052000321" -- UPDATED 2ND SOUND ID
+sound2.SoundId = "rbxassetid://78435052000321" 
 sound2.Volume = 2
 
 local sound3 = Instance.new("Sound")
@@ -24,9 +24,9 @@ sound3.SoundId = "rbxassetid://136178701391977"
 sound3.Volume = 2
 sound3.Looped = true
 
--- Leave Notification Sound
+-- Updated Leave Notification Sound
 local leaveSound = Instance.new("Sound")
-leaveSound.SoundId = "rbxassetid://77239445785417"
+leaveSound.SoundId = "rbxassetid://96880277560628" -- NEW LEAVE SOUND ID
 leaveSound.Volume = 2
 
 local lastSoundTime = 0
@@ -163,7 +163,7 @@ task.spawn(function()
 end)
 
 -- ====================================================================
--- // BRANDED UPGRADED AUDIO CONTROLLED PANEL GUI // --
+-- // COMPACT HIGH-UPGRADED PANEL GUI // --
 -- ====================================================================
 local screenGui = Instance.new("ScreenGui") 
 screenGui.Name = "DeltaGlassRoboticUI" 
@@ -172,8 +172,8 @@ screenGui.Parent = game.CoreGui
 _G.EndlessAuraStorage.CurrentGui = screenGui 
 
 local mainFrame = Instance.new("Frame") 
-mainFrame.Size = UDim2.new(0, 250, 0, 360) 
-mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180) 
+mainFrame.Size = UDim2.new(0, 250, 0, 330) -- Smaller compact size
+mainFrame.Position = UDim2.new(0.5, -125, 0.4, -165) -- Shifted higher up on screen
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
 mainFrame.BackgroundTransparency = 0.45 
 mainFrame.BorderSizePixel = 2 
@@ -185,7 +185,7 @@ mainFrame.Parent = screenGui
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 4)
 
 local nameBoxFrame = Instance.new("Frame")
-nameBoxFrame.Size = UDim2.new(1, -12, 0, 36) -- Increased header height for bigger text/image
+nameBoxFrame.Size = UDim2.new(1, -12, 0, 36) 
 nameBoxFrame.Position = UDim2.new(0, 6, 0, 6)
 nameBoxFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 5)
 nameBoxFrame.BackgroundTransparency = 0.3
@@ -193,7 +193,6 @@ nameBoxFrame.BorderSizePixel = 1
 nameBoxFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)
 nameBoxFrame.Parent = mainFrame
 
--- Custom Asset Branding Image Injector (MADE LARGER)
 local brandingImg = Instance.new("ImageLabel")
 brandingImg.Size = UDim2.new(0, 26, 0, 26)
 brandingImg.Position = UDim2.new(0, 6, 0, 5)
@@ -201,7 +200,6 @@ brandingImg.Image = "rbxassetid://129299711445020"
 brandingImg.BackgroundTransparency = 1
 brandingImg.Parent = nameBoxFrame
 
--- Main Title Text (MADE LARGER)
 local nameText = Instance.new("TextLabel")
 nameText.Size = UDim2.new(1, -95, 1, 0)
 nameText.Position = UDim2.new(0, 38, 0, 0)
@@ -213,7 +211,6 @@ nameText.TextXAlignment = Enum.TextXAlignment.Left
 nameText.BackgroundTransparency = 1
 nameText.Parent = nameBoxFrame
 
--- INVISIBLE BORDER SOUND TOGGLE BUTTON
 local soundToggleBtn = Instance.new("TextButton")
 soundToggleBtn.Size = UDim2.new(0, 24, 0, 24)
 soundToggleBtn.Position = UDim2.new(1, -52, 0, 6)
@@ -235,7 +232,6 @@ soundToggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- INVISIBLE BORDER ANIMATION LIVE TOGGLE BUTTON (👤)
 local animToggleBtn = Instance.new("TextButton")
 animToggleBtn.Size = UDim2.new(0, 24, 0, 24)
 animToggleBtn.Position = UDim2.new(1, -26, 0, 6)
@@ -249,7 +245,7 @@ animToggleBtn.Parent = nameBoxFrame
 animToggleBtn.MouseButton1Click:Connect(function()
     animMuted = not animMuted
     if animMuted then
-        animToggleBtn.Text = "❌" -- UI updates state to show disabled
+        animToggleBtn.Text = "❌" 
         if activeTrack then activeTrack:Stop() activeTrack = nil end
     else
         animToggleBtn.Text = "👤"
@@ -267,36 +263,9 @@ animToggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- PLAYER LEAVE DETECTION VIA OFFICIAL ROBLOX NOTIFICATION
-Players.PlayerRemoving:Connect(function(leftPlayer)
-    local targetIdx = table.find(selectedPlayers, leftPlayer)
-    if targetIdx then
-        table.remove(selectedPlayers, targetIdx)
-        
-        -- Play Official Roblox Bottom Right Notification
-        pcall(function()
-            starterGui:SetCore("SendNotification", {
-                Title = "Target Leave",
-                Text = leftPlayer.DisplayName .. " (@" .. leftPlayer.Name .. ") left the game.",
-                Duration = 5
-            })
-        end)
-        
-        -- Play Custom Trigger Sound
-        leaveSound:Play()
-        
-        -- Recalculate target loops safety
-        if #selectedPlayers == 0 and isAttached then
-            toggleButton:Click()
-        elseif isAttached then
-            lastTargetSwitchTime = 0 
-        end
-    end
-end)
-
 local toggleGuiBtn = Instance.new("TextButton")
-toggleGuiBtn.Size = UDim2.new(0, 70, 0, 30)
-toggleGuiBtn.Position = UDim2.new(0, 15, 1, -45) 
+toggleGuiBtn.Size = UDim2.new(0, 70, 0, 26)
+toggleGuiBtn.Position = UDim2.new(0, 15, 1, -40) 
 toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
 toggleGuiBtn.BackgroundTransparency = 0.3
 toggleGuiBtn.BorderSizePixel = 2
@@ -304,7 +273,7 @@ toggleGuiBtn.BorderColor3 = Color3.fromRGB(255, 0, 50)
 toggleGuiBtn.Text = "[ CLOSE ]"
 toggleGuiBtn.TextColor3 = Color3.fromRGB(255, 0, 50)
 toggleGuiBtn.Font = Enum.Font.Code
-toggleGuiBtn.TextSize = 12
+toggleGuiBtn.TextSize = 11
 toggleGuiBtn.Parent = screenGui
 Instance.new("UICorner", toggleGuiBtn).CornerRadius = UDim.new(0, 4)
 
@@ -336,8 +305,8 @@ end)
 
 -- SEARCH BOX
 local textBox = Instance.new("TextBox") 
-textBox.Size = UDim2.new(1, -16, 0, 26) 
-textBox.Position = UDim2.new(0, 8, 0, 50) 
+textBox.Size = UDim2.new(1, -16, 0, 24) 
+textBox.Position = UDim2.new(0, 8, 0, 48) 
 textBox.PlaceholderText = "> SEARCH MULTI TARGETS..." 
 textBox.Text = "" 
 textBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10) 
@@ -350,8 +319,8 @@ textBox.Parent = mainFrame
 
 -- SCROLL LIST
 local scrollingFrame = Instance.new("ScrollingFrame") 
-scrollingFrame.Size = UDim2.new(1, -16, 0, 65) 
-scrollingFrame.Position = UDim2.new(0, 8, 0, 82) 
+scrollingFrame.Size = UDim2.new(1, -16, 0, 55) 
+scrollingFrame.Position = UDim2.new(0, 8, 0, 76) 
 scrollingFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5) 
 scrollingFrame.BackgroundTransparency = 0.4
 scrollingFrame.ScrollBarThickness = 3 
@@ -362,8 +331,8 @@ uiList.Padding = UDim.new(0, 2)
 
 -- TARGET MODE BUTTON
 local modeBtn = Instance.new("TextButton")
-modeBtn.Size = UDim2.new(1, -16, 0, 24)
-modeBtn.Position = UDim2.new(0, 8, 0, 154)
+modeBtn.Size = UDim2.new(1, -16, 0, 22)
+modeBtn.Position = UDim2.new(0, 8, 0, 136)
 modeBtn.Text = "MODE // SYSTEM_NORMAL"
 modeBtn.BackgroundColor3 = Color3.fromRGB(15, 5, 5)
 modeBtn.BackgroundTransparency = 0.3
@@ -398,14 +367,14 @@ local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callbac
     label.Text = "SYS_" .. labelText .. ":: " .. tostring(defaultVal)
     label.TextColor3 = Color3.fromRGB(180, 180, 180)
     label.Font = Enum.Font.Code
-    label.TextSize = 10
+    label.TextSize = 9.5
     label.BackgroundTransparency = 1
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = mainFrame
 
     local track = Instance.new("TextButton") 
     track.Size = UDim2.new(1, -16, 0, 4)
-    track.Position = UDim2.new(0, 8, 0, minY + 15)
+    track.Position = UDim2.new(0, 8, 0, minY + 14)
     track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     track.Text = ""
     track.AutoButtonColor = false
@@ -451,19 +420,30 @@ local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callbac
     end)
 end
 
-createSlider(182, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
+createSlider(162, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
     speedMultiplier = v 
-    if activeTrack then
-        activeTrack:AdjustSpeed(v / 5)
-    end
+    if activeTrack then activeTrack:AdjustSpeed(v / 5) end
 end)
-createSlider(214, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
-createSlider(246, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
-createSlider(278, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
+createSlider(192, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
+createSlider(222, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
+createSlider(252, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
 
+-- UNSELECT ALL BUTTON [ CLEAR ]
+local clearBtn = Instance.new("TextButton")
+clearBtn.Size = UDim2.new(0, 65, 0, 26)
+clearBtn.Position = UDim2.new(0, 8, 1, -34)
+clearBtn.Text = "[ CLEAR ]"
+clearBtn.BackgroundColor3 = Color3.fromRGB(25, 5, 10)
+clearBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+clearBtn.BorderColor3 = Color3.fromRGB(200, 0, 50)
+clearBtn.Font = Enum.Font.Code
+clearBtn.TextSize = 11
+clearBtn.Parent = mainFrame
+
+-- ACTION BUTTON FUCK ON / OFF
 local toggleButton = Instance.new("TextButton") 
-toggleButton.Size = UDim2.new(1, -16, 0, 32) 
-toggleButton.Position = UDim2.new(0, 8, 1, -38) 
+toggleButton.Size = UDim2.new(1, -85, 0, 26) 
+toggleButton.Position = UDim2.new(0, 77, 1, -34) 
 toggleButton.Text = "[ FUCK ON ]" 
 toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
 toggleButton.BackgroundTransparency = 0.2
@@ -510,27 +490,63 @@ local function updateList()
         end 
     end 
 end 
+
+clearBtn.MouseButton1Click:Connect(function()
+    selectedPlayers = {}
+    textBox.Text = ""
+    updateList()
+    if isAttached then toggleButton:Click() end
+end)
+
 textBox:GetPropertyChangedSignal("Text"):Connect(function()
-    if not string.find(textBox.Text, "Targets Selected:") then
-        updateList()
-    end
+    if not string.find(textBox.Text, "Targets Selected:") then updateList() end
 end) 
 updateList() 
 
 -- ====================================================================
--- // 99999999x MAX FORCE SERVER-SIDE ZERO DELAY PHYSICS ENGINE // --
+-- // ANTI-GAP TARGET LEAVE TRACKER MATRIX SYSTEM // --
+-- ====================================================================
+Players.PlayerRemoving:Connect(function(leftPlayer)
+    local targetIdx = table.find(selectedPlayers, leftPlayer)
+    if targetIdx then
+        table.remove(selectedPlayers, targetIdx)
+        
+        -- Instant Reset logic to completely eliminate empty gaps during execution
+        lastTargetSwitchTime = 0 
+        currentTargetIndex = 1
+        
+        pcall(function()
+            starterGui:SetCore("SendNotification", {
+                Title = "Target Leave",
+                Text = leftPlayer.DisplayName .. " left.",
+                Duration = 4
+            })
+        end)
+        
+        leaveSound:Play()
+        
+        if #selectedPlayers == 0 and isAttached then
+            isAttached = false
+            if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end
+            if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end
+            if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
+            if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
+            if activeTrack then activeTrack:Stop() activeTrack = nil end
+            stopAllSounds()
+            toggleButton.Text = "[ FUCK ON ]"
+            toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30)
+        end
+    end
+end)
+
+-- ====================================================================
+-- // MAXIMUM SERVER-SIDE FORCE ATTACHMENT PHYSICS MATRIX // --
 -- ====================================================================
 toggleButton.MouseButton1Click:Connect(function() 
     if isAttached then 
         isAttached = false 
-        if _G.EndlessAuraStorage.ActiveConnection then 
-            _G.EndlessAuraStorage.ActiveConnection:Disconnect() 
-            _G.EndlessAuraStorage.ActiveConnection = nil 
-        end 
-        if _G.EndlessAuraStorage.PlatformPart then 
-            _G.EndlessAuraStorage.PlatformPart:Destroy() 
-            _G.EndlessAuraStorage.PlatformPart = nil 
-        end 
+        if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end 
+        if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end 
         if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
         if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
         
@@ -545,9 +561,7 @@ toggleButton.MouseButton1Click:Connect(function()
             local torso = char:FindFirstChild("Torso") or char:FindFirstChild("LowerTorso")
             local rootJoint = torso and (torso:FindFirstChild("RootJoint") or char.HumanoidRootPart:FindFirstChild("RootJoint"))
             if rootJoint then rootJoint.C0 = CFrame.new() end
-            if char:FindFirstChild("Humanoid") then 
-                char.Humanoid.PlatformStand = false 
-            end
+            if char:FindFirstChild("Humanoid") then char.Humanoid.PlatformStand = false end
         end)
     elseif #selectedPlayers > 0 then 
         isAttached = true 
@@ -564,7 +578,6 @@ toggleButton.MouseButton1Click:Connect(function()
         local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
         if not myHRP then return end
 
-        -- Only plays animation if user hasn't explicitly disabled it via 👤 button
         if not animMuted then
             local hum = getHumanoid()
             if hum then
@@ -577,15 +590,17 @@ toggleButton.MouseButton1Click:Connect(function()
             end
         end
 
+        -- MAXIMUM FORCE MATRICES INJECTED ($10^15 OVERPOWERED PEAK FORCES)
         local bv = Instance.new("BodyVelocity")
-        bv.MaxForce = Vector3.new(99999999, 99999999, 99999999)
+        bv.MaxForce = Vector3.new(1e15, 1e15, 1e15)
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.Parent = myHRP
         _G.EndlessAuraStorage.BV = bv
 
         local bg = Instance.new("BodyGyro")
-        bg.MaxTorque = Vector3.new(99999999, 99999999, 99999999)
-        bg.P = 500000
+        bg.MaxTorque = Vector3.new(1e15, 1e15, 1e15)
+        bg.P = 1e8
+        bg.D = 100
         bg.CFrame = myHRP.CFrame
         bg.Parent = myHRP
         _G.EndlessAuraStorage.BG = bg
@@ -601,12 +616,11 @@ toggleButton.MouseButton1Click:Connect(function()
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            if tick() - lastTargetSwitchTime >= 1.0 then
+            -- Seamless Next Shifter
+            if tick() - lastTargetSwitchTime >= 1.0 or not selectedPlayer then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
-                if currentTargetIndex > #selectedPlayers then
-                    currentTargetIndex = 1
-                end
+                if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end
                 selectedPlayer = selectedPlayers[currentTargetIndex]
             end
 
@@ -660,9 +674,10 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
+            -- GLUED MATRIX POSITIONING Sync Engine
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
-            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 120 
+            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300 -- Massive instantaneous speed lock multiplier
             
             if platform and platform.Parent then
                 platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
