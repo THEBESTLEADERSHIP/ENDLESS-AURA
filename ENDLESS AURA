@@ -9,7 +9,7 @@ local TextChatService = game:GetService("TextChatService")
 local player = Players.LocalPlayer
 
 -- // CONFIG //
-local MASTER_ACC = "Nameless82872262"
+local MASTER_ACC = "Nameless82872262" --
 local CORRECT_KEY = "WHAT IS AURA"
 local CLICK_SOUND = "107406973902030" 
 local LOGO_IMAGE = "rbxassetid://129299711445020"
@@ -25,7 +25,7 @@ if CoreGui:FindFirstChild("EndlessAura_Final") then
 end
 
 local sg = Instance.new("ScreenGui", CoreGui); sg.Name = "EndlessAura_Final"
-local DarkRed = Color3.fromRGB(150, 0, 0) -- Naya Dark Red Colour jo Logo se Match karega
+local DarkRed = Color3.fromRGB(150, 0, 0) -- Premium Dark Red Colour (Logo Match)
 local Black, White, Green = Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)
 
 -- // FUNCTIONS //
@@ -109,7 +109,6 @@ local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0
 -- MAIN MENU
 -- ==========================================
 local function Initialize()
-    KF:Destroy()
     local entry = player.Name .. " (" .. player.UserId .. ")"
     local alreadyLogged = false
     for _, v in pairs(_G.AdminLogs) do if v == entry then alreadyLogged = true break end end
@@ -134,7 +133,7 @@ local function Initialize()
     local TopLine = Instance.new("Frame", Main); TopLine.Size = UDim2.new(1, -20, 0, 2); TopLine.Position = UDim2.new(0, 10, 0, 38)
     TopLine.BackgroundColor3 = DarkRed; TopLine.BorderSizePixel = 0
     
-    -- Layout Positions Adjusted according to top line spacing
+    -- Layout Positions
     local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 95, 1, -50); Side.Position = UDim2.new(0, 10, 0, 45); Side.BackgroundTransparency = 1; Instance.new("UIListLayout", Side).Padding = UDim.new(0, 4)
     local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 115, 0, 45); Cont.BackgroundTransparency = 1
     
@@ -176,7 +175,7 @@ local function Initialize()
         end)
     end
     
-    -- TAB 1: INFO
+    -- TAB 1: INFO (Centered Logo & Elements)
     local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE
 
     local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top"
@@ -220,11 +219,11 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("🎵 Music Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/U0NdycvQ"))() end, true)
     btn("📢 Ward Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
     btn("💀 @ Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
-    btn("🤪 OG spammer" , T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/u2RLRqat"))() end, true)   
+    btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true) -- Replaced & Renamed  
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
 
     -- TAB 5: OTHER 
-    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/bTa4jQeJ"))() end, true)
+    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true) -- Replaced Link
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
     btn("⚡ Speed 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
     btn("🆙 Fly Jump", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end)
@@ -286,17 +285,19 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
 end
 
--- Verify Logic
+-- Smooth Verification Logic (Anti-Lag Fix)
 Verify.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then 
         playS(CLICK_SOUND) 
         playKeySuccess()
         
-        pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG"))()
+        -- Task spawn handle karega background execution bina UI ko freeze kiye
+        task.spawn(function()
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG"))()
+            end)
+            Initialize() 
         end)
-        
-        Initialize() 
     else 
         playS(CLICK_SOUND) 
         KeyBox.Text = ""
