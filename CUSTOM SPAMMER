@@ -1,0 +1,296 @@
+-- [[ CUSTOM GALACTIC SPAMMΞR 195 LIMIT - SCRIPTED BY NAMELESS ]] --
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CustomSpammerGui"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
+
+-- Global Balanced Audio Setup
+local function playTapSound()
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://107406973902030"
+    sound.Volume = 2.5 -- Balanced Volume
+    sound.PlaybackSpeed = 1
+    sound.Parent = SoundService
+    sound:Play()
+    game:GetService("Debris"):AddItem(sound, 2)
+end
+
+-- 40 Premium Alphabet-Based Galactic/Cosmic Theme Words with Emojis
+local SpamWords = {
+    "🌌 GALAXY", "☄️ METEOR", "🌟 NOVA", "🛸 ORBIT", "🪐 COSMOS", 
+    "🔮 VOID", "🚀 APEX", "☄️ COMET", "🌑 ECLIPSE", "🎆 NEBULA", 
+    "🛰️ ROCKET", "📡 PROBE", "⚡ QUARK", "🌌 MATRIX", "🌀 VORTEX", 
+    "☀️ SOLAR", "🔭 TITAN", "👑 RULER", "🦾 CYBORG", "💥 IMPACT", 
+    "🛡️ SHIELD", "🎯 RADAR", "🌪️ GRAVITY", "⚔️ LASER", "🧪 PHRASE", 
+    "💎 STELLAR", "🎭 PHANTOM", "🤫 SILENCE", "🧠 MIND", "💥 PULSAR", 
+    "🔥 FLAME", "🥶 ZERO", "💀 DOOM", "🤖 ROBO", "⚡ SHOCK", 
+    "🦁 ORION", "🦅 CHASER", "🏹 FLIGHT", "🏹 SNIPER", "🏁 WARP"
+}
+
+-- Custom Clean Space Patterns List for Random Rotation
+local CustomPatterns = {
+    "__",
+    "~~",
+    "``"
+}
+
+----------------------------------------------------------------
+-- 1. DRAGGABLE "CM" TOGGLE BUTTON (PERFECT ROUND, PATLA DARK / TRANSPARENT)
+----------------------------------------------------------------
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "MenuToggle"
+ToggleBtn.Parent = ScreenGui
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Position = UDim2.new(0, 20, 0, 150)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ToggleBtn.BackgroundTransparency = 0.55 -- Patla, clean transparent black look
+ToggleBtn.Text = "CM"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 0, 0) -- Pure Red Text
+ToggleBtn.TextSize = 18
+ToggleBtn.Font = Enum.Font.SourceSansBold
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1, 0) -- Perfect Circle (Gol)
+ToggleCorner.Parent = ToggleBtn
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(255, 0, 0) -- Red Glow Border
+ToggleStroke.Thickness = 2
+ToggleStroke.Parent = ToggleBtn
+
+-- Smooth Dragging Logic for CM Button (Mobile & PC Friendly)
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    ToggleBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+ToggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = ToggleBtn.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+----------------------------------------------------------------
+-- 2. STUCK MAIN MENU (LOCKED & PERFECTLY CENTERED)
+----------------------------------------------------------------
+local MainMenu = Instance.new("Frame")
+MainMenu.Name = "MainMenu"
+MainMenu.Parent = ScreenGui
+MainMenu.Size = UDim2.new(0, 280, 0, 260) -- Compact Frame Layout
+MainMenu.Position = UDim2.new(0.5, -140, 0.5, -130) -- Center Alignment
+MainMenu.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainMenu.BackgroundTransparency = 0.35
+MainMenu.Visible = false
+MainMenu.Active = true
+MainMenu.Draggable = false -- Locked position inside center screen
+
+local MenuCorner = Instance.new("UICorner")
+MenuCorner.CornerRadius = UDim.new(0, 18)
+MenuCorner.Parent = MainMenu
+
+local MenuStroke = Instance.new("UIStroke")
+MenuStroke.Color = Color3.fromRGB(255, 0, 0)
+MenuStroke.Thickness = 2
+MenuStroke.Parent = MainMenu
+
+----------------------------------------------------------------
+-- 3. HEADER ELEMENTS & RGB BLINK
+----------------------------------------------------------------
+local Title = Instance.new("TextLabel")
+Title.Parent = MainMenu
+Title.Size = UDim2.new(1, 0, 0, 20)
+Title.Position = UDim2.new(0, 0, 0, 8)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "CUSTOME SPAMMER 💀"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
+Title.TextSize = 15
+
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Parent = MainMenu
+Subtitle.Size = UDim2.new(1, 0, 0, 12)
+Subtitle.Position = UDim2.new(0, 0, 0, 26)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Font = Enum.Font.SourceSansItalic
+Subtitle.Text = "SCRIPTED BY NAMELESS"
+Subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+Subtitle.TextSize = 11
+
+local HeaderLine = Instance.new("Frame")
+HeaderLine.Parent = MainMenu
+HeaderLine.Size = UDim2.new(0.9, 0, 0, 1)
+HeaderLine.Position = UDim2.new(0.05, 0, 0, 42)
+HeaderLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+HeaderLine.BorderSizePixel = 0
+
+local InstaLabel = Instance.new("TextLabel")
+InstaLabel.Parent = MainMenu
+InstaLabel.Size = UDim2.new(1, 0, 0, 15)
+InstaLabel.Position = UDim2.new(0, 0, 0, 46)
+InstaLabel.BackgroundTransparency = 1
+InstaLabel.Font = Enum.Font.SourceSansBold
+InstaLabel.Text = "insta > ea_nameless"
+InstaLabel.TextSize = 12
+
+task.spawn(function()
+    while true do
+        InstaLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+        task.wait(0.4)
+        InstaLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        task.wait(0.4)
+    end
+end)
+
+----------------------------------------------------------------
+-- 4. INPUT FIELDS
+----------------------------------------------------------------
+local SenderBox = Instance.new("TextBox")
+SenderBox.Parent = MainMenu
+SenderBox.Size = UDim2.new(0, 120, 0, 30)
+SenderBox.Position = UDim2.new(0.06, 0, 0, 75)
+SenderBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+SenderBox.PlaceholderText = "[YOUR NAME]"
+SenderBox.Text = ""
+SenderBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+SenderBox.TextSize = 12
+Instance.new("UICorner", SenderBox).CornerRadius = UDim.new(0, 6)
+
+local TargetBox = Instance.new("TextBox")
+TargetBox.Parent = MainMenu
+TargetBox.Size = UDim2.new(0, 120, 0, 30)
+TargetBox.Position = UDim2.new(0.51, 0, 0, 75)
+TargetBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TargetBox.PlaceholderText = "[TARGET NAME]"
+TargetBox.Text = ""
+TargetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TargetBox.TextSize = 12
+Instance.new("UICorner", TargetBox).CornerRadius = UDim.new(0, 6)
+
+local DelayBox = Instance.new("TextBox")
+DelayBox.Parent = MainMenu
+DelayBox.Size = UDim2.new(0, 130, 0, 30)
+DelayBox.Position = UDim2.new(0.27, 0, 0, 120)
+DelayBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+DelayBox.PlaceholderText = "[SPEED DELAY]"
+DelayBox.Text = "0.5"
+DelayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+DelayBox.TextSize = 12
+Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 6)
+
+----------------------------------------------------------------
+-- 5. CHAT BUILDING LOGIC (STRICT 195 CHARACTER CLAMP)
+----------------------------------------------------------------
+local StartBtn = Instance.new("TextButton")
+StartBtn.Parent = MainMenu
+StartBtn.Size = UDim2.new(0, 160, 0, 35)
+StartBtn.Position = UDim2.new(0.22, 0, 0, 175)
+StartBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+StartBtn.Text = "ON / OFF"
+StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+StartBtn.TextSize = 14
+StartBtn.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", StartBtn).CornerRadius = UDim.new(0, 10)
+
+local isSpamming = false
+
+local function executeChat(msg)
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        local targetChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if targetChannel then targetChannel:SendAsync(msg) end
+    else
+        local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        if chatEvent then chatEvent:FireServer(msg, "All") end
+    end
+end
+
+local function generatePatternString(patternUnit, maxLen)
+    local result = ""
+    local unitLen = string.len(patternUnit)
+    if unitLen == 0 then return "" end
+    
+    while (string.len(result) + unitLen) <= maxLen do
+        result = result .. patternUnit
+    end
+    return result
+end
+
+local function buildSpamString(sender, target, rawWord, patternUnit)
+    local prefix = "SCRIPT BY " .. sender .. " > "
+    local suffix = " [ " .. target .. " ] TMX MI " .. rawWord
+    
+    local staticLength = string.len(prefix) + string.len(suffix)
+    local maxAllowedPatternLength = 195 - staticLength
+    
+    if maxAllowedPatternLength < 0 then
+        local rawFallback = prefix .. suffix
+        return string.sub(rawFallback, 1, 195)
+    end
+    
+    local dynamicPattern = generatePatternString(patternUnit, maxAllowedPatternLength)
+    local finalPayload = prefix .. dynamicPattern .. suffix
+    return string.sub(finalPayload, 1, 195)
+end
+
+StartBtn.MouseButton1Click:Connect(function()
+    playTapSound()
+    if isSpamming then
+        isSpamming = false
+        StartBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    else
+        isSpamming = true
+        StartBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+        
+        task.spawn(function()
+            while isSpamming do
+                local senderName = SenderBox.Text ~= "" and SenderBox.Text or "ME"
+                local targetName = TargetBox.Text ~= "" and TargetBox.Text or "NOOB"
+                local speed = tonumber(DelayBox.Text) or 0.5
+                
+                local selectedWord = SpamWords[math.random(1, #SpamWords)]
+                local selectedPattern = CustomPatterns[math.random(1, #CustomPatterns)]
+                
+                local processedPayload = buildSpamString(senderName, targetName, selectedWord, selectedPattern)
+                executeChat(processedPayload)
+                
+                task.wait(speed)
+            end
+        end)
+    end
+end)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    playTapSound()
+    MainMenu.Visible = not MainMenu.Visible
+end)
+
