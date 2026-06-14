@@ -189,7 +189,7 @@ animLabel.MouseButton1Click:Connect(function()
 end)
 
 -- ===== NEW SPAM BUTTON SYSTEM =====
-local spamText = "SCRIPTER ]> NAMELESS 💢 \\\\ THEFAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢//SAB BACHE HO💢..."
+local spamText = "SCRIPTER ]> NAMELESS💢\\THEFAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢..."
 
 local function sendChatMessage(message)
     -- Naye TextChatService aur purane SayMessageRequest dono ko support karta hai safe execution ke liye
