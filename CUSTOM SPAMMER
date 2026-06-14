@@ -28,7 +28,7 @@ end
 -- 40 Premium Alphabet-Based Galactic/Cosmic Theme Words with Emojis
 local SpamWords = {
     "🌌 GALAXY", "☄️ METEOR", "🌟 NOVA", "🛸 ORBIT", "🪐 COSMOS", 
-    "🔮 VOID", "🚀 APEX", "☄️ COMET", "🌑 ECLIPSE", "🎆 NEBULA", 
+    "🔮 VOID", "🚀 APEX", "☄️ COMET", "SCRIPT BY NAMELESS💢", "🎆 NEBULA", 
     "🛰️ ROCKET", "📡 PROBE", "⚡ QUARK", "🌌 MATRIX", "🌀 VORTEX", 
     "☀️ SOLAR", "🔭 TITAN", "👑 RULER", "🦾 CYBORG", "💥 IMPACT", 
     "🛡️ SHIELD", "🎯 RADAR", "🌪️ GRAVITY", "⚔️ LASER", "🧪 PHRASE", 
