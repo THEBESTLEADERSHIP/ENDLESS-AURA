@@ -9,7 +9,7 @@ local TextChatService = game:GetService("TextChatService")
 local player = Players.LocalPlayer
 
 -- // CONFIG //
-local MASTER_ACC = "Nameless82872262" --
+local MASTER_ACC = "Nameless82872262"
 local CORRECT_KEY = "WHAT IS AURA"
 local CLICK_SOUND = "107406973902030" 
 local LOGO_IMAGE = "rbxassetid://129299711445020"
@@ -25,7 +25,7 @@ if CoreGui:FindFirstChild("EndlessAura_Final") then
 end
 
 local sg = Instance.new("ScreenGui", CoreGui); sg.Name = "EndlessAura_Final"
-local DarkRed = Color3.fromRGB(150, 0, 0) -- Premium Dark Red Colour (Logo Match)
+local DarkRed = Color3.fromRGB(150, 0, 0)
 local Black, White, Green = Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)
 
 -- // FUNCTIONS //
@@ -122,18 +122,14 @@ local function Initialize()
     local Main = Instance.new("Frame", sg); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Black; Main.BackgroundTransparency = 0.4; makeDraggable(Main)
     Instance.new("UICorner", Main); local MS = Instance.new("UIStroke", Main); MS.Thickness = 2; MS.Color = DarkRed
     
-    -- Main Menu Header Logo
     local MainLogo = Instance.new("ImageLabel", Main); MainLogo.Size = UDim2.new(0, 28, 0, 28); MainLogo.Position = UDim2.new(0, 10, 0, 6); MainLogo.BackgroundTransparency = 1; MainLogo.Image = LOGO_IMAGE
     
-    -- Logo ke Right Side Me Stylized Text 'Eɴᴅʟᴇss Aᴜʀᴀ'
     local LogoText = Instance.new("TextLabel", Main); LogoText.Size = UDim2.new(0, 200, 0, 28); LogoText.Position = UDim2.new(0, 43, 0, 5); LogoText.BackgroundTransparency = 1
     LogoText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ"; LogoText.TextColor3 = DarkRed; LogoText.TextSize = 20; LogoText.Font = Enum.Font.GothamBlack; LogoText.TextXAlignment = Enum.TextXAlignment.Left
     
-    -- [ DRAWN LINE ] - Tabs aur Content Area ke Uper Horizontal Divider Line
     local TopLine = Instance.new("Frame", Main); TopLine.Size = UDim2.new(1, -20, 0, 2); TopLine.Position = UDim2.new(0, 10, 0, 38)
     TopLine.BackgroundColor3 = DarkRed; TopLine.BorderSizePixel = 0
     
-    -- Layout Positions
     local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 95, 1, -50); Side.Position = UDim2.new(0, 10, 0, 45); Side.BackgroundTransparency = 1; Instance.new("UIListLayout", Side).Padding = UDim.new(0, 4)
     local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 115, 0, 45); Cont.BackgroundTransparency = 1
     
@@ -145,7 +141,6 @@ local function Initialize()
     local T1, T2, T3, T4, T5, T_Phonk, T_Adm = pg(), pg(), pg(), pg(), pg(), pg(), pg()
     T1.UIGridLayout:Destroy()
     
-    -- Rainbow Glow Logic
     local rainbowActive = false
     task.spawn(function()
         while task.wait() do if rainbowActive then local hue = tick() % 5 / 5 MS.Color = Color3.fromHSV(hue, 1, 1) end end
@@ -175,7 +170,7 @@ local function Initialize()
         end)
     end
     
-    -- TAB 1: INFO (Centered Logo & Elements)
+    -- TAB 1: INFO
     local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE
 
     local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top"
@@ -199,7 +194,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("🚀 Goto", T2, function() local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame end end, true)
     btn("🍆 Bang", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,1.1 + math.sin(tick()*30)*0.7) end task.wait() end end)
     btn("🍑 Front Bang", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-1.1 - math.sin(tick()*30)*0.7) * CFrame.Angles(0,math.pi,0) end task.wait() end end)
-    btn("🧒 Headsit", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.Head.CFrame * CFrame.new(0,0.5,0); player.Character.Humanoid.Sit = true end task.wait() end end)
+    btn("🧒 Headsit", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.Head.CFrame * CFrame.new(0,0.5,0); player.Character.Humanoid.Sit = true end task.wait() end end)
     btn("🦒 Front Headsit", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.Head.CFrame * CFrame.new(0,0.5,-0.6) * CFrame.Angles(0,math.pi,0); player.Character.Humanoid.Sit = true end task.wait() end end)
     btn("⬇️ Down", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0,-1.5,0) end task.wait() end end)
     btn("👅 Suck", T2, function(b) _G.Loop = b:GetAttribute("T") while _G.Loop do local t = getT() if t then player.Character.HumanoidRootPart.CFrame = t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.2, -0.8) * CFrame.Angles(math.rad(90), 0, 0) end task.wait() end end)
@@ -219,11 +214,11 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("🎵 Music Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/U0NdycvQ"))() end, true)
     btn("📢 Ward Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
     btn("💀 @ Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
-    btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true) -- Replaced & Renamed  
+    btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true) -- Replaced OG Spammer
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
 
     -- TAB 5: OTHER 
-    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true) -- Replaced Link
+    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true) -- Replaced link
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
     btn("⚡ Speed 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
     btn("🆙 Fly Jump", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end)
@@ -285,13 +280,18 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
 end
 
--- Smooth Verification Logic (Anti-Lag Fix)
+-- ==========================================
+-- OPTIMIZED SMOOTH VERIFY LOGIC
+-- ==========================================
 Verify.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then 
         playS(CLICK_SOUND) 
         playKeySuccess()
         
-        -- Task spawn handle karega background execution bina UI ko freeze kiye
+        -- Lag Hatane Ke Liye Key System Frame Ko Instant Destroy Karo
+        if KF then KF:Destroy() end
+        
+        -- Background Thread Me Scripts Aur Menu Load Hoga Bina Atke
         task.spawn(function()
             pcall(function()
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG"))()
