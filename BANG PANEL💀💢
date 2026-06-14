@@ -24,7 +24,6 @@ sound3.SoundId = "rbxassetid://136178701391977"
 sound3.Volume = 2
 sound3.Looped = true
 
--- Leave Notification Sound
 local leaveSound = Instance.new("Sound")
 leaveSound.SoundId = "rbxassetid://96880277560628" 
 leaveSound.Volume = 2
@@ -163,7 +162,7 @@ task.spawn(function()
 end)
 
 -- ====================================================================
--- // RESTORED ORIGINAL SIZE BRANDED PANEL GUI // --
+-- // RESTORED ORIGINAL SIZE & COMFORT POSITIONING PANEL GUI // --
 -- ====================================================================
 local screenGui = Instance.new("ScreenGui") 
 screenGui.Name = "DeltaGlassRoboticUI" 
@@ -172,8 +171,8 @@ screenGui.Parent = game.CoreGui
 _G.EndlessAuraStorage.CurrentGui = screenGui 
 
 local mainFrame = Instance.new("Frame") 
-mainFrame.Size = UDim2.new(0, 250, 0, 360) -- Restored original size
-mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180) -- Restored central alignment 
+mainFrame.Size = UDim2.new(0, 250, 0, 360) -- Restored to original spacious design
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180) -- Restored to stable default center 
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
 mainFrame.BackgroundTransparency = 0.45 
 mainFrame.BorderSizePixel = 2 
@@ -306,7 +305,7 @@ end)
 -- SEARCH BOX
 local textBox = Instance.new("TextBox") 
 textBox.Size = UDim2.new(1, -16, 0, 26) 
-textBox.Position = UDim2.new(0, 8, 0, 48) 
+textBox.Position = UDim2.new(0, 8, 0, 50) 
 textBox.PlaceholderText = "> SEARCH MULTI TARGETS..." 
 textBox.Text = "" 
 textBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10) 
@@ -319,8 +318,8 @@ textBox.Parent = mainFrame
 
 -- SCROLL LIST
 local scrollingFrame = Instance.new("ScrollingFrame") 
-scrollingFrame.Size = UDim2.new(1, -16, 0, 60) 
-scrollingFrame.Position = UDim2.new(0, 8, 0, 78) 
+scrollingFrame.Size = UDim2.new(1, -16, 0, 65) 
+scrollingFrame.Position = UDim2.new(0, 8, 0, 82) 
 scrollingFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5) 
 scrollingFrame.BackgroundTransparency = 0.4
 scrollingFrame.ScrollBarThickness = 3 
@@ -329,22 +328,22 @@ scrollingFrame.Parent = mainFrame
 local uiList = Instance.new("UIListLayout", scrollingFrame)
 uiList.Padding = UDim.new(0, 2)
 
--- CLEAR / UNSELECT ALL BUTTON (PLACED DIRECTLY ABOVE MODE BUTTON)
+-- CLEAR BUTTON (PLACED EXACTLY ABOVE MODE SELECTION BUTTON)
 local clearBtn = Instance.new("TextButton")
 clearBtn.Size = UDim2.new(1, -16, 0, 22)
-clearBtn.Position = UDim2.new(0, 8, 0, 144) -- Positioned perfectly above mode button
-clearBtn.Text = "[ CLEAR UNSELECT ALL targets ]"
-clearBtn.BackgroundColor3 = Color3.fromRGB(30, 5, 10)
-clearBtn.TextColor3 = Color3.fromRGB(255, 60, 60)
-clearBtn.BorderColor3 = Color3.fromRGB(220, 0, 50)
+clearBtn.Position = UDim2.new(0, 8, 0, 154) -- Positioned stacked above Mode button
+clearBtn.Text = "[ CLEAR UNSELECT ALL TARGETS ]"
+clearBtn.BackgroundColor3 = Color3.fromRGB(25, 5, 10)
+clearBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+clearBtn.BorderColor3 = Color3.fromRGB(200, 0, 50)
 clearBtn.Font = Enum.Font.Code
-clearBtn.TextSize = 11
+clearBtn.TextSize = 10.5
 clearBtn.Parent = mainFrame
 
--- TARGET MODE BUTTON
+-- TARGET MODE BUTTON (SHIFTED SLIGHTLY DOWN FOR STACK LAYOUT)
 local modeBtn = Instance.new("TextButton")
 modeBtn.Size = UDim2.new(1, -16, 0, 24)
-modeBtn.Position = UDim2.new(0, 8, 0, 172) -- Shifted down slightly to fit clear button cleanly
+modeBtn.Position = UDim2.new(0, 8, 0, 182)
 modeBtn.Text = "MODE // SYSTEM_NORMAL"
 modeBtn.BackgroundColor3 = Color3.fromRGB(15, 5, 5)
 modeBtn.BackgroundTransparency = 0.3
@@ -371,7 +370,7 @@ modeBtn.MouseButton1Click:Connect(function()
     if isAttached then lastSoundTime = 0 end 
 end)
 
--- SLIDER GENERATOR (ADJUSTED Y CONFIG FOR ORIGINAL SPACING)
+-- SLIDER GENERATOR
 local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callback)
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -16, 0, 14)
@@ -379,14 +378,14 @@ local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callbac
     label.Text = "SYS_" .. labelText .. ":: " .. tostring(defaultVal)
     label.TextColor3 = Color3.fromRGB(180, 180, 180)
     label.Font = Enum.Font.Code
-    label.TextSize = 10
+    label.TextSize = 9.5
     label.BackgroundTransparency = 1
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = mainFrame
 
     local track = Instance.new("TextButton") 
     track.Size = UDim2.new(1, -16, 0, 4)
-    track.Position = UDim2.new(0, 8, 0, minY + 15)
+    track.Position = UDim2.new(0, 8, 0, minY + 14)
     track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     track.Text = ""
     track.AutoButtonColor = false
@@ -432,18 +431,17 @@ local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callbac
     end)
 end
 
-createSlider(202, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
+createSlider(212, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
     speedMultiplier = v 
     if activeTrack then activeTrack:AdjustSpeed(v / 5) end
 end)
-createSlider(232, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
-createSlider(262, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
-createSlider(292, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
+createSlider(242, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
+createSlider(272, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
+createSlider(302, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
 
--- ACTION BUTTON FUCK ON / OFF
 local toggleButton = Instance.new("TextButton") 
 toggleButton.Size = UDim2.new(1, -16, 0, 26) 
-toggleButton.Position = UDim2.new(0, 8, 1, -34) 
+toggleButton.Position = UDim2.new(0, 8, 1, -32) 
 toggleButton.Text = "[ FUCK ON ]" 
 toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
 toggleButton.BackgroundTransparency = 0.2
@@ -504,16 +502,21 @@ end)
 updateList() 
 
 -- ====================================================================
--- // ANTI-GAP TARGET LEAVE TRACKER MATRIX SYSTEM // --
+-- // 0.0s ZERO DELAY TARGET LEAVE MATRIX TRACKER // --
 -- ====================================================================
+local function emergencyTargetShift()
+    lastTargetSwitchTime = 0 
+    currentTargetIndex = 1
+    if #selectedPlayers > 0 then
+        selectedPlayer = selectedPlayers[1]
+    end
+end
+
 Players.PlayerRemoving:Connect(function(leftPlayer)
     local targetIdx = table.find(selectedPlayers, leftPlayer)
     if targetIdx then
         table.remove(selectedPlayers, targetIdx)
-        
-        -- TRUE 0.0 SECOND GAPLESS RESET
-        lastTargetSwitchTime = 0 
-        currentTargetIndex = 1
+        emergencyTargetShift() -- Zero-delay evaluation trigger
         
         pcall(function()
             starterGui:SetCore("SendNotification", {
@@ -521,7 +524,7 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
                 Text = leftPlayer.DisplayName .. " left.",
                 Duration = 4
             })
-        end)
+end)
         
         leaveSound:Play()
         
@@ -540,7 +543,7 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
 end)
 
 -- ====================================================================
--- // MAXIMUM SERVER-SIDE FORCE ATTACHMENT PHYSICS MATRIX // --
+-- // ULTRA ZERO DELAY PERFORMANCE PHYSICS ATTACH MATRIX // --
 -- ====================================================================
 toggleButton.MouseButton1Click:Connect(function() 
     if isAttached then 
@@ -590,7 +593,6 @@ toggleButton.MouseButton1Click:Connect(function()
             end
         end
 
-        -- MAXIMUM FORCE MATRICES INJECTED ($10^15 OVERPOWERED PEAK FORCES FOR TOTAL GLUE EFFECT)
         local bv = Instance.new("BodyVelocity")
         bv.MaxForce = Vector3.new(1e15, 1e15, 1e15)
         bv.Velocity = Vector3.new(0, 0, 0)
@@ -616,8 +618,9 @@ toggleButton.MouseButton1Click:Connect(function()
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            -- TRUE 0.0 SECOND ABSOLUTE SPEED SHIFTER ENGINE (ELIMINATED STUCK PROBLEMS)
-            if not selectedPlayer or not selectedPlayer.Character or not selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            -- INSTANT 0.1s SWITCHING SPEED FOR MULTI-TARGETS
+            if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
+                lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
                 if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end
                 selectedPlayer = selectedPlayers[currentTargetIndex]
@@ -673,10 +676,10 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- INSTANT GLUED CONNECTION POSITION MATRIX (ZERO DELAY LATENCY LOCK)
+            -- GLUED TO TARGET MATRIX ENGINE
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
-            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 400 
+            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300 
             
             if platform and platform.Parent then
                 platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
@@ -700,3 +703,4 @@ toggleButton.MouseButton1Click:Connect(function()
         end) 
     end 
 end)
+     
