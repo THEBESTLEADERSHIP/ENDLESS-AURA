@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 -- ANIMATION & AUDIO CONFIGURATION
 local bangAnimId = "rbxassetid://5918726674"
 local activeTrack = nil
+local soundMuted = false -- Sound Toggle State Control
 
 -- SOUND SYSTEM INITIALIZATION
 local sound1 = Instance.new("Sound")
@@ -13,7 +14,7 @@ sound1.SoundId = "rbxassetid://95656642853883"
 sound1.Volume = 2
 
 local sound2 = Instance.new("Sound")
-sound2.SoundId = "rbxassetid://129697356456437"
+sound2.SoundId = "rbxassetid://95656642853883"
 sound2.Volume = 2
 
 local sound3 = Instance.new("Sound")
@@ -22,7 +23,7 @@ sound3.Volume = 2
 sound3.Looped = true
 
 local lastSoundTime = 0
-local soundGap = 7 -- 7 Second Gap
+local soundGap = 7 
 
 local function stopAllSounds()
     sound1:Stop()
@@ -31,6 +32,11 @@ local function stopAllSounds()
 end
 
 local function handleAudioForMode(currentMode)
+    if soundMuted then 
+        stopAllSounds()
+        return 
+    end
+    
     if tick() - lastSoundTime >= soundGap then
         if currentMode == "Normal" then
             if sound2.IsPlaying then sound2:Stop() end
@@ -125,7 +131,6 @@ local selectedPlayer = nil
 local currentAutoSubMode = "Normal"
 local lastSwitchTime = 0
 
--- Parent Sounds to CoreGui or Workspace Safely
 pcall(function()
     sound1.Parent = game.CoreGui
     sound2.Parent = game.CoreGui
@@ -149,7 +154,7 @@ task.spawn(function()
 end)
 
 -- ====================================================================
--- // MULTI-AURA AUDIO CONTROLLED PANEL GUI // --
+-- // BRANDED UPGRADED AUDIO CONTROLLED PANEL GUI // --
 -- ====================================================================
 local screenGui = Instance.new("ScreenGui") 
 screenGui.Name = "DeltaGlassRoboticUI" 
@@ -158,8 +163,8 @@ screenGui.Parent = game.CoreGui
 _G.EndlessAuraStorage.CurrentGui = screenGui 
 
 local mainFrame = Instance.new("Frame") 
-mainFrame.Size = UDim2.new(0, 220, 0, 350) 
-mainFrame.Position = UDim2.new(0.5, -110, 0.5, -175) 
+mainFrame.Size = UDim2.new(0, 240, 0, 350) -- Adjusted wide size to fit header beautifully
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -175) 
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
 mainFrame.BackgroundTransparency = 0.45 
 mainFrame.BorderSizePixel = 2 
@@ -179,14 +184,46 @@ nameBoxFrame.BorderSizePixel = 1
 nameBoxFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)
 nameBoxFrame.Parent = mainFrame
 
+-- Custom Asset Branding Image Injector
+local brandingImg = Instance.new("ImageLabel")
+brandingImg.Size = UDim2.new(0, 20, 0, 20)
+brandingImg.Position = UDim2.new(0, 5, 0, 5)
+brandingImg.Image = "rbxassetid://129299711445020"
+brandingImg.BackgroundTransparency = 1
+brandingImg.Parent = nameBoxFrame
+
 local nameText = Instance.new("TextLabel")
-nameText.Size = UDim2.new(1, 0, 1, 0)
-nameText.Text = "ENDLESS AURA MULTI-BANG PANEL 💀💢"
+nameText.Size = UDim2.new(1, -55, 1, 0)
+nameText.Position = UDim2.new(0, 28, 0, 0)
+nameText.Text = "ENDLESS AURA BANG PANEL💀💢"
 nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
 nameText.Font = Enum.Font.Code 
 nameText.TextSize = 9 
+nameText.TextXAlignment = Enum.TextXAlignment.Left
 nameText.BackgroundTransparency = 1
 nameText.Parent = nameBoxFrame
+
+-- INVISIBLE BORDER SOUND TOGGLE BUTTON
+local soundToggleBtn = Instance.new("TextButton")
+soundToggleBtn.Size = UDim2.new(0, 24, 0, 24)
+soundToggleBtn.Position = UDim2.new(1, -26, 0, 3)
+soundToggleBtn.BackgroundTransparency = 1 -- Completely clean borderless background
+soundToggleBtn.BorderSizePixel = 0
+soundToggleBtn.Text = "🔊"
+soundToggleBtn.TextSize = 14
+soundToggleBtn.TextColor3 = Color3.new(1, 1, 1)
+soundToggleBtn.Parent = nameBoxFrame
+
+soundToggleBtn.MouseButton1Click:Connect(function()
+    soundMuted = not soundMuted
+    if soundMuted then
+        soundToggleBtn.Text = "🔕"
+        stopAllSounds()
+    else
+        soundToggleBtn.Text = "🔊"
+        if isAttached then lastSoundTime = 0 end -- Triggers immediate catch-up loop play
+    end
+end)
 
 local toggleGuiBtn = Instance.new("TextButton")
 toggleGuiBtn.Size = UDim2.new(0, 70, 0, 30)
@@ -281,7 +318,7 @@ modeBtn.MouseButton1Click:Connect(function()
         modeBtn.Text = "MODE // SYSTEM_NORMAL"
         modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     end
-    if isAttached then lastSoundTime = 0 end -- Reset sound transition instantly when switching modes live
+    if isAttached then lastSoundTime = 0 end 
 end)
 
 -- SLIDER GENERATOR
@@ -428,7 +465,6 @@ toggleButton.MouseButton1Click:Connect(function()
         if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
         if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
         
-        -- Safe Stop Elements
         if activeTrack then activeTrack:Stop() activeTrack = nil end
         stopAllSounds()
         
@@ -450,7 +486,7 @@ toggleButton.MouseButton1Click:Connect(function()
         toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
         lastSwitchTime = tick()
         lastTargetSwitchTime = tick()
-        lastSoundTime = 0 -- Triggers sound immediately on startup
+        lastSoundTime = 0 
         currentTargetIndex = 1
         selectedPlayer = selectedPlayers[currentTargetIndex]
         currentAutoSubMode = "Normal"
@@ -459,7 +495,6 @@ toggleButton.MouseButton1Click:Connect(function()
         local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
         if not myHRP then return end
 
-        -- Load Animation Track
         local hum = getHumanoid()
         if hum then
             local anim = Instance.new("Animation")
@@ -470,7 +505,6 @@ toggleButton.MouseButton1Click:Connect(function()
             activeTrack:AdjustSpeed(speedMultiplier / 5)
         end
 
-        -- Physics Vectors Injectors
         local bv = Instance.new("BodyVelocity")
         bv.MaxForce = Vector3.new(99999999, 99999999, 99999999)
         bv.Velocity = Vector3.new(0, 0, 0)
@@ -495,7 +529,6 @@ toggleButton.MouseButton1Click:Connect(function()
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            -- Multi Target Logic: Core Loop Switch Every 1 Sec
             if tick() - lastTargetSwitchTime >= 1.0 then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
@@ -516,7 +549,6 @@ toggleButton.MouseButton1Click:Connect(function()
             local targetHead = selectedPlayer.Character:FindFirstChild("Head") 
             if not targetHRP then return end
 
-            -- Dynamic Mode & Audio Switcher Link Core
             local currentModeToRun = targetMode
             if targetMode == "Auto Switch" then
                 if tick() - lastSwitchTime >= 1.0 then
@@ -526,10 +558,8 @@ toggleButton.MouseButton1Click:Connect(function()
                 currentModeToRun = currentAutoSubMode
             end
             
-            -- Run Engine Sound Checker Function
             handleAudioForMode(targetMode)
 
-            -- Void Limit Physics Protection
             if targetHRP.Position.Y < -60 or targetHRP.Position.Y < (game.Workspace.FallenPartsDestroyHeight + 15) then
                 bv.Velocity = Vector3.new(0,0,0)
                 if platform and platform.Parent then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
@@ -558,7 +588,6 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- ZERO DELAY POSITION MATRIX SYNC
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
             bv.Velocity = (targetCFrame.Position - myHRP.Position) * 120 
@@ -567,7 +596,6 @@ toggleButton.MouseButton1Click:Connect(function()
                 platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
             end
             
-            -- Motor6D Math Transform Engine
             pcall(function()
                 local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")
                 local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myHRP:FindFirstChild("RootJoint"))
@@ -578,7 +606,6 @@ toggleButton.MouseButton1Click:Connect(function()
                 end
             end)
             
-            -- Noclip Collision Disabler
             pcall(function()
                 for _, v in pairs(myChar:GetDescendants()) do
                     if v:IsA("BasePart") then v.CanCollide = false end
