@@ -18,7 +18,7 @@ if not _G.AuraState then
         tagsEnabled = true,
         auraEnabled = true,
         animEnabled = true,
-        spamEnabled = false, -- Default Spam Off rahega
+        spamEnabled = false,
         emitters = {},
         currentTrack = nil
     }
@@ -35,8 +35,8 @@ end
 local hud = Instance.new("ScreenGui")
 hud.Name = "AuraHUD"
 hud.ResetOnSpawn = false
-hud.IgnoreGuiInset = true 
-hud.DisplayOrder = 9999999 -- Roblox core elements ke upar render hone ke liye highest priority
+hud.IgnoreGuiInset = true
+hud.DisplayOrder = 9999999
 hud.Parent = playerGui
 
 -- Universal Sound Player
@@ -49,16 +49,43 @@ local function playCustomSound(soundId)
     Debris:AddItem(sound, 3)
 end
 
+-- =====================
+-- LOGO ASSET ID
+-- =====================
+local LOGO_ID = "rbxassetid://129299711445020"
+
+-- =====================
+-- MAIN BAR CONTAINER (holds bar + logo button)
+-- =====================
+local barContainer = Instance.new("Frame")
+barContainer.Name = "BarContainer"
+barContainer.AutomaticSize = Enum.AutomaticSize.X
+barContainer.Size = UDim2.new(0, 0, 0, 28)
+barContainer.AnchorPoint = Vector2.new(1, 0)
+barContainer.Position = UDim2.new(1, -8, 0, 6)
+barContainer.BackgroundTransparency = 1
+barContainer.BorderSizePixel = 0
+barContainer.Parent = hud
+
+local containerLayout = Instance.new("UIListLayout")
+containerLayout.FillDirection = Enum.FillDirection.Horizontal
+containerLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+containerLayout.Padding = UDim.new(0, 4)
+containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+containerLayout.Parent = barContainer
+
+-- =====================
+-- MAIN HUD BAR
+-- =====================
 local bar = Instance.new("Frame")
 bar.Name = "Bar"
 bar.AutomaticSize = Enum.AutomaticSize.X
 bar.Size = UDim2.new(0, 0, 0, 24)
-bar.AnchorPoint = Vector2.new(1, 0)
-bar.Position = UDim2.new(1, -45, 0, 6) 
 bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 bar.BackgroundTransparency = 0.45
 bar.BorderSizePixel = 0
-bar.Parent = hud
+bar.ClipsDescendants = false
+bar.Parent = barContainer
 
 local barCorner = Instance.new("UICorner")
 barCorner.CornerRadius = UDim.new(0, 6)
@@ -79,6 +106,86 @@ local barPadding = Instance.new("UIPadding")
 barPadding.PaddingLeft = UDim.new(0, 6)
 barPadding.PaddingRight = UDim.new(0, 6)
 barPadding.Parent = bar
+
+-- =====================
+-- LOGO TOGGLE BUTTON (sabse right mein)
+-- =====================
+local logoBtn = Instance.new("ImageButton")
+logoBtn.Name = "LogoToggleBtn"
+logoBtn.Size = UDim2.new(0, 28, 0, 28)
+logoBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+logoBtn.BackgroundTransparency = 0.4
+logoBtn.BorderSizePixel = 0
+logoBtn.Image = LOGO_ID
+logoBtn.ScaleType = Enum.ScaleType.Fit
+logoBtn.AutoButtonColor = false
+logoBtn.Parent = barContainer
+
+local logoBtnCorner = Instance.new("UICorner")
+logoBtnCorner.CornerRadius = UDim.new(1, 0)
+logoBtnCorner.Parent = logoBtn
+
+local logoBtnStroke = Instance.new("UIStroke")
+logoBtnStroke.Color = Color3.fromRGB(200, 0, 0)
+logoBtnStroke.Thickness = 1.5
+logoBtnStroke.Parent = logoBtn
+
+-- =====================
+-- HUD TOGGLE ANIMATION (slide in/out)
+-- =====================
+local hudVisible = true
+local hudAnimating = false
+
+logoBtn.MouseButton1Click:Connect(function()
+    if hudAnimating then return end
+    hudAnimating = true
+    playCustomSound(107406973902030)
+
+    if hudVisible then
+        -- Logo rotate + bar slide OUT to the right
+        local rotateTween = TweenService:Create(logoBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+            Rotation = 360
+        })
+        rotateTween:Play()
+
+        local slideOut = TweenService:Create(bar, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, 24)
+        })
+        -- We fade out and make invisible
+        bar.ClipsDescendants = true
+        for _, child in ipairs(bar:GetDescendants()) do
+            if child:IsA("TextLabel") or child:IsA("TextButton") then
+                TweenService:Create(child, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
+            end
+        end
+        task.wait(0.25)
+        bar.Visible = false
+        hudVisible = false
+        rotateTween:Play()
+        task.wait(0.5)
+        logoBtn.Rotation = 0
+        hudAnimating = false
+    else
+        -- Logo rotate + bar slide IN
+        local rotateTween = TweenService:Create(logoBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+            Rotation = -360
+        })
+        rotateTween:Play()
+
+        bar.Visible = true
+        bar.ClipsDescendants = false
+        for _, child in ipairs(bar:GetDescendants()) do
+            if child:IsA("TextLabel") or child:IsA("TextButton") then
+                child.TextTransparency = 1
+                TweenService:Create(child, TweenInfo.new(0.35), {TextTransparency = 0}):Play()
+            end
+        end
+        hudVisible = true
+        task.wait(0.5)
+        logoBtn.Rotation = 0
+        hudAnimating = false
+    end
+end)
 
 -- Box Creator Utility
 local function createBox(name, text, withDot, interactive)
@@ -188,13 +295,11 @@ animLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== NEW SPAM BUTTON SYSTEM =====
+-- ===== SPAM BUTTON SYSTEM =====
 local spamText = "SCRIPTER ]> NAMELESS💢\\THEFAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢..."
 
 local function sendChatMessage(message)
-    -- Naye TextChatService aur purane SayMessageRequest dono ko support karta hai safe execution ke liye
     if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-        local chatInputBarConfiguration = TextChatService:FindFirstChildOfClass("ChatInputBarConfiguration")
         local targetChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
         if targetChannel then
             targetChannel:SendAsync(message)
@@ -215,7 +320,6 @@ spamLabel.MouseButton1Click:Connect(function()
     spamDot.BackgroundColor3 = AuraState.spamEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
 end)
 
--- Background thread looping for 2.6s spam
 task.spawn(function()
     while true do
         if AuraState.spamEnabled then
@@ -264,13 +368,12 @@ end)
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
 
-    -- Check if the joined player is a friend
     local isFriend = false
     pcall(function()
         isFriend = player:IsFriendsWith(joinedPlayer.UserId)
     end)
-    
-    if not isFriend then return end -- Agar friend nahi hai to skip pipeline
+
+    if not isFriend then return end
 
     playCustomSound(106544581344345)
 
@@ -278,8 +381,7 @@ local function showJoinNotification(joinedPlayer)
     notifFrame.Name = "JoinNotification"
     notifFrame.Size = UDim2.new(0, 340, 0, 64)
     notifFrame.AnchorPoint = Vector2.new(0.5, 0)
-    -- Positioned directly at safe core view area to overlay over native alerts
-    notifFrame.Position = UDim2.new(0.5, 0, 0, -80) 
+    notifFrame.Position = UDim2.new(0.5, 0, 0, -80)
     notifFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     notifFrame.BackgroundTransparency = 0.3
     notifFrame.BorderSizePixel = 0
@@ -322,9 +424,8 @@ local function showJoinNotification(joinedPlayer)
     txtLabel.Text = "YOUR FRIEND JOINED:\n@" .. joinedPlayer.Name
     txtLabel.Parent = notifFrame
 
-    -- Drops down completely clear over core headers
     local tweenIn = TweenService:Create(notifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, 0, 0, 35) -- Pulled down slightly more to completely visually overlay standard alerts
+        Position = UDim2.new(0.5, 0, 0, 35)
     })
     tweenIn:Play()
 
@@ -355,44 +456,50 @@ local function setup(character)
 
     AuraState.emitters = {}
 
-    -- EA CIRCLE
+    -- =====================
+    -- EA CIRCLE → LOGO IMAGE (replaces "EA" text circle)
+    -- =====================
     local eaBillboard = Instance.new("BillboardGui")
     eaBillboard.Name = "EACircle"
-    eaBillboard.Size = UDim2.new(0, 28, 0, 28)
+    eaBillboard.Size = UDim2.new(0, 32, 0, 32)
     eaBillboard.StudsOffset = Vector3.new(0, 2.4, 0)
     eaBillboard.AlwaysOnTop = true
     eaBillboard.MaxDistance = 1000
     eaBillboard.Parent = head
 
-    local eaCircle = Instance.new("Frame")
-    eaCircle.Size = UDim2.new(1, 0, 1, 0)
-    eaCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    eaCircle.BackgroundTransparency = 0.5
-    eaCircle.BorderSizePixel = 0
-    eaCircle.Parent = eaBillboard
+    -- Circular black background with red stroke
+    local eaCircleBg = Instance.new("Frame")
+    eaCircleBg.Size = UDim2.new(1, 0, 1, 0)
+    eaCircleBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    eaCircleBg.BackgroundTransparency = 0.45
+    eaCircleBg.BorderSizePixel = 0
+    eaCircleBg.Parent = eaBillboard
 
     local eaCircleCorner = Instance.new("UICorner")
     eaCircleCorner.CornerRadius = UDim.new(1, 0)
-    eaCircleCorner.Parent = eaCircle
+    eaCircleCorner.Parent = eaCircleBg
 
     local eaCircleStroke = Instance.new("UIStroke")
     eaCircleStroke.Color = Color3.fromRGB(200, 0, 0)
     eaCircleStroke.Thickness = 2
-    eaCircleStroke.Parent = eaCircle
+    eaCircleStroke.Parent = eaCircleBg
 
-    local eaText = Instance.new("TextLabel")
-    eaText.Size = UDim2.new(1, 0, 1, 0)
-    eaText.BackgroundTransparency = 1
-    eaText.Text = "EA"
-    eaText.TextColor3 = Color3.fromRGB(200, 0, 0)
-    eaText.TextScaled = true
-    eaText.Font = Enum.Font.GothamBold
-    eaText.Parent = eaCircle
+    -- Logo image inside circle (instead of "EA" text)
+    local eaLogoImg = Instance.new("ImageLabel")
+    eaLogoImg.Size = UDim2.new(0.82, 0, 0.82, 0)
+    eaLogoImg.AnchorPoint = Vector2.new(0.5, 0.5)
+    eaLogoImg.Position = UDim2.new(0.5, 0, 0.5, 0)
+    eaLogoImg.BackgroundTransparency = 1
+    eaLogoImg.Image = LOGO_ID
+    eaLogoImg.ScaleType = Enum.ScaleType.Fit
+    eaLogoImg.Parent = eaCircleBg
 
-    -- OVERHEAD TAG
+    -- =====================
+    -- OVERHEAD TAG (logo replaces "EA" text on left side)
+    -- =====================
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "OverheadTag"
-    billboard.Size = UDim2.new(0, 140, 0, 36)
+    billboard.Size = UDim2.new(0, 148, 0, 36)
     billboard.StudsOffset = Vector3.new(0, 2.9, 0)
     billboard.AlwaysOnTop = true
     billboard.MaxDistance = 1000
@@ -414,26 +521,26 @@ local function setup(character)
     corner.CornerRadius = UDim.new(0, 5)
     corner.Parent = frame
 
-    local eaTagLabel = Instance.new("TextLabel")
-    eaTagLabel.Size = UDim2.new(0.17, 0, 1, 0)
-    eaTagLabel.Position = UDim2.new(0.01, 0, 0, 0)
-    eaTagLabel.BackgroundTransparency = 1
-    eaTagLabel.Text = "EA"
-    eaTagLabel.TextColor3 = Color3.fromRGB(200, 0, 0)
-    eaTagLabel.TextScaled = true
-    eaTagLabel.Font = Enum.Font.GothamBold
-    eaTagLabel.Parent = frame
+    -- Logo image in place of "EA" text label (left side of tag)
+    local eaTagLogo = Instance.new("ImageLabel")
+    eaTagLogo.Size = UDim2.new(0, 26, 0, 26)
+    eaTagLogo.AnchorPoint = Vector2.new(0, 0.5)
+    eaTagLogo.Position = UDim2.new(0, 4, 0.5, 0)
+    eaTagLogo.BackgroundTransparency = 1
+    eaTagLogo.Image = LOGO_ID
+    eaTagLogo.ScaleType = Enum.ScaleType.Fit
+    eaTagLogo.Parent = frame
 
     local divider = Instance.new("Frame")
     divider.Size = UDim2.new(0, 1.5, 0.7, 0)
-    divider.Position = UDim2.new(0.19, 0, 0.15, 0)
+    divider.Position = UDim2.new(0, 34, 0.15, 0)
     divider.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
     divider.BorderSizePixel = 0
     divider.Parent = frame
 
     local overheadAuraLabel = Instance.new("TextLabel")
-    overheadAuraLabel.Size = UDim2.new(0.79, 0, 0.54, 0)
-    overheadAuraLabel.Position = UDim2.new(0.21, 0, 0.02, 0)
+    overheadAuraLabel.Size = UDim2.new(1, -38, 0.54, 0)
+    overheadAuraLabel.Position = UDim2.new(0, 38, 0.02, 0)
     overheadAuraLabel.BackgroundTransparency = 1
     overheadAuraLabel.Text = "Eɴᴅʟᴇss Aᴜʀᴀ: Usᴇʀ"
     overheadAuraLabel.TextColor3 = Color3.fromRGB(200, 0, 0)
@@ -443,8 +550,8 @@ local function setup(character)
     overheadAuraLabel.Parent = frame
 
     local nameLabel = Instance.new("TextLabel")
-    nameLabel.Size = UDim2.new(0.79, 0, 0.38, 0)
-    nameLabel.Position = UDim2.new(0.21, 0, 0.57, 0)
+    nameLabel.Size = UDim2.new(1, -38, 0.38, 0)
+    nameLabel.Position = UDim2.new(0, 38, 0.57, 0)
     nameLabel.BackgroundTransparency = 1
     nameLabel.Text = "@" .. player.Name
     nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -506,6 +613,7 @@ local function setup(character)
         thunder.RotSpeed = NumberRange.new(-250, 250)
         thunder.Rotation = NumberRange.new(0, 360)
         thunder.ZOffset = 0.4
+        table.insert(AuraState.emitters, thunder)
 
         local glow = Instance.new("ParticleEmitter")
         glow.Parent = att
@@ -530,6 +638,7 @@ local function setup(character)
         glow.Rate = rate * 0.7
         glow.Speed = NumberRange.new(1, 2.5)
         glow.SpreadAngle = Vector2.new(360, 360)
+        table.insert(AuraState.emitters, glow)
 
         local smoke = Instance.new("ParticleEmitter")
         smoke.Parent = att
@@ -540,113 +649,57 @@ local function setup(character)
         smoke.LightEmission = 0.2
         smoke.LightInfluence = 0.5
         smoke.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 0.8),
-            NumberSequenceKeypoint.new(0.5, size * 2.2),
-            NumberSequenceKeypoint.new(1, 0)
+            NumberSequenceKeypoint.new(0, size * 1.5),
+            NumberSequenceKeypoint.new(0.5, size * 2.5),
+            NumberSequenceKeypoint.new(1, size * 3.0)
         })
         smoke.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.5),
-            NumberSequenceKeypoint.new(0.6, 0.8),
+            NumberSequenceKeypoint.new(0, 0.6),
+            NumberSequenceKeypoint.new(0.5, 0.8),
             NumberSequenceKeypoint.new(1, 1)
         })
-        smoke.Lifetime = NumberRange.new(0.4, 0.8)
+        smoke.Lifetime = NumberRange.new(0.5, 1.0)
         smoke.Rate = rate * 0.4
-        smoke.Speed = NumberRange.new(1, 3)
-        smoke.SpreadAngle = Vector2.new(45, 45)
-
-        thunder.Enabled = AuraState.auraEnabled
-        glow.Enabled = AuraState.auraEnabled
-        smoke.Enabled = AuraState.auraEnabled
-
-        table.insert(AuraState.emitters, thunder)
-        table.insert(AuraState.emitters, glow)
+        smoke.Speed = NumberRange.new(0.5, 1.5)
+        smoke.SpreadAngle = Vector2.new(360, 360)
         table.insert(AuraState.emitters, smoke)
     end
 
-    -- Base Parts Setup
-    local baseParts = {"Head", "UpperTorso", "LowerTorso", "Torso"}
-    for _, partName in ipairs(baseParts) do
-        local part = character:FindFirstChild(partName)
-        if part then createThunder(part, 0, 50, 4, 1.1) end
+    -- Apply aura to body parts
+    createThunder(hrp, 0, 45, 3, 0.55)
+    createThunder(hrp, -2, 30, 2, 0.4)
+    createThunder(head, 0, 25, 2, 0.35)
+
+    -- Set initial emitter state
+    for _, emitter in ipairs(AuraState.emitters) do
+        if emitter and emitter.Parent then
+            emitter.Enabled = AuraState.auraEnabled
+        end
     end
 
-    -- Limbs Setup
-    local heavyParts = {
-        "LeftUpperArm", "LeftLowerArm", "LeftHand", "Left Arm",
-        "RightUpperArm", "RightLowerArm", "RightHand", "Right Arm",
-        "LeftUpperLeg", "LeftLowerLeg", "LeftFoot", "Left Leg",
-        "RightUpperLeg", "RightLowerLeg", "RightFoot", "Right Leg"
-    }
-    for _, partName in ipairs(heavyParts) do
-        local part = character:FindFirstChild(partName)
-        if part then createThunder(part, 0, 95, 5, 1.3) end
-    end
-
-    createThunder(hrp, 0, 65, 5, 1.4)
-    createThunder(hrp, 1, 45, 4, 1.0)
-    createThunder(hrp, -1, 45, 4, 1.0)
-
-    -- Ground Effects
-    local groundAtt = Instance.new("Attachment")
-    groundAtt.Position = Vector3.new(0, -3, 0)
-    groundAtt.Parent = hrp
-
-    local groundThunder = Instance.new("ParticleEmitter")
-    groundThunder.Parent = groundAtt
-    groundThunder.Texture = "rbxassetid://6101261905"
-    groundThunder.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 40)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 0))
-    })
-    groundThunder.LightEmission = 1
-    groundThunder.LightInfluence = 0
-    groundThunder.Size = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.4),
-        NumberSequenceKeypoint.new(0.4, 1.4),
-        NumberSequenceKeypoint.new(1, 0)
-    })
-    groundThunder.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.1),
-        NumberSequenceKeypoint.new(1, 1)
-    })
-    groundThunder.Lifetime = NumberRange.new(0.4, 0.7)
-    groundThunder.Rate = 75
-    groundThunder.Speed = NumberRange.new(3, 6)
-    groundThunder.SpreadAngle = Vector2.new(110, 110)
-    groundThunder.EmissionDirection = Enum.NormalId.Bottom
-    groundThunder.Enabled = AuraState.auraEnabled
-    table.insert(AuraState.emitters, groundThunder)
-
-    -- Idle Animation System
+    -- Idle animation
     local idleAnim = Instance.new("Animation")
-    idleAnim.AnimationId = "rbxassetid://138665010911335"
-
-    local idleTrack = animator:LoadAnimation(idleAnim)
-    idleTrack.Priority = Enum.AnimationPriority.Idle
-    idleTrack.Looped = true
-    AuraState.currentTrack = idleTrack
+    idleAnim.AnimationId = "rbxassetid://180435571"
+    local track = animator:LoadAnimation(idleAnim)
+    track.Looped = true
+    AuraState.currentTrack = track
 
     humanoid.Running:Connect(function(speed)
-        if speed < 0.5 then
-            if AuraState.animEnabled and not idleTrack.IsPlaying then
-                idleTrack:Play()
-            end
+        if not AuraState.animEnabled then return end
+        if speed < 0.1 then
+            track:Play()
         else
-            if idleTrack.IsPlaying then
-                idleTrack:Stop()
-            end
+            track:Stop()
         end
     end)
 
-    if humanoid.MoveDirection.Magnitude < 0.1 and AuraState.animEnabled then
-        idleTrack:Play()
+    if AuraState.animEnabled then
+        track:Play()
     end
 end
 
-local function safeSetup(character)
-    pcall(setup, character)
-    syncHUD()
+-- Character spawn handler
+if player.Character then
+    setup(player.Character)
 end
-
-safeSetup(player.Character or player.CharacterAdded:Wait())
-player.CharacterAdded:Connect(safeSetup)
+player.CharacterAdded:Connect(setup)
