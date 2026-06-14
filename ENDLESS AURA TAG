@@ -50,32 +50,46 @@ local function playCustomSound(soundId)
 end
 
 -- =====================
--- LOGO ASSET ID
+-- LOGO ASSET
 -- =====================
 local LOGO_ID = "rbxassetid://129299711445020"
 
 -- =====================
--- MAIN BAR CONTAINER (holds bar + logo button)
+-- WRAPPER: Logo + Bar together (right side)
 -- =====================
-local barContainer = Instance.new("Frame")
-barContainer.Name = "BarContainer"
-barContainer.AutomaticSize = Enum.AutomaticSize.X
-barContainer.Size = UDim2.new(0, 0, 0, 28)
-barContainer.AnchorPoint = Vector2.new(1, 0)
-barContainer.Position = UDim2.new(1, -8, 0, 6)
-barContainer.BackgroundTransparency = 1
-barContainer.BorderSizePixel = 0
-barContainer.Parent = hud
+local wrapper = Instance.new("Frame")
+wrapper.Name = "HUDWrapper"
+wrapper.BackgroundTransparency = 1
+wrapper.BorderSizePixel = 0
+wrapper.AnchorPoint = Vector2.new(1, 0)
+wrapper.Position = UDim2.new(1, -8, 0, 5)
+wrapper.Size = UDim2.new(0, 600, 0, 28)
+wrapper.ClipsDescendants = false
+wrapper.Parent = hud
 
-local containerLayout = Instance.new("UIListLayout")
-containerLayout.FillDirection = Enum.FillDirection.Horizontal
-containerLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-containerLayout.Padding = UDim.new(0, 4)
-containerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-containerLayout.Parent = barContainer
+local wrapLayout = Instance.new("UIListLayout")
+wrapLayout.FillDirection = Enum.FillDirection.Horizontal
+wrapLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+wrapLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+wrapLayout.Padding = UDim.new(0, 4)
+wrapLayout.Parent = wrapper
 
 -- =====================
--- MAIN HUD BAR
+-- LOGO BUTTON (no background, no border)
+-- =====================
+local logoBtn = Instance.new("ImageButton")
+logoBtn.Name = "LogoBtn"
+logoBtn.Size = UDim2.new(0, 28, 0, 28)
+logoBtn.BackgroundTransparency = 1
+logoBtn.BorderSizePixel = 0
+logoBtn.Image = LOGO_ID
+logoBtn.ScaleType = Enum.ScaleType.Fit
+logoBtn.AutoButtonColor = false
+logoBtn.ZIndex = 10
+logoBtn.Parent = wrapper
+
+-- =====================
+-- HUD BAR
 -- =====================
 local bar = Instance.new("Frame")
 bar.Name = "Bar"
@@ -84,8 +98,9 @@ bar.Size = UDim2.new(0, 0, 0, 24)
 bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 bar.BackgroundTransparency = 0.45
 bar.BorderSizePixel = 0
-bar.ClipsDescendants = false
-bar.Parent = barContainer
+bar.ClipsDescendants = true
+bar.LayoutOrder = 2
+bar.Parent = wrapper
 
 local barCorner = Instance.new("UICorner")
 barCorner.CornerRadius = UDim.new(0, 6)
@@ -108,83 +123,60 @@ barPadding.PaddingRight = UDim.new(0, 6)
 barPadding.Parent = bar
 
 -- =====================
--- LOGO TOGGLE BUTTON (sabse right mein)
+-- HUD TOGGLE LOGIC
 -- =====================
-local logoBtn = Instance.new("ImageButton")
-logoBtn.Name = "LogoToggleBtn"
-logoBtn.Size = UDim2.new(0, 28, 0, 28)
-logoBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-logoBtn.BackgroundTransparency = 0.4
-logoBtn.BorderSizePixel = 0
-logoBtn.Image = LOGO_ID
-logoBtn.ScaleType = Enum.ScaleType.Fit
-logoBtn.AutoButtonColor = false
-logoBtn.Parent = barContainer
+local hudOpen = true
+local hudBusy = false
+local barFullWidth = 0 -- will be measured after content loads
 
-local logoBtnCorner = Instance.new("UICorner")
-logoBtnCorner.CornerRadius = UDim.new(1, 0)
-logoBtnCorner.Parent = logoBtn
-
-local logoBtnStroke = Instance.new("UIStroke")
-logoBtnStroke.Color = Color3.fromRGB(200, 0, 0)
-logoBtnStroke.Thickness = 1.5
-logoBtnStroke.Parent = logoBtn
-
--- =====================
--- HUD TOGGLE ANIMATION (slide in/out)
--- =====================
-local hudVisible = true
-local hudAnimating = false
+-- Store full size after first render
+task.delay(0.2, function()
+    barFullWidth = bar.AbsoluteSize.X
+end)
 
 logoBtn.MouseButton1Click:Connect(function()
-    if hudAnimating then return end
-    hudAnimating = true
+    if hudBusy then return end
+    hudBusy = true
     playCustomSound(107406973902030)
 
-    if hudVisible then
-        -- Logo rotate + bar slide OUT to the right
-        local rotateTween = TweenService:Create(logoBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
-            Rotation = 360
-        })
-        rotateTween:Play()
+    if hudOpen then
+        -- Spin logo clockwise
+        for i = 1, 6 do
+            TweenService:Create(logoBtn, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Rotation = i * 60}):Play()
+            task.wait(0.05)
+        end
+        logoBtn.Rotation = 0
 
-        local slideOut = TweenService:Create(bar, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        -- Slide bar contents out (shrink width to 0)
+        local currentWidth = bar.AbsoluteSize.X
+        barFullWidth = currentWidth
+        TweenService:Create(bar, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
             Size = UDim2.new(0, 0, 0, 24)
-        })
-        -- We fade out and make invisible
-        bar.ClipsDescendants = true
-        for _, child in ipairs(bar:GetDescendants()) do
-            if child:IsA("TextLabel") or child:IsA("TextButton") then
-                TweenService:Create(child, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-            end
-        end
-        task.wait(0.25)
+        }):Play()
+        task.wait(0.38)
         bar.Visible = false
-        hudVisible = false
-        rotateTween:Play()
-        task.wait(0.5)
-        logoBtn.Rotation = 0
-        hudAnimating = false
+        hudOpen = false
     else
-        -- Logo rotate + bar slide IN
-        local rotateTween = TweenService:Create(logoBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
-            Rotation = -360
-        })
-        rotateTween:Play()
-
+        -- Spin logo counter-clockwise
         bar.Visible = true
-        bar.ClipsDescendants = false
-        for _, child in ipairs(bar:GetDescendants()) do
-            if child:IsA("TextLabel") or child:IsA("TextButton") then
-                child.TextTransparency = 1
-                TweenService:Create(child, TweenInfo.new(0.35), {TextTransparency = 0}):Play()
-            end
+        bar.Size = UDim2.new(0, 0, 0, 24)
+        for i = 1, 6 do
+            TweenService:Create(logoBtn, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Rotation = -(i * 60)}):Play()
+            task.wait(0.05)
         end
-        hudVisible = true
-        task.wait(0.5)
         logoBtn.Rotation = 0
-        hudAnimating = false
+
+        -- Slide bar back open
+        TweenService:Create(bar, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, barFullWidth, 0, 24)
+        }):Play()
+        task.wait(0.42)
+        -- Reset to AutomaticSize
+        bar.Size = UDim2.new(0, 0, 0, 24)
+        bar.AutomaticSize = Enum.AutomaticSize.X
+        hudOpen = true
     end
+    hudBusy = false
 end)
 
 -- Box Creator Utility
@@ -225,7 +217,6 @@ local function createBox(name, text, withDot, interactive)
         dot.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
         dot.BorderSizePixel = 0
         dot.Parent = box
-
         local dc = Instance.new("UICorner")
         dc.CornerRadius = UDim.new(1, 0)
         dc.Parent = dot
@@ -295,7 +286,7 @@ animLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== SPAM BUTTON SYSTEM =====
+-- ===== SPAM BUTTON =====
 local spamText = "SCRIPTER ]> NAMELESS💢\\THEFAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢..."
 
 local function sendChatMessage(message)
@@ -363,16 +354,14 @@ task.spawn(function()
 end)
 
 -- =====================
--- FRIEND-ONLY BYPASS NOTIFICATION SYSTEM
+-- FRIEND JOIN NOTIFICATION
 -- =====================
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
-
     local isFriend = false
     pcall(function()
         isFriend = player:IsFriendsWith(joinedPlayer.UserId)
     end)
-
     if not isFriend then return end
 
     playCustomSound(106544581344345)
@@ -408,8 +397,7 @@ local function showJoinNotification(joinedPlayer)
     avatarCorner.Parent = avatarImg
 
     pcall(function()
-        local userId = joinedPlayer.UserId
-        avatarImg.Image = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+        avatarImg.Image = Players:GetUserThumbnailAsync(joinedPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
     end)
 
     local txtLabel = Instance.new("TextLabel")
@@ -424,10 +412,9 @@ local function showJoinNotification(joinedPlayer)
     txtLabel.Text = "YOUR FRIEND JOINED:\n@" .. joinedPlayer.Name
     txtLabel.Parent = notifFrame
 
-    local tweenIn = TweenService:Create(notifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    TweenService:Create(notifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         Position = UDim2.new(0.5, 0, 0, 35)
-    })
-    tweenIn:Play()
+    }):Play()
 
     task.delay(4, function()
         if notifFrame and notifFrame.Parent then
@@ -435,9 +422,7 @@ local function showJoinNotification(joinedPlayer)
                 Position = UDim2.new(0.5, 0, 0, -80)
             })
             tweenOut:Play()
-            tweenOut.Completed:Connect(function()
-                notifFrame:Destroy()
-            end)
+            tweenOut.Completed:Connect(function() notifFrame:Destroy() end)
         end
     end)
 end
@@ -445,7 +430,7 @@ end
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
--- CHARACTER SETUP (Aura + Tags)
+-- CHARACTER SETUP (EXACT ORIGINAL - Aura + Tags + Animation)
 -- =====================
 local function setup(character)
     local head = character:WaitForChild("Head")
@@ -456,50 +441,45 @@ local function setup(character)
 
     AuraState.emitters = {}
 
-    -- =====================
-    -- EA CIRCLE → LOGO IMAGE (replaces "EA" text circle)
-    -- =====================
+    -- EA CIRCLE (original exact)
     local eaBillboard = Instance.new("BillboardGui")
     eaBillboard.Name = "EACircle"
-    eaBillboard.Size = UDim2.new(0, 32, 0, 32)
+    eaBillboard.Size = UDim2.new(0, 28, 0, 28)
     eaBillboard.StudsOffset = Vector3.new(0, 2.4, 0)
     eaBillboard.AlwaysOnTop = true
     eaBillboard.MaxDistance = 1000
     eaBillboard.Parent = head
 
-    -- Circular black background with red stroke
-    local eaCircleBg = Instance.new("Frame")
-    eaCircleBg.Size = UDim2.new(1, 0, 1, 0)
-    eaCircleBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    eaCircleBg.BackgroundTransparency = 0.45
-    eaCircleBg.BorderSizePixel = 0
-    eaCircleBg.Parent = eaBillboard
+    local eaCircle = Instance.new("Frame")
+    eaCircle.Size = UDim2.new(1, 0, 1, 0)
+    eaCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    eaCircle.BackgroundTransparency = 0.5
+    eaCircle.BorderSizePixel = 0
+    eaCircle.Parent = eaBillboard
 
     local eaCircleCorner = Instance.new("UICorner")
     eaCircleCorner.CornerRadius = UDim.new(1, 0)
-    eaCircleCorner.Parent = eaCircleBg
+    eaCircleCorner.Parent = eaCircle
 
     local eaCircleStroke = Instance.new("UIStroke")
     eaCircleStroke.Color = Color3.fromRGB(200, 0, 0)
     eaCircleStroke.Thickness = 2
-    eaCircleStroke.Parent = eaCircleBg
+    eaCircleStroke.Parent = eaCircle
 
-    -- Logo image inside circle (instead of "EA" text)
+    -- Logo image inside EA circle (replaces "EA" text)
     local eaLogoImg = Instance.new("ImageLabel")
-    eaLogoImg.Size = UDim2.new(0.82, 0, 0.82, 0)
+    eaLogoImg.Size = UDim2.new(0.85, 0, 0.85, 0)
     eaLogoImg.AnchorPoint = Vector2.new(0.5, 0.5)
     eaLogoImg.Position = UDim2.new(0.5, 0, 0.5, 0)
     eaLogoImg.BackgroundTransparency = 1
     eaLogoImg.Image = LOGO_ID
     eaLogoImg.ScaleType = Enum.ScaleType.Fit
-    eaLogoImg.Parent = eaCircleBg
+    eaLogoImg.Parent = eaCircle
 
-    -- =====================
-    -- OVERHEAD TAG (logo replaces "EA" text on left side)
-    -- =====================
+    -- OVERHEAD TAG (original exact, logo replaces "EA" text label)
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "OverheadTag"
-    billboard.Size = UDim2.new(0, 148, 0, 36)
+    billboard.Size = UDim2.new(0, 140, 0, 36)
     billboard.StudsOffset = Vector3.new(0, 2.9, 0)
     billboard.AlwaysOnTop = true
     billboard.MaxDistance = 1000
@@ -521,11 +501,11 @@ local function setup(character)
     corner.CornerRadius = UDim.new(0, 5)
     corner.Parent = frame
 
-    -- Logo image in place of "EA" text label (left side of tag)
+    -- Logo in place of "EA" text (left side)
     local eaTagLogo = Instance.new("ImageLabel")
-    eaTagLogo.Size = UDim2.new(0, 26, 0, 26)
+    eaTagLogo.Size = UDim2.new(0.17, 0, 0.85, 0)
     eaTagLogo.AnchorPoint = Vector2.new(0, 0.5)
-    eaTagLogo.Position = UDim2.new(0, 4, 0.5, 0)
+    eaTagLogo.Position = UDim2.new(0.01, 0, 0.5, 0)
     eaTagLogo.BackgroundTransparency = 1
     eaTagLogo.Image = LOGO_ID
     eaTagLogo.ScaleType = Enum.ScaleType.Fit
@@ -533,14 +513,14 @@ local function setup(character)
 
     local divider = Instance.new("Frame")
     divider.Size = UDim2.new(0, 1.5, 0.7, 0)
-    divider.Position = UDim2.new(0, 34, 0.15, 0)
+    divider.Position = UDim2.new(0.19, 0, 0.15, 0)
     divider.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
     divider.BorderSizePixel = 0
     divider.Parent = frame
 
     local overheadAuraLabel = Instance.new("TextLabel")
-    overheadAuraLabel.Size = UDim2.new(1, -38, 0.54, 0)
-    overheadAuraLabel.Position = UDim2.new(0, 38, 0.02, 0)
+    overheadAuraLabel.Size = UDim2.new(0.79, 0, 0.54, 0)
+    overheadAuraLabel.Position = UDim2.new(0.21, 0, 0.02, 0)
     overheadAuraLabel.BackgroundTransparency = 1
     overheadAuraLabel.Text = "Eɴᴅʟᴇss Aᴜʀᴀ: Usᴇʀ"
     overheadAuraLabel.TextColor3 = Color3.fromRGB(200, 0, 0)
@@ -550,8 +530,8 @@ local function setup(character)
     overheadAuraLabel.Parent = frame
 
     local nameLabel = Instance.new("TextLabel")
-    nameLabel.Size = UDim2.new(1, -38, 0.38, 0)
-    nameLabel.Position = UDim2.new(0, 38, 0.57, 0)
+    nameLabel.Size = UDim2.new(0.79, 0, 0.38, 0)
+    nameLabel.Position = UDim2.new(0.21, 0, 0.57, 0)
     nameLabel.BackgroundTransparency = 1
     nameLabel.Text = "@" .. player.Name
     nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -578,7 +558,9 @@ local function setup(character)
         end
     end)
 
-    -- Aura Generator Function
+    -- =====================
+    -- AURA (EXACT ORIGINAL CODE)
+    -- =====================
     local function createThunder(parent, offsetY, rate, speed, size)
         local att = Instance.new("Attachment")
         att.Position = Vector3.new(0, offsetY, 0)
@@ -613,7 +595,6 @@ local function setup(character)
         thunder.RotSpeed = NumberRange.new(-250, 250)
         thunder.Rotation = NumberRange.new(0, 360)
         thunder.ZOffset = 0.4
-        table.insert(AuraState.emitters, thunder)
 
         local glow = Instance.new("ParticleEmitter")
         glow.Parent = att
@@ -638,7 +619,6 @@ local function setup(character)
         glow.Rate = rate * 0.7
         glow.Speed = NumberRange.new(1, 2.5)
         glow.SpreadAngle = Vector2.new(360, 360)
-        table.insert(AuraState.emitters, glow)
 
         local smoke = Instance.new("ParticleEmitter")
         smoke.Parent = att
@@ -662,22 +642,27 @@ local function setup(character)
         smoke.Rate = rate * 0.4
         smoke.Speed = NumberRange.new(0.5, 1.5)
         smoke.SpreadAngle = Vector2.new(360, 360)
+
+        table.insert(AuraState.emitters, thunder)
+        table.insert(AuraState.emitters, glow)
         table.insert(AuraState.emitters, smoke)
     end
 
-    -- Apply aura to body parts
+    -- Aura on body parts (original placement)
     createThunder(hrp, 0, 45, 3, 0.55)
     createThunder(hrp, -2, 30, 2, 0.4)
     createThunder(head, 0, 25, 2, 0.35)
 
-    -- Set initial emitter state
+    -- Sync emitter state
     for _, emitter in ipairs(AuraState.emitters) do
         if emitter and emitter.Parent then
             emitter.Enabled = AuraState.auraEnabled
         end
     end
 
-    -- Idle animation
+    -- =====================
+    -- ANIMATION (EXACT ORIGINAL)
+    -- =====================
     local idleAnim = Instance.new("Animation")
     idleAnim.AnimationId = "rbxassetid://180435571"
     local track = animator:LoadAnimation(idleAnim)
@@ -698,7 +683,7 @@ local function setup(character)
     end
 end
 
--- Character spawn handler
+-- Character spawn
 if player.Character then
     setup(player.Character)
 end
