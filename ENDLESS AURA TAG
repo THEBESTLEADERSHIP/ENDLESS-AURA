@@ -30,7 +30,7 @@ end
 local AuraState = _G.AuraState
 
 -- =====================
--- HUD BAR LAYOUT (Edge-Locked Bound System)
+-- HUD BAR LAYOUT DESIGN
 -- =====================
 if playerGui:FindFirstChild("AuraHUD") then
     playerGui:FindFirstChild("AuraHUD"):Destroy()
@@ -43,25 +43,51 @@ hud.IgnoreGuiInset = true
 hud.DisplayOrder = 9999999
 hud.Parent = playerGui
 
--- Master Container Pinned Tight to Screen Edge
+-- Universal Sound Player
+local function playCustomSound(soundId)
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://" .. tostring(soundId)
+    sound.Volume = 0.6
+    sound.Parent = hud
+    sound:Play()
+    Debris:AddItem(sound, 3)
+end
+
+-- Master Container For Perfect Alignment
 local hudMaster = Instance.new("Frame")
 hudMaster.Name = "HUDMaster"
 hudMaster.Size = UDim2.new(0, 0, 0, 40)
-hudMaster.Position = UDim2.new(1, 0, 0, 6) 
+hudMaster.Position = UDim2.new(1, 0, 0, 6)
 hudMaster.BackgroundTransparency = 1
 hudMaster.Parent = hud
 
--- Layout Setup - Automatic Scaling Bar Bound Inside Master Frame
+-- Independent Fixed Logo Position to Prevent Overlap Clipping
+local logoToggleFrame = Instance.new("Frame")
+logoToggleFrame.Name = "LogoToggleFrame"
+logoToggleFrame.Size = UDim2.new(0, 28, 0, 28)
+logoToggleFrame.AnchorPoint = Vector2.new(1, 0)
+logoToggleFrame.Position = UDim2.new(1, -10, 0, 4) -- Always static on edge
+logoToggleFrame.BackgroundTransparency = 1
+logoToggleFrame.ZIndex = 5 -- Stays strictly on top layer
+logoToggleFrame.Parent = hud
+
+local logoToggleBtn = Instance.new("ImageButton")
+logoToggleBtn.Name = "LogoButton"
+logoToggleBtn.Size = UDim2.new(1, 0, 1, 0)
+logoToggleBtn.BackgroundTransparency = 1
+logoToggleBtn.Image = CUSTOM_LOGO_ID
+logoToggleBtn.Parent = logoToggleFrame
+
 local bar = Instance.new("Frame")
 bar.Name = "Bar"
 bar.AutomaticSize = Enum.AutomaticSize.X
 bar.Size = UDim2.new(0, 0, 0, 24)
 bar.AnchorPoint = Vector2.new(1, 0)
-bar.Position = UDim2.new(0, -45, 0, 0) -- Perfect edge offset positioning
+bar.Position = UDim2.new(1, -45, 0, 6) -- Starting right up against logo edge
 bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 bar.BackgroundTransparency = 0.45
 bar.BorderSizePixel = 0
-bar.Parent = hudMaster
+bar.Parent = hud
 
 local barCorner = Instance.new("UICorner")
 barCorner.CornerRadius = UDim.new(0, 6)
@@ -82,32 +108,6 @@ local barPadding = Instance.new("UIPadding")
 barPadding.PaddingLeft = UDim.new(0, 6)
 barPadding.PaddingRight = UDim.new(0, 6)
 barPadding.Parent = bar
-
--- Edge Bound Locked Trigger Toggle Button (Locked Outside HUD Bar Frame)
-local toggleBtnFrame = Instance.new("Frame")
-toggleBtnFrame.Name = "LogoToggleFrame"
-toggleBtnFrame.Size = UDim2.new(0, 28, 0, 28)
-toggleBtnFrame.AnchorPoint = Vector2.new(1, 0)
-toggleBtnFrame.Position = UDim2.new(0, -10, 0, -2) -- Stays perfectly on the screen edge boundaries
-toggleBtnFrame.BackgroundTransparency = 1
-toggleBtnFrame.Parent = hudMaster
-
-local logoToggleBtn = Instance.new("ImageButton")
-logoToggleBtn.Name = "LogoButton"
-logoToggleBtn.Size = UDim2.new(1, 0, 1, 0)
-logoToggleBtn.BackgroundTransparency = 1 
-logoToggleBtn.Image = CUSTOM_LOGO_ID
-logoToggleBtn.Parent = toggleBtnFrame
-
--- Universal Sound Player
-local function playCustomSound(soundId)
-    local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://" .. tostring(soundId)
-    sound.Volume = 0.6
-    sound.Parent = hud
-    sound:Play()
-    Debris:AddItem(sound, 3)
-end
 
 -- Box Creator Utility
 local function createBox(name, text, withDot, interactive)
@@ -172,7 +172,7 @@ local function createBox(name, text, withDot, interactive)
     return box, label, dot
 end
 
--- Toggles Creation
+-- Toggles Layout Creation
 local _, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
 tagsLabel.MouseButton1Click:Connect(function()
     playCustomSound(107406973902030)
@@ -217,7 +217,7 @@ animLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- SPAM ENGINE SYSTEM
+-- SPAM SYSTEM
 local spamText = "SCRIPTER ]> NAMELESS 💢 \\\\ THEFAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢//SAB BACHE HO💢..."
 
 local function sendChatMessage(message)
@@ -245,9 +245,9 @@ task.spawn(function()
     end
 end)
 
--- MULTI-TAP HARDSYNC SPIN AND SLIDE ENGINE FIX
+-- === FIXED LOGO SPIN & HUD INTERACTION ENGINE ===
 local isTweeningHUD = false
-local incrementalRotation = 0
+local currentRotation = 0
 
 logoToggleBtn.MouseButton1Click:Connect(function()
     if isTweeningHUD then return end
@@ -256,21 +256,21 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     
     AuraState.hudVisible = not AuraState.hudVisible
     
-    -- Har tap par rotational shift constant rahega chahe condition sliding out ho ya back in
-    incrementalRotation = incrementalRotation + 360
+    -- Har click par 360 degree spin loop add karega infinitely
+    currentRotation = currentRotation + 360
     
     local targetBarPos
     if AuraState.hudVisible then
-        targetBarPos = UDim2.new(0, -45, 0, 0) -- Slider moves right up behind the boundary bounds safely
+        targetBarPos = UDim2.new(1, -45, 0, 6) -- Completely out smoothly positioned
     else
         local barWidth = bar.AbsoluteSize.X
-        targetBarPos = UDim2.new(0, barWidth + 60, 0, 0) -- Hides completely cleanly, no elements visual bleedover
+        targetBarPos = UDim2.new(1, barWidth + 10, 0, 6) -- Slides behind logo safely into edge
     end
     
-    local rotationTween = TweenService:Create(logoToggleBtn, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Rotation = incrementalRotation
+    local rotationTween = TweenService:Create(logoToggleBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Rotation = currentRotation
     })
-    local slideTween = TweenService:Create(bar, TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+    local slideTween = TweenService:Create(bar, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
         Position = targetBarPos
     })
     
@@ -282,7 +282,7 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- HUD Core Refresh
+-- HUD Sync Engine
 local function syncHUD()
     tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
     tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
@@ -316,7 +316,7 @@ task.spawn(function()
 end)
 
 -- =====================
--- FRIEND JOIN NOTIFICATION BYPASS SYSTEM
+-- FRIEND JOIN LOGO SYSTEM
 -- =====================
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
@@ -389,36 +389,23 @@ end
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
--- COMPLEX UNBREAKABLE AURA & PERMANENT TAG CORE ENGINE
+-- CHARACTER ENGINE (Persistent Auras & Un-Vanishing Tags)
 -- =====================
-local renderConnection = nil
-
-local function setupCharacter(character)
-    if not character then return end
-    
-    -- Purani rendering connection system pipeline flush cleanly
-    if renderConnection then
-        renderConnection:Disconnect()
-        renderConnection = nil
-    end
-
+local function setup(character)
     local head = character:WaitForChild("Head", 10)
     local humanoid = character:WaitForChild("Humanoid", 10)
+    local animator = humanoid:WaitForChild("Animator", 10)
     local hrp = character:WaitForChild("HumanoidRootPart", 10)
+    if not head or not humanoid or not hrp or not animator then return end
     
-    if not head or not humanoid or not hrp then return end
-    local animator = humanoid:WaitForChild("Animator", 10) or Instance.new("Animator", humanoid)
-
+    local camera = workspace.CurrentCamera
     AuraState.emitters = {}
 
-    -- Force Clear Active Double Tags
-    for _, v in ipairs(head:GetChildren()) do
-        if v.Name == "EACircle" or v.Name == "OverheadTag" then
-            v:Destroy()
-        end
-    end
+    -- Re-render / Clear elements safely
+    if head:FindFirstChild("EACircle") then head.EACircle:Destroy() end
+    if head:FindFirstChild("OverheadTag") then head.OverheadTag:Destroy() end
 
-    -- Persistent Round Shield Logo Token Token
+    -- ===== LOGO TOKEN CIRCLE =====
     local eaBillboard = Instance.new("BillboardGui")
     eaBillboard.Name = "EACircle"
     eaBillboard.Size = UDim2.new(0, 28, 0, 28)
@@ -450,7 +437,7 @@ local function setupCharacter(character)
     eaLogoImage.Image = CUSTOM_LOGO_ID
     eaLogoImage.Parent = eaCircle
 
-    -- Full Text Overhead Identity Bar Frame
+    -- ===== FULL OVERHEAD TEXT TAG =====
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "OverheadTag"
     billboard.Size = UDim2.new(0, 140, 0, 36)
@@ -511,43 +498,35 @@ local function setupCharacter(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- Rigid Unbreakable Engine For Distance Culling and Continuous Infinite Rotation
+    -- Spin & Range Render Connection
+    local distConn
     local rotAngle = 0
-    local camera = workspace.CurrentCamera
-    
-    renderConnection = RunService.RenderStepped:Connect(function(dt)
-        if not character or not character.Parent or not head or not head.Parent then
-            if renderConnection then renderConnection:Disconnect() renderConnection = nil end
-            return 
-        end
+    distConn = RunService.RenderStepped:Connect(function(dt)
+        if not character.Parent or not head.Parent then distConn:Disconnect() return end
         
         rotAngle = (rotAngle + (90 * dt)) % 360
-        if eaLogoImage and eaLogoImage.Parent then eaLogoImage.Rotation = rotAngle end
-        if tagLogoImage and tagLogoImage.Parent then tagLogoImage.Rotation = rotAngle end
+        eaLogoImage.Rotation = rotAngle
+        tagLogoImage.Rotation = rotAngle
         
-        -- Lock mechanism control over setting modifications
         if not AuraState.tagsEnabled then
             billboard.Enabled = false
             eaBillboard.Enabled = false
             return
         end
-        
-        local activeCamera = workspace.CurrentCamera or camera
-        if activeCamera then
-            local dist = (activeCamera.CFrame.Position - head.Position).Magnitude
-            if dist > 40 then
-                billboard.Enabled = false
-                eaBillboard.Enabled = true
-            else
-                billboard.Enabled = true
-                eaBillboard.Enabled = false
-            end
+        local dist = (camera.CFrame.Position - head.Position).Magnitude
+        if dist > 40 then
+            billboard.Enabled = false
+            eaBillboard.Enabled = true
+        else
+            billboard.Enabled = true
+            eaBillboard.Enabled = false
         end
     end)
 
-    -- Particle Generators Factory
+    -- Aura Particle Injector Function
     local function createThunder(parent, offsetY, rate, speed, size)
         local att = Instance.new("Attachment")
+        att.Name = "AuraAttachment"
         att.Position = Vector3.new(0, offsetY, 0)
         att.Parent = parent
 
@@ -605,80 +584,55 @@ local function setupCharacter(character)
         glow.Speed = NumberRange.new(1, 2.5)
         glow.SpreadAngle = Vector2.new(360, 360)
 
-        local smoke = Instance.new("ParticleEmitter")
-        smoke.Parent = att
-        smoke.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 0, 0))
-        })
-        smoke.LightEmission = 0.2
-        smoke.LightInfluence = 0.5
-        smoke.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 0.8),
-            NumberSequenceKeypoint.new(0.5, size * 2.2),
-            NumberSequenceKeypoint.new(1, 0)
-        })
-        smoke.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.5),
-            NumberSequenceKeypoint.new(0.6, 0.8),
-            NumberSequenceKeypoint.new(1, 1)
-        })
-        smoke.Lifetime = NumberRange.new(0.4, 0.8)
-        smoke.Rate = rate * 0.4
-        smoke.Speed = NumberRange.new(1, 3)
-        smoke.SpreadAngle = Vector2.new(45, 45)
-
         thunder.Enabled = AuraState.auraEnabled
         glow.Enabled = AuraState.auraEnabled
-        smoke.Enabled = AuraState.auraEnabled
 
         table.insert(AuraState.emitters, thunder)
         table.insert(AuraState.emitters, glow)
-        table.insert(AuraState.emitters, smoke)
     end
 
-    -- Process Injection To All Valid Core Body Parts Safely
-    for _, obj in ipairs(character:GetChildren()) do
-        if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
-            createThunder(obj, 0, 45, 4, 1.1)
+    -- Persistent Aura Generator Logic (Scans All Available Base Body limbs)
+    local function applyFullAura()
+        for _, obj in ipairs(character:GetChildren()) do
+            if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
+                -- Purane bache attachments ko completely wipe karke fresh lagane ke liye
+                for _, oldAtt in ipairs(obj:GetChildren()) do
+                    if oldAtt.Name == "AuraAttachment" then oldAtt:Destroy() end
+                end
+                createThunder(obj, 0, 55, 4, 1.2)
+            end
         end
+        
+        -- HRP Extra Layer Base Aura Injection
+        for _, oldAtt in ipairs(hrp:GetChildren()) do
+            if oldAtt.Name == "AuraAttachment" then oldAtt:Destroy() end
+        end
+        createThunder(hrp, 0, 65, 5, 1.4)
+        createThunder(hrp, 1.5, 40, 4, 1.0)
+        createThunder(hrp, -1.5, 40, 4, 1.0)
     end
-    createThunder(hrp, 0, 65, 5, 1.4)
-    createThunder(hrp, 1, 35, 4, 1.0)
-    createThunder(hrp, -1, 35, 4, 1.0)
+    applyFullAura()
 
-    -- Dynamic Ground Array Emitter Setup
-    local groundAtt = Instance.new("Attachment")
-    groundAtt.Position = Vector3.new(0, -3, 0)
-    groundAtt.Parent = hrp
+    -- ===== ANTI-AVATAR CHANGE RESISTANT TRACKERS =====
+    -- Agar avatar dynamically inline change hota hai to ye automatic reload kar dega bina aura lose kiye
+    local childAddedConn = character.ChildAdded:Connect(function(child)
+        if child:IsA("BasePart") or child:IsA("Accessory") then
+            task.defer(applyFullAura)
+        end
+    end)
+    local childRemovedConn = character.ChildRemoved:Connect(function(child)
+        if child:IsA("BasePart") then
+            task.defer(applyFullAura)
+        end
+    end)
 
-    local groundThunder = Instance.new("ParticleEmitter")
-    groundThunder.Parent = groundAtt
-    groundThunder.Texture = "rbxassetid://6101261905"
-    groundThunder.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 40)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 0))
-    })
-    groundThunder.LightEmission = 1
-    groundThunder.LightInfluence = 0
-    groundThunder.Size = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.4),
-        NumberSequenceKeypoint.new(0.4, 1.4),
-        NumberSequenceKeypoint.new(1, 0)
-    })
-    groundThunder.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.1),
-        NumberSequenceKeypoint.new(1, 1)
-    })
-    groundThunder.Lifetime = NumberRange.new(0.4, 0.7)
-    groundThunder.Rate = 75
-    groundThunder.Speed = NumberRange.new(3, 6)
-    groundThunder.SpreadAngle = Vector2.new(110, 110)
-    groundThunder.EmissionDirection = Enum.NormalId.Bottom
-    groundThunder.Enabled = AuraState.auraEnabled
-    table.insert(AuraState.emitters, groundThunder)
+    -- Cleanup listeners safely on death
+    humanoid.Died:Connect(function()
+        childAddedConn:Disconnect()
+        childRemovedConn:Disconnect()
+    end)
 
-    -- Idle Loop System Injection
+    -- Idle Animation Player Engine
     local idleAnim = Instance.new("Animation")
     idleAnim.AnimationId = "rbxassetid://138665010911335"
 
@@ -704,20 +658,27 @@ local function setupCharacter(character)
     end
 end
 
--- =====================
--- MULTI-LOAD AVATAR PERSISTENCE EVENT RIGS
--- =====================
-local function onCharacterReady(character)
-    if not character then return end
-    setupCharacter(character)
+-- ===== CORE REVALIDATION LOOP (Anti-Vanishing Tag Engine) =====
+-- Ye backup thread har half second me checks run karega taaki tag kabhi disappear na ho sake
+task.spawn(function()
+    while true do
+        local char = player.Character
+        if char and char:Parent() then
+            local head = char:FindFirstChild("Head")
+            if head then
+                if AuraState.tagsEnabled and not head:FindFirstChild("OverheadTag") then
+                    pcall(setup, char)
+                end
+            end
+        end
+        task.wait(0.5)
+    end
+end)
+
+local function safeSetup(character)
+    pcall(setup, character)
     syncHUD()
 end
 
--- Rigs up direct listeners to handle immediate changes from avatar editor manipulations instantly
-player.CharacterAdded:Connect(onCharacterReady)
-player.CharacterAppearanceLoaded:Connect(onCharacterReady)
-
--- Initial Core Run Execution Block
-if player.Character then
-    task.spawn(onCharacterReady, player.Character)
-end
+safeSetup(player.Character or player.CharacterAdded:Wait())
+player.CharacterAdded:Connect(safeSetup)
