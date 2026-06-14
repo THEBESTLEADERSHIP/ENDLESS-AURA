@@ -73,54 +73,56 @@ local function getHumanoid()
     return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 end
 
--- GLOBAL STORAGE FOR INSTANT DESTRUCTION & COUNTING
-if not _G.EndlessAuraStorage then
-    _G.EndlessAuraStorage = {
-        ExecCount = 1,
-        CurrentGui = nil,
-        ActiveConnection = nil,
-        PlatformPart = nil,
-        BV = nil,
-        BG = nil
-    }
-else
-    _G.EndlessAuraStorage.ExecCount = _G.EndlessAuraStorage.ExecCount + 1
-end
-
--- 2ND EXECUTION: FULL DESTRUCTION PROTOCOL
-if _G.EndlessAuraStorage.ExecCount == 2 then
+-- ====================================================================
+-- // RE-EXECUTION CLEAN WIPE & RESTART SYSTEM // --
+-- ====================================================================
+if _G.EndlessAuraStorage then
+    -- Purani saari cheezein ban aur gayab karne ka protocol
     if _G.EndlessAuraStorage.CurrentGui then
         _G.EndlessAuraStorage.CurrentGui:Destroy()
-        _G.EndlessAuraStorage.CurrentGui = nil
     end
     if _G.EndlessAuraStorage.ActiveConnection then
         _G.EndlessAuraStorage.ActiveConnection:Disconnect()
-        _G.EndlessAuraStorage.ActiveConnection = nil
     end
     if _G.EndlessAuraStorage.PlatformPart then
         _G.EndlessAuraStorage.PlatformPart:Destroy()
-        _G.EndlessAuraStorage.PlatformPart = nil
     end
-    if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
-    if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
-    if activeTrack then activeTrack:Stop() activeTrack = nil end
+    if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() end
+    if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() end
+    
+    -- Animation aur sounds ko complete stop karna
+    pcall(function()
+        local myChar = player.Character
+        if myChar then
+            local hum = myChar:FindFirstChildOfClass("Humanoid")
+            if hum then
+                for _, track in pairs(hum:GetPlayingAnimationTracks()) do
+                    if track.Animation.AnimationId == bangAnimId then
+                        track:Stop()
+                    end
+                end
+                hum.PlatformStand = false
+            end
+            local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")
+            local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myChar.HumanoidRootPart:FindFirstChild("RootJoint"))
+            if rootJoint then rootJoint.C0 = CFrame.new() end
+        end
+    end)
+    
     stopAllSounds()
     leaveSound:Destroy()
-    
-    pcall(function()
-        local torso = player.Character:FindFirstChild("Torso") or player.Character:FindFirstChild("LowerTorso")
-        local rootJoint = torso and (torso:FindFirstChild("RootJoint") or player.Character.HumanoidRootPart:FindFirstChild("RootJoint"))
-        if rootJoint then rootJoint.C0 = CFrame.new() end
-    end)
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.PlatformStand = false
-    end
-    return 
+    _G.EndlessAuraStorage = nil
+    task.wait(0.1) -- Fresh restart delay
 end
 
-if _G.EndlessAuraStorage.ExecCount >= 3 then
-    _G.EndlessAuraStorage.ExecCount = 1
-end
+-- Initialize clean memory storage
+_G.EndlessAuraStorage = {
+    CurrentGui = nil,
+    ActiveConnection = nil,
+    PlatformPart = nil,
+    BV = nil,
+    BG = nil
+}
 
 -- CONFIGURATIONS
 local speedMultiplier = 17.4   
@@ -148,7 +150,7 @@ end)
 -- Anti-Die System
 task.spawn(function()
     while task.wait(0.5) do
-        if _G.EndlessAuraStorage.ExecCount == 2 then break end 
+        if not _G.EndlessAuraStorage then break end 
         pcall(function()
             if game.Workspace.FallenPartsDestroyHeight ~= -500000 then
                 game.Workspace.FallenPartsDestroyHeight = -500000
@@ -162,7 +164,7 @@ task.spawn(function()
 end)
 
 -- ====================================================================
--- // RESTORED ORIGINAL SIZE & COMFORT POSITIONING PANEL GUI // --
+-- // PANEL GUI DESIGN // --
 -- ====================================================================
 local screenGui = Instance.new("ScreenGui") 
 screenGui.Name = "DeltaGlassRoboticUI" 
@@ -171,8 +173,8 @@ screenGui.Parent = game.CoreGui
 _G.EndlessAuraStorage.CurrentGui = screenGui 
 
 local mainFrame = Instance.new("Frame") 
-mainFrame.Size = UDim2.new(0, 250, 0, 360) -- Restored to original spacious design
-mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180) -- Restored to stable default center 
+mainFrame.Size = UDim2.new(0, 250, 0, 360) 
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180) 
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
 mainFrame.BackgroundTransparency = 0.45 
 mainFrame.BorderSizePixel = 2 
@@ -328,19 +330,32 @@ scrollingFrame.Parent = mainFrame
 local uiList = Instance.new("UIListLayout", scrollingFrame)
 uiList.Padding = UDim.new(0, 2)
 
--- CLEAR BUTTON (PLACED EXACTLY ABOVE MODE SELECTION BUTTON)
+-- ====================================================================
+-- // SIDE-BY-SIDE SMALL BUTTONS SETUP (ABOVE MODE SELECTION) // --
+-- ====================================================================
 local clearBtn = Instance.new("TextButton")
-clearBtn.Size = UDim2.new(1, -16, 0, 22)
-clearBtn.Position = UDim2.new(0, 8, 0, 154) -- Positioned stacked above Mode button
-clearBtn.Text = "[ CLEAR UNSELECT ALL TARGETS ]"
+clearBtn.Size = UDim2.new(0.5, -12, 0, 22) -- Made smaller (half width)
+clearBtn.Position = UDim2.new(0, 8, 0, 154) 
+clearBtn.Text = "[ CLEAR ]"
 clearBtn.BackgroundColor3 = Color3.fromRGB(25, 5, 10)
 clearBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
 clearBtn.BorderColor3 = Color3.fromRGB(200, 0, 50)
 clearBtn.Font = Enum.Font.Code
-clearBtn.TextSize = 10.5
+clearBtn.TextSize = 11
 clearBtn.Parent = mainFrame
 
--- TARGET MODE BUTTON (SHIFTED SLIGHTLY DOWN FOR STACK LAYOUT)
+local selectAllBtn = Instance.new("TextButton")
+selectAllBtn.Size = UDim2.new(0.5, -12, 0, 22) -- Placed right side of clear button
+selectAllBtn.Position = UDim2.new(0.5, 4, 0, 154) 
+selectAllBtn.Text = "[ SELECT ALL ]"
+selectAllBtn.BackgroundColor3 = Color3.fromRGB(5, 20, 10)
+selectAllBtn.TextColor3 = Color3.fromRGB(50, 255, 150)
+selectAllBtn.BorderColor3 = Color3.fromRGB(0, 200, 100)
+selectAllBtn.Font = Enum.Font.Code
+selectAllBtn.TextSize = 11
+selectAllBtn.Parent = mainFrame
+
+-- TARGET MODE BUTTON 
 local modeBtn = Instance.new("TextButton")
 modeBtn.Size = UDim2.new(1, -16, 0, 24)
 modeBtn.Position = UDim2.new(0, 8, 0, 182)
@@ -496,13 +511,24 @@ clearBtn.MouseButton1Click:Connect(function()
     if isAttached then toggleButton:Click() end
 end)
 
+selectAllBtn.MouseButton1Click:Connect(function()
+    selectedPlayers = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player then
+            table.insert(selectedPlayers, p)
+        end
+    end
+    textBox.Text = "Targets Selected: " .. tostring(#selectedPlayers)
+    updateList()
+end)
+
 textBox:GetPropertyChangedSignal("Text"):Connect(function()
     if not string.find(textBox.Text, "Targets Selected:") then updateList() end
 end) 
 updateList() 
 
 -- ====================================================================
--- // 0.0s ZERO DELAY TARGET LEAVE MATRIX TRACKER // --
+-- // 0.0s ZERO DELAY TARGET LEAVE TRACKER // --
 -- ====================================================================
 local function emergencyTargetShift()
     lastTargetSwitchTime = 0 
@@ -516,7 +542,7 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
     local targetIdx = table.find(selectedPlayers, leftPlayer)
     if targetIdx then
         table.remove(selectedPlayers, targetIdx)
-        emergencyTargetShift() -- Zero-delay evaluation trigger
+        emergencyTargetShift() 
         
         pcall(function()
             starterGui:SetCore("SendNotification", {
@@ -524,7 +550,7 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
                 Text = leftPlayer.DisplayName .. " left.",
                 Duration = 4
             })
-end)
+        end)
         
         leaveSound:Play()
         
@@ -543,7 +569,7 @@ end)
 end)
 
 -- ====================================================================
--- // ULTRA ZERO DELAY PERFORMANCE PHYSICS ATTACH MATRIX // --
+-- // MAXIMUM STUCK-FREE PHYSICS SYNCHRONIZER ENGINE // --
 -- ====================================================================
 toggleButton.MouseButton1Click:Connect(function() 
     if isAttached then 
@@ -618,7 +644,7 @@ toggleButton.MouseButton1Click:Connect(function()
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            -- INSTANT 0.1s SWITCHING SPEED FOR MULTI-TARGETS
+            -- PURE 0.1s SHIFTING INTERVAL
             if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
@@ -676,7 +702,7 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- GLUED TO TARGET MATRIX ENGINE
+            -- GLUED TO TARGET ENGINE
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
             bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300 
@@ -703,4 +729,3 @@ toggleButton.MouseButton1Click:Connect(function()
         end) 
     end 
 end)
-     
