@@ -30,7 +30,7 @@ end
 local AuraState = _G.AuraState
 
 -- =====================
--- HUD BAR LAYOUT (Advanced Boundary Clipping)
+-- HUD BAR LAYOUT (Absolute Strict Clipping Enabled)
 -- =====================
 if playerGui:FindFirstChild("AuraHUD") then
     playerGui:FindFirstChild("AuraHUD"):Destroy()
@@ -43,23 +43,23 @@ hud.IgnoreGuiInset = true
 hud.DisplayOrder = 9999999
 hud.Parent = playerGui
 
--- Invisible Master Boundary for strict cropping/clipping
+-- Master Safe Zone Outer Shell
 local hudMaster = Instance.new("Frame")
 hudMaster.Name = "HUDMaster"
-hudMaster.Size = UDim2.new(0, 800, 0, 40)
+hudMaster.Size = UDim2.new(0, 800, 0, 40) 
 hudMaster.AnchorPoint = Vector2.new(1, 0)
 hudMaster.Position = UDim2.new(1, -6, 0, 6) 
 hudMaster.BackgroundTransparency = 1
-hudMaster.ClipsDescendants = true -- Forcefully cuts everything that goes past the border
+hudMaster.ClipsDescendants = true -- Forcefully cuts rendering at borders
 hudMaster.Parent = hud
 
--- Static Logo Button on the extreme right edge
+-- Rightmost Static Logo Anchor Frame
 local logoAnchor = Instance.new("Frame")
 logoAnchor.Name = "LogoAnchor"
 logoAnchor.Size = UDim2.new(0, 28, 0, 28)
 logoAnchor.Position = UDim2.new(1, -28, 0, 6)
 logoAnchor.BackgroundTransparency = 1
-logoAnchor.ZIndex = 10 -- Always stays on top layer
+logoAnchor.ZIndex = 5 -- Kept on top layer
 logoAnchor.Parent = hudMaster
 
 local logoToggleBtn = Instance.new("ImageButton")
@@ -67,14 +67,17 @@ logoToggleBtn.Name = "LogoButton"
 logoToggleBtn.Size = UDim2.new(1, 0, 1, 0)
 logoToggleBtn.BackgroundTransparency = 1
 logoToggleBtn.Image = CUSTOM_LOGO_ID
+logoToggleBtn.ZIndex = 6
 logoToggleBtn.Parent = logoAnchor
 
--- Dynamic Wrapper Frame for sliding inside the clipping box
+-- Slide Inner Wrapper Panel
 local sliderFrame = Instance.new("Frame")
 sliderFrame.Name = "SliderFrame"
-sliderFrame.Size = UDim2.new(1, -34, 1, 0)
-sliderFrame.Position = UDim2.new(0, 0, 0, 0) -- Default Position
+sliderFrame.Size = UDim2.new(1, -34, 1, 0) -- Stops exactly before the logo zone
+sliderFrame.Position = UDim2.new(0, 0, 0, 0)
 sliderFrame.BackgroundTransparency = 1
+sliderFrame.ClipsDescendants = true -- Double assurance clipping window
+sliderFrame.ZIndex = 2
 sliderFrame.Parent = hudMaster
 
 local bar = Instance.new("Frame")
@@ -109,7 +112,7 @@ barPadding.PaddingLeft = UDim.new(0, 6)
 barPadding.PaddingRight = UDim.new(0, 6)
 barPadding.Parent = bar
 
--- Sound System
+-- Universal Sound Player
 local function playCustomSound(soundId)
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://" .. tostring(soundId)
@@ -182,7 +185,7 @@ local function createBox(name, text, withDot, interactive)
     return box, label, dot
 end
 
--- Setup HUD Buttons
+-- Toggles Layout Execution
 local _, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
 tagsLabel.MouseButton1Click:Connect(function()
     playCustomSound(107406973902030)
@@ -227,7 +230,7 @@ animLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- SPAM DATA SYSTEM
+-- SPAM ENGINE SYSTEM
 local spamText = "SCRIPTER ]> NAMELESS 💢 \\\\ THEFAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢//SAB BACHE HO💢..."
 
 local function sendChatMessage(message)
@@ -255,7 +258,7 @@ task.spawn(function()
     end
 end)
 
--- PERFECT CLIPPING SLIDE ENGINE INTERACTION
+-- HIGH CONTEXT ANTI-LEAK SLIDE TWEEN
 local isTweeningHUD = false
 local currentRotation = 0
 
@@ -268,19 +271,18 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     
     local targetSliderPos
     if AuraState.hudVisible then
-        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Slide Out (Poora Wapas Aayega)
+        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Instantly reveals into workspace view
         currentRotation = currentRotation - 360
     else
-        -- Slide In: Logo ko touch karte hi background window frame se cut ho jayega
-        local actualBarWidth = bar.AbsoluteSize.X
-        targetSliderPos = UDim2.new(0, actualBarWidth + 15, 0, 0) 
+        -- Shifts frame completely outside the bound window so it cuts cleanly before the logo layer
+        targetSliderPos = UDim2.new(0, 850, 0, 0) 
         currentRotation = currentRotation + 360
     end
     
-    local rotationTween = TweenService:Create(logoToggleBtn, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+    local rotationTween = TweenService:Create(logoToggleBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         Rotation = currentRotation
     })
-    local slideTween = TweenService:Create(sliderFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+    local slideTween = TweenService:Create(sliderFrame, TweenInfo.new(0.45, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
         Position = targetSliderPos
     })
     
@@ -292,7 +294,19 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Stats Loops
+-- Engine Sync
+local function syncHUD()
+    tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
+    tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
+    auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
+    animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+    spamLabel.Text = AuraState.spamEnabled and "Sᴘᴀᴍ Øɴ" or "Sᴘᴀᴍ Øғғ"
+    spamDot.BackgroundColor3 = AuraState.spamEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+end
+syncHUD()
+
 RunService.Heartbeat:Connect(function(dt)
     if dt > 0 then fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt) end
 end)
@@ -314,7 +328,7 @@ task.spawn(function()
 end)
 
 -- =====================
--- FRIEND JOIN SYSTEM (Notification Bypass)
+-- FRIEND JOIN SYSTEM (Bypass Active)
 -- =====================
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
@@ -387,24 +401,67 @@ end
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
--- CHARACTER SETUP (Bulletproof Persistent Tags)
+-- CHARACTER SETUP (Avatar Change Protection Protocol)
 -- =====================
 local function setup(character)
-    local head = character:WaitForChild("Head")
-    local humanoid = character:WaitForChild("Humanoid")
-    local animator = humanoid:WaitForChild("Animator")
-    local hrp = character:WaitForChild("HumanoidRootPart")
+    if not character or not character.Parent then return end
+    
+    local head = character:WaitForChild("Head", 5)
+    local humanoid = character:WaitForChild("Humanoid", 5)
+    if not head or not humanoid then return end
+    
+    local animator = humanoid:WaitForChild("Animator", 5)
+    local hrp = character:WaitForChild("HumanoidRootPart", 5)
+    if not hrp or not animator then return end
+
+    -- Clean up any pre-existing broken tags on this character instance
+    for _, child in ipairs(head:GetChildren()) do
+        if child.Name == "EACircle" or child.Name == "OverheadTag" then
+            child:Destroy()
+        end
+    end
 
     AuraState.emitters = {}
 
-    -- ===== PERSISTENT OVERHEAD TEXT TAG =====
+    -- ===== LOGO TOKEN CIRCLE =====
+    local eaBillboard = Instance.new("BillboardGui")
+    eaBillboard.Name = "EACircle"
+    eaBillboard.Size = UDim2.new(0, 28, 0, 28)
+    eaBillboard.StudsOffset = Vector3.new(0, 2.4, 0)
+    eaBillboard.AlwaysOnTop = true
+    eaBillboard.MaxDistance = math.huge
+    eaBillboard.Parent = head
+
+    local eaCircle = Instance.new("Frame")
+    eaCircle.Size = UDim2.new(1, 0, 1, 0)
+    eaCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    eaCircle.BackgroundTransparency = 0.5
+    eaCircle.BorderSizePixel = 0
+    eaCircle.Parent = eaBillboard
+
+    local eaCircleCorner = Instance.new("UICorner")
+    eaCircleCorner.CornerRadius = UDim.new(1, 0)
+    eaCircleCorner.Parent = eaCircle
+
+    local eaCircleStroke = Instance.new("UIStroke")
+    eaCircleStroke.Color = Color3.fromRGB(200, 0, 0)
+    eaCircleStroke.Thickness = 2
+    eaCircleStroke.Parent = eaCircle
+
+    local eaLogoImage = Instance.new("ImageLabel")
+    eaLogoImage.Size = UDim2.new(0.85, 0, 0.85, 0)
+    eaLogoImage.Position = UDim2.new(0.075, 0, 0.075, 0)
+    eaLogoImage.BackgroundTransparency = 1
+    eaLogoImage.Image = CUSTOM_LOGO_ID
+    eaLogoImage.Parent = eaCircle
+
+    -- ===== FULL OVERHEAD TEXT TAG =====
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "OverheadTag"
     billboard.Size = UDim2.new(0, 140, 0, 36)
-    billboard.StudsOffset = Vector3.new(0, 2.8, 0)
+    billboard.StudsOffset = Vector3.new(0, 2.9, 0)
     billboard.AlwaysOnTop = true
-    billboard.MaxDistance = math.huge -- Force field infinite visibility range
-    billboard.ResetOnSpawn = false
+    billboard.MaxDistance = math.huge
     billboard.Parent = head
 
     local frame = Instance.new("Frame")
@@ -459,31 +516,31 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- UNBREAKABLE RENDERING PIPELINE (Never disappears on its own)
+    -- Permanent Unbreakable Multi-Render Engine Connection
     local renderConn
     local rotAngle = 0
     renderConn = RunService.RenderStepped:Connect(function(dt)
-        -- Hard check to clean up connection if player dies/character unloads entirely
         if not character or not character.Parent or not head or not head.Parent then 
             renderConn:Disconnect() 
             return 
         end
         
-        -- Permanent Continuous Spin
-        rotAngle = (rotAngle + (100 * dt)) % 360
-        tagLogoImage.Rotation = rotAngle
+        rotAngle = (rotAngle + (90 * dt)) % 360
+        if eaLogoImage and eaLogoImage.Parent then eaLogoImage.Rotation = rotAngle end
+        if tagLogoImage and tagLogoImage.Parent then tagLogoImage.Rotation = rotAngle end
         
-        -- Anti-Disappear Rule enforcement: Overwrites any engine level occlusion glitches
-        if AuraState.tagsEnabled then
-            if not billboard.Enabled then billboard.Enabled = true end
-            if billboard.Parent ~= head then billboard.Parent = head end
-        else
+        if not AuraState.tagsEnabled then
             billboard.Enabled = false
+            eaBillboard.Enabled = false
+        else
+            billboard.Enabled = true
+            eaBillboard.Enabled = false
         end
     end)
 
-    -- Aura Particle Generators
+    -- Aura Generators Injection Pipeline
     local function createThunder(parent, offsetY, rate, speed, size)
+        if not parent or not parent.Parent then return end
         local att = Instance.new("Attachment")
         att.Position = Vector3.new(0, offsetY, 0)
         att.Parent = parent
@@ -625,7 +682,7 @@ local function setup(character)
     groundThunder.Enabled = AuraState.auraEnabled
     table.insert(AuraState.emitters, groundThunder)
 
-    -- Dynamic Idle Execution
+    -- Dynamic Idle Execution Engine
     local idleAnim = Instance.new("Animation")
     idleAnim.AnimationId = "rbxassetid://138665010911335"
 
@@ -651,9 +708,26 @@ local function setup(character)
     end
 end
 
-local function safeSetup(character)
-    pcall(setup, character)
+-- Strict Avatar Appearance Observers Connection
+local function attachCharacterTracks(character)
+    if not character then return end
+    
+    -- Baseline boot execution
+    task.spawn(setup, character)
+    
+    -- Sub-Pipeline A: Triggers safely when clothes/assets finish streaming
+    character.CharacterAppearanceLoaded:Connect(function()
+        task.spawn(setup, character)
+    end)
+    
+    -- Sub-Pipeline B: Triggers instantly if catalog avatar description modifications are injected
+    local humanoid = character:WaitForChild("Humanoid", 10)
+    if humanoid then
+        humanoid.DescriptionApplied:Connect(function()
+            task.spawn(setup, character)
+        end)
+    end
 end
 
-if player.Character then safeSetup(player.Character) end
-player.CharacterAdded:Connect(safeSetup)
+if player.Character then attachCharacterTracks(player.Character) end
+player.CharacterAdded:Connect(attachCharacterTracks)
