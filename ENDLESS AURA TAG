@@ -40,7 +40,7 @@ local hud = Instance.new("ScreenGui")
 hud.Name = "AuraHUD"
 hud.ResetOnSpawn = false
 hud.IgnoreGuiInset = true 
-hud.DisplayOrder = 9999999
+hud.DisplayOrder = 999999999 -- Maximum layer priority above Roblox Core GUI
 hud.Parent = playerGui
 
 -- Master Safe Zone Outer Shell
@@ -59,7 +59,7 @@ logoAnchor.Name = "LogoAnchor"
 logoAnchor.Size = UDim2.new(0, 28, 0, 28)
 logoAnchor.Position = UDim2.new(1, -28, 0, 6)
 logoAnchor.BackgroundTransparency = 1
-logoAnchor.ZIndex = 5 -- Kept on top layer
+logoAnchor.ZIndex = 5 
 logoAnchor.Parent = hudMaster
 
 local logoToggleBtn = Instance.new("ImageButton")
@@ -73,10 +73,10 @@ logoToggleBtn.Parent = logoAnchor
 -- Slide Inner Wrapper Panel
 local sliderFrame = Instance.new("Frame")
 sliderFrame.Name = "SliderFrame"
-sliderFrame.Size = UDim2.new(1, -34, 1, 0) -- Stops exactly before the logo zone
+sliderFrame.Size = UDim2.new(1, -34, 1, 0) 
 sliderFrame.Position = UDim2.new(0, 0, 0, 0)
 sliderFrame.BackgroundTransparency = 1
-sliderFrame.ClipsDescendants = true -- Double assurance clipping window
+sliderFrame.ClipsDescendants = true 
 sliderFrame.ZIndex = 2
 sliderFrame.Parent = hudMaster
 
@@ -230,8 +230,8 @@ animLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- SPAM ENGINE SYSTEM
-local spamText = "SCRIPTER ]> NAMELESS 💢 \\\\ THEFAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢//SAB BACHE HO💢..."
+-- SPAM ENGINE SYSTEM (Updated Configuration String)
+local spamText = "SCRIPTER ]> NAMELESS💢//THE FAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢..."
 
 local function sendChatMessage(message)
     if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
@@ -258,7 +258,7 @@ task.spawn(function()
     end
 end)
 
--- HIGH CONTEXT ANTI-LEAK SLIDE TWEEN
+-- PRECISE SLIDE IN/OUT CLIPPING SYSTEM (Symmetric Fluid Motion)
 local isTweeningHUD = false
 local currentRotation = 0
 
@@ -271,10 +271,11 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     
     local targetSliderPos
     if AuraState.hudVisible then
-        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Instantly reveals into workspace view
+        -- Returns back out using the exact same path smoothly
+        targetSliderPos = UDim2.new(0, 0, 0, 0) 
         currentRotation = currentRotation - 360
     else
-        -- Shifts frame completely outside the bound window so it cuts cleanly before the logo layer
+        -- Slides inside the boundary zone cutting instantly right at the edge threshold
         targetSliderPos = UDim2.new(0, 850, 0, 0) 
         currentRotation = currentRotation + 360
     end
@@ -282,7 +283,7 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     local rotationTween = TweenService:Create(logoToggleBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         Rotation = currentRotation
     })
-    local slideTween = TweenService:Create(sliderFrame, TweenInfo.new(0.45, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+    local slideTween = TweenService:Create(sliderFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
         Position = targetSliderPos
     })
     
@@ -328,7 +329,7 @@ task.spawn(function()
 end)
 
 -- =====================
--- FRIEND JOIN SYSTEM (Bypass Active)
+-- FRIEND JOIN SYSTEM (User Headshot Configuration Enabled)
 -- =====================
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
@@ -360,13 +361,19 @@ local function showJoinNotification(joinedPlayer)
     notifStroke.Thickness = 1.8
     notifStroke.Parent = notifFrame
 
-    local logoImg = Instance.new("ImageLabel")
-    logoImg.Size = UDim2.new(0, 48, 0, 48)
-    logoImg.Position = UDim2.new(0, 10, 0.5, -24)
-    logoImg.BackgroundTransparency = 1 
-    logoImg.BorderSizePixel = 0
-    logoImg.Image = CUSTOM_LOGO_ID
-    logoImg.Parent = notifFrame
+    -- Dynamic Joining Player Avatar Headshot Image Engine Injector
+    local avatarImg = Instance.new("ImageLabel")
+    avatarImg.Size = UDim2.new(0, 48, 0, 48)
+    avatarImg.Position = UDim2.new(0, 10, 0.5, -24)
+    avatarImg.BackgroundTransparency = 1 
+    avatarImg.BorderSizePixel = 0
+    -- Fetches high resolution user card thumb data instantly
+    avatarImg.Image = Players:GetUserThumbnailAsync(joinedPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+    avatarImg.Parent = notifFrame
+
+    local avatarCorner = Instance.new("UICorner")
+    avatarCorner.CornerRadius = UDim.new(1, 0) -- Round clip frame for avatar headshot
+    avatarCorner.Parent = avatarImg
 
     local txtLabel = Instance.new("TextLabel")
     txtLabel.Size = UDim2.new(1, -74, 1, 0)
@@ -414,7 +421,7 @@ local function setup(character)
     local hrp = character:WaitForChild("HumanoidRootPart", 5)
     if not hrp or not animator then return end
 
-    -- Clean up any pre-existing broken tags on this character instance
+    -- Clean up any pre-existing tags to completely avoid stacking clones
     for _, child in ipairs(head:GetChildren()) do
         if child.Name == "EACircle" or child.Name == "OverheadTag" then
             child:Destroy()
@@ -437,7 +444,7 @@ local function setup(character)
     eaCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     eaCircle.BackgroundTransparency = 0.5
     eaCircle.BorderSizePixel = 0
-    eaCircle.Parent = eaBillboard
+    eaCircle.Parent = eaCircle
 
     local eaCircleCorner = Instance.new("UICorner")
     eaCircleCorner.CornerRadius = UDim.new(1, 0)
@@ -516,7 +523,7 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- Permanent Unbreakable Multi-Render Engine Connection
+    -- Persistent Render Engine Connection
     local renderConn
     local rotAngle = 0
     renderConn = RunService.RenderStepped:Connect(function(dt)
@@ -712,15 +719,12 @@ end
 local function attachCharacterTracks(character)
     if not character then return end
     
-    -- Baseline boot execution
     task.spawn(setup, character)
     
-    -- Sub-Pipeline A: Triggers safely when clothes/assets finish streaming
     character.CharacterAppearanceLoaded:Connect(function()
         task.spawn(setup, character)
     end)
     
-    -- Sub-Pipeline B: Triggers instantly if catalog avatar description modifications are injected
     local humanoid = character:WaitForChild("Humanoid", 10)
     if humanoid then
         humanoid.DescriptionApplied:Connect(function()
