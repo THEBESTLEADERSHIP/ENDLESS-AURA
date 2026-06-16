@@ -1,0 +1,351 @@
+-- [[ ENDLESS OCEAN SPAMMΞR - CUSTOM BLUE THEME ]] --
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "OceanSpammerGui"
+ScreenGui.Parent = game.CoreGui or PlayerGui
+ScreenGui.ResetOnSpawn = false
+
+-- Global Balanced Audio Setup (Updated Sound Asset)
+local function playTapSound()
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://102332681553777"
+    sound.Volume = 2.5
+    sound.PlaybackSpeed = 1
+    sound.Parent = SoundService
+    sound:Play()
+    game:GetService("Debris"):AddItem(sound, 2)
+end
+
+-- Premium Ocean/Water Theme Dictionary Words
+local OceanWords = {
+    "🌊 TSUNAMI", "🦈 SHARK", "🐋 WHALE", "🧊 GLACIER", "🌀 VORTEX", 
+    "🌊 AQUA", "🔱 POSEIDON", "⚓ ANCHOR", "🌊 CURRENT", "🌊 TIDE", 
+    "🏝️ ISLAND", "🌊 ABYSS", "🌊 REEF", "🦑 KRAKEN", "🌊 WAVE", 
+    "💧 DROP", "🌊 OCEAN", "🌊 FLOOD", "🌊 STORM", "🚢 FRIGATE", 
+    "🌊 TYPHOON", "🌊 CYCLONE", "🌊 HURRICANE", "🪸 CORAL", "💦 SPLASH", 
+    "🛶 RIDGE", "🧊 ICEBERG", "🧜‍♂️ TRIDENT", "🌊 DEEP", "🌌 MARIANA"
+}
+
+-- Fixed Pattern Configuration
+local FixedPattern = "@@@@@"
+
+----------------------------------------------------------------
+-- 1. DRAGGABLE "E.O" MENU TOGGLE BUTTON (BLUE THEME)
+----------------------------------------------------------------
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "MenuToggle"
+ToggleBtn.Parent = ScreenGui
+ToggleBtn.Size = UDim2.new(0, 52, 0, 52)
+ToggleBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+ToggleBtn.BackgroundTransparency = 0.25
+ToggleBtn.Text = "E.O🌊"
+ToggleBtn.TextColor3 = Color3.fromRGB(240, 245, 255)
+ToggleBtn.TextSize = 14
+ToggleBtn.Font = Enum.Font.GothamBold
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1, 0)
+ToggleCorner.Parent = ToggleBtn
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(0, 120, 255) -- Deep Blue Exterior Border
+ToggleStroke.Thickness = 2
+ToggleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+ToggleStroke.Parent = ToggleBtn
+
+-- Drag Engine for Circle Button
+local toggleDragging, toggleDragInput, toggleDragStart, toggleStartPos
+local function updateToggle(input)
+    local delta = input.Position - toggleDragStart
+    ToggleBtn.Position = UDim2.new(toggleStartPos.X.Scale, toggleStartPos.X.Offset + delta.X, toggleStartPos.Y.Scale, toggleStartPos.Y.Offset + delta.Y)
+end
+
+ToggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        toggleDragging = true
+        toggleDragStart = input.Position
+        toggleStartPos = ToggleBtn.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then toggleDragging = false end
+        end)
+    end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then toggleDragInput = input end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == toggleDragInput and toggleDragging then updateToggle(input) end
+end)
+
+----------------------------------------------------------------
+-- 2. DRAGGABLE STYLISH MAIN MENU GUI (COMPACT BLUE OCEAN)
+----------------------------------------------------------------
+local MainMenu = Instance.new("Frame")
+MainMenu.Name = "MainMenu"
+MainMenu.Parent = ScreenGui
+MainMenu.Size = UDim2.new(0, 230, 0, 310)
+MainMenu.Position = UDim2.new(0.5, -115, 0.5, -155)
+MainMenu.BackgroundColor3 = Color3.fromRGB(5, 8, 15)
+MainMenu.BackgroundTransparency = 0.2
+MainMenu.Active = true
+MainMenu.Visible = false
+MainMenu.ClipsDescendants = true
+
+local MenuCorner = Instance.new("UICorner")
+MenuCorner.CornerRadius = UDim.new(0, 10)
+MenuCorner.Parent = MainMenu
+
+local MenuStroke = Instance.new("UIStroke")
+MenuStroke.Color = Color3.fromRGB(0, 120, 255) -- Premium Metallic Blue Border
+MenuStroke.Thickness = 2
+MenuStroke.Parent = MainMenu
+
+-- Drag Engine for Main Menu Frame
+local menuDragging, menuDragInput, menuDragStart, menuStartPos
+local function updateMenu(input)
+    local delta = input.Position - menuDragStart
+    MainMenu.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+end
+
+MainMenu.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        menuDragging = true
+        menuDragStart = input.Position
+        menuStartPos = MainMenu.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then menuDragging = false end
+        end)
+    end
+end)
+
+MainMenu.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then menuDragInput = input end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == menuDragInput and menuDragging then updateMenu(input) end
+end)
+
+----------------------------------------------------------------
+-- 3. METALLIC BLUE HEADER SETUP & DYNAMIC AVATAR HEADSHOT
+----------------------------------------------------------------
+local AuraImage = Instance.new("ImageLabel")
+AuraImage.Parent = MainMenu
+AuraImage.BackgroundTransparency = 1
+AuraImage.Position = UDim2.new(0.06, 0, 0.025, 0)
+AuraImage.Size = UDim2.new(0, 20, 0, 20)
+AuraImage.Image = "rbxassetid://129299711445020"
+
+local AuraText = Instance.new("TextLabel")
+AuraText.Parent = MainMenu
+AuraText.BackgroundTransparency = 1
+AuraText.Position = UDim2.new(0.18, 0, 0.025, 0)
+AuraText.Size = UDim2.new(0.45, 0, 0, 20)
+AuraText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ 💢"
+AuraText.TextColor3 = Color3.fromRGB(0, 90, 190) -- Metallic Blue Configuration
+AuraText.TextSize = 12
+AuraText.Font = Enum.Font.BuilderSansBold
+AuraText.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Dynamic Avatar Headshot Setup with Blue Border
+local AvatarImage = Instance.new("ImageLabel")
+AvatarImage.Parent = MainMenu
+AvatarImage.Size = UDim2.new(0, 24, 0, 24)
+AvatarImage.Position = UDim2.new(0.82, 0, 0.02, 0)
+AvatarImage.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0)
+
+local AvatarStroke = Instance.new("UIStroke", AvatarImage)
+AvatarStroke.Color = Color3.fromRGB(0, 120, 255) -- Sharp Blue Avatar Border
+AvatarStroke.Thickness = 1.5
+
+-- Pushes Local User Headshot Thumbnail Data
+task.spawn(function()
+    pcall(function()
+        local userId = LocalPlayer.UserId
+        local thumbType = Enum.ThumbnailType.HeadShot
+        local thumbSize = Enum.ThumbnailSize.Size48x48
+        local content, isReady = Players:GetUserThumbnailAsync(userId, thumbType, thumbSize)
+        if isReady then AvatarImage.Image = content end
+    end)
+end)
+
+local HeaderLine = Instance.new("Frame")
+HeaderLine.Parent = MainMenu
+HeaderLine.Size = UDim2.new(1, 0, 0, 2)
+HeaderLine.Position = UDim2.new(0, 0, 0.11, 0)
+HeaderLine.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+HeaderLine.BorderSizePixel = 0
+
+local Title = Instance.new("TextLabel")
+Title.Parent = MainMenu
+Title.Size = UDim2.new(1, 0, 0, 22)
+Title.Position = UDim2.new(0, 0, 0.14, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.Text = "ENDLESS OCEAN SPAMMER🌊"
+Title.TextColor3 = Color3.fromRGB(0, 100, 220) -- Dark Blue Core
+Title.TextSize = 13
+
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Parent = MainMenu
+Subtitle.Size = UDim2.new(1, 0, 0, 12)
+Subtitle.Position = UDim2.new(0, 0, 0.22, 0)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Font = Enum.Font.SourceSans
+Subtitle.Text = "SCRIPTED BY NAMELESS"
+Subtitle.TextColor3 = Color3.fromRGB(90, 110, 140)
+Subtitle.TextSize = 10
+
+local InstaLabel = Instance.new("TextLabel")
+InstaLabel.Parent = MainMenu
+InstaLabel.Size = UDim2.new(1, 0, 0, 16)
+InstaLabel.Position = UDim2.new(0, 0, 0.28, 0)
+InstaLabel.BackgroundTransparency = 1
+InstaLabel.Font = Enum.Font.GothamBold
+InstaLabel.Text = "INSTA ID > ea_nameless"
+InstaLabel.TextSize = 12
+
+task.spawn(function()
+    while true do
+        InstaLabel.TextColor3 = Color3.fromRGB(0, 120, 255)
+        task.wait(0.5)
+        InstaLabel.TextColor3 = Color3.fromRGB(220, 240, 255)
+        task.wait(0.5)
+    end
+end)
+
+----------------------------------------------------------------
+-- 4. OCEAN BOUNDED SINGLE TARGET FIELDS
+----------------------------------------------------------------
+local TargetBox = Instance.new("TextBox")
+TargetBox.Parent = MainMenu
+TargetBox.Size = UDim2.new(0, 180, 0, 32)
+TargetBox.Position = UDim2.new(0.11, 0, 0.4, 0)
+TargetBox.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+TargetBox.PlaceholderText = "( PANI KA NAME)"
+TargetBox.Text = ""
+TargetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TargetBox.TextSize = 12
+TargetBox.Font = Enum.Font.SourceSansSemibold
+TargetBox.ClipsDescendants = true
+TargetBox.TextWrapped = true
+Instance.new("UICorner", TargetBox).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", TargetBox).Color = Color3.fromRGB(30, 50, 80)
+
+local DelayBox = Instance.new("TextBox")
+DelayBox.Parent = MainMenu
+DelayBox.Size = UDim2.new(0, 180, 0, 32)
+DelayBox.Position = UDim2.new(0.11, 0, 0.55, 0)
+DelayBox.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+DelayBox.PlaceholderText = "( PANI KI SPEED)"
+DelayBox.Text = "0.5"
+DelayBox.TextColor3 = Color3.fromRGB(0, 150, 255) -- Ice Blue Text Data
+DelayBox.TextSize = 12
+DelayBox.Font = Enum.Font.SourceSansSemibold
+DelayBox.ClipsDescendants = true
+DelayBox.TextWrapped = true
+Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", DelayBox).Color = Color3.fromRGB(30, 50, 80)
+
+----------------------------------------------------------------
+-- 5. BLUE SYSTEM TOGGLE EXECUTION LOGIC (NO TEXT STROKE)
+----------------------------------------------------------------
+local StartBtn = Instance.new("TextButton")
+StartBtn.Parent = MainMenu
+StartBtn.Size = UDim2.new(0, 160, 0, 40)
+StartBtn.Position = UDim2.new(0.15, 0, 0.76, 0)
+StartBtn.Font = Enum.Font.GothamBold
+StartBtn.TextSize = 13
+Instance.new("UICorner", StartBtn).CornerRadius = UDim.new(0, 6)
+
+-- Init State Setup: OFF (START SPAM Mode Blue Config)
+StartBtn.Text = "START SPAM"
+StartBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+StartBtn.TextColor3 = Color3.fromRGB(0, 100, 255)
+
+local isSpamming = false
+
+local function executeChat(msg)
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        local targetChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if targetChannel then targetChannel:SendAsync(msg) end
+    else
+        local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        if chatEvent then chatEvent:FireServer(msg, "All") end
+    end
+end
+
+local function generatePatternString(patternUnit, maxLen)
+    local result = ""
+    local unitLen = string.len(patternUnit)
+    if unitLen == 0 then return "" end
+    while (string.len(result) + unitLen) <= maxLen do
+        result = result .. patternUnit
+    end
+    return result
+end
+
+local function buildSpamString(sender, target, rawWord, patternUnit)
+    local prefix = "SCRIPT BY " .. sender .. " > "
+    local suffix = " [ " .. target .. " ] TMX MI " .. rawWord
+    local staticLength = string.len(prefix) + string.len(suffix)
+    local maxAllowedPatternLength = 195 - staticLength
+    
+    if maxAllowedPatternLength < 0 then
+        return string.sub(prefix .. suffix, 1, 195)
+    end
+    
+    local dynamicPattern = generatePatternString(patternUnit, maxAllowedPatternLength)
+    return string.sub(prefix .. dynamicPattern .. suffix, 1, 195)
+end
+
+StartBtn.MouseButton1Click:Connect(function()
+    playTapSound()
+    isSpamming = not isSpamming
+    
+    if isSpamming then
+        -- Action Configuration: ON (STOP SPAM State Blue Config)
+        StartBtn.Text = "STOP SPAM"
+        StartBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 220)
+        StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        
+        task.spawn(function()
+            while isSpamming do
+                local senderName = "NAMELESS Pres" and "NAMELESS🌊"
+                local targetName = TargetBox.Text ~= "" and TargetBox.Text or "NOOB WATER"
+                local speed = tonumber(DelayBox.Text) or 0.5
+                
+                local selectedWord = OceanWords[math.random(1, #OceanWords)]
+                
+                local processedPayload = buildSpamString(senderName, targetName, selectedWord, FixedPattern)
+                executeChat(processedPayload)
+                
+                task.wait(speed)
+            end
+        end)
+    else
+        -- Action Configuration: OFF (START SPAM State Blue Config)
+        StartBtn.Text = "START SPAM"
+        StartBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        StartBtn.TextColor3 = Color3.fromRGB(0, 100, 255)
+    end
+end)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    playTapSound()
+    MainMenu.Visible = not MainMenu.Visible
+end)
+
