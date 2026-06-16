@@ -40,7 +40,7 @@ local hud = Instance.new("ScreenGui")
 hud.Name = "AuraHUD"
 hud.ResetOnSpawn = false
 hud.IgnoreGuiInset = true 
-hud.DisplayOrder = 999999999 -- Maximum layer priority above Roblox Core GUI
+hud.DisplayOrder = 9999999
 hud.Parent = playerGui
 
 -- Master Safe Zone Outer Shell
@@ -50,7 +50,7 @@ hudMaster.Size = UDim2.new(0, 800, 0, 40)
 hudMaster.AnchorPoint = Vector2.new(1, 0)
 hudMaster.Position = UDim2.new(1, -6, 0, 6) 
 hudMaster.BackgroundTransparency = 1
-hudMaster.ClipsDescendants = true -- Forcefully cuts rendering at borders
+hudMaster.ClipsDescendants = true 
 hudMaster.Parent = hud
 
 -- Rightmost Static Logo Anchor Frame
@@ -230,7 +230,7 @@ animLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- SPAM ENGINE SYSTEM (Updated Configuration String)
+-- NEW UPDATED SPAM STRING
 local spamText = "SCRIPTER ]> NAMELESS💢//THE FAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢..."
 
 local function sendChatMessage(message)
@@ -258,7 +258,7 @@ task.spawn(function()
     end
 end)
 
--- PRECISE SLIDE IN/OUT CLIPPING SYSTEM (Symmetric Fluid Motion)
+-- ACCURATE CLIPPING & INFINITE CYCLE TWEEN
 local isTweeningHUD = false
 local currentRotation = 0
 
@@ -271,19 +271,17 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     
     local targetSliderPos
     if AuraState.hudVisible then
-        -- Returns back out using the exact same path smoothly
-        targetSliderPos = UDim2.new(0, 0, 0, 0) 
+        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Smoothly slides right back fully into display view
         currentRotation = currentRotation - 360
     else
-        -- Slides inside the boundary zone cutting instantly right at the edge threshold
-        targetSliderPos = UDim2.new(0, 850, 0, 0) 
+        targetSliderPos = UDim2.new(0, 850, 0, 0) -- Cuts away cleanly before it overflows past the logo frame
         currentRotation = currentRotation + 360
     end
     
     local rotationTween = TweenService:Create(logoToggleBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         Rotation = currentRotation
     })
-    local slideTween = TweenService:Create(sliderFrame, TweenInfo.new(0.5, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+    local slideTween = TweenService:Create(sliderFrame, TweenInfo.new(0.45, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
         Position = targetSliderPos
     })
     
@@ -329,7 +327,7 @@ task.spawn(function()
 end)
 
 -- =====================
--- FRIEND JOIN SYSTEM (User Headshot Configuration Enabled)
+-- FRIEND JOIN SYSTEM (Dynamic Avatar Headshot Added)
 -- =====================
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
@@ -361,18 +359,25 @@ local function showJoinNotification(joinedPlayer)
     notifStroke.Thickness = 1.8
     notifStroke.Parent = notifFrame
 
-    -- Dynamic Joining Player Avatar Headshot Image Engine Injector
+    -- Dynamic Friend Character Headshot Thumbnail Configuration
     local avatarImg = Instance.new("ImageLabel")
     avatarImg.Size = UDim2.new(0, 48, 0, 48)
     avatarImg.Position = UDim2.new(0, 10, 0.5, -24)
     avatarImg.BackgroundTransparency = 1 
     avatarImg.BorderSizePixel = 0
-    -- Fetches high resolution user card thumb data instantly
-    avatarImg.Image = Players:GetUserThumbnailAsync(joinedPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+    
+    -- Fetches the exact headshot of the joining user id natively
+    local thumbType = Enum.ThumbnailType.HeadShot
+    local thumbSize = Enum.ThumbnailSize.Size420x420
+    pcall(function()
+        local content, isReady = Players:GetUserThumbnailAsync(joinedPlayer.UserId, thumbType, thumbSize)
+        avatarImg.Image = content
+    end)
     avatarImg.Parent = notifFrame
 
+    -- Circular mask for clean premium display bounds
     local avatarCorner = Instance.new("UICorner")
-    avatarCorner.CornerRadius = UDim.new(1, 0) -- Round clip frame for avatar headshot
+    avatarCorner.CornerRadius = UDim.new(1, 0)
     avatarCorner.Parent = avatarImg
 
     local txtLabel = Instance.new("TextLabel")
@@ -421,7 +426,7 @@ local function setup(character)
     local hrp = character:WaitForChild("HumanoidRootPart", 5)
     if not hrp or not animator then return end
 
-    -- Clean up any pre-existing tags to completely avoid stacking clones
+    -- Clean up any pre-existing broken tags on this character instance
     for _, child in ipairs(head:GetChildren()) do
         if child.Name == "EACircle" or child.Name == "OverheadTag" then
             child:Destroy()
@@ -523,7 +528,7 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- Persistent Render Engine Connection
+    -- Permanent Unbreakable Multi-Render Engine Connection
     local renderConn
     local rotAngle = 0
     renderConn = RunService.RenderStepped:Connect(function(dt)
