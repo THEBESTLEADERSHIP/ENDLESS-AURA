@@ -220,7 +220,7 @@ animLabel.MouseButton1Click:Connect(function()
     if AuraState.currentTrack then
         if AuraState.animEnabled then
             local character = player.Character
-            local humanoid = character and character:FindFirstChild("Humanoid")
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
             if humanoid and humanoid.MoveDirection.Magnitude < 0.1 then
                 AuraState.currentTrack:Play()
             end
@@ -230,7 +230,7 @@ animLabel.MouseButton1Click:Connect(function()
     end
 end)
 
--- NEW UPDATED SPAM STRING
+-- UPDATED SPAM TEXT CONFIGURATION
 local spamText = "SCRIPTER ]> NAMELESS💢//THE FAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢..."
 
 local function sendChatMessage(message)
@@ -258,7 +258,7 @@ task.spawn(function()
     end
 end)
 
--- ACCURATE CLIPPING & INFINITE CYCLE TWEEN
+-- SLIDE OUT & PERFECT REVERSE RETURN TWEEN ENGINE
 local isTweeningHUD = false
 local currentRotation = 0
 
@@ -271,10 +271,10 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     
     local targetSliderPos
     if AuraState.hudVisible then
-        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Smoothly slides right back fully into display view
+        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Smoothly returns exactly back to original visible spot
         currentRotation = currentRotation - 360
     else
-        targetSliderPos = UDim2.new(0, 850, 0, 0) -- Cuts away cleanly before it overflows past the logo frame
+        targetSliderPos = UDim2.new(0, 850, 0, 0) -- Hides cleanly past clipping window bounds
         currentRotation = currentRotation + 360
     end
     
@@ -327,7 +327,7 @@ task.spawn(function()
 end)
 
 -- =====================
--- FRIEND JOIN SYSTEM (Dynamic Avatar Headshot Added)
+-- FRIEND JOIN NOTIFICATION (Player Headshot Restored)
 -- =====================
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
@@ -359,26 +359,20 @@ local function showJoinNotification(joinedPlayer)
     notifStroke.Thickness = 1.8
     notifStroke.Parent = notifFrame
 
-    -- Dynamic Friend Character Headshot Thumbnail Configuration
+    -- Restored Player Avatar Headshot Thumbnail Thumbnail Image
     local avatarImg = Instance.new("ImageLabel")
     avatarImg.Size = UDim2.new(0, 48, 0, 48)
     avatarImg.Position = UDim2.new(0, 10, 0.5, -24)
     avatarImg.BackgroundTransparency = 1 
     avatarImg.BorderSizePixel = 0
     
-    -- Fetches the exact headshot of the joining user id natively
-    local thumbType = Enum.ThumbnailType.HeadShot
-    local thumbSize = Enum.ThumbnailSize.Size420x420
     pcall(function()
+        local thumbType = Enum.ThumbnailType.HeadShot
+        local thumbSize = Enum.ThumbnailSize.Size420x420
         local content, isReady = Players:GetUserThumbnailAsync(joinedPlayer.UserId, thumbType, thumbSize)
         avatarImg.Image = content
     end)
     avatarImg.Parent = notifFrame
-
-    -- Circular mask for clean premium display bounds
-    local avatarCorner = Instance.new("UICorner")
-    avatarCorner.CornerRadius = UDim.new(1, 0)
-    avatarCorner.Parent = avatarImg
 
     local txtLabel = Instance.new("TextLabel")
     txtLabel.Size = UDim2.new(1, -74, 1, 0)
@@ -413,20 +407,21 @@ end
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
--- CHARACTER SETUP (Avatar Change Protection Protocol)
+-- CHARACTER SETUP (Robust Fixed Core Components Loading)
 -- =====================
 local function setup(character)
     if not character or not character.Parent then return end
     
-    local head = character:WaitForChild("Head", 5)
-    local humanoid = character:WaitForChild("Humanoid", 5)
-    if not head or not humanoid then return end
+    -- Absolute Fallback Safety Scanner Engine
+    local head = character:FindFirstChild("Head") or character:WaitForChild("Head", 10)
+    local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
+    local hrp = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart", 10)
     
-    local animator = humanoid:WaitForChild("Animator", 5)
-    local hrp = character:WaitForChild("HumanoidRootPart", 5)
-    if not hrp or not animator then return end
+    if not head or not humanoid or not hrp then return end
+    local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid:WaitForChild("Animator", 10)
+    if not animator then return end
 
-    -- Clean up any pre-existing broken tags on this character instance
+    -- Clean up duplicate frames
     for _, child in ipairs(head:GetChildren()) do
         if child.Name == "EACircle" or child.Name == "OverheadTag" then
             child:Destroy()
@@ -449,7 +444,7 @@ local function setup(character)
     eaCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     eaCircle.BackgroundTransparency = 0.5
     eaCircle.BorderSizePixel = 0
-    eaCircle.Parent = eaCircle
+    eaCircle.Parent = eaBillboard
 
     local eaCircleCorner = Instance.new("UICorner")
     eaCircleCorner.CornerRadius = UDim.new(1, 0)
@@ -528,7 +523,7 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- Permanent Unbreakable Multi-Render Engine Connection
+    -- Permanent Sync Multi-Render Engine Connection
     local renderConn
     local rotAngle = 0
     renderConn = RunService.RenderStepped:Connect(function(dt)
@@ -550,7 +545,7 @@ local function setup(character)
         end
     end)
 
-    -- Aura Generators Injection Pipeline
+    -- Particle Generator Pipeline
     local function createThunder(parent, offsetY, rate, speed, size)
         if not parent or not parent.Parent then return end
         local att = Instance.new("Attachment")
@@ -643,26 +638,13 @@ local function setup(character)
         table.insert(AuraState.emitters, smoke)
     end
 
-    local baseParts = {"Head", "UpperTorso", "LowerTorso", "Torso"}
-    for _, partName in ipairs(baseParts) do
-        local part = character:FindFirstChild(partName)
-        if part then createThunder(part, 0, 50, 4, 1.1) end
+    -- Run deep iteration over limbs for absolute load reliability
+    for _, obj in ipairs(character:GetChildren()) do
+        if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
+            createThunder(obj, 0, 60, 4, 1.2)
+        end
     end
-
-    local heavyParts = {
-        "LeftUpperArm", "LeftLowerArm", "LeftHand", "Left Arm",
-        "RightUpperArm", "RightLowerArm", "RightHand", "Right Arm",
-        "LeftUpperLeg", "LeftLowerLeg", "LeftFoot", "Left Leg",
-        "RightUpperLeg", "RightLowerLeg", "RightFoot", "Right Leg"
-    }
-    for _, partName in ipairs(heavyParts) do
-        local part = character:FindFirstChild(partName)
-        if part then createThunder(part, 0, 95, 5, 1.3) end
-    end
-
-    createThunder(hrp, 0, 65, 5, 1.4)
-    createThunder(hrp, 1, 45, 4, 1.0)
-    createThunder(hrp, -1, 45, 4, 1.0)
+    createThunder(hrp, 0, 70, 5, 1.4)
 
     local groundAtt = Instance.new("Attachment")
     groundAtt.Position = Vector3.new(0, -3, 0)
@@ -694,7 +676,7 @@ local function setup(character)
     groundThunder.Enabled = AuraState.auraEnabled
     table.insert(AuraState.emitters, groundThunder)
 
-    -- Dynamic Idle Execution Engine
+    -- Dynamic Idle Animation Load
     local idleAnim = Instance.new("Animation")
     idleAnim.AnimationId = "rbxassetid://138665010911335"
 
@@ -720,7 +702,7 @@ local function setup(character)
     end
 end
 
--- Strict Avatar Appearance Observers Connection
+-- Appearance Observers Connection
 local function attachCharacterTracks(character)
     if not character then return end
     
@@ -730,7 +712,7 @@ local function attachCharacterTracks(character)
         task.spawn(setup, character)
     end)
     
-    local humanoid = character:WaitForChild("Humanoid", 10)
+    local humanoid = character:WaitForChild("Humanoid", 10) or character:FindFirstChildOfClass("Humanoid")
     if humanoid then
         humanoid.DescriptionApplied:Connect(function()
             task.spawn(setup, character)
