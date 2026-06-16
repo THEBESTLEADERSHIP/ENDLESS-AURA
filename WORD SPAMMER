@@ -1,0 +1,236 @@
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local UIStroke = Instance.new("UIStroke")
+local Title = Instance.new("TextLabel")
+local Instagram = Instance.new("TextLabel")
+local TargetBox = Instance.new("TextBox")
+local DelayBox = Instance.new("TextBox")
+local StartBtn = Instance.new("TextButton")
+local MenuBtn = Instance.new("TextButton")
+local MenuStroke = Instance.new("UIStroke")
+
+-- Top Elements
+local TopLine = Instance.new("Frame")
+local AuraImage = Instance.new("ImageLabel")
+local AuraText = Instance.new("TextLabel")
+
+-- SOUND EFFECT SETUP
+local SoundService = game:GetService("SoundService")
+local ClickSound = Instance.new("Sound")
+ClickSound.SoundId = "rbxassetid://107406973902030"
+ClickSound.Volume = 1
+ClickSound.Parent = SoundService
+
+local function PlayClick()
+    ClickSound:Play()
+end
+
+-- GUI Setup
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+
+-- ==========================================
+-- STYLISH FLOATING MENU BUTTON (CLEAN TEXT)
+-- ==========================================
+MenuBtn.Name = "MenuBtn"
+MenuBtn.Parent = ScreenGui
+MenuBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
+MenuBtn.Size = UDim2.new(0, 52, 0, 52)
+MenuBtn.Text = "W.S"
+MenuBtn.TextSize = 15
+MenuBtn.Font = Enum.Font.GothamBold
+MenuBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
+
+-- Black Background Transparent
+MenuBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MenuBtn.BackgroundTransparency = 0.25
+
+MenuBtn.Draggable = true
+MenuBtn.Active = true
+Instance.new("UICorner", MenuBtn).CornerRadius = UDim.new(1, 0)
+
+-- Border Gole ke bahar (No text stroke)
+MenuStroke.Parent = MenuBtn
+MenuStroke.Color = Color3.fromRGB(150, 0, 0) -- Dark Red Border
+MenuStroke.Thickness = 2
+MenuStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+-- ==========================================
+-- MAIN FRAME
+-- ==========================================
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+MainFrame.BackgroundTransparency = 0.2
+MainFrame.Position = UDim2.new(0.35, 0, 0.35, 0)
+MainFrame.Size = UDim2.new(0, 230, 0, 300)
+MainFrame.Visible = false
+MainFrame.Draggable = true
+MainFrame.Active = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+
+UIStroke.Parent = MainFrame
+UIStroke.Color = Color3.fromRGB(150, 0, 0)
+UIStroke.Thickness = 2
+
+-- Top Header Image & Text (Dark Metallic Red)
+AuraImage.Parent = MainFrame
+AuraImage.BackgroundTransparency = 1
+AuraImage.Position = UDim2.new(0.08, 0, 0.025, 0)
+AuraImage.Size = UDim2.new(0, 20, 0, 20)
+AuraImage.Image = "rbxassetid://129299711445020"
+
+AuraText.Parent = MainFrame
+AuraText.BackgroundTransparency = 1
+AuraText.Position = UDim2.new(0.22, 0, 0.025, 0)
+AuraText.Size = UDim2.new(0.7, 0, 0, 20)
+AuraText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ 💢"
+AuraText.TextColor3 = Color3.fromRGB(170, 0, 0) -- Dark Metallic Red
+AuraText.TextSize = 13
+AuraText.Font = Enum.Font.BuilderSansBold
+AuraText.TextXAlignment = Enum.TextXAlignment.Left
+
+-- SABSE UPPER EK SHARP LINE
+TopLine.Parent = MainFrame
+TopLine.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+TopLine.BorderSizePixel = 0
+TopLine.Position = UDim2.new(0, 0, 0.1, 0)
+TopLine.Size = UDim2.new(1, 0, 0, 2)
+
+-- Main Spammer Title (Clean Text)
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 25)
+Title.Position = UDim2.new(0, 0, 0.14, 0)
+Title.Text = "ENDLESS WORD SPAMMER"
+Title.TextColor3 = Color3.fromRGB(145, 10, 10)
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
+Title.BackgroundTransparency = 1
+
+local Sub = Instance.new("TextLabel", MainFrame)
+Sub.Size = UDim2.new(1, 0, 0, 15)
+Sub.Position = UDim2.new(0, 0, 0.22, 0)
+Sub.Text = "SCRIPT BY NAMELESS"
+Sub.TextColor3 = Color3.fromRGB(110, 110, 110)
+Sub.TextSize = 10
+Sub.Font = Enum.Font.SourceSans
+Sub.BackgroundTransparency = 1
+
+-- Instagram UI (Clean Text - No Stroke)
+Instagram.Parent = MainFrame
+Instagram.Position = UDim2.new(0, 0, 0.28, 0)
+Instagram.Size = UDim2.new(1, 0, 0, 20)
+Instagram.Text = "INSTA ID > ea_nameless"
+Instagram.TextSize = 12
+Instagram.Font = Enum.Font.GothamBold
+Instagram.BackgroundTransparency = 1
+
+task.spawn(function()
+    while true do
+        Instagram.TextColor3 = Color3.fromRGB(150, 0, 0)
+        task.wait(0.5)
+        Instagram.TextColor3 = Color3.fromRGB(230, 230, 230)
+        task.wait(0.5)
+    end
+end)
+
+-- Inputs Styling
+TargetBox.Parent = MainFrame
+TargetBox.Position = UDim2.new(0.1, 0, 0.39, 0)
+TargetBox.Size = UDim2.new(0.8, 0, 0, 32)
+TargetBox.PlaceholderText = "Target Name..."
+TargetBox.TextSize = 13
+TargetBox.Font = Enum.Font.SourceSansSemibold
+TargetBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+TargetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", TargetBox).CornerRadius = UDim.new(0, 6)
+local TBoxStroke = Instance.new("UIStroke", TargetBox)
+TBoxStroke.Color = Color3.fromRGB(40, 40, 40)
+
+DelayBox.Parent = MainFrame
+DelayBox.Position = UDim2.new(0.1, 0, 0.53, 0)
+DelayBox.Size = UDim2.new(0.8, 0, 0, 32)
+DelayBox.PlaceholderText = "Delay Seconds"
+DelayBox.Text = "3"
+DelayBox.TextSize = 13
+DelayBox.Font = Enum.Font.SourceSansSemibold
+DelayBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+DelayBox.TextColor3 = Color3.fromRGB(160, 20, 20)
+Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 6)
+local DBoxStroke = Instance.new("UIStroke", DelayBox)
+DBoxStroke.Color = Color3.fromRGB(40, 40, 40)
+
+-- Dynamic On/Off Button (Clean Text)
+StartBtn.Parent = MainFrame
+StartBtn.Position = UDim2.new(0.1, 0, 0.74, 0)
+StartBtn.Size = UDim2.new(0.8, 0, 0, 42)
+Instance.new("UICorner", StartBtn).CornerRadius = UDim.new(0, 6)
+StartBtn.Font = Enum.Font.GothamBold
+StartBtn.TextSize = 14
+
+-- Default state: OFF (START SPAM -> Red Text, White Background)
+StartBtn.Text = "START SPAM"
+StartBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+StartBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+
+-- 4 Letter Words Logic
+local isSpamming = false
+local rawLines = {
+    "💀-------------[TARGET]--------TMKX_________MEH___________// LOST 📉",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// DEAD ⚰️",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// VOID 🧿",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// QUIT 💨",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// SLAY 🔪",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// KILL 🩸",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// DONE 🏁",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// BURN 🔥",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// FEER 👺",
+    "💀-------------[TARGET]--------TMKX_________MEH___________// STOP 🚫"
+}
+
+local function SendChat(msg)
+    local tcs = game:GetService("TextChatService")
+    if tcs.ChatVersion == Enum.ChatVersion.TextChatService then
+        local channel = tcs.TextChannels:FindFirstChild("RBXGeneral")
+        if channel then channel:SendAsync(msg) end
+    else
+        local chatEvent = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
+        if chatEvent then chatEvent.SayMessageRequest:FireServer(msg, "All") end
+    end
+end
+
+-- Tap Sounds Enabled on Click
+MenuBtn.MouseButton1Click:Connect(function()
+    PlayClick()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+StartBtn.MouseButton1Click:Connect(function()
+    PlayClick()
+    isSpamming = not isSpamming
+    
+    if isSpamming then
+        -- ON State: STOP SPAM -> White Text, Red Background
+        StartBtn.Text = "STOP SPAM"
+        StartBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+        StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        
+        task.spawn(function()
+            while isSpamming do
+                for _, line in ipairs(rawLines) do
+                    if not isSpamming then break end
+                    local target = TargetBox.Text ~= "" and TargetBox.Text or "PLAYER"
+                    local waitTime = tonumber(DelayBox.Text) or 3
+                    local processedPart = string.gsub(line, "%[TARGET%]", target)
+                    local finalMsg = "SCRIPT BY NAMELESS " .. processedPart .. " " .. processedPart
+                    SendChat(finalMsg)
+                    task.wait(waitTime)
+                end
+            end
+        end)
+    else
+        -- OFF State: START SPAM -> Red Text, White Background
+        StartBtn.Text = "START SPAM"
+        StartBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        StartBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+    end
+end)
