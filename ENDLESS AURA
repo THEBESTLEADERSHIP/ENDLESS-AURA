@@ -215,6 +215,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("📢 Ward Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
     btn("💀 @ Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
     btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true) -- Replaced OG Spammer
+    btn("FIRE SPAMMER🔥", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5"))() end, true)
+    btn("OCEAN SPAMMER🌊", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A"))() end, true)
+    btn("GRASS SPAMMER🌲", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2"))() end, true)
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
 
     -- TAB 5: OTHER 
@@ -226,6 +229,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("👻 Noclip", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end)
     btn("AIR WALK 🍃", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/tLukyENu"))() end, true)
     btn("Aura♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)
+    btn("HIDE BUTTONS 🔘", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/DtJPutfe"))() end, true)
     btn("🥷 Copy Ninja", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/7QTTJFFa"))() end, true)
     btn("🪓 Sky Destroyer", T5, function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640"))() end, true)
     btn("🎭 Emote Name", T5, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))() end) end, true)
