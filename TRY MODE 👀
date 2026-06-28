@@ -6,6 +6,7 @@ local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 local TextChatService = game:GetService("TextChatService")
+local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 
 -- // CONFIG //
@@ -13,6 +14,7 @@ local MASTER_ACC = "Nameless82872262"
 local CORRECT_KEY = "WHAT IS AURA"
 local CLICK_SOUND = "107406973902030" 
 local LOGO_IMAGE = "rbxassetid://129299711445020"
+local LOAD_SOUND = "129584950954499"
 if not _G.AdminLogs then _G.AdminLogs = {} end
 
 -- Anti-Void Variables
@@ -114,11 +116,22 @@ local function Initialize()
     for _, v in pairs(_G.AdminLogs) do if v == entry then alreadyLogged = true break end end
     if not alreadyLogged then table.insert(_G.AdminLogs, entry) end
     
-    -- SEQUENCE ME CHAT SENDING (1 SECOND DELAY KE SAATH)
+    -- TIMED CHAT SEQUENCE (3 SECOND DELAY) -> THEN OPEN MENU & NOTIFICATION
     task.spawn(function()
         SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
         task.wait(3)
-        SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
+        SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ``````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
+        
+        -- Play Custom Load Sound
+        playS(LOAD_SOUND)
+        
+        -- Side Notification With Logo
+        StarterGui:SetCore("SendNotification", {
+            Title = "ENDLESS AURA",
+            Text = "Loaded...",
+            Icon = LOGO_IMAGE,
+            Duration = 5
+        })
     end)
     
     task.spawn(function()
@@ -208,39 +221,39 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 3: SHIELD
     btn("🛡️ Anti Void", T3, function(b) task.spawn(function() while b:GetAttribute("T") do local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end task.wait(0.1) end end) end)
-    btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
+    btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("[https://pastebin.com/raw/d4r8JDXz](https://pastebin.com/raw/d4r8JDXz)"))() end, true)
     btn("🛡️ Anti Sit", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.Humanoid.Sit = false task.wait() end end) end)
     btn("🛡️ Anti AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
     btn("🛡️ Anti Fling", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
     
     -- TAB 4: SPAM
-    btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/9S2h4aDC"))() end, true)
-    btn("NAMELESS SPAMMER💢", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/bAdrcuP8"))() end, true)
-    btn("BHUMIKA SPAMMER 💖", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/3UfyBuCx"))() end, true)
-    btn("🎵 Music Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/U0NdycvQ"))() end, true)
-    btn("📢 Ward Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
-    btn("💀 @ Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
-    btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true) -- Replaced OG Spammer
-    btn("FIRE SPAMMER🔥", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5"))() end, true)
-    btn("OCEAN SPAMMER🌊", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A"))() end, true)
-    btn("GRASS SPAMMER🌲", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2"))() end, true)
-    btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
-    btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
+    btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("[https://pastebin.com/raw/9S2h4aDC](https://pastebin.com/raw/9S2h4aDC)"))() end, true)
+    btn("NAMELESS SPAMMER💢", T4, function() loadstring(game:HttpGet("[https://pastebin.com/raw/bAdrcuP8](https://pastebin.com/raw/bAdrcuP8)"))() end, true)
+    btn("BHUMIKA SPAMMER 💖", T4, function() loadstring(game:HttpGet("[https://pastebin.com/raw/3UfyBuCx](https://pastebin.com/raw/3UfyBuCx)"))() end, true)
+    btn("🎵 Music Spammer", T4, function() loadstring(game:HttpGet("[https://pastebin.com/raw/U0NdycvQ](https://pastebin.com/raw/U0NdycvQ)"))() end, true)
+    btn("📢 Ward Spammer", T4, function() loadstring(game:HttpGet("[https://pastebin.com/raw/V27NiC4e](https://pastebin.com/raw/V27NiC4e)"))() end, true)
+    btn("💀 @ Spammer", T4, function() loadstring(game:HttpGet("[https://pastebin.com/raw/Gv6RtAmL](https://pastebin.com/raw/Gv6RtAmL)"))() end, true)
+    btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("[https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER](https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER)"))() end, true)
+    btn("FIRE SPAMMER🔥", T4, function() loadstring(game:HttpGet("[https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5](https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5)"))() end, true)
+    btn("OCEAN SPAMMER🌊", T4, function() loadstring(game:HttpGet("[https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A](https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A)"))() end, true)
+    btn("GRASS SPAMMER🌲", T4, function() loadstring(game:HttpGet("[https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2](https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2)"))() end, true)
+    btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("[https://pastebin.com/raw/m3wpKv3d](https://pastebin.com/raw/m3wpKv3d)"))() end, true)
+    btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("[https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER](https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER)"))() end, true)
 
     -- TAB 5: OTHER 
-    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true) -- Replaced link
-    btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
+    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("[https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2](https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2)"))() end, true)
+    btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("[https://pastebin.com/raw/BM0uamrz](https://pastebin.com/raw/BM0uamrz)"))() end, true)
     btn("⚡ Speed 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
     btn("🆙 Fly Jump", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end)
     btn("🌀 Spin 300", T5, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(20), 0) task.wait() end end) end)
     btn("ghost Noclip", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end)
-    btn("AIR WALK 🍃", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/tLukyENu"))() end, true)
-    btn("Aura♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)
-    btn("HIDE BUTTONS 🔘", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/DtJPutfe"))() end, true)
-    btn("🥷 Copy Ninja", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/7QTTJFFa"))() end, true)
-    btn("🪓 Sky Destroyer", T5, function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640"))() end, true)
-    btn("🎭 Emote Name", T5, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))() end) end, true)
-    btn("NAMELSSS EMOTE👤", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)
+    btn("AIR WALK 🍃", T5, function() loadstring(game:HttpGet("[https://pastebin.com/raw/tLukyENu](https://pastebin.com/raw/tLukyENu)"))() end, true)
+    btn("Aura♀️", T5, function() loadstring(game:HttpGet("[https://pastebin.com/raw/LmxNcQvt](https://pastebin.com/raw/LmxNcQvt)"))() end, true)
+    btn("HIDE BUTTONS 🔘", T5, function() loadstring(game:HttpGet("[https://pastebin.com/raw/DtJPutfe](https://pastebin.com/raw/DtJPutfe)"))() end, true)
+    btn("🥷 Copy Ninja", T5, function() loadstring(game:HttpGet("[https://pastebin.com/raw/7QTTJFFa](https://pastebin.com/raw/7QTTJFFa)"))() end, true)
+    btn("🪓 Sky Destroyer", T5, function() loadstring(game:HttpGet("[https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640](https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640)"))() end, true)
+    btn("🎭 Emote Name", T5, function() pcall(function() loadstring(game:HttpGet("[https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024](https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024)"))() end) end, true)
+    btn("NAMELSSS EMOTE👤", T5, function() loadstring(game:HttpGet("[https://pastebin.com/raw/VV3ggiki](https://pastebin.com/raw/VV3ggiki)"))() end, true)
     btn("🔄 Rejoin", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)
     
     -- [[ PHONK TAB ]] --
@@ -305,7 +318,7 @@ Verify.MouseButton1Click:Connect(function()
         -- Background Thread Me Scripts Aur Menu Load Hoga Bina Atke
         task.spawn(function()
             pcall(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG"))()
+                loadstring(game:HttpGet("[https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG](https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG)"))()
             end)
             Initialize() 
         end)
