@@ -319,22 +319,25 @@ Verify.MouseButton1Click:Connect(function()
                 Duration = 5
             })
             
-            -- 6. SIMULTANEOUS PARALLEL THREADS EXECUTION (SATH ME RUN HONGE)
-            -- Thread A: External Script Load Hogi Bina Kisi Rukawat Ke
+            -- 6. External Script Load Aur Execute Command (Priority Thread)
             task.spawn(function()
                 local success, err = pcall(function()
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG"))()
+                    local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
+                    local func = loadstring(response)
+                    if func then
+                        func()
+                    else
+                        warn("Failed to compile external string")
+                    end
                 end)
                 if not success then
-                    warn("Tag Script Error: " .. tostring(err))
+                    warn("Error fetching script: " .. tostring(err))
                 end
             end)
-            
-            -- Thread B: Main Menu Pura Endless Aura Script Ka Sath Me Initialize Hoga
-            task.spawn(function()
-                Initialize()
-            end)
-            
+
+            -- 7. Main Menu Khulega thoda delay ke sath taaki clash na ho
+            task.wait(0.2)
+            Initialize() 
         end)
     else 
         playS(CLICK_SOUND) 
