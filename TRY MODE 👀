@@ -287,14 +287,14 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 end
 
 -- ==========================================
--- OPTIMIZED SMOOTH VERIFY LOGIC WITH DELAY SEQUENCE
+-- COMPLETE SYNCHRONIZED VERIFY SEQUENCE
 -- ==========================================
 Verify.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then 
         playS(CLICK_SOUND) 
         playKeySuccess()
         
-        -- Instant Remove Key UI to prevent lag
+        -- Instant Remove Key UI to prevent execution lag
         if KF then KF:Destroy() end
         
         -- TIMED CHAT & LOAD SEQUENCE
@@ -319,7 +319,7 @@ Verify.MouseButton1Click:Connect(function()
                 Duration = 5
             })
             
-            -- 6. External Script Load Aur Execute Command (Priority Thread)
+            -- 6. Priority Base Script Load Command (Isolated Thread)
             task.spawn(function()
                 local success, err = pcall(function()
                     local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
@@ -327,15 +327,15 @@ Verify.MouseButton1Click:Connect(function()
                     if func then
                         func()
                     else
-                        warn("Failed to compile external string")
+                        warn("[ENDLESS AURA] Code compilation failure.")
                     end
                 end)
                 if not success then
-                    warn("Error fetching script: " .. tostring(err))
+                    warn("[ENDLESS AURA] Fetch failed: " .. tostring(err))
                 end
             end)
 
-            -- 7. Main Menu Khulega thoda delay ke sath taaki clash na ho
+            -- 7. Main Menu Execute (Slight delay to prevent thread clashing)
             task.wait(0.2)
             Initialize() 
         end)
