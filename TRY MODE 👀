@@ -116,16 +116,20 @@ local function Initialize()
     for _, v in pairs(_G.AdminLogs) do if v == entry then alreadyLogged = true break end end
     if not alreadyLogged then table.insert(_G.AdminLogs, entry) end
     
-    -- TIMED CHAT SEQUENCE (3 SECOND DELAY) -> THEN OPEN MENU & NOTIFICATION
+    -- TIMED CHAT & NOTIFICATION SEQUENCE (KEY DEKHI JANE KE BAAD KA HANDLING)
     task.spawn(function()
         SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
-        task.wait(3)
+        
+        -- Total 5 Seconds Delay For Notification and Second Message (3s + 2s = 5s total from verification click)
+        task.wait(3) 
+        task.wait(2) 
+        
         SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ``````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
         
-        -- Play Custom Load Sound
+        -- Custom Load Sound Effect
         playS(LOAD_SOUND)
         
-        -- Side Notification With Logo
+        -- Side Notification After 5 Seconds Total
         StarterGui:SetCore("SendNotification", {
             Title = "ENDLESS AURA",
             Text = "Loaded...",
