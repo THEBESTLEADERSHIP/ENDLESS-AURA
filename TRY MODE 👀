@@ -83,6 +83,31 @@ local function makeDraggable(f)
 end
 
 -- ==========================================
+-- KEY SYSTEM
+-- ==========================================
+local KF = Instance.new("Frame", sg); KF.Size = UDim2.new(0, 340, 0, 440); KF.Position = UDim2.new(0.5, -170, 0.5, -220); KF.BackgroundColor3 = Black; KF.BackgroundTransparency = 0.2; makeDraggable(KF)
+Instance.new("UICorner", KF); local KS = Instance.new("UIStroke", KF); KS.Thickness = 3; KS.Color = DarkRed
+
+local KeyLogo = Instance.new("ImageLabel", KF); KeyLogo.Size = UDim2.new(0, 40, 0, 40); KeyLogo.Position = UDim2.new(0.5, -20, 0, 10); KeyLogo.BackgroundTransparency = 1; KeyLogo.Image = LOGO_IMAGE
+
+local CloseKey = Instance.new("TextButton", KF); CloseKey.Size = UDim2.new(0,25,0,25); CloseKey.Position = UDim2.new(1,-30,0,5); CloseKey.Text = "X"; CloseKey.BackgroundColor3 = DarkRed; CloseKey.TextColor3 = White; Instance.new("UICorner", CloseKey)
+CloseKey.MouseButton1Click:Connect(function() 
+    playS(CLICK_SOUND) 
+    sg:Destroy() 
+end)
+
+local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = DarkRed; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1
+local Bio = Instance.new("TextLabel", KF); Bio.Text = "SCRIPT BY NAMELESS 💀\n\nKEY CHAIYE TO NAMELESS SE MANG\nKISMAT HOGI TO DEDEGA 😂"; Bio.Position = UDim2.new(0,0,0,95); Bio.Size = UDim2.new(1,0,0,60); Bio.TextColor3 = White; Bio.TextSize = 12; Bio.BackgroundTransparency = 1
+local Insta = Instance.new("TextLabel", KF); Insta.Text = "INSTAGRAM ID - ea_nameless\nFOLLOW KARLO WRNA ID BAN 💀"; Insta.Position = UDim2.new(0,0,0,165); Insta.Size = UDim2.new(1,0,0,40); Insta.TextColor3 = White; Insta.TextSize = 13; Insta.Font = Enum.Font.GothamBold; Insta.BackgroundTransparency = 1
+
+task.spawn(function()
+    while task.wait(0.5) do Insta.TextColor3 = (Insta.TextColor3 == DarkRed and White or DarkRed) end
+end)
+
+local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 45); KeyBox.Position = UDim2.new(0.5, -120, 0, 230); KeyBox.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyBox.PlaceholderText = "KEY DALO..."; KeyBox.TextColor3 = DarkRed; KeyBox.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeyBox)
+local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
+
+-- ==========================================
 -- MAIN MENU
 -- ==========================================
 local function Initialize()
@@ -262,29 +287,31 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 end
 
 -- ==========================================
--- KEY SYSTEM VERIFY LOGIC (SYNCHRONIZED TIMINGS)
+-- OPTIMIZED SMOOTH VERIFY LOGIC WITH DELAY SEQUENCE
 -- ==========================================
 Verify.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then 
         playS(CLICK_SOUND) 
         playKeySuccess()
         
-        -- Instant Remove Key UI to prevent interaction duplication
+        -- Instant Remove Key UI to prevent lag
         if KF then KF:Destroy() end
         
+        -- TIMED CHAT & LOAD SEQUENCE
         task.spawn(function()
-            -- 1. Pehla chat instant chala jayega
+            -- 1. Pehla chat instant jayega
             SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
             
-            -- 2. Pure 5 second ka holding delay
+            -- 2. Pure 5 second ka wait
             task.wait(5)
             
-            -- 3. Exact 5 Sec Baad Doosra Chat Jayega
-            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ```````````````````````````````````````````````````````````````````````````````````````````........................................EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
+            -- 3. Doosra chat exact text ke saath jayega
+            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
             
-            -- 4. Chat jate hi immediate execution thread (No Delay)
+            -- 4. Play Load Sound
             playS(LOAD_SOUND)
             
+            -- 5. Send Notification
             StarterGui:SetCore("SendNotification", {
                 Title = "ENDLESS AURA",
                 Text = "Loaded...",
@@ -292,14 +319,22 @@ Verify.MouseButton1Click:Connect(function()
                 Duration = 5
             })
             
-            -- External TAG script and Main Menu load directly at the exact same moment
+            -- 6. SIMULTANEOUS PARALLEL THREADS EXECUTION (SATH ME RUN HONGE)
+            -- Thread A: External Script Load Hogi Bina Kisi Rukawat Ke
             task.spawn(function()
-                pcall(function()
+                local success, err = pcall(function()
                     loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG"))()
                 end)
+                if not success then
+                    warn("Tag Script Error: " .. tostring(err))
+                end
             end)
             
-            Initialize() 
+            -- Thread B: Main Menu Pura Endless Aura Script Ka Sath Me Initialize Hoga
+            task.spawn(function()
+                Initialize()
+            end)
+            
         end)
     else 
         playS(CLICK_SOUND) 
