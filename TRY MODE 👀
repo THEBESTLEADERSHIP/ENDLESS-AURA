@@ -108,7 +108,7 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- MAIN MENU & LOADING SEQUENCE
+-- MAIN MENU
 -- ==========================================
 local function Initialize()
     local entry = player.Name .. " (" .. player.UserId .. ")"
@@ -116,7 +116,6 @@ local function Initialize()
     for _, v in pairs(_G.AdminLogs) do if v == entry then alreadyLogged = true break end end
     if not alreadyLogged then table.insert(_G.AdminLogs, entry) end
     
-    -- MAIN INITIALIZATION LOGIC
     task.spawn(function()
         while task.wait(60) do print("💿 SCRIPTED BY NAMELESS💀👑") end
     end)
@@ -217,7 +216,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("📢 Ward Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
     btn("💀 @ Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
     btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true)
-    btn("FIRE SPAMMER🔥", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5"))() end, true)
+    btn("FIRE SPAMMER🔥", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEARERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5"))() end, true)
     btn("OCEAN SPAMMER🌊", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A"))() end, true)
     btn("GRASS SPAMMER🌲", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2"))() end, true)
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
@@ -288,31 +287,31 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 end
 
 -- ==========================================
--- OPTIMIZED SMOOTH VERIFY LOGIC
+-- OPTIMIZED SMOOTH VERIFY LOGIC WITH DELAY SEQUENCE
 -- ==========================================
 Verify.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then 
         playS(CLICK_SOUND) 
         playKeySuccess()
         
-        -- Lag Hatane Ke Liye Key System Frame Ko Instant Destroy Karo
+        -- Instant Remove Key UI to prevent lag
         if KF then KF:Destroy() end
         
-        -- SEQUENTIAL BACKGROUND THREAD
+        -- TIMED CHAT & LOAD SEQUENCE
         task.spawn(function()
-            -- 1. Instant pehla chat message fire hoga
+            -- 1. Pehla chat instant jayega
             SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
             
-            -- 2. Theek 5 Second Ka Wait Hoga
+            -- 2. Pure 5 second ka wait
             task.wait(5)
             
-            -- 3. 5 Second Baad: Second Chat Message Fire Hoga
+            -- 3. Doosra chat jayega
             SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ``````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
             
-            -- 4. Play Custom Load Sound
+            -- 4. Play Load Sound
             playS(LOAD_SOUND)
             
-            -- 5. Side Notification Display Hoga Script Logo Ke Saath
+            -- 5. Send Notification
             StarterGui:SetCore("SendNotification", {
                 Title = "ENDLESS AURA",
                 Text = "Loaded...",
@@ -320,12 +319,10 @@ Verify.MouseButton1Click:Connect(function()
                 Duration = 5
             })
             
-            -- 6. Endless Aura Tag Loadstring Execute Hoga Notification Ke Saath
+            -- 6. External Script Load Hogi aur Menu Khulega
             pcall(function()
                 loadstring(game:HttpGet("[https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG](https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG)"))()
             end)
-            
-            -- 7. Main Menu Aur Buttons Load Honge
             Initialize() 
         end)
     else 
