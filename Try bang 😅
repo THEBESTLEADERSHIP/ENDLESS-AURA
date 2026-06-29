@@ -80,9 +80,6 @@ if _G.EndlessAuraStorage then
     if _G.EndlessAuraStorage.CurrentGui then _G.EndlessAuraStorage.CurrentGui:Destroy() end
     if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() end
     if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() end
-    if _G.EndlessAuraStorage.LV then _G.EndlessAuraStorage.LV:Destroy() end
-    if _G.EndlessAuraStorage.AO then _G.EndlessAuraStorage.AO:Destroy() end
-    if _G.EndlessAuraStorage.Attachment then _G.EndlessAuraStorage.Attachment:Destroy() end
     
     pcall(function()
         local myChar = player.Character
@@ -109,10 +106,7 @@ end
 _G.EndlessAuraStorage = {
     CurrentGui = nil,
     ActiveConnection = nil,
-    PlatformPart = nil,
-    LV = nil,
-    AO = nil,
-    Attachment = nil
+    PlatformPart = nil
 }
 
 -- CONFIGURATIONS
@@ -534,9 +528,6 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
             isAttached = false
             if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end
             if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end
-            if _G.EndlessAuraStorage.LV then _G.EndlessAuraStorage.LV:Destroy() _G.EndlessAuraStorage.LV = nil end
-            if _G.EndlessAuraStorage.AO then _G.EndlessAuraStorage.AO:Destroy() _G.EndlessAuraStorage.AO = nil end
-            if _G.EndlessAuraStorage.Attachment then _G.EndlessAuraStorage.Attachment:Destroy() _G.EndlessAuraStorage.Attachment = nil end
             if activeTrack then activeTrack:Stop() activeTrack = nil end
             stopAllSounds()
             toggleButton.Text = "[ FUCK ON ]"
@@ -546,16 +537,13 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
 end)
 
 -- ====================================================================
--- // MODERN CONSTRAINT FRAMEWORK ENGINE (ANTI-CHEAT BYPASS) // --
+-- // PURE FORCE GLUED POSITIONING SYNCHRONIZER (0.0 DELAY FIX) // --
 -- ====================================================================
 toggleButton.MouseButton1Click:Connect(function() 
     if isAttached then 
         isAttached = false 
         if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end 
         if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end 
-        if _G.EndlessAuraStorage.LV then _G.EndlessAuraStorage.LV:Destroy() _G.EndlessAuraStorage.LV = nil end
-        if _G.EndlessAuraStorage.AO then _G.EndlessAuraStorage.AO:Destroy() _G.EndlessAuraStorage.AO = nil end
-        if _G.EndlessAuraStorage.Attachment then _G.EndlessAuraStorage.Attachment:Destroy() _G.EndlessAuraStorage.Attachment = nil end
         
         if activeTrack then activeTrack:Stop() activeTrack = nil end
         stopAllSounds()
@@ -597,27 +585,6 @@ toggleButton.MouseButton1Click:Connect(function()
             end
         end
 
-        -- New Modern Constraints (Infinite Force, Zero Delay, Bypass detection)
-        local att = Instance.new("Attachment")
-        att.Parent = myHRP
-        _G.EndlessAuraStorage.Attachment = att
-
-        local lv = Instance.new("LinearVelocity")
-        lv.MaxForce = math.huge
-        lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
-        lv.RelativeTo = Enum.ActuatorRelativeTo.World
-        lv.Attachment0 = att
-        lv.Parent = myHRP
-        _G.EndlessAuraStorage.LV = lv
-
-        local ao = Instance.new("AlignOrientation")
-        ao.MaxTorque = math.huge
-        ao.Responsiveness = 200 -- Maximum snappy response
-        ao.Mode = Enum.OrientationMode.OneAttachment
-        ao.Attachment0 = att
-        ao.Parent = myHRP
-        _G.EndlessAuraStorage.AO = ao
-
         local platform = Instance.new("Part")
         platform.Size = Vector3.new(10, 1, 10) 
         platform.Transparency = 1 
@@ -641,7 +608,7 @@ toggleButton.MouseButton1Click:Connect(function()
             local myChar = player.Character
             local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart") 
             local myHumanoid = myChar and myChar:FindFirstChild("Humanoid")
-            if not myHRP or not myHumanoid or not lv or not ao then return end
+            if not myHRP or not myHumanoid then return end
             
             local targetHRP = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
             local targetHead = selectedPlayer.Character:FindFirstChild("Head") 
@@ -659,7 +626,7 @@ toggleButton.MouseButton1Click:Connect(function()
             handleAudioForMode(targetMode)
 
             if targetHRP.Position.Y < -60 or targetHRP.Position.Y < (game.Workspace.FallenPartsDestroyHeight + 15) then
-                lv.VectorVelocity = Vector3.new(0,0,0)
+                myHRP.AssemblyLinearVelocity = Vector3.new(0,0,0)
                 if platform and platform.Parent then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
                 return 
             end
@@ -686,12 +653,12 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- ULTRA GLUED PHYSICS SYNCHRONIZER
-            ao.CFrame = targetCFrame
+            -- PURE HARDFORCE GLUE (0.0 DELAY LITERALLY ATTACHED)
+            myHRP.CFrame = targetCFrame
             
-            -- P0.0 Delay Velocity Calculation (Anti-cheat safe network physics)
-            local distanceVector = targetCFrame.Position - myHRP.Position
-            lv.VectorVelocity = distanceVector * 60 -- Har frame velocity target point par adjust hogi instantaneous
+            -- Velocity match system taaki anticheat position desync na kare aur movement smooth ho
+            myHRP.AssemblyLinearVelocity = targetHRP.AssemblyLinearVelocity
+            myHRP.AssemblyAngularVelocity = targetHRP.AssemblyAngularVelocity
             
             if platform and platform.Parent then
                 platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
