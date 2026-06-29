@@ -1,0 +1,717 @@
+local player = game.Players.LocalPlayer 
+local runService = game:GetService("RunService") 
+local userInputService = game:GetService("UserInputService") 
+local Players = game:GetService("Players")
+local starterGui = game:GetService("StarterGui")
+
+-- ANIMATION & AUDIO CONFIGURATION
+local bangAnimId = "rbxassetid://5918726674"
+local activeTrack = nil
+local soundMuted = false 
+local animMuted = false 
+
+-- SOUND SYSTEM INITIALIZATION
+local sound1 = Instance.new("Sound")
+sound1.SoundId = "rbxassetid://95656642853883"
+sound1.Volume = 2
+
+local sound2 = Instance.new("Sound")
+sound2.SoundId = "rbxassetid://78435052000321" 
+sound2.Volume = 2
+
+local sound3 = Instance.new("Sound")
+sound3.SoundId = "rbxassetid://136178701391977"
+sound3.Volume = 2
+sound3.Looped = true
+
+local leaveSound = Instance.new("Sound")
+leaveSound.SoundId = "rbxassetid://96880277560628" 
+leaveSound.Volume = 2
+
+local lastSoundTime = 0
+local soundGap = 7 
+
+local function stopAllSounds()
+    sound1:Stop()
+    sound2:Stop()
+    sound3:Stop()
+end
+
+local function handleAudioForMode(currentMode)
+    if soundMuted then 
+        stopAllSounds()
+        return 
+    end
+    
+    if tick() - lastSoundTime >= soundGap then
+        if currentMode == "Normal" then
+            if sound2.IsPlaying then sound2:Stop() end
+            if sound3.IsPlaying then sound3:Stop() end
+            if not sound1.IsPlaying then
+                sound1:Play()
+                lastSoundTime = tick()
+            end
+        elseif currentMode == "Face Bang" then
+            if sound1.IsPlaying then sound1:Stop() end
+            if sound3.IsPlaying then sound3:Stop() end
+            if not sound2.IsPlaying then
+                sound2:Play()
+                lastSoundTime = tick()
+            end
+        elseif currentMode == "Auto Switch" then
+            if sound1.IsPlaying then sound1:Stop() end
+            if sound2.IsPlaying then sound2:Stop() end
+            if not sound3.IsPlaying then
+                sound3:Play()
+                lastSoundTime = tick()
+            end
+        end
+    end
+end
+
+local function getHumanoid()
+    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+end
+
+-- ====================================================================
+-- // RE-EXECUTION CLEAN WIPE & RESTART SYSTEM // --
+-- ====================================================================
+if _G.EndlessAuraStorage then
+    if _G.EndlessAuraStorage.CurrentGui then _G.EndlessAuraStorage.CurrentGui:Destroy() end
+    if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() end
+    if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() end
+    if _G.EndlessAuraStorage.LV then _G.EndlessAuraStorage.LV:Destroy() end
+    if _G.EndlessAuraStorage.AO then _G.EndlessAuraStorage.AO:Destroy() end
+    if _G.EndlessAuraStorage.Attachment then _G.EndlessAuraStorage.Attachment:Destroy() end
+    
+    pcall(function()
+        local myChar = player.Character
+        if myChar then
+            local hum = myChar:FindFirstChildOfClass("Humanoid")
+            if hum then
+                for _, track in pairs(hum:GetPlayingAnimationTracks()) do
+                    if track.Animation.AnimationId == bangAnimId then track:Stop() end
+                end
+                hum.PlatformStand = false
+            end
+            local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")
+            local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myChar.HumanoidRootPart:FindFirstChild("RootJoint"))
+            if rootJoint then rootJoint.C0 = CFrame.new() end
+        end
+    end)
+    
+    stopAllSounds()
+    leaveSound:Destroy()
+    _G.EndlessAuraStorage = nil
+    task.wait(0.1)
+end
+
+_G.EndlessAuraStorage = {
+    CurrentGui = nil,
+    ActiveConnection = nil,
+    PlatformPart = nil,
+    LV = nil,
+    AO = nil,
+    Attachment = nil
+}
+
+-- CONFIGURATIONS
+local speedMultiplier = 17.4   
+local forwardBackRange = 1.1   
+local fixedUpOffset = 1.8      
+local attachDistance = 0.4     
+
+local targetMode = "Normal" 
+local isAttached = false
+local selectedPlayers = {} 
+local currentTargetIndex = 1
+local lastTargetSwitchTime = 0
+local selectedPlayer = nil 
+
+local currentAutoSubMode = "Normal"
+local lastSwitchTime = 0
+
+pcall(function()
+    sound1.Parent = game.CoreGui
+    sound2.Parent = game.CoreGui
+    sound3.Parent = game.CoreGui
+    leaveSound.Parent = game.CoreGui
+end)
+
+-- Anti-Die System
+task.spawn(function()
+    while task.wait(0.5) do
+        if not _G.EndlessAuraStorage then break end 
+        pcall(function()
+            if game.Workspace.FallenPartsDestroyHeight ~= -500000 then
+                game.Workspace.FallenPartsDestroyHeight = -500000
+            end
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+                player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
+            end
+        end)
+    end
+end)
+
+-- ====================================================================
+-- // PANEL GUI DESIGN // --
+-- ====================================================================
+local screenGui = Instance.new("ScreenGui") 
+screenGui.Name = "DeltaGlassRoboticUI" 
+screenGui.ResetOnSpawn = false 
+screenGui.Parent = game.CoreGui 
+_G.EndlessAuraStorage.CurrentGui = screenGui 
+
+local mainFrame = Instance.new("Frame") 
+mainFrame.Size = UDim2.new(0, 250, 0, 360) 
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180) 
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+mainFrame.BackgroundTransparency = 0.45 
+mainFrame.BorderSizePixel = 2 
+mainFrame.BorderColor3 = Color3.fromRGB(255, 0, 50) 
+mainFrame.BorderMode = Enum.BorderMode.Inset 
+mainFrame.ClipsDescendants = true 
+mainFrame.Visible = true 
+mainFrame.Parent = screenGui 
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 4)
+
+local nameBoxFrame = Instance.new("Frame")
+nameBoxFrame.Size = UDim2.new(1, -12, 0, 36) 
+nameBoxFrame.Position = UDim2.new(0, 6, 0, 6)
+nameBoxFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 5)
+nameBoxFrame.BackgroundTransparency = 0.3
+nameBoxFrame.BorderSizePixel = 1
+nameBoxFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)
+nameBoxFrame.Parent = mainFrame
+
+local brandingImg = Instance.new("ImageLabel")
+brandingImg.Size = UDim2.new(0, 26, 0, 26)
+brandingImg.Position = UDim2.new(0, 6, 0, 5)
+brandingImg.Image = "rbxassetid://129299711445020"
+brandingImg.BackgroundTransparency = 1
+brandingImg.Parent = nameBoxFrame
+
+local nameText = Instance.new("TextLabel")
+nameText.Size = UDim2.new(1, -95, 1, 0)
+nameText.Position = UDim2.new(0, 38, 0, 0)
+nameText.Text = "ENDLESS AURA BANG PANEL💀💢"
+nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameText.Font = Enum.Font.Code 
+nameText.TextSize = 10.5
+nameText.TextXAlignment = Enum.TextXAlignment.Left
+nameText.BackgroundTransparency = 1
+nameText.Parent = nameBoxFrame
+
+local soundToggleBtn = Instance.new("TextButton")
+soundToggleBtn.Size = UDim2.new(0, 24, 0, 24)
+soundToggleBtn.Position = UDim2.new(1, -52, 0, 6)
+soundToggleBtn.BackgroundTransparency = 1 
+soundToggleBtn.BorderSizePixel = 0
+soundToggleBtn.Text = "🔊"
+soundToggleBtn.TextSize = 14
+soundToggleBtn.TextColor3 = Color3.new(1, 1, 1)
+soundToggleBtn.Parent = nameBoxFrame
+
+soundToggleBtn.MouseButton1Click:Connect(function()
+    soundMuted = not soundMuted
+    if soundMuted then
+        soundToggleBtn.Text = "🔕"
+        stopAllSounds()
+    else
+        soundToggleBtn.Text = "🔊"
+        if isAttached then lastSoundTime = 0 end 
+    end
+end)
+
+local animToggleBtn = Instance.new("TextButton")
+animToggleBtn.Size = UDim2.new(0, 24, 0, 24)
+animToggleBtn.Position = UDim2.new(1, -26, 0, 6)
+animToggleBtn.BackgroundTransparency = 1 
+animToggleBtn.BorderSizePixel = 0
+animToggleBtn.Text = "👤"
+animToggleBtn.TextSize = 14
+animToggleBtn.TextColor3 = Color3.new(1, 1, 1)
+animToggleBtn.Parent = nameBoxFrame
+
+animToggleBtn.MouseButton1Click:Connect(function()
+    animMuted = not animMuted
+    if animMuted then
+        animToggleBtn.Text = "❌" 
+        if activeTrack then activeTrack:Stop() activeTrack = nil end
+    else
+        animToggleBtn.Text = "👤"
+        if isAttached and not activeTrack then
+            local hum = getHumanoid()
+            if hum then
+                local anim = Instance.new("Animation")
+                anim.AnimationId = bangAnimId
+                activeTrack = hum:LoadAnimation(anim)
+                activeTrack.Looped = true
+                activeTrack:Play()
+                activeTrack:AdjustSpeed(speedMultiplier / 5)
+            end
+        end
+    end
+end)
+
+local toggleGuiBtn = Instance.new("TextButton")
+toggleGuiBtn.Size = UDim2.new(0, 70, 0, 30)
+toggleGuiBtn.Position = UDim2.new(0, 15, 1, -45) 
+toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+toggleGuiBtn.BackgroundTransparency = 0.3
+toggleGuiBtn.BorderSizePixel = 2
+toggleGuiBtn.BorderColor3 = Color3.fromRGB(255, 0, 50)
+toggleGuiBtn.Text = "[ CLOSE ]"
+toggleGuiBtn.TextColor3 = Color3.fromRGB(255, 0, 50)
+toggleGuiBtn.Font = Enum.Font.Code
+toggleGuiBtn.TextSize = 12
+toggleGuiBtn.Parent = screenGui
+Instance.new("UICorner", toggleGuiBtn).CornerRadius = UDim.new(0, 4)
+
+toggleGuiBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
+    toggleGuiBtn.Text = mainFrame.Visible and "[ CLOSE ]" or "[ OPEN ]"
+    toggleGuiBtn.TextColor3 = mainFrame.Visible and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(0, 255, 150)
+    toggleGuiBtn.BorderColor3 = mainFrame.Visible and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(0, 255, 150)
+end)
+
+local dragging, dragStart, startPos
+nameBoxFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+userInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+userInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
+
+local textBox = Instance.new("TextBox") 
+textBox.Size = UDim2.new(1, -16, 0, 26) 
+textBox.Position = UDim2.new(0, 8, 0, 50) 
+textBox.PlaceholderText = "> SEARCH MULTI TARGETS..." 
+textBox.Text = "" 
+textBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10) 
+textBox.BackgroundTransparency = 0.4
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255) 
+textBox.TextSize = 11
+textBox.Font = Enum.Font.Code
+textBox.BorderColor3 = Color3.fromRGB(150, 0, 30) 
+textBox.Parent = mainFrame 
+
+local scrollingFrame = Instance.new("ScrollingFrame") 
+scrollingFrame.Size = UDim2.new(1, -16, 0, 65) 
+scrollingFrame.Position = UDim2.new(0, 8, 0, 82) 
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5) 
+scrollingFrame.BackgroundTransparency = 0.4
+scrollingFrame.ScrollBarThickness = 3 
+scrollingFrame.BorderColor3 = Color3.fromRGB(100, 0, 20) 
+scrollingFrame.Parent = mainFrame 
+local uiList = Instance.new("UIListLayout", scrollingFrame)
+uiList.Padding = UDim.new(0, 2)
+
+local clearBtn = Instance.new("TextButton")
+clearBtn.Size = UDim2.new(0.5, -12, 0, 22) 
+clearBtn.Position = UDim2.new(0, 8, 0, 154) 
+clearBtn.Text = "[ CLEAR ]"
+clearBtn.BackgroundColor3 = Color3.fromRGB(25, 5, 10)
+clearBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+clearBtn.BorderColor3 = Color3.fromRGB(200, 0, 50)
+clearBtn.Font = Enum.Font.Code
+clearBtn.TextSize = 11
+clearBtn.Parent = mainFrame
+
+local selectAllBtn = Instance.new("TextButton")
+selectAllBtn.Size = UDim2.new(0.5, -12, 0, 22) 
+selectAllBtn.Position = UDim2.new(0.5, 4, 0, 154) 
+selectAllBtn.Text = "[ SELECT ALL ]"
+selectAllBtn.BackgroundColor3 = Color3.fromRGB(5, 20, 10)
+selectAllBtn.TextColor3 = Color3.fromRGB(50, 255, 150)
+selectAllBtn.BorderColor3 = Color3.fromRGB(0, 200, 100)
+selectAllBtn.Font = Enum.Font.Code
+selectAllBtn.TextSize = 11
+selectAllBtn.Parent = mainFrame
+
+local modeBtn = Instance.new("TextButton")
+modeBtn.Size = UDim2.new(1, -16, 0, 24)
+modeBtn.Position = UDim2.new(0, 8, 0, 182)
+modeBtn.Text = "MODE // SYSTEM_NORMAL"
+modeBtn.BackgroundColor3 = Color3.fromRGB(15, 5, 5)
+modeBtn.BackgroundTransparency = 0.3
+modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+modeBtn.Font = Enum.Font.Code
+modeBtn.TextSize = 11
+modeBtn.BorderColor3 = Color3.fromRGB(180, 0, 40)
+modeBtn.Parent = mainFrame
+
+modeBtn.MouseButton1Click:Connect(function()
+    if targetMode == "Normal" then
+        targetMode = "Face Bang"
+        modeBtn.Text = "MODE // CORE_FACE_BANG 🎯"
+        modeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+    elseif targetMode == "Face Bang" then
+        targetMode = "Auto Switch"
+        modeBtn.Text = "MODE // AUTO_SWITCH LOOP 🔄"
+        modeBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+    else
+        targetMode = "Normal"
+        modeBtn.Text = "MODE // SYSTEM_NORMAL"
+        modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    end
+    if isAttached then lastSoundTime = 0 end 
+end)
+
+local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callback)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -16, 0, 14)
+    label.Position = UDim2.new(0, 8, 0, minY)
+    label.Text = "SYS_" .. labelText .. ":: " .. tostring(defaultVal)
+    label.TextColor3 = Color3.fromRGB(180, 180, 180)
+    label.Font = Enum.Font.Code
+    label.TextSize = 9.5
+    label.BackgroundTransparency = 1
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = mainFrame
+
+    local track = Instance.new("TextButton") 
+    track.Size = UDim2.new(1, -16, 0, 4)
+    track.Position = UDim2.new(0, 8, 0, minY + 14)
+    track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    track.Text = ""
+    track.AutoButtonColor = false
+    track.BorderSizePixel = 0
+    track.Parent = mainFrame
+
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.new((defaultVal - minVal)/(maxVal - minVal), 0, 1, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(255, 0, 50)
+    fill.BorderSizePixel = 0
+    fill.Parent = track
+
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.new(0, 8, 0, 10)
+    knob.Position = UDim2.new((defaultVal - minVal)/(maxVal - minVal), -4, 0.5, -5)
+    knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    knob.Parent = track
+
+    local function updateSliderPosition(inputPositionX)
+        local relativeX = math.clamp((inputPositionX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+        knob.Position = UDim2.new(relativeX, -4, 0.5, -5)
+        fill.Size = UDim2.new(relativeX, 0, 1, 0)
+        
+        local currentVal = math.floor((minVal + (relativeX * (maxVal - minVal))) * 10) / 10
+        label.Text = "SYS_" .. labelText .. ":: " .. tostring(currentVal)
+        callback(currentVal)
+    end
+
+    local sliderDragging = false
+    track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            sliderDragging = true
+            updateSliderPosition(input.Position.X) 
+        end
+    end)
+    userInputService.InputChanged:Connect(function(input)
+        if sliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateSliderPosition(input.Position.X)
+        end
+    end)
+    userInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then sliderDragging = false end
+    end)
+end
+
+createSlider(212, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
+    speedMultiplier = v 
+    if activeTrack then activeTrack:AdjustSpeed(v / 5) end
+end)
+createSlider(242, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
+createSlider(272, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
+createSlider(302, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
+
+local toggleButton = Instance.new("TextButton") 
+toggleButton.Size = UDim2.new(1, -16, 0, 26) 
+toggleButton.Position = UDim2.new(0, 8, 1, -32) 
+toggleButton.Text = "[ FUCK ON ]" 
+toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
+toggleButton.BackgroundTransparency = 0.2
+toggleButton.TextColor3 = Color3.new(1, 1, 1) 
+toggleButton.Font = Enum.Font.Code
+toggleButton.TextSize = 12
+toggleButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Parent = mainFrame 
+
+local function updateList() 
+    for _, child in pairs(scrollingFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end 
+    for _, p in pairs(Players:GetPlayers()) do 
+        if p ~= player and (string.find(p.Name:lower(), textBox.Text:lower()) or string.find(p.DisplayName:lower(), textBox.Text:lower())) then 
+            local btn = Instance.new("TextButton") 
+            btn.Size = UDim2.new(1, 0, 0, 22) 
+            btn.Text = " > " .. p.DisplayName .. " (@" .. p.Name .. ")"
+            btn.BackgroundColor3 = table.find(selectedPlayers, p) and Color3.fromRGB(0, 100, 50) or Color3.fromRGB(15, 15, 15) 
+            btn.BackgroundTransparency = 0.5
+            btn.TextColor3 = table.find(selectedPlayers, p) and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(200, 200, 200) 
+            btn.TextSize = 11
+            btn.Font = Enum.Font.RobotoMono
+            btn.TextXAlignment = Enum.TextXAlignment.Left 
+            btn.BorderColor3 = Color3.fromRGB(40, 0, 10)
+            btn.Parent = scrollingFrame 
+            
+            btn.MouseButton1Click:Connect(function() 
+                local index = table.find(selectedPlayers, p)
+                if index then
+                    table.remove(selectedPlayers, index)
+                    btn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+                    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+                else
+                    table.insert(selectedPlayers, p)
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
+                    btn.TextColor3 = Color3.fromRGB(0, 255, 150)
+                end
+                
+                if #selectedPlayers > 0 then
+                    textBox.Text = "Targets Selected: " .. tostring(#selectedPlayers)
+                else
+                    textBox.Text = ""
+                end
+            end) 
+        end 
+    end 
+end 
+
+clearBtn.MouseButton1Click:Connect(function()
+    selectedPlayers = {}
+    textBox.Text = ""
+    updateList()
+    if isAttached then toggleButton:Click() end
+end)
+
+selectAllBtn.MouseButton1Click:Connect(function()
+    selectedPlayers = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player then table.insert(selectedPlayers, p) end
+    end
+    textBox.Text = "Targets Selected: " .. tostring(#selectedPlayers)
+    updateList()
+end)
+
+textBox:GetPropertyChangedSignal("Text"):Connect(function()
+    if not string.find(textBox.Text, "Targets Selected:") then updateList() end
+end) 
+updateList() 
+
+local function emergencyTargetShift()
+    lastTargetSwitchTime = 0 
+    currentTargetIndex = 1
+    if #selectedPlayers > 0 then selectedPlayer = selectedPlayers[1] end
+end
+
+Players.PlayerRemoving:Connect(function(leftPlayer)
+    local targetIdx = table.find(selectedPlayers, leftPlayer)
+    if targetIdx then
+        table.remove(selectedPlayers, targetIdx)
+        emergencyTargetShift() 
+        
+        pcall(function()
+            starterGui:SetCore("SendNotification", {
+                Title = "Target Leave",
+                Text = leftPlayer.DisplayName .. " left.",
+                Duration = 4
+            })
+        end)
+        
+        leaveSound:Play()
+        
+        if #selectedPlayers == 0 and isAttached then
+            isAttached = false
+            if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end
+            if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end
+            if _G.EndlessAuraStorage.LV then _G.EndlessAuraStorage.LV:Destroy() _G.EndlessAuraStorage.LV = nil end
+            if _G.EndlessAuraStorage.AO then _G.EndlessAuraStorage.AO:Destroy() _G.EndlessAuraStorage.AO = nil end
+            if _G.EndlessAuraStorage.Attachment then _G.EndlessAuraStorage.Attachment:Destroy() _G.EndlessAuraStorage.Attachment = nil end
+            if activeTrack then activeTrack:Stop() activeTrack = nil end
+            stopAllSounds()
+            toggleButton.Text = "[ FUCK ON ]"
+            toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30)
+        end
+    end
+end)
+
+-- ====================================================================
+-- // MODERN CONSTRAINT FRAMEWORK ENGINE (ANTI-CHEAT BYPASS) // --
+-- ====================================================================
+toggleButton.MouseButton1Click:Connect(function() 
+    if isAttached then 
+        isAttached = false 
+        if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end 
+        if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end 
+        if _G.EndlessAuraStorage.LV then _G.EndlessAuraStorage.LV:Destroy() _G.EndlessAuraStorage.LV = nil end
+        if _G.EndlessAuraStorage.AO then _G.EndlessAuraStorage.AO:Destroy() _G.EndlessAuraStorage.AO = nil end
+        if _G.EndlessAuraStorage.Attachment then _G.EndlessAuraStorage.Attachment:Destroy() _G.EndlessAuraStorage.Attachment = nil end
+        
+        if activeTrack then activeTrack:Stop() activeTrack = nil end
+        stopAllSounds()
+        
+        toggleButton.Text = "[ FUCK ON ]" 
+        toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
+        
+        pcall(function()
+            local char = player.Character
+            local torso = char:FindFirstChild("Torso") or char:FindFirstChild("LowerTorso")
+            local rootJoint = torso and (torso:FindFirstChild("RootJoint") or char.HumanoidRootPart:FindFirstChild("RootJoint"))
+            if rootJoint then rootJoint.C0 = CFrame.new() end
+            if char:FindFirstChild("Humanoid") then char.Humanoid.PlatformStand = false end
+        end)
+    elseif #selectedPlayers > 0 then 
+        isAttached = true 
+        toggleButton.Text = "[ FUCK OFF ]" 
+        toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
+        lastSwitchTime = tick()
+        lastTargetSwitchTime = tick()
+        lastSoundTime = 0 
+        currentTargetIndex = 1
+        selectedPlayer = selectedPlayers[currentTargetIndex]
+        currentAutoSubMode = "Normal"
+        
+        local myChar = player.Character
+        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+        if not myHRP then return end
+
+        if not animMuted then
+            local hum = getHumanoid()
+            if hum then
+                local anim = Instance.new("Animation")
+                anim.AnimationId = bangAnimId
+                activeTrack = hum:LoadAnimation(anim)
+                activeTrack.Looped = true
+                activeTrack:Play()
+                activeTrack:AdjustSpeed(speedMultiplier / 5)
+            end
+        end
+
+        -- New Modern Constraints (Infinite Force, Zero Delay, Bypass detection)
+        local att = Instance.new("Attachment")
+        att.Parent = myHRP
+        _G.EndlessAuraStorage.Attachment = att
+
+        local lv = Instance.new("LinearVelocity")
+        lv.MaxForce = math.huge
+        lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+        lv.RelativeTo = Enum.ActuatorRelativeTo.World
+        lv.Attachment0 = att
+        lv.Parent = myHRP
+        _G.EndlessAuraStorage.LV = lv
+
+        local ao = Instance.new("AlignOrientation")
+        ao.MaxTorque = math.huge
+        ao.Responsiveness = 200 -- Maximum snappy response
+        ao.Mode = Enum.OrientationMode.OneAttachment
+        ao.Attachment0 = att
+        ao.Parent = myHRP
+        _G.EndlessAuraStorage.AO = ao
+
+        local platform = Instance.new("Part")
+        platform.Size = Vector3.new(10, 1, 10) 
+        platform.Transparency = 1 
+        platform.Anchored = true
+        platform.CanCollide = true
+        platform.Parent = game.Workspace
+        _G.EndlessAuraStorage.PlatformPart = platform
+
+        _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
+            if not isAttached or #selectedPlayers == 0 then return end 
+            
+            if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
+                lastTargetSwitchTime = tick()
+                currentTargetIndex = currentTargetIndex + 1
+                if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end
+                selectedPlayer = selectedPlayers[currentTargetIndex]
+            end
+
+            if not selectedPlayer or not selectedPlayer.Character then return end
+
+            local myChar = player.Character
+            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart") 
+            local myHumanoid = myChar and myChar:FindFirstChild("Humanoid")
+            if not myHRP or not myHumanoid or not lv or not ao then return end
+            
+            local targetHRP = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local targetHead = selectedPlayer.Character:FindFirstChild("Head") 
+            if not targetHRP then return end
+
+            local currentModeToRun = targetMode
+            if targetMode == "Auto Switch" then
+                if tick() - lastSwitchTime >= 1.0 then
+                    lastSwitchTime = tick()
+                    currentAutoSubMode = (currentAutoSubMode == "Normal") and "Face Bang" or "Normal"
+                end
+                currentModeToRun = currentAutoSubMode
+            end
+            
+            handleAudioForMode(targetMode)
+
+            if targetHRP.Position.Y < -60 or targetHRP.Position.Y < (game.Workspace.FallenPartsDestroyHeight + 15) then
+                lv.VectorVelocity = Vector3.new(0,0,0)
+                if platform and platform.Parent then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
+                return 
+            end
+
+            myHumanoid.PlatformStand = true 
+            
+            local timeFactor = tick() * speedMultiplier
+            local sineWave = math.sin(timeFactor)
+            local absSine = math.abs(sineWave)
+            
+            local dynamicOffset = absSine * forwardBackRange 
+            local tiltAngle = -sineWave * 0.15 
+
+            local targetCFrame
+            if currentModeToRun == "Face Bang" then
+                local basePartForRotation = targetHead or targetHRP
+                targetCFrame = basePartForRotation.CFrame 
+                    * CFrame.new(0, fixedUpOffset, -attachDistance - dynamicOffset - 0.2) 
+                    * CFrame.Angles(0, math.pi, 0)
+                    + basePartForRotation.CFrame.LookVector * (sineWave * 0.7)
+            else
+                targetCFrame = targetHRP.CFrame 
+                    * CFrame.new(0, 0, attachDistance + dynamicOffset + 0.8 + sineWave) 
+                    * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
+            end
+            
+            -- ULTRA GLUED PHYSICS SYNCHRONIZER
+            ao.CFrame = targetCFrame
+            
+            -- P0.0 Delay Velocity Calculation (Anti-cheat safe network physics)
+            local distanceVector = targetCFrame.Position - myHRP.Position
+            lv.VectorVelocity = distanceVector * 60 -- Har frame velocity target point par adjust hogi instantaneous
+            
+            if platform and platform.Parent then
+                platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
+            end
+            
+            pcall(function()
+                local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")
+                local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myHRP:FindFirstChild("RootJoint"))
+                if rootJoint then
+                    local hipThrustAngle = math.rad(sineWave * (forwardBackRange * 15))
+                    local jointOffsetZ = -absSine * (forwardBackRange * 0.2)
+                    rootJoint.C0 = CFrame.new(0, 0, jointOffsetZ) * CFrame.Angles((currentModeToRun == "Face Bang" and hipThrustAngle or -hipThrustAngle), 0, 0)
+                end
+            end)
+            
+            pcall(function()
+                for _, v in pairs(myChar:GetDescendants()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
+                end
+            end)
+        end) 
+    end 
+end)
