@@ -1,0 +1,128 @@
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local camera = Workspace.CurrentCamera
+
+local textToShow = "Aɴᴛɪ Vᴏɪᴅ Sᴀᴠᴇᴅ" 
+local soundId = "rbxassetid://132919665409307"
+local isBypassing = false
+local fakeDropPart = nil
+
+-- UI aur Sound Function
+local function showAuraSavedUI()
+    if playerGui:FindFirstChild("AntiVoidNotification") then
+        playerGui.AntiVoidNotification:Destroy()
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "AntiVoidNotification"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = playerGui
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 500, 0, 60)
+    label.Position = UDim2.new(0.5, -250, 0.75, 0)
+    label.BackgroundTransparency = 1 
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Text = textToShow
+    label.Font = Enum.Font.GothamBlack 
+    label.TextSize = 32
+    label.TextTransparency = 1
+    label.Parent = screenGui
+
+    local textStroke = Instance.new("UIStroke")
+    textStroke.Color = Color3.fromRGB(255, 0, 0)
+    textStroke.Thickness = 3.5
+    textStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+    textStroke.Transparency = 1
+    textStroke.Parent = label
+
+    local sound = Instance.new("Sound")
+    sound.SoundId = soundId
+    sound.Volume = 1
+    sound.Parent = SoundService
+    
+    TweenService:Create(label, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+    TweenService:Create(textStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 0}):Play()
+    sound:Play()
+
+    task.wait(1.20)
+
+    local fadeTime = 0.4
+    local fadeOutLabel = TweenService:Create(label, TweenInfo.new(fadeTime, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1})
+    local fadeOutStroke = TweenService:Create(textStroke, TweenInfo.new(fadeTime, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Transparency = 1})
+    local fadeOutSound = TweenService:Create(sound, TweenInfo.new(fadeTime, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Volume = 0})
+    
+    fadeOutLabel:Play()
+    fadeOutStroke:Play()
+    fadeOutSound:Play()
+
+    fadeOutLabel.Completed:Connect(function()
+        screenGui:Destroy()
+        sound:Destroy()
+    end)
+end
+
+-- Core Immortality Logic
+RunService.RenderStepped:Connect(function()
+    local character = player.Character
+    if character then
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        
+        if hrp and humanoid then
+            humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+            if humanoid.Health <= 0 then humanoid.Health = 100 end
+
+            -- Jaise hi aap kill limit ke paas pahuncho (-380)
+            if hrp.Position.Y < -380 and not isBypassing then
+                isBypassing = true
+                task.spawn(showAuraSavedUI)
+
+                -- 1. Real character ko freeze kar do taaki server delete na kare
+                local savePos = hrp.Position
+                hrp.Anchored = true
+                
+                -- 2. Ek invisible tracking part banao jo continuously drop karega
+                fakeDropPart = Instance.new("Part")
+                fakeDropPart.Size = Vector3.new(1, 1, 1)
+                fakeDropPart.Transparency = 1
+                fakeDropPart.CanCollide = false
+                fakeDropPart.Anchored = false
+                fakeDropPart.Position = savePos
+                fakeDropPart.Parent = Workspace
+                fakeDropPart.Velocity = Vector3.new(0, -180, 0) -- Smooth non-stop falling velocity
+                
+                -- Camera ko is dropping part par lock karo taaki constant fall dikhe
+                camera.CameraSubject = fakeDropPart
+            end
+
+            -- Har frame character mesh ko fake drop part par smoothly match karo visual ke liye
+            if isBypassing and fakeDropPart then
+                -- Real parts ko safe height par rakh kar network spoofing ho rhi hai, par look continuous niche ka aayega
+                for _, part in ipairs(character:GetChildren()) do
+                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                        part.CFrame = fakeDropPart.CFrame
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- Clean reset jab player manually teleport kare ya re-spawn ho
+player.CharacterAdded:Connect(function()
+    isBypassing = false
+    if fakeDropPart then
+        fakeDropPart:Destroy()
+        fakeDropPart = nil
+    end
+    camera.CameraSubject = player.Character:WaitForChild("Humanoid")
+end)
+
