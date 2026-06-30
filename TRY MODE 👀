@@ -203,7 +203,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 3: SHIELD
     btn("🛡️ Anti Void", T3, function(b) task.spawn(function() while b:GetAttribute("T") do local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end task.wait(0.1) end end) end)
-    btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
+    btn("🛡️Anti Void V1", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, true)
+    btn("🛡️Anti Bang", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
     btn("🛡️ Anti Sit", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.Humanoid.Sit = false task.wait() end end) end)
     btn("🛡️ Anti AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
     btn("🛡️ Anti Fling", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
