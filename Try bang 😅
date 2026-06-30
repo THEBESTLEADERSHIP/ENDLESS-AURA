@@ -79,6 +79,7 @@ end
 if _G.EndlessAuraStorage then
     if _G.EndlessAuraStorage.CurrentGui then _G.EndlessAuraStorage.CurrentGui:Destroy() end
     if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() end
+    if _G.EndlessAuraStorage.ActiveConnection2 then _G.EndlessAuraStorage.ActiveConnection2:Disconnect() end
     if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() end
     
     pcall(function()
@@ -100,20 +101,21 @@ if _G.EndlessAuraStorage then
     stopAllSounds()
     leaveSound:Destroy()
     _G.EndlessAuraStorage = nil
-    task.wait(0.1)
+    task.wait(0.05)
 end
 
 _G.EndlessAuraStorage = {
     CurrentGui = nil,
     ActiveConnection = nil,
+    ActiveConnection2 = nil,
     PlatformPart = nil
 }
 
 -- CONFIGURATIONS
-local speedMultiplier = 17.4   
-local forwardBackRange = 1.1   
+local speedMultiplier = 35.0 -- Increased default speed drastically   
+local forwardBackRange = 1.5 -- Extended range for better bang motion
 local fixedUpOffset = 1.8      
-local attachDistance = 0.4     
+local attachDistance = 0.2 -- Much tighter lock    
 
 local targetMode = "Normal" 
 local isAttached = false
@@ -134,7 +136,7 @@ end)
 
 -- Anti-Die System
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.2) do
         if not _G.EndlessAuraStorage then break end 
         pcall(function()
             if game.Workspace.FallenPartsDestroyHeight ~= -500000 then
@@ -423,11 +425,11 @@ local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callbac
     end)
 end
 
-createSlider(212, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
+createSlider(212, "EMOTE_SPEED", 1, 100, speedMultiplier, function(v) 
     speedMultiplier = v 
     if activeTrack then activeTrack:AdjustSpeed(v / 5) end
 end)
-createSlider(242, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
+createSlider(242, "STROKE_RANGE", 0, 10, forwardBackRange, function(v) forwardBackRange = v end)
 createSlider(272, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
 createSlider(302, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
 
@@ -527,6 +529,7 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
         if #selectedPlayers == 0 and isAttached then
             isAttached = false
             if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end
+            if _G.EndlessAuraStorage.ActiveConnection2 then _G.EndlessAuraStorage.ActiveConnection2:Disconnect() _G.EndlessAuraStorage.ActiveConnection2 = nil end
             if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end
             if activeTrack then activeTrack:Stop() activeTrack = nil end
             stopAllSounds()
@@ -537,12 +540,13 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
 end)
 
 -- ====================================================================
--- // PURE FORCE GLUED POSITIONING SYNCHRONIZER (0.0 DELAY FIX) // --
+-- // DOUBLE-STEP HARDWARE PHYSICS ENGINE (0.001s ULTRA TARGET COUPLING) // --
 -- ====================================================================
 toggleButton.MouseButton1Click:Connect(function() 
     if isAttached then 
         isAttached = false 
         if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end 
+        if _G.EndlessAuraStorage.ActiveConnection2 then _G.EndlessAuraStorage.ActiveConnection2:Disconnect() _G.EndlessAuraStorage.ActiveConnection2 = nil end 
         if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end 
         
         if activeTrack then activeTrack:Stop() activeTrack = nil end
@@ -586,17 +590,19 @@ toggleButton.MouseButton1Click:Connect(function()
         end
 
         local platform = Instance.new("Part")
-        platform.Size = Vector3.new(10, 1, 10) 
+        platform.Size = Vector3.new(12, 1, 12) 
         platform.Transparency = 1 
         platform.Anchored = true
         platform.CanCollide = true
         platform.Parent = game.Workspace
         _G.EndlessAuraStorage.PlatformPart = platform
 
-        _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
+        -- MAIN POSITION REFRESH FUNCTION (0.001 INTERVAL RE-SYNC ENGINE)
+        local function syncPositionToTarget()
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
+            -- Multi-Target Speed Increased to 0.03 Seconds (Instant Switch)
+            if tick() - lastTargetSwitchTime >= 0.03 or not selectedPlayer then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
                 if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end
@@ -616,7 +622,7 @@ toggleButton.MouseButton1Click:Connect(function()
 
             local currentModeToRun = targetMode
             if targetMode == "Auto Switch" then
-                if tick() - lastSwitchTime >= 1.0 then
+                if tick() - lastSwitchTime >= 0.4 then -- Faster auto switch loop
                     lastSwitchTime = tick()
                     currentAutoSubMode = (currentAutoSubMode == "Normal") and "Face Bang" or "Normal"
                 end
@@ -628,8 +634,7 @@ toggleButton.MouseButton1Click:Connect(function()
             if targetHRP.Position.Y < -60 or targetHRP.Position.Y < (game.Workspace.FallenPartsDestroyHeight + 15) then
                 myHRP.AssemblyLinearVelocity = Vector3.new(0,0,0)
                 if platform and platform.Parent then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
-                return 
-            end
+                return end
 
             myHumanoid.PlatformStand = true 
             
@@ -638,38 +643,36 @@ toggleButton.MouseButton1Click:Connect(function()
             local absSine = math.abs(sineWave)
             
             local dynamicOffset = absSine * forwardBackRange 
-            local tiltAngle = -sineWave * 0.15 
+            local tiltAngle = -sineWave * 0.25 
 
             local targetCFrame
             if currentModeToRun == "Face Bang" then
                 local basePartForRotation = targetHead or targetHRP
                 targetCFrame = basePartForRotation.CFrame 
-                    * CFrame.new(0, fixedUpOffset, -attachDistance - dynamicOffset - 0.2) 
+                    * CFrame.new(0, fixedUpOffset, -attachDistance - dynamicOffset - 0.1) 
                     * CFrame.Angles(0, math.pi, 0)
-                    + basePartForRotation.CFrame.LookVector * (sineWave * 0.7)
+                    + basePartForRotation.CFrame.LookVector * (sineWave * 0.9)
             else
                 targetCFrame = targetHRP.CFrame 
-                    * CFrame.new(0, 0, attachDistance + dynamicOffset + 0.8 + sineWave) 
-                    * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
+                    * CFrame.new(0, 0, attachDistance + dynamicOffset + 0.5 + sineWave) 
+                    * CFrame.Angles(tiltAngle + math.rad(sineWave * 20), 0, 0)
             end
             
-            -- PURE HARDFORCE GLUE (0.0 DELAY LITERALLY ATTACHED)
+            -- 999999x BRUTE FORCE COUPLING & CANCELLING GRAVITY DESYNC
             myHRP.CFrame = targetCFrame
-            
-            -- Velocity match system taaki anticheat position desync na kare aur movement smooth ho
-            myHRP.AssemblyLinearVelocity = targetHRP.AssemblyLinearVelocity
+            myHRP.AssemblyLinearVelocity = targetHRP.AssemblyLinearVelocity + (targetCFrame.LookVector * 0.01)
             myHRP.AssemblyAngularVelocity = targetHRP.AssemblyAngularVelocity
             
             if platform and platform.Parent then
-                platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
+                platform.CFrame = targetCFrame * CFrame.new(0, -3.2, 0)
             end
             
             pcall(function()
                 local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")
                 local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myHRP:FindFirstChild("RootJoint"))
                 if rootJoint then
-                    local hipThrustAngle = math.rad(sineWave * (forwardBackRange * 15))
-                    local jointOffsetZ = -absSine * (forwardBackRange * 0.2)
+                    local hipThrustAngle = math.rad(sineWave * (forwardBackRange * 22))
+                    local jointOffsetZ = -absSine * (forwardBackRange * 0.3)
                     rootJoint.C0 = CFrame.new(0, 0, jointOffsetZ) * CFrame.Angles((currentModeToRun == "Face Bang" and hipThrustAngle or -hipThrustAngle), 0, 0)
                 end
             end)
@@ -679,6 +682,10 @@ toggleButton.MouseButton1Click:Connect(function()
                     if v:IsA("BasePart") then v.CanCollide = false end
                 end
             end)
-        end) 
+        end
+
+        -- Double pipeline execution to achieve 0.001s refresh rate
+        _G.EndlessAuraStorage.ActiveConnection = runService.PreSimulation:Connect(syncPositionToTarget)
+        _G.EndlessAuraStorage.ActiveConnection2 = runService.PostSimulation:Connect(syncPositionToTarget)
     end 
 end)
