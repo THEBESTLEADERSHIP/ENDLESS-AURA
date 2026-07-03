@@ -1,4 +1,3 @@
-
 -- LocalScript
 
 local Players = game:GetService("Players")
@@ -272,10 +271,10 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     
     local targetSliderPos
     if AuraState.hudVisible then
-        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Smoothly returns exactly back to original visible spot
+        targetSliderPos = UDim2.new(0, 0, 0, 0)
         currentRotation = currentRotation - 360
     else
-        targetSliderPos = UDim2.new(0, 850, 0, 0) -- Hides cleanly past clipping window bounds
+        targetSliderPos = UDim2.new(0, 850, 0, 0)
         currentRotation = currentRotation + 360
     end
     
@@ -328,7 +327,7 @@ task.spawn(function()
 end)
 
 -- =====================
--- FRIEND JOIN NOTIFICATION (Player Headshot Restored)
+-- FRIEND JOIN NOTIFICATION
 -- =====================
 local function showJoinNotification(joinedPlayer)
     if joinedPlayer == player then return end
@@ -360,7 +359,6 @@ local function showJoinNotification(joinedPlayer)
     notifStroke.Thickness = 1.8
     notifStroke.Parent = notifFrame
 
-    -- Restored Player Avatar Headshot Thumbnail Thumbnail Image
     local avatarImg = Instance.new("ImageLabel")
     avatarImg.Size = UDim2.new(0, 48, 0, 48)
     avatarImg.Position = UDim2.new(0, 10, 0.5, -24)
@@ -408,27 +406,30 @@ end
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
--- CHARACTER SETUP (Robust Fixed Core Components Loading)
+-- CHARACTER SETUP
 -- =====================
 local function setup(character)
     if not character or not character.Parent then return end
     
-    -- Absolute Fallback Safety Scanner Engine
-    local head = character:FindFirstChild("Head") or character:WaitForChild("Head", 10)
-    local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
-    local hrp = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart", 10)
+    local head = character:WaitForChild("Head", 15)
+    local humanoid = character:WaitForChild("Humanoid", 15)
+    local hrp = character:WaitForChild("HumanoidRootPart", 15)
     
     if not head or not humanoid or not hrp then return end
-    local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid:WaitForChild("Animator", 10)
+    local animator = humanoid:WaitForChild("Animator", 15)
     if not animator then return end
 
-    -- Clean up duplicate frames
+    -- Old assets clean up
     for _, child in ipairs(head:GetChildren()) do
         if child.Name == "EACircle" or child.Name == "OverheadTag" then
             child:Destroy()
         end
     end
 
+    if AuraState.currentTrack then
+        pcall(function() AuraState.currentTrack:Stop() end)
+        AuraState.currentTrack = nil
+    end
     AuraState.emitters = {}
 
     -- ===== LOGO TOKEN CIRCLE =====
@@ -524,7 +525,7 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- Permanent Sync Multi-Render Engine Connection
+    -- Permanent Sync Multi-Render Connection
     local renderConn
     local rotAngle = 0
     renderConn = RunService.RenderStepped:Connect(function(dt)
@@ -639,7 +640,7 @@ local function setup(character)
         table.insert(AuraState.emitters, smoke)
     end
 
-    -- Run deep iteration over limbs for absolute load reliability
+    -- Limbs Generation Loop
     for _, obj in ipairs(character:GetChildren()) do
         if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
             createThunder(obj, 0, 60, 4, 1.2)
@@ -703,7 +704,9 @@ local function setup(character)
     end
 end
 
--- Appearance Observers Connection
+-- =====================
+-- LIFECYCLE REBOOT ENGINE (Fixes Warnings/Resets)
+-- =====================
 local function attachCharacterTracks(character)
     if not character then return end
     
@@ -713,13 +716,24 @@ local function attachCharacterTracks(character)
         task.spawn(setup, character)
     end)
     
-    local humanoid = character:WaitForChild("Humanoid", 10) or character:FindFirstChildOfClass("Humanoid")
+    local humanoid = character:WaitForChild("Humanoid", 15)
     if humanoid then
         humanoid.DescriptionApplied:Connect(function()
             task.spawn(setup, character)
         end)
     end
 end
+
+-- Fallback loop check just in case CharacterAdded fires unpredictably after a warning
+task.spawn(function()
+    while true do
+        local currentCharacter = player.Character
+        if currentCharacter and currentCharacter.Parent and not currentCharacter:FindFirstChild("OverheadTag") then
+            attachCharacterTracks(currentCharacter)
+        end
+        task.wait(2.5) -- Low-overhead safety ping
+    end
+end)
 
 if player.Character then attachCharacterTracks(player.Character) end
 player.CharacterAdded:Connect(attachCharacterTracks)
