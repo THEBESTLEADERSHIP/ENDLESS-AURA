@@ -16,18 +16,17 @@ local playerGui = player:WaitForChild("PlayerGui", 10) or player:FindFirstChildO
 local CUSTOM_LOGO_ID = "rbxassetid://129299711445020"
 
 -- ========================================================
--- ANTI-OVERLAP & RE-EXECUTION SYSTEM (Old cleanup)
+-- ANTI-OVERLAP & RE-EXECUTION SYSTEM (Glitch-Free Fix)
 -- ========================================================
--- Agar pehle se koi loop chal raha hai, toh use signal dekar band karenge
 if _G.AuraKillSwitch then
     _G.AuraKillSwitch()
 end
 
--- Naya state aur toggle system setup (Humesha Fresh ON se shuru hoga)
+-- Fresh state setup (Default ON)
 _G.AuraState = {
-    tagsEnabled = true,   -- Default ON
-    auraEnabled = true,   -- Default ON
-    animEnabled = true,   -- Default ON
+    tagsEnabled = true,   
+    auraEnabled = true,   
+    animEnabled = true,   
     spamEnabled = false,
     hudVisible = true,
     emitters = {},
@@ -35,26 +34,44 @@ _G.AuraState = {
 }
 local AuraState = _G.AuraState
 
--- Kill switch function jo next execution par sab khatam karega
 local isScriptAlive = true
 _G.AuraKillSwitch = function()
     isScriptAlive = false
-    -- Old emitters ko clear karo
+    
+    -- Force Stop All Active Playing Tracks to prevent Glitch/Freeze
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            local animator = humanoid:FindFirstChildOfClass("Animator")
+            if animator then
+                for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                    if track.Animation and (track.Animation.AnimationId == "rbxassetid://138665010911335" or track.Name == "AuraIdle") then
+                        track:Stop(0)
+                        track:Destroy()
+                    end
+                end
+            end
+        end
+    end
+
+    if AuraState.currentTrack then
+        pcall(function() 
+            AuraState.currentTrack:Stop(0) 
+            AuraState.currentTrack:Destroy()
+        end)
+    end
+
     if AuraState.emitters then
         for _, emitter in ipairs(AuraState.emitters) do
             if emitter and emitter.Parent then emitter:Destroy() end
         end
     end
-    -- Old animation track ko stop karo
-    if AuraState.currentTrack then
-        pcall(function() AuraState.currentTrack:Stop() end)
-    end
-    -- Old HUD ko clear karo
+
     if playerGui and playerGui:FindFirstChild("AuraHUD") then
         playerGui:FindFirstChild("AuraHUD"):Destroy()
     end
-    -- Character ke andar ke purane tags aur attachments hatao
-    local char = player.Character
+
     if char then
         for _, child in ipairs(char:GetDescendants()) do
             if child.Name == "EACircle" or child.Name == "OverheadTag" or child.Name == "AuraAttachment" then
@@ -188,7 +205,7 @@ local function createBox(name, text, withDot, interactive)
     if withDot then
         dot = Instance.new("Frame")
         dot.Size = UDim2.new(0, 5, 0, 5)
-        dot.BackgroundColor3 = Color3.fromRGB(0, 255, 100) -- Default Green because it is ON
+        dot.BackgroundColor3 = Color3.fromRGB(0, 255, 100) 
         dot.BorderSizePixel = 0
         dot.Parent = box
 
@@ -211,9 +228,7 @@ local function createBox(name, text, withDot, interactive)
     return box, label, dot
 end
 
--- ==========================================
--- TOGGLES EXECUTION
--- ==========================================
+-- Toggles Connection
 local _, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
 tagsLabel.MouseButton1Click:Connect(function()
     if not isScriptAlive then return end
@@ -341,7 +356,7 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- CHARACTER SETUP (ORIGINAL AURA PIPELINE)
+-- CHARACTER SETUP (AURA & RESET LOGIC)
 -- ==========================================
 local function setup(character)
     if not isScriptAlive or not character or not character.Parent then return end
@@ -354,15 +369,19 @@ local function setup(character)
     local animator = humanoid:WaitForChild("Animator", 4) or humanoid:FindFirstChildOfClass("Animator")
     if not animator then return end
 
-    -- Purane tags ko destroy karo taaki duplication na ho
+    -- Clean up existing duplicate objects
     for _, child in ipairs(head:GetChildren()) do
         if child.Name == "EACircle" or child.Name == "OverheadTag" then
             child:Destroy()
         end
     end
 
+    -- Thorough Animation Clean up inside the current execution
     if AuraState.currentTrack then
-        pcall(function() AuraState.currentTrack:Stop() end)
+        pcall(function() 
+            AuraState.currentTrack:Stop(0) 
+            AuraState.currentTrack:Destroy()
+        end)
         AuraState.currentTrack = nil
     end
 
@@ -427,7 +446,6 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- Render Rotation & Tag Check
     local renderConn
     local rotAngle = 0
     renderConn = RunService.RenderStepped:Connect(function(dt)
@@ -440,7 +458,7 @@ local function setup(character)
         billboard.Enabled = AuraState.tagsEnabled
     end)
 
-    -- EXACT ORIGINAL 3-LAYER AURA SYSTEM
+    -- AURA RENDERING
     local function createThunder(parent, offsetY, rate, speed, size)
         if not isScriptAlive or not parent or not parent.Parent then return end
         local att = Instance.new("Attachment")
@@ -528,7 +546,6 @@ local function setup(character)
         smoke.Speed = NumberRange.new(1, 3)
         smoke.SpreadAngle = Vector2.new(45, 45)
 
-        -- Initial Sync
         thunder.Enabled = AuraState.auraEnabled
         glow.Enabled = AuraState.auraEnabled
         smoke.Enabled = AuraState.auraEnabled
@@ -538,7 +555,6 @@ local function setup(character)
         table.insert(AuraState.emitters, smoke)
     end
 
-    -- Limbs Distribution
     for _, obj in ipairs(character:GetChildren()) do
         if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
             createThunder(obj, 0, 60, 4, 1.2)
@@ -546,7 +562,6 @@ local function setup(character)
     end
     createThunder(hrp, 0, 70, 5, 1.4)
 
-    -- EXACT ORIGINAL GROUND THUNDER LAYER
     local groundAtt = Instance.new("Attachment")
     groundAtt.Name = "AuraAttachment"
     groundAtt.Position = Vector3.new(0, -3, 0)
@@ -578,8 +593,9 @@ local function setup(character)
     groundThunder.Enabled = AuraState.auraEnabled
     table.insert(AuraState.emitters, groundThunder)
 
-    -- Idle Animation Player
+    -- Safe Idle Animation Player Setup
     local idleAnim = Instance.new("Animation")
+    idleAnim.Name = "AuraIdle"
     idleAnim.AnimationId = "rbxassetid://138665010911335"
 
     local idleTrack = animator:LoadAnimation(idleAnim)
@@ -590,14 +606,18 @@ local function setup(character)
     humanoid.Running:Connect(function(speed)
         if not isScriptAlive then return end
         if speed < 0.5 then
-            if AuraState.animEnabled and not idleTrack.IsPlaying then idleTrack:Play() end
+            if AuraState.animEnabled and not idleTrack.IsPlaying then 
+                idleTrack:Play(0.1) 
+            end
         else
-            if idleTrack.IsPlaying then idleTrack:Stop() end
+            if idleTrack.IsPlaying then 
+                idleTrack:Stop(0.1) 
+            end
         end
     end)
 
     if humanoid.MoveDirection.Magnitude < 0.1 and AuraState.animEnabled then
-        idleTrack:Play()
+        idleTrack:Play(0.1)
     end
 end
 
