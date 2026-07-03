@@ -1,4 +1,4 @@
--- LocalScript
+-- LocalScript [Anti-Delete & Always Active Edition]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -29,91 +29,11 @@ if not _G.AuraState then
 end
 local AuraState = _G.AuraState
 
--- =====================
--- HUD BAR LAYOUT (Absolute Strict Clipping Enabled)
--- =====================
-if playerGui:FindFirstChild("AuraHUD") then
-    playerGui:FindFirstChild("AuraHUD"):Destroy()
-end
-
-local hud = Instance.new("ScreenGui")
-hud.Name = "AuraHUD"
-hud.ResetOnSpawn = false
-hud.IgnoreGuiInset = true 
-hud.DisplayOrder = 9999999
-hud.Parent = playerGui
-
--- Master Safe Zone Outer Shell
-local hudMaster = Instance.new("Frame")
-hudMaster.Name = "HUDMaster"
-hudMaster.Size = UDim2.new(0, 800, 0, 40) 
-hudMaster.AnchorPoint = Vector2.new(1, 0)
-hudMaster.Position = UDim2.new(1, -6, 0, 6) 
-hudMaster.BackgroundTransparency = 1
-hudMaster.ClipsDescendants = true 
-hudMaster.Parent = hud
-
--- Rightmost Static Logo Anchor Frame
-local logoAnchor = Instance.new("Frame")
-logoAnchor.Name = "LogoAnchor"
-logoAnchor.Size = UDim2.new(0, 28, 0, 28)
-logoAnchor.Position = UDim2.new(1, -28, 0, 6)
-logoAnchor.BackgroundTransparency = 1
-logoAnchor.ZIndex = 5 
-logoAnchor.Parent = hudMaster
-
-local logoToggleBtn = Instance.new("ImageButton")
-logoToggleBtn.Name = "LogoButton"
-logoToggleBtn.Size = UDim2.new(1, 0, 1, 0)
-logoToggleBtn.BackgroundTransparency = 1
-logoToggleBtn.Image = CUSTOM_LOGO_ID
-logoToggleBtn.ZIndex = 6
-logoToggleBtn.Parent = logoAnchor
-
--- Slide Inner Wrapper Panel
-local sliderFrame = Instance.new("Frame")
-sliderFrame.Name = "SliderFrame"
-sliderFrame.Size = UDim2.new(1, -34, 1, 0) 
-sliderFrame.Position = UDim2.new(0, 0, 0, 0)
-sliderFrame.BackgroundTransparency = 1
-sliderFrame.ClipsDescendants = true 
-sliderFrame.ZIndex = 2
-sliderFrame.Parent = hudMaster
-
-local bar = Instance.new("Frame")
-bar.Name = "Bar"
-bar.AutomaticSize = Enum.AutomaticSize.X
-bar.Size = UDim2.new(0, 0, 0, 24)
-bar.AnchorPoint = Vector2.new(1, 0)
-bar.Position = UDim2.new(1, 0, 0, 8) 
-bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-bar.BackgroundTransparency = 0.45
-bar.BorderSizePixel = 0
-bar.Parent = sliderFrame
-
-local barCorner = Instance.new("UICorner")
-barCorner.CornerRadius = UDim.new(0, 6)
-barCorner.Parent = bar
-
-local barStroke = Instance.new("UIStroke")
-barStroke.Color = Color3.fromRGB(200, 0, 0)
-barStroke.Thickness = 1.2
-barStroke.Parent = bar
-
-local barLayout = Instance.new("UIListLayout")
-barLayout.FillDirection = Enum.FillDirection.Horizontal
-barLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-barLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-barLayout.Padding = UDim.new(0, 4)
-barLayout.Parent = bar
-
-local barPadding = Instance.new("UIPadding")
-barPadding.PaddingLeft = UDim.new(0, 6)
-barPadding.PaddingRight = UDim.new(0, 6)
-barPadding.Parent = bar
+local hud, sliderFrame, logoToggleBtn, tagsLabel, tagsDot, auraLabel, auraDot, fpsLabel, pingLabel, timeLabel, animLabel, animDot, spamLabel, spamDot
 
 -- Universal Sound Player
 local function playCustomSound(soundId)
+    if not hud or not hud.Parent then return end
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://" .. tostring(soundId)
     sound.Volume = 0.6
@@ -123,7 +43,7 @@ local function playCustomSound(soundId)
 end
 
 -- Box Creator Utility
-local function createBox(name, text, withDot, interactive)
+local function createBox(parentBar, name, text, withDot, interactive)
     local box = Instance.new("Frame")
     box.Name = name
     box.AutomaticSize = Enum.AutomaticSize.X
@@ -131,7 +51,7 @@ local function createBox(name, text, withDot, interactive)
     box.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     box.BackgroundTransparency = 0.25
     box.BorderSizePixel = 0
-    box.Parent = bar
+    box.Parent = parentBar
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 4)
@@ -185,54 +105,187 @@ local function createBox(name, text, withDot, interactive)
     return box, label, dot
 end
 
--- Toggles Layout Execution
-local _, tagsLabel, tagsDot = createBox("TagsToggle", "Tᴀɢs Øɴ", true, true)
-tagsLabel.MouseButton1Click:Connect(function()
-    playCustomSound(107406973902030)
-    AuraState.tagsEnabled = not AuraState.tagsEnabled
+-- Engine Sync
+local function syncHUD()
+    if not tagsLabel then return end
     tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
     tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-end)
-
-local _, auraLabel, auraDot = createBox("AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
-auraLabel.MouseButton1Click:Connect(function()
-    playCustomSound(107406973902030)
-    AuraState.auraEnabled = not AuraState.auraEnabled
     auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
     auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    for _, emitter in ipairs(AuraState.emitters) do
-        if emitter and emitter.Parent then
-            emitter.Enabled = AuraState.auraEnabled
-        end
-    end
-end)
-
-local _, fpsLabel = createBox("FPS", "Fᴘs: --", false, false)
-local _, pingLabel = createBox("Ping", "Pɪɴɢ: --ᴍs", false, false)
-local _, timeLabel = createBox("Time", "--:--", false, false)
-
-local _, animLabel, animDot = createBox("AnimToggle", "Aɴɪᴍ Øɴ", true, true)
-animLabel.MouseButton1Click:Connect(function()
-    playCustomSound(107406973902030)
-    AuraState.animEnabled = not AuraState.animEnabled
     animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
     animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    if AuraState.currentTrack then
-        if AuraState.animEnabled then
-            local character = player.Character
-            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-            if humanoid and humanoid.MoveDirection.Magnitude < 0.1 then
-                AuraState.currentTrack:Play()
+    spamLabel.Text = AuraState.spamEnabled and "Sᴘᴀᴍ Øɴ" or "Sᴘᴀᴍ Øғғ"
+    spamDot.BackgroundColor3 = AuraState.spamEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
+end
+
+-- =====================
+-- HUD CREATOR & GUARDIAN
+-- =====================
+local function buildHUD()
+    if playerGui:FindFirstChild("AuraHUD") then
+        playerGui:FindFirstChild("AuraHUD"):Destroy()
+    end
+
+    hud = Instance.new("ScreenGui")
+    hud.Name = "AuraHUD"
+    hud.ResetOnSpawn = false
+    hud.IgnoreGuiInset = true 
+    hud.DisplayOrder = 9999999
+    hud.Parent = playerGui
+
+    local hudMaster = Instance.new("Frame")
+    hudMaster.Name = "HUDMaster"
+    hudMaster.Size = UDim2.new(0, 800, 0, 40) 
+    hudMaster.AnchorPoint = Vector2.new(1, 0)
+    hudMaster.Position = UDim2.new(1, -6, 0, 6) 
+    hudMaster.BackgroundTransparency = 1
+    hudMaster.ClipsDescendants = true 
+    hudMaster.Parent = hud
+
+    local logoAnchor = Instance.new("Frame")
+    logoAnchor.Name = "LogoAnchor"
+    logoAnchor.Size = UDim2.new(0, 28, 0, 28)
+    logoAnchor.Position = UDim2.new(1, -28, 0, 6)
+    logoAnchor.BackgroundTransparency = 1
+    logoAnchor.ZIndex = 5 
+    logoAnchor.Parent = hudMaster
+
+    logoToggleBtn = Instance.new("ImageButton")
+    logoToggleBtn.Name = "LogoButton"
+    logoToggleBtn.Size = UDim2.new(1, 0, 1, 0)
+    logoToggleBtn.BackgroundTransparency = 1
+    logoToggleBtn.Image = CUSTOM_LOGO_ID
+    logoToggleBtn.ZIndex = 6
+    logoToggleBtn.Parent = logoAnchor
+
+    sliderFrame = Instance.new("Frame")
+    sliderFrame.Name = "SliderFrame"
+    sliderFrame.Size = UDim2.new(1, -34, 1, 0) 
+    sliderFrame.Position = AuraState.hudVisible and UDim2.new(0, 0, 0, 0) or UDim2.new(0, 850, 0, 0)
+    sliderFrame.BackgroundTransparency = 1
+    sliderFrame.ClipsDescendants = true 
+    sliderFrame.ZIndex = 2
+    sliderFrame.Parent = hudMaster
+
+    local bar = Instance.new("Frame")
+    bar.Name = "Bar"
+    bar.AutomaticSize = Enum.AutomaticSize.X
+    bar.Size = UDim2.new(0, 0, 0, 24)
+    bar.AnchorPoint = Vector2.new(1, 0)
+    bar.Position = UDim2.new(1, 0, 0, 8) 
+    bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    bar.BackgroundTransparency = 0.45
+    bar.BorderSizePixel = 0
+    bar.Parent = sliderFrame
+
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(0, 6)
+    barCorner.Parent = bar
+
+    local barStroke = Instance.new("UIStroke")
+    barStroke.Color = Color3.fromRGB(200, 0, 0)
+    barStroke.Thickness = 1.2
+    barStroke.Parent = bar
+
+    local barLayout = Instance.new("UIListLayout")
+    barLayout.FillDirection = Enum.FillDirection.Horizontal
+    barLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+    barLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    barLayout.Padding = UDim.new(0, 4)
+    barLayout.Parent = bar
+
+    local barPadding = Instance.new("UIPadding")
+    barPadding.PaddingLeft = UDim.new(0, 6)
+    barPadding.PaddingRight = UDim.new(0, 6)
+    barPadding.Parent = bar
+
+    -- Setup Boxes
+    local _; tagsLabel, tagsDot = createBox(bar, "TagsToggle", "Tᴀɢs Øɴ", true, true)
+    _, auraLabel, auraDot = createBox(bar, "AuraToggle", "Aᴜʀᴀ Øɴ", true, true)
+    _, fpsLabel = createBox(bar, "FPS", "Fᴘs: --", false, false)
+    _, pingLabel = createBox(bar, "Ping", "Pɪɴɢ: --ᴍs", false, false)
+    _, timeLabel = createBox(bar, "Time", "--:--", false, false)
+    _, animLabel, animDot = createBox(bar, "AnimToggle", "Aɴɪᴍ Øɴ", true, true)
+    _, spamLabel, spamDot = createBox(bar, "SpamToggle", "Sᴘᴀᴍ Øғғ", true, true)
+
+    -- Event Listeners
+    tagsLabel.MouseButton1Click:Connect(function()
+        playCustomSound(107406973902030)
+        AuraState.tagsEnabled = not AuraState.tagsEnabled
+        syncHUD()
+    end)
+
+    auraLabel.MouseButton1Click:Connect(function()
+        playCustomSound(107406973902030)
+        AuraState.auraEnabled = not AuraState.auraEnabled
+        syncHUD()
+        for _, emitter in ipairs(AuraState.emitters) do
+            if emitter and emitter.Parent then
+                emitter.Enabled = AuraState.auraEnabled
             end
-        else
-            AuraState.currentTrack:Stop()
         end
+    end)
+
+    animLabel.MouseButton1Click:Connect(function()
+        playCustomSound(107406973902030)
+        AuraState.animEnabled = not AuraState.animEnabled
+        syncHUD()
+        if AuraState.currentTrack then
+            if AuraState.animEnabled then
+                local character = player.Character
+                local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.MoveDirection.Magnitude < 0.1 then
+                    AuraState.currentTrack:Play()
+                end
+            else
+                AuraState.currentTrack:Stop()
+            end
+        end
+    end)
+
+    spamLabel.MouseButton1Click:Connect(function()
+        playCustomSound(107406973902030)
+        AuraState.spamEnabled = not AuraState.spamEnabled
+        syncHUD()
+    end)
+
+    local isTweeningHUD = false
+    local currentRotation = logoToggleBtn.Rotation
+    logoToggleBtn.MouseButton1Click:Connect(function()
+        if isTweeningHUD then return end
+        isTweeningHUD = true
+        playCustomSound(107406973902030)
+        
+        AuraState.hudVisible = not AuraState.hudVisible
+        local targetSliderPos = AuraState.hudVisible and UDim2.new(0, 0, 0, 0) or UDim2.new(0, 850, 0, 0)
+        currentRotation = AuraState.hudVisible and (currentRotation - 360) or (currentRotation + 360)
+        
+        TweenService:Create(logoToggleBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = currentRotation}):Play()
+        local slideTween = TweenService:Create(sliderFrame, TweenInfo.new(0.45, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {Position = targetSliderPos})
+        slideTween:Play()
+        slideTween.Completed:Connect(function() isTweeningHUD = false end)
+    end)
+
+    syncHUD()
+end
+
+-- Init HUD
+buildHUD()
+
+-- Keep HUD alive forever even if game forces warning or deletes UI
+task.spawn(function()
+    while true do
+        if not hud or not hud.Parent or hud.Parent ~= playerGui then
+            pcall(buildHUD)
+        end
+        task.wait(1)
     end
 end)
 
--- UPDATED SPAM TEXT CONFIGURATION
+-- =====================
+-- CHAT SPAM SYSTEM
+-- =====================
 local spamText = "SCRIPTER ]> NAMELESS💢//THE FAMOUS LEADER ØF ENDLESS AURA💢//EGO WALO MERE PYARE BACHE💢// () DEDO 💢// NAME EGO !? but REALITY [RND]💢/WORST GANG RND EMPIRE💢..."
-
 local function sendChatMessage(message)
     if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
         local targetChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
@@ -243,14 +296,6 @@ local function sendChatMessage(message)
     end
 end
 
-local _, spamLabel, spamDot = createBox("SpamToggle", "Sᴘᴀᴍ Øғғ", true, true)
-spamLabel.MouseButton1Click:Connect(function()
-    playCustomSound(107406973902030)
-    AuraState.spamEnabled = not AuraState.spamEnabled
-    spamLabel.Text = AuraState.spamEnabled and "Sᴘᴀᴍ Øɴ" or "Sᴘᴀᴍ Øғғ"
-    spamDot.BackgroundColor3 = AuraState.spamEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-end)
-
 task.spawn(function()
     while true do
         if AuraState.spamEnabled then pcall(sendChatMessage, spamText) end
@@ -258,88 +303,40 @@ task.spawn(function()
     end
 end)
 
--- SLIDE OUT & PERFECT REVERSE RETURN TWEEN ENGINE
-local isTweeningHUD = false
-local currentRotation = 0
-
-logoToggleBtn.MouseButton1Click:Connect(function()
-    if isTweeningHUD then return end
-    isTweeningHUD = true
-    playCustomSound(107406973902030)
-    
-    AuraState.hudVisible = not AuraState.hudVisible
-    
-    local targetSliderPos
-    if AuraState.hudVisible then
-        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Smoothly returns exactly back to original visible spot
-        currentRotation = currentRotation - 360
-    else
-        targetSliderPos = UDim2.new(0, 850, 0, 0) -- Hides cleanly past clipping window bounds
-        currentRotation = currentRotation + 360
-    end
-    
-    local rotationTween = TweenService:Create(logoToggleBtn, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Rotation = currentRotation
-    })
-    local slideTween = TweenService:Create(sliderFrame, TweenInfo.new(0.45, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
-        Position = targetSliderPos
-    })
-    
-    rotationTween:Play()
-    slideTween:Play()
-    
-    slideTween.Completed:Connect(function()
-        isTweeningHUD = false
-    end)
-end)
-
--- Engine Sync
-local function syncHUD()
-    tagsLabel.Text = AuraState.tagsEnabled and "Tᴀɢs Øɴ" or "Tᴀɢs Øғғ"
-    tagsDot.BackgroundColor3 = AuraState.tagsEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    auraLabel.Text = AuraState.auraEnabled and "Aᴜʀᴀ Øɴ" or "Aᴜʀᴀ Øғғ"
-    auraDot.BackgroundColor3 = AuraState.auraEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    animLabel.Text = AuraState.animEnabled and "Aɴɪᴍ Øɴ" or "Aɴɪᴍ Øғғ"
-    animDot.BackgroundColor3 = AuraState.animEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-    spamLabel.Text = AuraState.spamEnabled and "Sᴘᴀᴍ Øɴ" or "Sᴘᴀᴍ Øғғ"
-    spamDot.BackgroundColor3 = AuraState.spamEnabled and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(120, 0, 0)
-end
-syncHUD()
-
 RunService.Heartbeat:Connect(function(dt)
-    if dt > 0 then fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt) end
+    if dt > 0 and fpsLabel and fpsLabel.Parent then fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt) end
 end)
 
 task.spawn(function()
     while true do
         pcall(function()
-            local pingValue = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
-            pingLabel.Text = "Pɪɴɢ: " .. math.floor(pingValue) .. "ᴍs"
+            if pingLabel and pingLabel.Parent then
+                local pingValue = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
+                pingLabel.Text = "Pɪɴɢ: " .. math.floor(pingValue) .. "ᴍs"
+            end
         end)
-        local dt = DateTime.now():ToLocalTime()
-        local hour = dt.Hour
-        local ampm = "AM"
-        if hour >= 12 then ampm = "PM" if hour > 12 then hour -= 12 end end
-        if hour == 0 then hour = 12 end
-        timeLabel.Text = string.format("%02d:%02d %s", hour, dt.Minute, ampm)
+        if timeLabel and timeLabel.Parent then
+            local dt = DateTime.now():ToLocalTime()
+            local hour = dt.Hour
+            local ampm = "AM"
+            if hour >= 12 then ampm = "PM" if hour > 12 then hour -= 12 end end
+            if hour == 0 then hour = 12 end
+            timeLabel.Text = string.format("%02d:%02d %s", hour, dt.Minute, ampm)
+        end
         task.wait(1)
     end
 end)
 
 -- =====================
--- FRIEND JOIN NOTIFICATION (Player Headshot Restored)
+-- FRIEND JOIN NOTIFICATION
 -- =====================
 local function showJoinNotification(joinedPlayer)
-    if joinedPlayer == player then return end
-
+    if joinedPlayer == player or not hud or not hud.Parent then return end
     local isFriend = false
-    pcall(function()
-        isFriend = player:IsFriendsWith(joinedPlayer.UserId)
-    end)
+    pcall(function() isFriend = player:IsFriendsWith(joinedPlayer.UserId) end)
     if not isFriend then return end 
 
     playCustomSound(106544581344345)
-
     local notifFrame = Instance.new("Frame")
     notifFrame.Name = "JoinNotification"
     notifFrame.Size = UDim2.new(0, 340, 0, 64)
@@ -359,18 +356,12 @@ local function showJoinNotification(joinedPlayer)
     notifStroke.Thickness = 1.8
     notifStroke.Parent = notifFrame
 
-    -- Restored Player Avatar Headshot Thumbnail Thumbnail Image
     local avatarImg = Instance.new("ImageLabel")
     avatarImg.Size = UDim2.new(0, 48, 0, 48)
     avatarImg.Position = UDim2.new(0, 10, 0.5, -24)
     avatarImg.BackgroundTransparency = 1 
-    avatarImg.BorderSizePixel = 0
-    
     pcall(function()
-        local thumbType = Enum.ThumbnailType.HeadShot
-        local thumbSize = Enum.ThumbnailSize.Size420x420
-        local content, isReady = Players:GetUserThumbnailAsync(joinedPlayer.UserId, thumbType, thumbSize)
-        avatarImg.Image = content
+        avatarImg.Image = Players:GetUserThumbnailAsync(joinedPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
     end)
     avatarImg.Parent = notifFrame
 
@@ -386,81 +377,38 @@ local function showJoinNotification(joinedPlayer)
     txtLabel.Text = "YOUR FRIEND JOINED:\n@" .. joinedPlayer.Name
     txtLabel.Parent = notifFrame
 
-    local tweenIn = TweenService:Create(notifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, 0, 0, 35)
-    })
-    tweenIn:Play()
-
+    TweenService:Create(notifFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0, 35)}):Play()
     task.delay(4, function()
         if notifFrame and notifFrame.Parent then
-            local tweenOut = TweenService:Create(notifFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Position = UDim2.new(0.5, 0, 0, -80)
-            })
+            local tweenOut = TweenService:Create(notifFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(0.5, 0, 0, -80)})
             tweenOut:Play()
-            tweenOut.Completed:Connect(function()
-                notifFrame:Destroy()
-            end)
+            tweenOut.Completed:Connect(function() notifFrame:Destroy() end)
         end
     end)
 end
-
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
--- CHARACTER SETUP (Robust Fixed Core Components Loading)
+-- CHARACTER SETUP & FORCE IMMORTAL ATTACHMENT
 -- =====================
 local function setup(character)
     if not character or not character.Parent then return end
     
-    -- Absolute Fallback Safety Scanner Engine
     local head = character:FindFirstChild("Head") or character:WaitForChild("Head", 10)
     local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
     local hrp = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart", 10)
-    
     if not head or not humanoid or not hrp then return end
     local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid:WaitForChild("Animator", 10)
     if not animator then return end
 
-    -- Clean up duplicate frames
+    -- Avoid re-running fully if elements exist
+    if head:FindFirstChild("OverheadTag") and hrp:FindFirstChild("Attachment") then return end
+
     for _, child in ipairs(head:GetChildren()) do
-        if child.Name == "EACircle" or child.Name == "OverheadTag" then
-            child:Destroy()
-        end
+        if child.Name == "EACircle" or child.Name == "OverheadTag" then child:Destroy() end
     end
 
     AuraState.emitters = {}
-
-    -- ===== LOGO TOKEN CIRCLE =====
-    local eaBillboard = Instance.new("BillboardGui")
-    eaBillboard.Name = "EACircle"
-    eaBillboard.Size = UDim2.new(0, 28, 0, 28)
-    eaBillboard.StudsOffset = Vector3.new(0, 2.4, 0)
-    eaBillboard.AlwaysOnTop = true
-    eaBillboard.MaxDistance = math.huge
-    eaBillboard.Parent = head
-
-    local eaCircle = Instance.new("Frame")
-    eaCircle.Size = UDim2.new(1, 0, 1, 0)
-    eaCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    eaCircle.BackgroundTransparency = 0.5
-    eaCircle.BorderSizePixel = 0
-    eaCircle.Parent = eaBillboard
-
-    local eaCircleCorner = Instance.new("UICorner")
-    eaCircleCorner.CornerRadius = UDim.new(1, 0)
-    eaCircleCorner.Parent = eaCircle
-
-    local eaCircleStroke = Instance.new("UIStroke")
-    eaCircleStroke.Color = Color3.fromRGB(200, 0, 0)
-    eaCircleStroke.Thickness = 2
-    eaCircleStroke.Parent = eaCircle
-
-    local eaLogoImage = Instance.new("ImageLabel")
-    eaLogoImage.Size = UDim2.new(0.85, 0, 0.85, 0)
-    eaLogoImage.Position = UDim2.new(0.075, 0, 0.075, 0)
-    eaLogoImage.BackgroundTransparency = 1
-    eaLogoImage.Image = CUSTOM_LOGO_ID
-    eaLogoImage.Parent = eaCircle
 
     -- ===== FULL OVERHEAD TEXT TAG =====
     local billboard = Instance.new("BillboardGui")
@@ -523,29 +471,19 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- Permanent Sync Multi-Render Engine Connection
     local renderConn
     local rotAngle = 0
     renderConn = RunService.RenderStepped:Connect(function(dt)
-        if not character or not character.Parent or not head or not head.Parent then 
+        if not character or not character.Parent or not head or not head.Parent or not billboard or not billboard.Parent then 
             renderConn:Disconnect() 
             return 
         end
-        
         rotAngle = (rotAngle + (90 * dt)) % 360
-        if eaLogoImage and eaLogoImage.Parent then eaLogoImage.Rotation = rotAngle end
         if tagLogoImage and tagLogoImage.Parent then tagLogoImage.Rotation = rotAngle end
-        
-        if not AuraState.tagsEnabled then
-            billboard.Enabled = false
-            eaBillboard.Enabled = false
-        else
-            billboard.Enabled = true
-            eaBillboard.Enabled = false
-        end
+        billboard.Enabled = AuraState.tagsEnabled
     end)
 
-    -- Particle Generator Pipeline
+    -- Particle Pipeline
     local function createThunder(parent, offsetY, rate, speed, size)
         if not parent or not parent.Parent then return end
         local att = Instance.new("Attachment")
@@ -562,16 +500,13 @@ local function setup(character)
             ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 0, 0))
         })
         thunder.LightEmission = 1
-        thunder.LightInfluence = 0
         thunder.Size = NumberSequence.new({
             NumberSequenceKeypoint.new(0, size * 0.6),
             NumberSequenceKeypoint.new(0.3, size * 1.4),
-            NumberSequenceKeypoint.new(0.7, size * 0.9),
             NumberSequenceKeypoint.new(1, 0)
         })
         thunder.Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 0),
-            NumberSequenceKeypoint.new(0.4, 0.15),
             NumberSequenceKeypoint.new(1, 1)
         })
         thunder.Lifetime = NumberRange.new(0.3, 0.6)
@@ -579,66 +514,22 @@ local function setup(character)
         thunder.Speed = NumberRange.new(speed, speed + 4)
         thunder.SpreadAngle = Vector2.new(90, 90)
         thunder.RotSpeed = NumberRange.new(-250, 250)
-        thunder.Rotation = NumberRange.new(0, 360)
-        thunder.ZOffset = 0.4
+        thunder.Enabled = AuraState.auraEnabled
+        table.insert(AuraState.emitters, thunder)
 
         local glow = Instance.new("ParticleEmitter")
         glow.Parent = att
-        glow.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))
-        })
+        glow.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 0, 0))})
         glow.LightEmission = 1
-        glow.LightInfluence = 0
-        glow.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 2.0),
-            NumberSequenceKeypoint.new(0.4, size * 1.4),
-            NumberSequenceKeypoint.new(1, 0)
-        })
-        glow.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.25),
-            NumberSequenceKeypoint.new(0.5, 0.55),
-            NumberSequenceKeypoint.new(1, 1)
-        })
+        glow.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, size * 2.0), NumberSequenceKeypoint.new(1, 0)})
+        glow.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(1, 1)})
         glow.Lifetime = NumberRange.new(0.3, 0.5)
         glow.Rate = rate * 0.7
         glow.Speed = NumberRange.new(1, 2.5)
-        glow.SpreadAngle = Vector2.new(360, 360)
-
-        local smoke = Instance.new("ParticleEmitter")
-        smoke.Parent = att
-        smoke.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 0, 0)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 0, 0))
-        })
-        smoke.LightEmission = 0.2
-        smoke.LightInfluence = 0.5
-        smoke.Size = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, size * 0.8),
-            NumberSequenceKeypoint.new(0.5, size * 2.2),
-            NumberSequenceKeypoint.new(1, 0)
-        })
-        smoke.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.5),
-            NumberSequenceKeypoint.new(0.6, 0.8),
-            NumberSequenceKeypoint.new(1, 1)
-        })
-        smoke.Lifetime = NumberRange.new(0.4, 0.8)
-        smoke.Rate = rate * 0.4
-        smoke.Speed = NumberRange.new(1, 3)
-        smoke.SpreadAngle = Vector2.new(45, 45)
-
-        thunder.Enabled = AuraState.auraEnabled
         glow.Enabled = AuraState.auraEnabled
-        smoke.Enabled = AuraState.auraEnabled
-
-        table.insert(AuraState.emitters, thunder)
         table.insert(AuraState.emitters, glow)
-        table.insert(AuraState.emitters, smoke)
     end
 
-    -- Run deep iteration over limbs for absolute load reliability
     for _, obj in ipairs(character:GetChildren()) do
         if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
             createThunder(obj, 0, 60, 4, 1.2)
@@ -646,40 +537,9 @@ local function setup(character)
     end
     createThunder(hrp, 0, 70, 5, 1.4)
 
-    local groundAtt = Instance.new("Attachment")
-    groundAtt.Position = Vector3.new(0, -3, 0)
-    groundAtt.Parent = hrp
-
-    local groundThunder = Instance.new("ParticleEmitter")
-    groundThunder.Parent = groundAtt
-    groundThunder.Texture = "rbxassetid://6101261905"
-    groundThunder.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 40)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 0))
-    })
-    groundThunder.LightEmission = 1
-    groundThunder.LightInfluence = 0
-    groundThunder.Size = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.4),
-        NumberSequenceKeypoint.new(0.4, 1.4),
-        NumberSequenceKeypoint.new(1, 0)
-    })
-    groundThunder.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.1),
-        NumberSequenceKeypoint.new(1, 1)
-    })
-    groundThunder.Lifetime = NumberRange.new(0.4, 0.7)
-    groundThunder.Rate = 75
-    groundThunder.Speed = NumberRange.new(3, 6)
-    groundThunder.SpreadAngle = Vector2.new(110, 110)
-    groundThunder.EmissionDirection = Enum.NormalId.Bottom
-    groundThunder.Enabled = AuraState.auraEnabled
-    table.insert(AuraState.emitters, groundThunder)
-
     -- Dynamic Idle Animation Load
     local idleAnim = Instance.new("Animation")
     idleAnim.AnimationId = "rbxassetid://138665010911335"
-
     local idleTrack = animator:LoadAnimation(idleAnim)
     idleTrack.Priority = Enum.AnimationPriority.Idle
     idleTrack.Looped = true
@@ -687,13 +547,9 @@ local function setup(character)
 
     humanoid.Running:Connect(function(speed)
         if speed < 0.5 then
-            if AuraState.animEnabled and not idleTrack.IsPlaying then
-                idleTrack:Play()
-            end
+            if AuraState.animEnabled and not idleTrack.IsPlaying then idleTrack:Play() end
         else
-            if idleTrack.IsPlaying then
-                idleTrack:Stop()
-            end
+            if idleTrack.IsPlaying then idleTrack:Stop() end
         end
     end)
 
@@ -702,23 +558,25 @@ local function setup(character)
     end
 end
 
--- Appearance Observers Connection
 local function attachCharacterTracks(character)
     if not character then return end
-    
     task.spawn(setup, character)
-    
-    character.CharacterAppearanceLoaded:Connect(function()
-        task.spawn(setup, character)
-    end)
-    
-    local humanoid = character:WaitForChild("Humanoid", 10) or character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        humanoid.DescriptionApplied:Connect(function()
-            task.spawn(setup, character)
-        end)
-    end
+    character.CharacterAppearanceLoaded:Connect(function() task.spawn(setup, character) end)
 end
 
 if player.Character then attachCharacterTracks(player.Character) end
 player.CharacterAdded:Connect(attachCharacterTracks)
+
+-- LOOP DETECTOR: Har 1 second me checks karega agar warning se effects clear hue toh unhe instantly force-reload karega
+task.spawn(function()
+    while true do
+        local char = player.Character
+        if char and char.Parent then
+            local head = char:FindFirstChild("Head")
+            if head and not head:FindFirstChild("OverheadTag") then
+                pcall(setup, char)
+            end
+        end
+        task.wait(1)
+    end
+end)
