@@ -1,4 +1,6 @@
+
 -- LocalScript
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StatsService = game:GetService("Stats")
@@ -13,7 +15,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 local CUSTOM_LOGO_ID = "rbxassetid://129299711445020"
 
 -- =====================
--- SHARED STATE SYSTEM (Persistent & Safe)
+-- SHARED STATE SYSTEM
 -- =====================
 if not _G.AuraState then
     _G.AuraState = {
@@ -37,7 +39,7 @@ end
 
 local hud = Instance.new("ScreenGui")
 hud.Name = "AuraHUD"
-hud.ResetOnSpawn = false -- Kept false to prevent HUD from breaking on reset
+hud.ResetOnSpawn = false
 hud.IgnoreGuiInset = true 
 hud.DisplayOrder = 9999999
 hud.Parent = playerGui
@@ -270,10 +272,10 @@ logoToggleBtn.MouseButton1Click:Connect(function()
     
     local targetSliderPos
     if AuraState.hudVisible then
-        targetSliderPos = UDim2.new(0, 0, 0, 0)
+        targetSliderPos = UDim2.new(0, 0, 0, 0) -- Smoothly returns exactly back to original visible spot
         currentRotation = currentRotation - 360
     else
-        targetSliderPos = UDim2.new(0, 850, 0, 0)
+        targetSliderPos = UDim2.new(0, 850, 0, 0) -- Hides cleanly past clipping window bounds
         currentRotation = currentRotation + 360
     end
     
@@ -306,21 +308,21 @@ end
 syncHUD()
 
 RunService.Heartbeat:Connect(function(dt)
-    if dt > 0 and fpsLabel and fpsLabel.Parent then fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt) end
+    if dt > 0 then fpsLabel.Text = "Fᴘs: " .. math.floor(1 / dt) end
 end)
 
 task.spawn(function()
     while true do
         pcall(function()
             local pingValue = StatsService.Network.ServerStatsItem["Data Ping"]:GetValue()
-            if pingLabel and pingLabel.Parent then pingLabel.Text = "Pɪɴɢ: " .. math.floor(pingValue) .. "ᴍs" end
+            pingLabel.Text = "Pɪɴɢ: " .. math.floor(pingValue) .. "ᴍs"
         end)
         local dt = DateTime.now():ToLocalTime()
         local hour = dt.Hour
         local ampm = "AM"
         if hour >= 12 then ampm = "PM" if hour > 12 then hour -= 12 end end
         if hour == 0 then hour = 12 end
-        if timeLabel and timeLabel.Parent then timeLabel.Text = string.format("%02d:%02d %s", hour, dt.Minute, ampm) end
+        timeLabel.Text = string.format("%02d:%02d %s", hour, dt.Minute, ampm)
         task.wait(1)
     end
 end)
@@ -335,7 +337,6 @@ local function showJoinNotification(joinedPlayer)
     pcall(function()
         isFriend = player:IsFriendsWith(joinedPlayer.UserId)
     end)
-    
     if not isFriend then return end 
 
     playCustomSound(106544581344345)
@@ -359,6 +360,7 @@ local function showJoinNotification(joinedPlayer)
     notifStroke.Thickness = 1.8
     notifStroke.Parent = notifFrame
 
+    -- Restored Player Avatar Headshot Thumbnail Thumbnail Image
     local avatarImg = Instance.new("ImageLabel")
     avatarImg.Size = UDim2.new(0, 48, 0, 48)
     avatarImg.Position = UDim2.new(0, 10, 0.5, -24)
@@ -406,11 +408,12 @@ end
 Players.PlayerAdded:Connect(showJoinNotification)
 
 -- =====================
--- CHARACTER SETUP PIPELINE (Immune to Warnings / Resets)
+-- CHARACTER SETUP (Robust Fixed Core Components Loading)
 -- =====================
 local function setup(character)
     if not character or not character.Parent then return end
     
+    -- Absolute Fallback Safety Scanner Engine
     local head = character:FindFirstChild("Head") or character:WaitForChild("Head", 10)
     local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid", 10)
     local hrp = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart", 10)
@@ -419,14 +422,13 @@ local function setup(character)
     local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid:WaitForChild("Animator", 10)
     if not animator then return end
 
-    -- Active Clean up duplicate frames safely
+    -- Clean up duplicate frames
     for _, child in ipairs(head:GetChildren()) do
         if child.Name == "EACircle" or child.Name == "OverheadTag" then
             child:Destroy()
         end
     end
 
-    -- Clear legacy emitters
     AuraState.emitters = {}
 
     -- ===== LOGO TOKEN CIRCLE =====
@@ -522,7 +524,7 @@ local function setup(character)
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.Parent = frame
 
-    -- Render Connection Sync Loop
+    -- Permanent Sync Multi-Render Engine Connection
     local renderConn
     local rotAngle = 0
     renderConn = RunService.RenderStepped:Connect(function(dt)
@@ -637,7 +639,7 @@ local function setup(character)
         table.insert(AuraState.emitters, smoke)
     end
 
-    -- Run iteration over limbs securely
+    -- Run deep iteration over limbs for absolute load reliability
     for _, obj in ipairs(character:GetChildren()) do
         if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" then
             createThunder(obj, 0, 60, 4, 1.2)
@@ -701,7 +703,7 @@ local function setup(character)
     end
 end
 
--- Infinite Resilient Watcher Connection Loop
+-- Appearance Observers Connection
 local function attachCharacterTracks(character)
     if not character then return end
     
@@ -719,8 +721,5 @@ local function attachCharacterTracks(character)
     end
 end
 
--- Initialize & Secure Core Loop Hooks
-if player.Character then task.spawn(attachCharacterTracks, player.Character) end
-player.CharacterAdded:Connect(function(char)
-    task.spawn(attachCharacterTracks, char)
-end)
+if player.Character then attachCharacterTracks(player.Character) end
+player.CharacterAdded:Connect(attachCharacterTracks)
