@@ -197,7 +197,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 Stop All", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.StrongESP = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
+    btn("🛑 Stop All", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
     
     btn("👁️ View", T2, function(b) 
         _G.StrongView = b:GetAttribute("T")
@@ -217,77 +217,54 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
 
-    btn("🔴 ESP", T2, function(b)
-        _G.StrongESP = b:GetAttribute("T")
-        
-        local function clearESP(tPlayer)
-            if tPlayer and tPlayer.Character then
-                local oldHighlight = tPlayer.Character:FindFirstChild("EaHighlight")
-                if oldHighlight then oldHighlight:Destroy() end
-                local oldHead = tPlayer.Character:FindFirstChild("Head")
-                if oldHead then
-                    local oldBBG = oldHead:FindFirstChild("EaBillboard")
-                    if oldBBG then oldBBG:Destroy() end
-                end
-            end
-        end
-
+    btn("🔴 Target ESP", T2, function(b)
+        _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
-            while _G.StrongESP do
+            local currentHighlight, currentBillboard
+            local function cleanup()
+                if currentHighlight then currentHighlight:Destroy(); currentHighlight = nil end
+                if currentBillboard then currentBillboard:Destroy(); currentBillboard = nil end
+            end
+            while _G.TargetESP do
                 local t = getT()
                 if t and t.Character then
-                    -- Highlight Body (Neon Red Glow)
-                    if not t.Character:FindFirstChild("EaHighlight") then
-                        local hl = Instance.new("Highlight")
-                        hl.Name = "EaHighlight"
-                        hl.FillColor = Color3.fromRGB(255, 0, 0)
-                        hl.FillTransparency = 0.4
-                        hl.OutlineColor = Color3.fromRGB(255, 0, 0)
-                        hl.OutlineTransparency = 0
-                        hl.Parent = t.Character
+                    if not currentHighlight or currentHighlight.Parent ~= t.Character then
+                        cleanup()
+                        currentHighlight = Instance.new("Highlight")
+                        currentHighlight.FillColor = Color3.fromRGB(255, 0, 0)
+                        currentHighlight.FillTransparency = 0.6
+                        currentHighlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+                        currentHighlight.OutlineTransparency = 0
+                        currentHighlight.Parent = t.Character
                     end
-                    
-                    -- Billboard Custom GUI on Head
                     local head = t.Character:FindFirstChild("Head")
-                    if head and not head:FindFirstChild("EaBillboard") then
-                        local bbg = Instance.new("BillboardGui")
-                        bbg.Name = "EaBillboard"
-                        bbg.Size = UDim2.new(0, 130, 0, 55)
-                        bbg.AlwaysOnTop = true
-                        bbg.StudsOffset = Vector3.new(0, 2.5, 0)
+                    if head and (not currentBillboard or currentBillboard.Parent ~= head) then
+                        if currentBillboard then currentBillboard:Destroy() end
+                        currentBillboard = Instance.new("BillboardGui")
+                        currentBillboard.Size = UDim2.new(0, 100, 0, 30)
+                        currentBillboard.AlwaysOnTop = true
+                        currentBillboard.StudsOffset = Vector3.new(0, 2, 0)
                         
-                        local frame = Instance.new("Frame", bbg)
-                        frame.Size = UDim2.new(1, 0, 1, 0)
-                        frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                        frame.BackgroundTransparency = 0.3
-                        Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 4)
+                        local tl = Instance.new("TextLabel", currentBillboard)
+                        tl.Size = UDim2.new(1, 0, 1, 0)
+                        tl.BackgroundTransparency = 1
+                        tl.Text = "ᴛᴀʀɢᴇᴛ"
+                        tl.TextColor3 = Color3.fromRGB(255, 0, 0)
+                        tl.TextSize = 16
+                        tl.Font = Enum.Font.GothamBlack
                         
-                        local stroke = Instance.new("UIStroke", frame)
-                        stroke.Color = Color3.fromRGB(255, 0, 0)
-                        stroke.Thickness = 1.5
+                        local stroke = Instance.new("UIStroke", tl)
+                        stroke.Thickness = 3
+                        stroke.Color = Color3.fromRGB(0, 0, 0)
                         
-                        local lbl = Instance.new("TextLabel", frame)
-                        lbl.Size = UDim2.new(1, 0, 1, 0)
-                        lbl.BackgroundTransparency = 1
-                        lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        lbl.TextSize = 9
-                        lbl.Font = Enum.Font.GothamBold
-                        lbl.LineHeight = 1.2
-                        lbl.Text = "TARGET > " .. t.DisplayName .. "\n@" .. t.Name .. "\nBy Ea Script"
-                        
-                        bbg.Parent = head
+                        currentBillboard.Parent = head
                     end
-                end
-                
-                -- Clear external targets if they lose focus
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= t then clearESP(p) end
+                else
+                    cleanup()
                 end
                 task.wait(0.1)
             end
-            
-            -- Turn off all ESP when button disabled
-            for _, p in pairs(Players:GetPlayers()) do clearESP(p) end
+            cleanup()
         end)
     end)
     
