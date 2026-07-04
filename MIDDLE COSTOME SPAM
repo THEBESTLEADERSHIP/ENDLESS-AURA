@@ -1,4 +1,4 @@
--- [[ CUSTOM GALACTIC SPAMMΞR 195 LIMIT - RAINBOW EDITION ]] --
+-- [[ CUSTOM GALACTIC SPAMMΞR 200 LIMIT - RAINBOW EDITION ]] --
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -26,22 +26,14 @@ local function playTapSound()
     game:GetService("Debris"):AddItem(sound, 2)
 end
 
--- Premium 100+ Aggressive & Random Words Dictionary (Mixed + Emoji)
+-- Premium Exact 50 Words List (3-4 Letters Cyber & Nature Style)
 local SpamWords = {
-    "VORTX🌀", "CRASH💥", "ZILCH❄️", "GHOST👻", "HYDRA🐉", "WRATH😡", "PULSR⚡", "BLEED🩸", "CLOWN🤡", "GRAVE🪦",
-    "REBEL⚔️", "SHOCK⚡", "LETHL💀", "PHANT🎭", "ANARK🔥", "PSYCH🧠", "CHAOS🌪️", "BLITZ⚡", "CYBRG🦾", "SHLD🛡️",
-    "TITAN🔭", "VENOM🐍", "SLAYR⚔️", "VIPER🐍", "XENON🧪", "STORM🌪️", "FORCE✊", "QUARK⚛️", "ROBOT🤖", "KARMA🔮",
-    "REAPER☠️", "DEMON😈", "FROST🥶", "BLAZE🔥", "SHDW🖤", "FLEET🚀", "GLITCH👾", "HACKR💻", "ROGUE🥷", "CULT🔱",
-    "SQUAD🐺", "CHIEF👑", "SINFU😈", "TOXIC☣️", "HAZRD⚠️", "CRIC🔮", "MYST🔮", "PLUTO🪐", "VALOR🛡️", "KRAK🐙",
-    "HOUND🐺", "SHARK🦈", "GRIM☠️", "MORTL💀", "FATAL🩸", "STATIC⚡", "ECLIP🌙", "SOLAR☀️", "LUNAR🌙", "COMET☄️",
-    "METER☄️", "NOVA🌟", "NEBULA🎆", "MATRIX🌌", "ORBIT🛸", "APEX🚀", "VOID🔮", "AURA✨", "AXIS🌀", "ATOM⚛️",
-    "BEAM⚡", "BOLT⚡", "BOSS👑", "BURN🔥", "CLAW🦅", "COSM🪐", "COLD🥶", "CORE💎", "CUFF⛓️", "DARK🖤",
-    "DOOM☠️", "DUST🌪️", "EDGE🔪", "ENVY🤢", "EVIL😈", "FEAR😨", "FURY😡", "FUSE🔋", "GLOW🌟", "GODS🔱",
-    "GOLD👑", "GRIP✊", "HALO😇", "HELL🔥", "HOPE🍀", "HUNT🏹", "IRON🦾", "JINX🔮", "KING👑", "LAVA🌋"
+    "VIRE⚡", "VIEW👁️", "WIND💨", "ICE❄️", "POOL🌊", "CORP🏢", "SNK🐍", "VOLT⚡", "AURA✨", "BURN🔥",
+    "CORE💎", "DARK🖤", "DUST🌪️", "ECHO🗣️", "EDGE🔪", "FADE🌫️", "FIRE🔥", "FLOW🌊", "FURY😡", "GEAR⚙️",
+    "GLOW🌟", "HALO😇", "HAZE💨", "HELL🔥", "HOPE🍀", "IRON🦾", "LAVA🌋", "MIND🧠", "NEON⚡", "NOVA🌟",
+    "ONYX🖤", "PACK🐺", "PEAK🏔️", "RAGE😡", "RAID⚔️", "RARE💎", "RUSH🏃", "SOUL👻", "STAR⭐", "TANK🛡️",
+    "TIME⏳", "VOID🔮", "WAVE🌊", "WARP🏁", "WOLF🐺", "ZERO🥶", "ZONE📍", "BEAM⚡", "BOLT⚡", "BOSS👑"
 }
-
--- Current active pattern fixed to ` (Backtick) as requested
-local CurrentPatternUnit = "`"
 
 -- Track objects for Rainbow Effect
 local RainbowObjects = {}
@@ -103,7 +95,7 @@ end)
 local MainMenu = Instance.new("Frame")
 MainMenu.Name = "MainMenu"
 MainMenu.Parent = ScreenGui
-MainMenu.Size = UDim2.new(0, 240, 0, 280) -- Adjusted height since pattern matrix is removed
+MainMenu.Size = UDim2.new(0, 240, 0, 280)
 MainMenu.Position = UDim2.new(0.5, -120, 0.5, -140)
 MainMenu.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
 MainMenu.BackgroundTransparency = 0.2
@@ -228,7 +220,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 ----------------------------------------------------------------
--- 4. BOUNDED INPUT BOXES WITH UPDATED DEFAULTS
+-- 4. BOUNDED INPUT BOXES
 ----------------------------------------------------------------
 local SenderBox = Instance.new("TextBox")
 SenderBox.Parent = MainMenu
@@ -251,7 +243,7 @@ TargetBox.Size = UDim2.new(0, 100, 0, 30)
 TargetBox.Position = UDim2.new(0.51, 0, 0.33, 0)
 TargetBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 TargetBox.PlaceholderText = "[TARGET NAME]"
-TargetBox.Text = "RND EMPIRE😂" -- Default target set
+TargetBox.Text = "RND EMPIRE😂"
 TargetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TargetBox.TextSize = 11
 TargetBox.Font = Enum.Font.SourceSansSemibold
@@ -266,7 +258,7 @@ DelayBox.Size = UDim2.new(0, 120, 0, 30)
 DelayBox.Position = UDim2.new(0.25, 0, 0.48, 0)
 DelayBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 DelayBox.PlaceholderText = "SPEED DELAY"
-DelayBox.Text = "3" -- Default delay set to 3
+DelayBox.Text = "3"
 DelayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 DelayBox.TextSize = 12
 DelayBox.Font = Enum.Font.SourceSansSemibold
@@ -276,7 +268,7 @@ Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 6)
 Instance.new("UIStroke", DelayBox).Color = Color3.fromRGB(40, 40, 40)
 
 ----------------------------------------------------------------
--- 5. DYNAMIC TEXT CLAMP EXECUTION LOGIC (195 MAXIMUM LIMIT)
+-- 5. BALANCED TEMPLATE PATTERN ENGINE (MAX LIMIT 200)
 ----------------------------------------------------------------
 local StartBtn = Instance.new("TextButton")
 StartBtn.Parent = MainMenu
@@ -302,34 +294,25 @@ local function executeChat(msg)
     end
 end
 
-local function generatePatternString(patternUnit, maxLen)
-    local result = ""
-    local unitLen = string.len(patternUnit)
-    if unitLen == 0 then return "" end
-    while (string.len(result) + unitLen) <= maxLen do
-        result = result .. patternUnit
-    end
-    return result
-end
-
-local function buildSpamString(sender, target, rawWord, patternUnit)
-    local part1 = "SCRIPT BY " .. sender .. " "
-    local part2 = target .. " TMX ME " .. rawWord .. " "
+local function buildSpamString(sender, target, rawWord)
+    local baseStart = "SCRIPT BY " .. sender .. " "
+    local baseMiddle = " [" .. target .. "] TMX ME " .. rawWord .. " "
     
-    local staticLength = string.len(part1) + string.len(part2)
-    local availableSpace = 195 - staticLength
+    local combinedStaticLen = string.len(baseStart) + string.len(baseMiddle)
+    local freeSpace = 200 - combinedStaticLen
     
-    if availableSpace <= 0 then
-        return string.sub(part1 .. part2, 1, 195)
+    if freeSpace <= 0 then
+        return string.sub(baseStart .. baseMiddle, 1, 200)
     end
     
-    local segmentLen = math.floor(availableSpace / 2)
+    -- Balanced backtick ratio allocation to preserve exact template feel
+    local leftCount = math.floor(freeSpace / 2)
+    local rightCount = freeSpace - leftCount
     
-    local leftPattern = generatePatternString(patternUnit, segmentLen)
-    local rightPattern = generatePatternString(patternUnit, availableSpace - string.len(leftPattern))
+    local leftTicks = string.rep("`", leftCount)
+    local rightTicks = string.rep("`", rightCount)
     
-    local combinedPayload = part1 .. leftPattern .. part2 .. rightPattern
-    return string.sub(combinedPayload, 1, 195)
+    return baseStart .. leftTicks .. baseMiddle .. rightTicks
 end
 
 StartBtn.MouseButton1Click:Connect(function()
@@ -349,7 +332,7 @@ StartBtn.MouseButton1Click:Connect(function()
                 
                 local selectedWord = SpamWords[math.random(1, #SpamWords)]
                 
-                local processedPayload = buildSpamString(senderName, targetName, selectedWord, CurrentPatternUnit)
+                local processedPayload = buildSpamString(senderName, targetName, selectedWord)
                 executeChat(processedPayload)
                 
                 task.wait(speed)
