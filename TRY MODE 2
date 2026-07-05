@@ -82,16 +82,37 @@ local function SafeMoveTo(targetCFrame)
     local char = player.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if hrp then
-        local posY = targetCFrame.Position.Y
-        if posY < (voidYLevel + 5) then
-            targetCFrame = CFrame.new(targetCFrame.Position.X, voidYLevel + 6, targetCFrame.Position.Z) * (targetCFrame - targetCFrame.Position)
-        end
-        hrp.Velocity = Vector3.new(0, 0, 0)
-        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        hrp.Velocity = Vector3.new(0, 0.001, 0)
+        hrp.AssemblyLinearVelocity = Vector3.new(0, 0.001, 0)
         hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
         hrp.CFrame = targetCFrame
     end
 end
+
+-- ==========================================
+-- KEY SYSTEM
+-- ==========================================
+local KF = Instance.new("Frame", sg); KF.Size = UDim2.new(0, 340, 0, 440); KF.Position = UDim2.new(0.5, -170, 0.5, -220); KF.BackgroundColor3 = Black; KF.BackgroundTransparency = 0.2; makeDraggable(KF)
+Instance.new("UICorner", KF); local KS = Instance.new("UIStroke", KF); KS.Thickness = 3; KS.Color = DarkRed
+
+local KeyLogo = Instance.new("ImageLabel", KF); KeyLogo.Size = UDim2.new(0, 40, 0, 40); KeyLogo.Position = UDim2.new(0.5, -20, 0, 10); KeyLogo.BackgroundTransparency = 1; KeyLogo.Image = LOGO_IMAGE
+
+local CloseKey = Instance.new("TextButton", KF); CloseKey.Size = UDim2.new(0,25,0,25); CloseKey.Position = UDim2.new(1,-30,0,5); CloseKey.Text = "X"; CloseKey.BackgroundColor3 = DarkRed; CloseKey.TextColor3 = White; Instance.new("UICorner", CloseKey)
+CloseKey.MouseButton1Click:Connect(function() 
+    playS(CLICK_SOUND) 
+    sg:Destroy() 
+end)
+
+local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = DarkRed; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1
+local Bio = Instance.new("TextLabel", KF); Bio.Text = "SCRIPT BY NAMELESS 💀\n\nKEY CHAIYE TO NAMELESS SE MANG\nKISMAT HOGI TO DEDEGA 😂"; Bio.Position = UDim2.new(0,0,0,95); Bio.Size = UDim2.new(1,0,0,60); Bio.TextColor3 = White; Bio.TextSize = 12; Bio.BackgroundTransparency = 1
+local Insta = Instance.new("TextLabel", KF); Insta.Text = "INSTAGRAM ID - ea_nameless\nFOLLOW KARLO WRNA ID BAN 💀"; Insta.Position = UDim2.new(0,0,0,165); Insta.Size = UDim2.new(1,0,0,40); Insta.TextColor3 = White; Insta.TextSize = 13; Insta.Font = Enum.Font.GothamBold; Insta.BackgroundTransparency = 1
+
+task.spawn(function()
+    while task.wait(0.5) do Insta.TextColor3 = (Insta.TextColor3 == DarkRed and White or DarkRed) end
+end)
+
+local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 45); KeyBox.Position = UDim2.new(0.5, -120, 0, 230); KeyBox.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyBox.PlaceholderText = "KEY DALO..."; KeyBox.TextColor3 = DarkRed; KeyBox.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeyBox)
+local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
 -- MAIN MENU
@@ -176,7 +197,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; _G.CopyAnim = false; _G.CopyChat = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
     
     btn("👁️ VIEW", T2, function(b) 
         _G.StrongView = b:GetAttribute("T")
@@ -286,7 +307,18 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
                 SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55)) 
             end 
-            task.wait(0.01)
+            task.wait(0.03)
+        end 
+    end)
+    
+    btn("🍑 FRONT BANG", T2, function(b) 
+        _G.Loop = b:GetAttribute("T") 
+        while _G.Loop do 
+            local t = getT() 
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
+                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1.1 - math.sin(tick()*20)*0.55) * CFrame.Angles(0, math.pi, 0)) 
+            end 
+            task.wait(0.03)
         end 
     end)
     
@@ -298,7 +330,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0)) 
                 if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
             end 
-            task.wait(0.01)
+            task.wait(0.04)
         end 
     end)
     
@@ -310,115 +342,44 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0)) 
                 if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
             end 
-            task.wait(0.01)
+            task.wait(0.04)
         end 
     end)
-
-    btn("🎭 COPY ANIM", T2, function(b)
-        _G.CopyAnim = b:GetAttribute("T")
-        task.spawn(function()
-            local activeTracks = {}
-            while _G.CopyAnim do
-                local t = getT()
-                if t and t.Character and player.Character then
-                    local tHum = t.Character:FindFirstChildOfClass("Humanoid")
-                    local pHum = player.Character:FindFirstChildOfClass("Humanoid")
-                    if tHum and pHum then
-                        local tAnimator = tHum:FindFirstChildOfClass("Animator")
-                        local pAnimator = pHum:FindFirstChildOfClass("Animator")
-                        if tAnimator and pAnimator then
-                            local tTracks = tAnimator:GetPlayingAnimationTracks()
-                            for _, track in pairs(tTracks) do
-                                if not activeTracks[track.Animation.AnimationId] then
-                                    local newTrack = pAnimator:LoadAnimation(track.Animation)
-                                    newTrack:Play()
-                                    newTrack:AdjustSpeed(track.Speed)
-                                    activeTracks[track.Animation.AnimationId] = newTrack
-                                end
-                            end
-                        end
-                    end
-                end
-                task.wait(0.1)
-            end
-            for id, track in pairs(activeTracks) do track:Stop(); track:Destroy() end
-            activeTracks = {}
-        end)
+    
+    btn("⬇️ DOWN", T2, function(b) 
+        _G.Loop = b:GetAttribute("T") 
+        while _G.Loop do 
+            local t = getT() 
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
+                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.45 + (math.sin(tick()*15)*0.05), 0)) 
+            end 
+            task.wait(0.03)
+        end 
     end)
-
-    btn("💬 COPY CHAT", T2, function(b)
-        _G.CopyChat = b:GetAttribute("T")
-        local chatHook
-        if _G.CopyChat then
-            chatHook = Players.PlayerAdded:Connect(function(p) end) -- Placeholder base connection
-            local function hookPlayer(targetPlayer)
-                return targetPlayer.Chatted:Connect(function(msg)
-                    if _G.CopyChat and getT() == targetPlayer then
-                        SendPublicChat(msg)
-                    end
-                end)
-            end
-            task.spawn(function()
-                local currentHooked = nil
-                local hookConn = nil
-                while _G.CopyChat do
-                    local t = getT()
-                    if t and t ~= currentHooked then
-                        if hookConn then hookConn:Disconnect() end
-                        currentHooked = t
-                        hookConn = hookPlayer(t)
-                    elseif not t and hookConn then
-                        hookConn:Disconnect(); hookConn = nil; currentHooked = nil
-                    end
-                    task.wait(0.5)
-                end
-                if hookConn then hookConn:Disconnect() end
-            end)
-        end
+    
+    btn("👅 SUCK", T2, function(b) 
+        _G.Loop = b:GetAttribute("T") 
+        while _G.Loop do 
+            local t = getT() 
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
+                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.0, -0.75 - math.sin(tick()*20)*0.4) * CFrame.Angles(math.rad(80 + math.sin(tick()*15)*10), 0, 0)) 
+            end 
+            task.wait(0.03)
+        end 
     end)
-
-    btn("⬅️ LEFT", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
-        while _G.Loop do
-            local t = getT()
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(-5, 0, 0))
-            end
-            task.wait(0.005)
-        end
-    end)
-
-    btn("➡️ RIGHT", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
-        while _G.Loop do
-            local t = getT()
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(5, 0, 0))
-            end
-            task.wait(0.005)
-        end
-    end)
-
-    btn("⬆️ FRONT", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
-        while _G.Loop do
-            local t = getT()
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5))
-            end
-            task.wait(0.005)
-        end
-    end)
-
-    btn("⬇️ BACK", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
-        while _G.Loop do
-            local t = getT()
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
-            end
-            task.wait(0.005)
-        end
+    
+    btn("🦟 MOSKITO ANNOY", T2, function(b) 
+        _G.Loop = b:GetAttribute("T") 
+        while _G.Loop do 
+            local t = getT() 
+            if t and t.Character and t.Character:FindFirstChild("Head") then 
+                local angle = tick() * 45
+                local radius = 0.6
+                local offset = Vector3.new(math.cos(angle) * radius, 1.2 + math.sin(tick()*30)*0.2, math.sin(angle) * radius)
+                SafeMoveTo(CFrame.new(t.Character.Head.Position + offset) * CFrame.Angles(0, -angle, 0))
+            end 
+            task.wait(0.01)
+        end 
     end)
     
     -- TAB 3: SHIELD
@@ -443,6 +404,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("OCEAN SPAMMER🌊", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A"))() end, true)
     btn("GRASS SPAMMER🌲", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2"))() end, true)
     btn("GORZILLA SPAMMER🦍", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/84c5d1ed122de825817a657502382f358a21efaa/GORZILLA%20SPAMMER%F0%9F%A6%8D"))() end, true)
+    btn("FROG SPAMMER🐸", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FROG%20SPAMMER%F0%9F%90%B8"))() end, true)
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
     btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
 
