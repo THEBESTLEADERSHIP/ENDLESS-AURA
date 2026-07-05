@@ -27,23 +27,6 @@ local sg = Instance.new("ScreenGui", CoreGui); sg.Name = "EndlessAura_Final"
 local DarkRed = Color3.fromRGB(150, 0, 0)
 local Black, White, Green = Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)
 
--- Small Caps Converter Function
-local function toSmallCaps(str)
-    local upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    local smallCaps = "AʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘQʀꜱᴛᴜᴠᴡxʏᴢ"
-    local result = ""
-    for i = 1, #str do
-        local char = str:sub(i, i)
-        local pos = upper:find(char)
-        if pos then
-            result = result .. smallCaps:sub(pos*3 - 2, pos*3)
-        else
-            result = result .. char
-        end
-    end
-    return result
-end
-
 local function SendPublicChat(msg)
     task.spawn(function()
         if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
@@ -172,23 +155,22 @@ local function Initialize()
     end)
     
     local function tab(n, p)
-        local b = Instance.new("TextButton", Side); b.Size = UDim2.new(1, 0, 0, 30); b.BackgroundColor3 = Color3.fromRGB(15,15,15); b.Text = n; b.TextColor3 = White; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
+        local b = Instance.new("TextButton", Side); b.Size = UDim2.new(1, 0, 0, 30); b.BackgroundColor3 = Color3.fromRGB(15,15,15); b.Text = string.upper(n); b.TextColor3 = White; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND) 
             for _,v in pairs(Cont:GetChildren()) do v.Visible = false end
             p.Visible = true
             for _,v in pairs(Side:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = White end end
             b.TextColor3 = DarkRed
-            if n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = DarkRed end end
+            if n == "PHONK" or n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = DarkRed end end
         end)
     end
     
-    tab("👑 INFO", T1); tab("🌚 TROLL", T2); tab("🛡️ SHIELD", T3); tab("👺 SPAM", T4); tab("📁 OTHER", T5); tab("Phonk", T_Phonk)
+    tab("👑 INFO", T1); tab("🌚 TROLL", T2); tab("🛡️ SHIELD", T3); tab("👺 SPAM", T4); tab("📁 OTHER", T5); tab("PHONK", T_Phonk)
     if player.Name == MASTER_ACC then tab("🛡️ ADMIN", T_Adm) end; T1.Visible = true
     
     local function btn(txt, par, func, isLoad)
-        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; 
-        b.Text = toSmallCaps(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
+        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND) 
             if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
@@ -215,9 +197,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 Stop All", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
     
-    btn("👁️ View", T2, function(b) 
+    btn("👁️ VIEW", T2, function(b) 
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -235,7 +217,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
 
-    btn("🔴 Target ESP", T2, function(b)
+    btn("🔴 TARGET ESP", T2, function(b)
         _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
             local currentHighlight, currentBillboard
@@ -286,14 +268,40 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    btn("🚀 Goto", T2, function() 
+    btn("👁️ TARGET LOOK", T2, function(b)
+        _G.TargetLook = b:GetAttribute("T")
+        local lookConnection
+        if _G.TargetLook then
+            lookConnection = RunService.RenderStepped:Connect(function()
+                if not _G.TargetLook then if lookConnection then lookConnection:Disconnect() end return end
+                local t = getT()
+                local char = player.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if t and t.Character and hrp then
+                    local targetHrp = t.Character:FindFirstChild("HumanoidRootPart")
+                    if targetHrp then
+                        -- Forces completely bypass setting rotvelocity and raw lookAt angles
+                        hrp.RotVelocity = Vector3.zero
+                        local lookPos = Vector3.new(targetHrp.Position.X, hrp.Position.Y, targetHrp.Position.Z)
+                        if (lookPos - hrp.Position).Magnitude > 0.1 then
+                            hrp.CFrame = CFrame.lookAt(hrp.Position, lookPos)
+                        end
+                    end
+                end
+            end)
+        else
+            if lookConnection then lookConnection:Disconnect() end
+        end
+    end, false)
+    
+    btn("🚀 GOTO", T2, function() 
         local t = getT() 
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
             SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)) 
         end 
     end, true)
     
-    btn("🍆 Bang", T2, function(b) 
+    btn("🍆 BANG", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
             local t = getT() 
@@ -304,7 +312,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("🍑 Front Bang", T2, function(b) 
+    btn("🍑 FRONT BANG", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
             local t = getT() 
@@ -315,7 +323,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("🧒 Headsit", T2, function(b) 
+    btn("🧒 HEADSIT", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
             local t = getT() 
@@ -327,7 +335,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("🦒 Front Headsit", T2, function(b) 
+    btn("🦒 FRONT HEADSIT", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
             local t = getT() 
@@ -339,7 +347,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("⬇️ Down", T2, function(b) 
+    btn("⬇️ DOWN", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
             local t = getT() 
@@ -350,7 +358,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("👅 Suck", T2, function(b) 
+    btn("👅 SUCK", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
             local t = getT() 
@@ -361,7 +369,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("🦟 Moskito Annoy", T2, function(b) 
+    btn("🦟 MOSKITO ANNOY", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
             local t = getT() 
@@ -376,20 +384,20 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
     
     -- TAB 3: SHIELD
-    btn("🛡️ Anti Void", T3, function(b) task.spawn(function() while b:GetAttribute("T") do local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end task.wait(0.1) end end) end)
-    btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, true)
+    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end task.wait(0.1) end end) end)
+    btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, false)
     btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
-    btn("🛡️ Anti Sit", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.Humanoid.Sit = false task.wait() end end) end)
-    btn("🛡️ Anti AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
-    btn("🛡️ Anti Fling", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
+    btn("🛡️ ANTI SIT", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.Humanoid.Sit = false task.wait() end end) end)
+    btn("🛡️ ANTI AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
+    btn("🛡️ ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
     
     -- TAB 4: SPAM
     btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/9S2h4aDC"))() end, true)
     btn("NAMELESS SPAMMER💢", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/bAdrcuP8"))() end, true)
     btn("BHUMIKA SPAMMER 💖", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/3UfyBuCx"))() end, true)
-    btn("🎵 Music Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/U0NdycvQ"))() end, true)
-    btn("📢 Ward Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
-    btn("💀 @ Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
+    btn("🎵 MUSIC SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/U0NdycvQ"))() end, true)
+    btn("📢 WARD SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
+    btn("💀 @ SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
     btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true)
     btn("CUSTOM SPAMMER V1💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER%20V2"))() end, true)
     btn("MIDDLE CUSTOM SPAM🌈", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/MIDDLE%20COSTOME%20SPAM"))() end, true)
@@ -403,23 +411,23 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- TAB 5: OTHER 
     btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
-    btn("⚡ Speed 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
-    btn("🆙 Fly Jump", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end)
-    btn("🌀 Spin 300", T5, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(20), 0) task.wait() end end) end)
-    btn("ghost Noclip", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end)
+    btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
+    btn("🆙 FLY JUMP", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end)
+    btn("🌀 SPIN 300", T5, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(20), 0) task.wait() end end) end)
+    btn("GHOST NOCLIP", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end)
     btn("AIR WALK 🍃", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/tLukyENu"))() end, true)
-    btn("Aura♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)
+    btn("AURA♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)
     btn("HIDE BUTTONS 🔘", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/DtJPutfe"))() end, true)
-    btn("🥷 Copy Ninja", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/7QTTJFFa"))() end, true)
-    btn("🪓 Sky Destroyer", T5, function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640"))() end, true)
-    btn("🎭 Emote Name", T5, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))() end) end, true)
-    btn("NAMELSSS EMOTE👤", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)
-    btn("🔄 Rejoin", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)
+    btn("🥷 COPY NINJA", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/7QTTJFFa"))() end, true)
+    btn("🪓 SKY DESTROYER", T5, function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640"))() end, true)
+    btn("🎭 EMOTE NAME", T5, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))() end) end, true)
+    btn("NAMELESS EMOTE👤", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)
+    btn("🔄 REJOIN", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)
     
     local currentPlaying = nil
     local function phonkBtn(name, id)
         local b = Instance.new("TextButton", T_Phonk)
-        b.BackgroundColor3 = White; b.Text = toSmallCaps(name); b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
+        b.BackgroundColor3 = White; b.Text = name; b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
         task.spawn(function()
             while task.wait() do if b:GetAttribute("Disco") then b.BackgroundColor3 = Color3.fromHSV(tick() % 2 / 2, 0.8, 1) else b.BackgroundColor3 = White end end
         end)
