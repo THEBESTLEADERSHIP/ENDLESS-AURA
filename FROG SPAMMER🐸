@@ -1,4 +1,4 @@
--- [[ FROG SPAMMER 🐸 - CUSTOM PATTERN EDITION ]] --
+-- [[ FROG SPAMMER 🐸 - ENDLESS AURA GREEN EDITION ]] --
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -14,25 +14,26 @@ ScreenGui.Name = "FrogSpammerGui"
 ScreenGui.Parent = game.CoreGui or PlayerGui
 ScreenGui.ResetOnSpawn = false
 
--- Global Balanced Audio Setup
+-- Custom 0.90 Second Tap Sound Setup
 local function playTapSound()
     local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://107406973902030"
+    sound.SoundId = "rbxassetid://128608067526645"
     sound.Volume = 2.5
     sound.PlaybackSpeed = 1
     sound.Parent = SoundService
     sound:Play()
-    game:GetService("Debris"):AddItem(sound, 2)
+    -- Automatically destroy sound after exactly 0.90 seconds
+    game:GetService("Debris"):AddItem(sound, 0.90)
 end
 
 -- Frog Themed Dictionary Data
 local SpamWords = {
-    "🐸 FROG", "🔋 POND", "🍀 TOAD", "🌿FANG×NAMELESS", "🦎 SWAMP", 
-    "🍃 LEAP", "FROG SPAMMER 🐸", "🌲 TADPOLE", "🌳 RIVET", "🌱 LILYPAD", 
+    "🐸 FROG", "🔋 POND", "🍀 TOAD", "🌿 AMPHIBIAN", "🦎 SWAMP", 
+    "🍃 LEAP", "🌾 CROAK", "🌲 TADPOLE", "🌳 RIVET", "🌱 LILYPAD", 
     "☘️ AQUATIC", "🍏 MARSH", "🥒 BULLFROG", "🥗 GREEN", "🛶 WETLAND"
 }
 
--- Custom Requested Pattern with Backticks
+-- Custom Backtick Pattern
 local CurrentPattern = "TUR````````````TUR````````````"
 
 ----------------------------------------------------------------
@@ -92,8 +93,8 @@ end)
 local MainMenu = Instance.new("Frame")
 MainMenu.Name = "MainMenu"
 MainMenu.Parent = ScreenGui
-MainMenu.Size = UDim2.new(0, 240, 0, 300)
-MainMenu.Position = UDim2.new(0.5, -120, 0.5, -150)
+MainMenu.Size = UDim2.new(0, 240, 0, 310)
+MainMenu.Position = UDim2.new(0.5, -120, 0.5, -155)
 MainMenu.BackgroundColor3 = Color3.fromRGB(5, 15, 5)
 MainMenu.BackgroundTransparency = 0.15
 MainMenu.Active = true
@@ -136,18 +137,25 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 ----------------------------------------------------------------
--- 3. PREMIUM TOP ELEMENTS & METALLIC HEADER SETUP
+-- 3. ORIGINAL ENDLESS AURA LOGO & HEADER SETUP
 ----------------------------------------------------------------
+local AuraImage = Instance.new("ImageLabel")
+AuraImage.Parent = MainMenu
+AuraImage.BackgroundTransparency = 1
+AuraImage.Position = UDim2.new(0.08, 0, 0.02, 0)
+AuraImage.Size = UDim2.new(0, 20, 0, 20)
+AuraImage.Image = "rbxassetid://129299711445020"
+
 local AuraText = Instance.new("TextLabel")
 AuraText.Parent = MainMenu
 AuraText.BackgroundTransparency = 1
-AuraText.Position = UDim2.new(0.08, 0, 0.02, 0)
-AuraText.Size = UDim2.new(0.84, 0, 0, 20)
-AuraText.Text = "🐸 Gʀᴇᴇɴ Lᴇᴀᴘ 🐸"
-AuraText.TextColor3 = Color3.fromRGB(0, 220, 0)
+AuraText.Position = UDim2.new(0.22, 0, 0.02, 0)
+AuraText.Size = UDim2.new(0.7, 0, 0, 20)
+AuraText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ 💢"
+AuraText.TextColor3 = Color3.fromRGB(0, 220, 0) -- Green Glow
 AuraText.TextSize = 13
 AuraText.Font = Enum.Font.BuilderSansBold
-AuraText.TextXAlignment = Enum.TextXAlignment.Center
+AuraText.TextXAlignment = Enum.TextXAlignment.Left
 
 local HeaderLine = Instance.new("Frame")
 HeaderLine.Parent = MainMenu
