@@ -27,6 +27,23 @@ local sg = Instance.new("ScreenGui", CoreGui); sg.Name = "EndlessAura_Final"
 local DarkRed = Color3.fromRGB(150, 0, 0)
 local Black, White, Green = Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)
 
+-- Small Caps Converter Function
+local function toSmallCaps(str)
+    local upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    local smallCaps = "AʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘQʀꜱᴛᴜᴠᴡxʏᴢ"
+    local result = ""
+    for i = 1, #str do
+        local char = str:sub(i, i)
+        local pos = upper:find(char)
+        if pos then
+            result = result .. smallCaps:sub(pos*3 - 2, pos*3)
+        else
+            result = result .. char
+        end
+    end
+    return result
+end
+
 local function SendPublicChat(msg)
     task.spawn(function()
         if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
@@ -170,7 +187,8 @@ local function Initialize()
     if player.Name == MASTER_ACC then tab("🛡️ ADMIN", T_Adm) end; T1.Visible = true
     
     local function btn(txt, par, func, isLoad)
-        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = txt; b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
+        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; 
+        b.Text = toSmallCaps(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND) 
             if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
@@ -359,6 +377,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 3: SHIELD
     btn("🛡️ Anti Void", T3, function(b) task.spawn(function() while b:GetAttribute("T") do local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end task.wait(0.1) end end) end)
+    btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, true)
     btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
     btn("🛡️ Anti Sit", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.Humanoid.Sit = false task.wait() end end) end)
     btn("🛡️ Anti AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
@@ -400,7 +419,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local currentPlaying = nil
     local function phonkBtn(name, id)
         local b = Instance.new("TextButton", T_Phonk)
-        b.BackgroundColor3 = White; b.Text = name; b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
+        b.BackgroundColor3 = White; b.Text = toSmallCaps(name); b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
         task.spawn(function()
             while task.wait() do if b:GetAttribute("Disco") then b.BackgroundColor3 = Color3.fromHSV(tick() % 2 / 2, 0.8, 1) else b.BackgroundColor3 = White end end
         end)
