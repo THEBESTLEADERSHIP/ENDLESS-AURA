@@ -81,9 +81,11 @@ end
 local function SafeMoveTo(targetCFrame)
     local char = player.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.Velocity = Vector3.new(0, 0.001, 0)
-        hrp.AssemblyLinearVelocity = Vector3.new(0, 0.001, 0)
+    local hum = char and char:FindFirstChild("Humanoid")
+    if hrp and hum then
+        -- Anti-Cheat Velocity Bypasser Logic
+        hrp.Velocity = Vector3.new(0, 0, 0)
+        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
         hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
         hrp.CFrame = targetCFrame
     end
@@ -290,7 +292,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
             local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
+            if t lifestyle and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
                 SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1.1 - math.sin(tick()*20)*0.55) * CFrame.Angles(0, math.pi, 0)) 
             end 
             task.wait(0.03)
@@ -372,7 +374,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("📢 Ward Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
     btn("💀 @ Spammer", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
     btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true)
-    btn("CUSTOM SPAMMER V1💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/MIDDLE%20COSTOME%20SPAM"))() end, true)
+    btn("CUSTOM SPAMMER V1", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER%20V2"))() end, true)
+    btn("MIDDLE CUSTOM SPAM🌈", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/MIDDLE%20COSTOME%20SPAM"))() end, true)
     btn("FIRE SPAMMER🔥", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5"))() end, true)
     btn("OCEAN SPAMMER🌊", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A"))() end, true)
     btn("GRASS SPAMMER🌲", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2"))() end, true)
@@ -412,7 +415,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end
                 for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end
                 b:SetAttribute("Disco", true)
-                local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxasseetid://"..id; s.Volume = 3; s:Play()
+                local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxassetid://"..id; s.Volume = 3; s:Play()
                 currentPlaying = id
                 task.spawn(function() s.Ended:Wait(); if currentPlaying == id then b:SetAttribute("Disco", false); currentPlaying = nil; s:Destroy() end end)
             end
