@@ -1,0 +1,361 @@
+-- [[ GODZILLA SPAMMER 🦍 - CLEAN GREEN EDITION ]] --
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "GodzillaSpammerGui"
+ScreenGui.Parent = game.CoreGui or PlayerGui
+ScreenGui.ResetOnSpawn = false
+
+-- Green Themed Dynamic Objects Array
+local GreenThemeObjects = {}
+
+-- Zane Spammer Phrase Base Data Array (Expanded to 30 with Green Emojis)
+local BaseList = {
+    "TMKX МЕН VOID SPELL FUN FACT VOID FRAUD GODZILLA HYPER GODLY BEAM 🟢",
+    "TMKX MEH NOVA POWER FRAUD FUN FACT GODZILLA WAVE GODZILLA FRAUD DARK POWER 🐍",
+    "TMKX MEH POWER VOID SPELL HYPER GODLY BEAM GODLY BEAM POWER POWER POWER 🦖",
+    "TMKX MEH POWER WAVE WAVE OC3 GODZILLA V OC3 FUN FACT DARK POWER 🤢",
+    "TMKX MEH PARALLEL SPELL GODLY BEAM FRAUD DIMENSION WAVE HYPER SPELL SPELL 🧪",
+    "TMKX MEH PARALLEL POWER WAVE VOID WORM VOID DARK POWER SPELL HYPER 🤮",
+    "TMKX MEH POWER NOVA VOID WORM OC3 GODLY BEAM GODZILLA GODZILLA VOID WORM GODLY BEAM 🔫",
+    "TMKX MEH DIMENSION POWER SPELL DIMENSION WAVE WAVE WAVE HYPER POWER 🍀",
+    "TMKX MEH FUN FACT VOID GODZILLA FUN FACT DIMENSION VOID WORM GODLY BEAM PARALLEL NOVA 🎍",
+    "TMKX MEH HYPER BEAM VOID FRAUD EXTRA EMPIRE DESTROY EXECUTED POWER SYSTEM 🐲",
+    "TMKX MEH GODZILLA RAGE EXTRA FRAUD CLAN BLAST V1 SYSTEM SHUTDOWN SPELL 🌵",
+    "TMKX MEH OC3 WAVE DIMENSION FRAUD DEFECT OMNI BEAM EXTREME POWER HIT 🌿",
+    "TMKX MEH VOID WORM PARALLEL POWER BURST OVERLOAD QUANTUM BEAM ATTACK 🌴",
+    "TMKX MEH DARK SPELL GODZILLA CRUSH TOTAL FRAUD EMPIRE DISMANTLED TRACE 🌲",
+    "TMKX MEH NOVA ULTRA BEAM SYSTEM SHOCK FRAUD EXTREME DIMENSION CRASH 🌳",
+    "TMKX MEH PARALLEL WAVE SPELL CRUSH OVER POWER MATRIX GODZILLA BLAST ⚡",
+    "TMKX MEH HYPER SPELL VOID FRAUD EXTRA SYSTEM BREAKDOWN PROTOCOL SHUT 🍃",
+    "TMKX MEH GODZILLA FORCE MATRIX BLOCK CHAT LIMIT EXCEEDED ULTRA POWER 🥑",
+    "TMKX MEH OC3 FORCE QUANTUM FRAUD DISASTER BLAST SPELL EMPIRE V2 🍏",
+    "TMKX MEH VOID SPELL SHOCKED SYSTEM CRITICAL OVERDRIVE HIT FRAUD LINE 🍐",
+    "TMKX MEH DARK POWER GODZILLA ULTRA WAVE PARALLEL DESTRUCTION CODE 🍈",
+    "TMKX MEH FUN FACT EMPIRE FRAUD EXPOSED CHAT POWER SPEED EXTRA BEAM 🥝",
+    "TMKX MEH NOVA SYSTEM PROTOCOL VOID SPELL CRUSH HIT WAVE FRAUD EX 🥦",
+    "TMKX MEH DIMENSION BEAM ULTRA GODZILLA DEFECT WAVE EXTRA POWER SYSTEM 🥬",
+    "TMKX MEH GORZILLA RAGE SPEED RUN FRAUD EMPIRE EXECUTED TRACE MATRIX 🥒",
+    "TMKX MEH QUANTUM SPELL VOID SHOCK OVERLOAD WAVE HYPER GODLY BLAST 🫑",
+    "TMKX MEH EXTRA POWER MATRIX FRAUD SHUTDOWN SYSTEM DESTRUCTION CODE  BOUND 🦎",
+    "TMKX MEH OMNI WAVE DEFECT EXTREME GODZILLA CRUSH FRAUD EMPIRE SPELL 🐢",
+    "TMKX MEH DARK SPELL PARALLEL FORCE VOID WORM BEAM EXTRA HIT BLOCK 🐊",
+    "TMKX MEH HYPER BEAM MATRIX OVERDRIVE PROTOCOL FRAUD GODZILLA BLAST SYSTEM 🐸"
+}
+
+----------------------------------------------------------------
+-- 1. DRAGGABLE MENU TOGGLE BUTTON
+----------------------------------------------------------------
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "MenuToggle"
+ToggleBtn.Parent = ScreenGui
+ToggleBtn.Size = UDim2.new(0, 140, 0, 45)
+ToggleBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(10, 15, 10)
+ToggleBtn.BackgroundTransparency = 0.2
+ToggleBtn.Text = "G.S GREEN LEAZER"
+ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+ToggleBtn.TextSize = 13
+ToggleBtn.Font = Enum.Font.GothamBold
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(0, 8)
+ToggleCorner.Parent = ToggleBtn
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Thickness = 2
+ToggleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+ToggleStroke.Parent = ToggleBtn
+table.insert(GreenThemeObjects, ToggleStroke)
+
+-- Drag Engine for Button
+local toggleDragging, toggleDragInput, toggleDragStart, toggleStartPos
+local function updateToggle(input)
+    local delta = input.Position - toggleDragStart
+    ToggleBtn.Position = UDim2.new(toggleStartPos.X.Scale, toggleStartPos.X.Offset + delta.X, toggleStartPos.Y.Scale, toggleStartPos.Y.Offset + delta.Y)
+end
+
+ToggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        toggleDragging = true
+        toggleDragStart = input.Position
+        toggleStartPos = ToggleBtn.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then toggleDragging = false end
+        end)
+    end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then toggleDragInput = input end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == toggleDragInput and toggleDragging then updateToggle(input) end
+end)
+
+----------------------------------------------------------------
+-- 2. DRAGGABLE MAIN MENU GUI
+----------------------------------------------------------------
+local MainMenu = Instance.new("Frame")
+MainMenu.Name = "MainMenu"
+MainMenu.Parent = ScreenGui
+MainMenu.Size = UDim2.new(0, 260, 0, 290)
+MainMenu.Position = UDim2.new(0.5, -130, 0.5, -145)
+MainMenu.BackgroundColor3 = Color3.fromRGB(5, 8, 5)
+MainMenu.BackgroundTransparency = 0.15
+MainMenu.Active = true
+MainMenu.Visible = false
+MainMenu.ClipsDescendants = true
+
+local MenuCorner = Instance.new("UICorner")
+MenuCorner.CornerRadius = UDim.new(0, 12)
+MenuCorner.Parent = MainMenu
+
+local MenuStroke = Instance.new("UIStroke")
+MenuStroke.Thickness = 2
+MenuStroke.Parent = MainMenu
+table.insert(GreenThemeObjects, MenuStroke)
+
+-- Drag Engine for Main Menu Frame
+local menuDragging, menuDragInput, menuDragStart, menuStartPos
+local function updateMenu(input)
+    local delta = input.Position - menuDragStart
+    MainMenu.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+end
+
+MainMenu.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        menuDragging = true
+        menuDragStart = input.Position
+        menuStartPos = MainMenu.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then menuDragging = false end
+        end)
+    end
+end)
+
+MainMenu.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then menuDragInput = input end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == menuDragInput and menuDragging then updateMenu(input) end
+end)
+
+----------------------------------------------------------------
+-- 3. HEADER LAYOUT CONFIGURATION
+----------------------------------------------------------------
+local AuraImage = Instance.new("ImageLabel")
+AuraImage.Parent = MainMenu
+AuraImage.BackgroundTransparency = 1
+AuraImage.Position = UDim2.new(0.08, 0, 0.02, 0)
+AuraImage.Size = UDim2.new(0, 20, 0, 20)
+AuraImage.Image = "rbxassetid://129299711445020"
+
+local AuraText = Instance.new("TextLabel")
+AuraText.Parent = MainMenu
+AuraText.BackgroundTransparency = 1
+AuraText.Position = UDim2.new(0.22, 0, 0.02, 0)
+AuraText.Size = UDim2.new(0.7, 0, 0, 20)
+AuraText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ 💢"
+AuraText.TextColor3 = Color3.fromRGB(240, 240, 240)
+AuraText.TextSize = 13
+AuraText.Font = Enum.Font.BuilderSansBold
+AuraText.TextXAlignment = Enum.TextXAlignment.Left
+
+local HeaderLine = Instance.new("Frame")
+HeaderLine.Parent = MainMenu
+HeaderLine.Size = UDim2.new(1, 0, 0, 2)
+HeaderLine.Position = UDim2.new(0, 0, 0.09, 0)
+HeaderLine.BorderSizePixel = 0
+table.insert(GreenThemeObjects, HeaderLine)
+
+local Title = Instance.new("TextLabel")
+Title.Parent = MainMenu
+Title.Size = UDim2.new(1, 0, 0, 22)
+Title.Position = UDim2.new(0, 0, 0.11, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.Text = "GODZILLA SPAMMER🦍"
+Title.TextColor3 = Color3.fromRGB(0, 255, 100)
+Title.TextSize = 15
+
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Parent = MainMenu
+Subtitle.Size = UDim2.new(1, 0, 0, 12)
+Subtitle.Position = UDim2.new(0, 0, 0.19, 0)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Font = Enum.Font.SourceSansBold
+Subtitle.Text = "SCRIPT BY NAMELESS💢"
+Subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+Subtitle.TextSize = 11
+
+local InstaLabel = Instance.new("TextLabel")
+InstaLabel.Parent = MainMenu
+InstaLabel.Size = UDim2.new(1, 0, 0, 16)
+InstaLabel.Position = UDim2.new(0, 0, 0.24, 0)
+InstaLabel.BackgroundTransparency = 1
+InstaLabel.Font = Enum.Font.GothamBold
+InstaLabel.Text = "insta > ea_nameless"
+InstaLabel.TextSize = 11
+
+task.spawn(function()
+    while true do
+        InstaLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        task.wait(0.5)
+        InstaLabel.TextColor3 = Color3.fromRGB(200, 255, 200)
+        task.wait(0.5)
+    end
+end)
+
+----------------------------------------------------------------
+-- Dynamic Green Gradient Pulse Engine
+----------------------------------------------------------------
+RunService.RenderStepped:Connect(function()
+    local intensity = math.abs(math.sin(tick() * 3))
+    local laserColor = Color3.fromRGB(0, 155 + (intensity * 100), 50 * intensity)
+    for _, obj in ipairs(GreenThemeObjects) do
+        if obj:IsA("UIStroke") then
+            obj.Color = laserColor
+        elseif obj:IsA("Frame") then
+            obj.BackgroundColor3 = laserColor
+        end
+    end
+end)
+
+----------------------------------------------------------------
+-- 4. INPUT INTERFACES
+----------------------------------------------------------------
+local TargetBox = Instance.new("TextBox")
+TargetBox.Parent = MainMenu
+TargetBox.Size = UDim2.new(0, 200, 0, 32)
+TargetBox.Position = UDim2.new(0.11, 0, 0.36, 0)
+TargetBox.BackgroundColor3 = Color3.fromRGB(10, 15, 10)
+TargetBox.PlaceholderText = "[TARGET CLAN/NAME]"
+TargetBox.Text = "RND EMPIRE😂"
+TargetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TargetBox.TextSize = 12
+TargetBox.Font = Enum.Font.SourceSansSemibold
+TargetBox.ClipsDescendants = true
+TargetBox.TextWrapped = true
+Instance.new("UICorner", TargetBox).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", TargetBox).Color = Color3.fromRGB(0, 120, 40)
+
+local DelayBox = Instance.new("TextBox")
+DelayBox.Parent = MainMenu
+DelayBox.Size = UDim2.new(0, 200, 0, 32)
+DelayBox.Position = UDim2.new(0.11, 0, 0.51, 0)
+DelayBox.BackgroundColor3 = Color3.fromRGB(10, 15, 10)
+DelayBox.PlaceholderText = "SPEED DELAY"
+DelayBox.Text = "3"
+DelayBox.TextColor3 = Color3.fromRGB(0, 255, 100)
+DelayBox.TextSize = 12
+DelayBox.Font = Enum.Font.GothamBold
+DelayBox.ClipsDescendants = true
+DelayBox.TextWrapped = true
+Instance.new("UICorner", DelayBox).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", DelayBox).Color = Color3.fromRGB(0, 120, 40)
+
+----------------------------------------------------------------
+-- 5. FUNCTIONAL NORMAL START LOOP ENGINE
+----------------------------------------------------------------
+local StartBtn = Instance.new("TextButton")
+StartBtn.Parent = MainMenu
+StartBtn.Size = UDim2.new(0, 180, 0, 40)
+StartBtn.Position = UDim2.new(0.15, 0, 0.72, 0)
+StartBtn.Font = Enum.Font.GothamBold
+StartBtn.TextSize = 13
+Instance.new("UICorner", StartBtn).CornerRadius = UDim.new(0, 6)
+
+StartBtn.Text = "START SPAM"
+StartBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 50)
+StartBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+
+local isSpamming = false
+
+-- Chat Communication Wrapper
+local function executeChat(msg)
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        local targetChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+        if targetChannel then targetChannel:SendAsync(msg) end
+    else
+        local chatEvent = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+        if chatEvent then chatEvent:FireServer(msg, "All") end
+    end
+end
+
+-- Configured Header Strings
+local baseTitle = "BY NAMELESS GORZILLA SPAMMER🐍 "
+local baseAtList = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "
+
+-- Balanced Payload Builder protecting Max 200 Word Limit
+local function buildSpamString(clanTarget, phrase)
+    local targetSegment = clanTarget ~= "" and clanTarget .. " " or ""
+    
+    -- Calculate length without the @ characters first
+    local staticLength = string.len(baseTitle) + string.len(targetSegment) + string.len(phrase)
+    local availableAtSpace = 200 - staticLength
+    
+    local finalAtString = ""
+    if availableAtSpace > 0 then
+        local optimalAtCount = math.min(string.len(baseAtList), availableAtSpace)
+        finalAtString = string.sub(baseAtList, 1, optimalAtCount)
+    end
+    
+    local combinedMessage = baseTitle .. finalAtString .. targetSegment .. phrase
+    
+    -- Strict cutoff fallback wrapper
+    if string.len(combinedMessage) > 200 then
+        return string.sub(combinedMessage, 1, 200)
+    else
+        return combinedMessage
+    end
+end
+
+StartBtn.MouseButton1Click:Connect(function()
+    isSpamming = not isSpamming
+    
+    if isSpamming then
+        StartBtn.Text = "STOP SPAM"
+        StartBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+        StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        
+        -- Starts cleanly with zero visual flashes or execution sounds
+        task.spawn(function()
+            local phraseIndex = 1
+            while isSpamming do
+                local targetClan = TargetBox.Text
+                local selectedPhrase = BaseList[phraseIndex]
+                
+                phraseIndex = phraseIndex + 1
+                if phraseIndex > #BaseList then
+                    phraseIndex = 1
+                end
+                
+                -- Build payload sequentially under 200 limits
+                local completePayload = buildSpamString(targetClan, selectedPhrase)
+                executeChat(completePayload)
+                
+                local speed = tonumber(DelayBox.Text) or 3
+                task.wait(speed)
+            end
+        end)
+    else
+        StartBtn.Text = "START SPAM"
+        StartBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 50)
+        StartBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+    end
+end)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    MainMenu.Visible = not MainMenu.Visible
+end)
