@@ -325,12 +325,20 @@ StartBtn.MouseButton1Click:Connect(function()
         StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
         
         task.spawn(function()
+            local wordIndex = 1 -- Start from the first word
             while isSpamming do
                 local senderName = SenderBox.Text ~= "" and SenderBox.Text or "💀NAMELESS × BHUMIKA🎀"
                 local targetName = TargetBox.Text ~= "" and TargetBox.Text or "RND EMPIRE😂"
                 local speed = tonumber(DelayBox.Text) or 3
                 
-                local selectedWord = SpamWords[math.random(1, #SpamWords)]
+                -- Get word sequentially
+                local selectedWord = SpamWords[wordIndex]
+                
+                -- Move to next index or loop back to 1
+                wordIndex = wordIndex + 1
+                if wordIndex > #SpamWords then
+                    wordIndex = 1
+                end
                 
                 local processedPayload = buildSpamString(senderName, targetName, selectedWord)
                 executeChat(processedPayload)
