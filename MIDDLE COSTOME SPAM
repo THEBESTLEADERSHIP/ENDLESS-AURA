@@ -28,8 +28,8 @@ end
 
 -- Premium Exact 50 Words List (3-4 Letters Cyber & Nature Style)
 local SpamWords = {
-    "VIRE⚡", "VIEW👁️", "WIND💨", "ICE❄️", "POOL🌊", "CORP🏢", "SNK🐍", "VOLT⚡", "AURA✨", "BURN🔥",
-    "CORE💎", "DARK🖤", "DUST🌪️", "ECHO🗣️", "EDGE🔪", "FADE🌫️", "FIRE🔥", "FLOW🌊", "FURY😡", "GEAR⚙️",
+    "ROCK🪨", "VIEW👁️", "WIND💨", "NAMELESS💢 ON TOP", "POOL🌊", "CORP🏢", "BHUMIKA ON TOP💖", "VOLT⚡", "AURA✨", "BURN🔥",
+    "CORE💎", "DARK🖤", "ATUL ON TOP💀", "ECHO🗣️", "SCRIPT BY NAMELESSS", "FADE🌫️", "FIRE🔥", "FLOW🌊", "FURY😡", "GEAR⚙️",
     "GLOW🌟", "HALO😇", "HAZE💨", "HELL🔥", "HOPE🍀", "IRON🦾", "LAVA🌋", "MIND🧠", "NEON⚡", "NOVA🌟",
     "ONYX🖤", "PACK🐺", "PEAK🏔️", "RAGE😡", "RAID⚔️", "RARE💎", "RUSH🏃", "SOUL👻", "STAR⭐", "TANK🛡️",
     "TIME⏳", "VOID🔮", "WAVE🌊", "WARP🏁", "WOLF🐺", "ZERO🥶", "ZONE📍", "BEAM⚡", "BOLT⚡", "BOSS👑"
@@ -39,7 +39,7 @@ local SpamWords = {
 local RainbowObjects = {}
 
 ----------------------------------------------------------------
--- 1. DRAGGABLE "C.S" MENU TOGGLE BUTTON
+-- 1. DRAGGABLE "MC.S" MENU TOGGLE BUTTON
 ----------------------------------------------------------------
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "MenuToggle"
@@ -48,7 +48,7 @@ ToggleBtn.Size = UDim2.new(0, 52, 0, 52)
 ToggleBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 ToggleBtn.BackgroundTransparency = 0.25
-ToggleBtn.Text = "C.S"
+ToggleBtn.Text = "MC.S"
 ToggleBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
 ToggleBtn.TextSize = 15
 ToggleBtn.Font = Enum.Font.GothamBold
@@ -172,7 +172,7 @@ Title.Size = UDim2.new(1, 0, 0, 22)
 Title.Position = UDim2.new(0, 0, 0.11, 0)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
-Title.Text = "MIDDLE COSTOME SPAMMER🌈"
+Title.Text = "MIDDLE CUSTOM SPAMMER🌈"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 13
 
