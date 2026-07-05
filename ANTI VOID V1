@@ -1,4 +1,4 @@
--- [[ Endless Aura - Anti-Void Toggle System ]] --
+-- [[ Endless Aura - Anti-Void Toggle System (Compact UI) ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -14,20 +14,17 @@ local CORE_TAG = "EA_VoidFreedom_Engine"
 -- 1. ABSOLUTE CLEANUP FUNCTION (Turn OFF Everything)
 -- ========================================================
 local function turnOffEverything()
-    -- Background Loop Disconnect
     if _G[CORE_TAG] then
         _G[CORE_TAG]:Disconnect()
         _G[CORE_TAG] = nil
     end
 
-    -- UI Destroyer
     for _, ui in pairs(LocalPlayer:WaitForChild("PlayerGui"):GetChildren()) do
         if ui.Name == "EATempVoidUI" then 
             ui:Destroy() 
         end
     end
 
-    -- Audio Destroyer
     for _, snd in pairs(SoundService:GetChildren()) do
         if snd.Name == "EALocalVoidSound" then
             snd:Stop()
@@ -35,13 +32,11 @@ local function turnOffEverything()
         end
     end
 
-    -- Character Physics Reset
     local char = LocalPlayer.Character
     if char then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then 
             hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
-            -- Health ko wapas normal limit par set karna
             hum.MaxHealth = 100
             hum.Health = 100
         end
@@ -53,7 +48,6 @@ local function turnOffEverything()
         end
     end
 
-    -- Default Void height wapas normal kar do
     pcall(function() Workspace.FallenPartsDestroyHeight = -500 end)
 end
 
@@ -61,21 +55,17 @@ end
 -- 2. TOGGLE CHECK (ON / OFF Logic)
 -- ========================================================
 if _G.AntiVoidActive == true then
-    -- Agar pehle se ON hai, toh ab OFF kar do
     _G.AntiVoidActive = false
     turnOffEverything()
-    
-    -- Notification for OFF (Direct Client Sound/Sign)
     print("Endless Aura Anti-Void: [STATUS - OFF]")
-    return -- Script yahi ruk jayegi, aage ka code nahi chalega
+    return 
 else
-    -- Agar OFF tha, toh ab ON karo
     _G.AntiVoidActive = true
     print("Endless Aura Anti-Void: [STATUS - ON]")
 end
 
 -- ========================================================
--- 3. CORE ENGINE (Sirf tab chalega jab STATUS - ON hoga)
+-- 3. CORE ENGINE
 -- ========================================================
 pcall(function() Workspace.FallenPartsDestroyHeight = -999999999999 end)
 
@@ -100,18 +90,18 @@ local function showVoidText()
     gui.Name = "EATempVoidUI"
     
     local lbl = Instance.new("TextLabel", gui)
-    lbl.Size = UDim2.new(0, 500, 0, 100)
-    lbl.Position = UDim2.new(0.5, -250, 0.75, 0)
+    lbl.Size = UDim2.new(0, 400, 0, 70)
+    lbl.Position = UDim2.new(0.5, -200, 0.75, 0) -- Center se thoda niche down
     lbl.BackgroundTransparency = 1
     lbl.TextColor3 = Color3.fromRGB(255, 0, 0)
     lbl.Font = Enum.Font.GothamBold
-    lbl.TextSize = 55
+    lbl.TextSize = 38 -- Yahan size chota kiya hai (55 se 38)
     lbl.Text = "Aɴᴛɪ Vᴏɪᴅ"
     lbl.TextTransparency = 0
 
     local stroke = Instance.new("UIStroke", lbl)
     stroke.Color = Color3.fromRGB(0, 0, 0)
-    stroke.Thickness = 5.5
+    stroke.Thickness = 4.5 -- Stroke thickness bhi thodi adjust ki hai compact look ke liye
 
     task.delay(2, function()
         local tween = TweenService:Create(lbl, TweenInfo.new(0.4), {TextTransparency = 1})
@@ -157,7 +147,6 @@ local function removeShield(char)
     end
 end
 
--- Heartbeat Loop Injection
 _G[CORE_TAG] = RunService.Heartbeat:Connect(function()
     local char = LocalPlayer.Character
     if not char then return end
@@ -166,14 +155,12 @@ _G[CORE_TAG] = RunService.Heartbeat:Connect(function()
     local root = char:FindFirstChild("HumanoidRootPart")
     
     if hum and root then
-        -- God Mode Frame Lock
         if hum.Health < 1000000 then
             hum.MaxHealth = 999999999
             hum.Health = 999999999
         end
         hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
 
-        -- Void Vector Trigger Check
         if root.Position.Y < -50 then
             showVoidText()
             spawnShield(char)
