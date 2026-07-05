@@ -1,128 +1,201 @@
--- Services
+-- [[ Endless Aura - Anti-Void Toggle System ]] --
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
 local Workspace = game:GetService("Workspace")
+local SoundService = game:GetService("SoundService")
+local LocalPlayer = Players.LocalPlayer
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local camera = Workspace.CurrentCamera
+local SOUND_ID = "rbxassetid://105571074253435"
+local CORE_TAG = "EA_VoidFreedom_Engine"
 
-local textToShow = "Aɴᴛɪ Vᴏɪᴅ Sᴀᴠᴇᴅ" 
-local soundId = "rbxassetid://132919665409307"
-local isBypassing = false
-local fakeDropPart = nil
-
--- UI aur Sound Function
-local function showAuraSavedUI()
-    if playerGui:FindFirstChild("AntiVoidNotification") then
-        playerGui.AntiVoidNotification:Destroy()
+-- ========================================================
+-- 1. ABSOLUTE CLEANUP FUNCTION (Turn OFF Everything)
+-- ========================================================
+local function turnOffEverything()
+    -- Background Loop Disconnect
+    if _G[CORE_TAG] then
+        _G[CORE_TAG]:Disconnect()
+        _G[CORE_TAG] = nil
     end
 
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "AntiVoidNotification"
-    screenGui.ResetOnSpawn = false
-    screenGui.Parent = playerGui
+    -- UI Destroyer
+    for _, ui in pairs(LocalPlayer:WaitForChild("PlayerGui"):GetChildren()) do
+        if ui.Name == "EATempVoidUI" then 
+            ui:Destroy() 
+        end
+    end
 
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0, 500, 0, 60)
-    label.Position = UDim2.new(0.5, -250, 0.75, 0)
-    label.BackgroundTransparency = 1 
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.Text = textToShow
-    label.Font = Enum.Font.GothamBlack 
-    label.TextSize = 32
-    label.TextTransparency = 1
-    label.Parent = screenGui
+    -- Audio Destroyer
+    for _, snd in pairs(SoundService:GetChildren()) do
+        if snd.Name == "EALocalVoidSound" then
+            snd:Stop()
+            snd:Destroy()
+        end
+    end
 
-    local textStroke = Instance.new("UIStroke")
-    textStroke.Color = Color3.fromRGB(255, 0, 0)
-    textStroke.Thickness = 3.5
-    textStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-    textStroke.Transparency = 1
-    textStroke.Parent = label
+    -- Character Physics Reset
+    local char = LocalPlayer.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then 
+            hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+            -- Health ko wapas normal limit par set karna
+            hum.MaxHealth = 100
+            hum.Health = 100
+        end
+        
+        for _, item in pairs(char:GetDescendants()) do
+            if item.Name == "EAPerfectShield" or item.Name == "EAShieldAttachment" or item.Name == "EAMovementForce" then
+                item:Destroy()
+            end
+        end
+    end
 
-    local sound = Instance.new("Sound")
-    sound.SoundId = soundId
-    sound.Volume = 1
-    sound.Parent = SoundService
+    -- Default Void height wapas normal kar do
+    pcall(function() Workspace.FallenPartsDestroyHeight = -500 end)
+end
+
+-- ========================================================
+-- 2. TOGGLE CHECK (ON / OFF Logic)
+-- ========================================================
+if _G.AntiVoidActive == true then
+    -- Agar pehle se ON hai, toh ab OFF kar do
+    _G.AntiVoidActive = false
+    turnOffEverything()
     
-    TweenService:Create(label, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-    TweenService:Create(textStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Transparency = 0}):Play()
-    sound:Play()
+    -- Notification for OFF (Direct Client Sound/Sign)
+    print("Endless Aura Anti-Void: [STATUS - OFF]")
+    return -- Script yahi ruk jayegi, aage ka code nahi chalega
+else
+    -- Agar OFF tha, toh ab ON karo
+    _G.AntiVoidActive = true
+    print("Endless Aura Anti-Void: [STATUS - ON]")
+end
 
-    task.wait(1.20)
+-- ========================================================
+-- 3. CORE ENGINE (Sirf tab chalega jab STATUS - ON hoga)
+-- ========================================================
+pcall(function() Workspace.FallenPartsDestroyHeight = -999999999999 end)
 
-    local fadeTime = 0.4
-    local fadeOutLabel = TweenService:Create(label, TweenInfo.new(fadeTime, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1})
-    local fadeOutStroke = TweenService:Create(textStroke, TweenInfo.new(fadeTime, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Transparency = 1})
-    local fadeOutSound = TweenService:Create(sound, TweenInfo.new(fadeTime, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Volume = 0})
+local shieldActive = false
+local uiTriggered = false
+
+local function playClientSound()
+    local localSound = Instance.new("Sound")
+    localSound.Name = "EALocalVoidSound"
+    localSound.SoundId = SOUND_ID
+    localSound.Volume = 3.5
+    localSound.Parent = SoundService
+    localSound:Play()
+    localSound.Ended:Connect(function() localSound:Destroy() end)
+end
+
+local function showVoidText()
+    if uiTriggered then return end
+    uiTriggered = true
+
+    local gui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+    gui.Name = "EATempVoidUI"
     
-    fadeOutLabel:Play()
-    fadeOutStroke:Play()
-    fadeOutSound:Play()
+    local lbl = Instance.new("TextLabel", gui)
+    lbl.Size = UDim2.new(0, 500, 0, 100)
+    lbl.Position = UDim2.new(0.5, -250, 0.75, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(255, 0, 0)
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 55
+    lbl.Text = "Aɴᴛɪ Vᴏɪᴅ"
+    lbl.TextTransparency = 0
 
-    fadeOutLabel.Completed:Connect(function()
-        screenGui:Destroy()
-        sound:Destroy()
+    local stroke = Instance.new("UIStroke", lbl)
+    stroke.Color = Color3.fromRGB(0, 0, 0)
+    stroke.Thickness = 5.5
+
+    task.delay(2, function()
+        local tween = TweenService:Create(lbl, TweenInfo.new(0.4), {TextTransparency = 1})
+        tween:Play()
+        tween.Completed:Connect(function() gui:Destroy() end)
     end)
 end
 
--- Core Immortality Logic
-RunService.RenderStepped:Connect(function()
-    local character = player.Character
-    if character then
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        
-        if hrp and humanoid then
-            humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-            if humanoid.Health <= 0 then humanoid.Health = 100 end
+local function spawnShield(char)
+    if shieldActive or char:FindFirstChild("EAPerfectShield") then return end
+    shieldActive = true
+    
+    local root = char:WaitForChild("HumanoidRootPart")
+    local shield = Instance.new("Part", char)
+    shield.Name = "EAPerfectShield"
+    shield.Shape = Enum.PartType.Ball
+    shield.Size = Vector3.new(16, 16, 16)
+    shield.Material = Enum.Material.ForceField
+    shield.Color = Color3.fromRGB(255, 0, 0)
+    shield.Transparency = 0.15
+    shield.CanCollide = false
+    shield.Massless = true
+    shield.CFrame = root.CFrame
 
-            -- Jaise hi aap kill limit ke paas pahuncho (-380)
-            if hrp.Position.Y < -380 and not isBypassing then
-                isBypassing = true
-                task.spawn(showAuraSavedUI)
+    local a0 = Instance.new("Attachment", root)
+    a0.Name = "EAShieldAttachment"
+    local a1 = Instance.new("Attachment", shield)
+    
+    local rigid = Instance.new("RigidConstraint", shield)
+    rigid.Attachment0 = a0
+    rigid.Attachment1 = a1
+    
+    playClientSound()
+end
 
-                -- 1. Real character ko freeze kar do taaki server delete na kare
-                local savePos = hrp.Position
-                hrp.Anchored = true
-                
-                -- 2. Ek invisible tracking part banao jo continuously drop karega
-                fakeDropPart = Instance.new("Part")
-                fakeDropPart.Size = Vector3.new(1, 1, 1)
-                fakeDropPart.Transparency = 1
-                fakeDropPart.CanCollide = false
-                fakeDropPart.Anchored = false
-                fakeDropPart.Position = savePos
-                fakeDropPart.Parent = Workspace
-                fakeDropPart.Velocity = Vector3.new(0, -180, 0) -- Smooth non-stop falling velocity
-                
-                -- Camera ko is dropping part par lock karo taaki constant fall dikhe
-                camera.CameraSubject = fakeDropPart
+local function removeShield(char)
+    shieldActive = false
+    uiTriggered = false
+    for _, item in pairs(char:GetDescendants()) do
+        if item.Name == "EAPerfectShield" or item.Name == "EAShieldAttachment" or item.Name == "EAMovementForce" then
+            item:Destroy()
+        end
+    end
+end
+
+-- Heartbeat Loop Injection
+_G[CORE_TAG] = RunService.Heartbeat:Connect(function()
+    local char = LocalPlayer.Character
+    if not char then return end
+    
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local root = char:FindFirstChild("HumanoidRootPart")
+    
+    if hum and root then
+        -- God Mode Frame Lock
+        if hum.Health < 1000000 then
+            hum.MaxHealth = 999999999
+            hum.Health = 999999999
+        end
+        hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+
+        -- Void Vector Trigger Check
+        if root.Position.Y < -50 then
+            showVoidText()
+            spawnShield(char)
+            
+            if not root:FindFirstChild("EAMovementForce") then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Name = "EAMovementForce"
+                bodyVelocity.MaxForce = Vector3.new(400000, 0, 400000)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Parent = root
             end
-
-            -- Har frame character mesh ko fake drop part par smoothly match karo visual ke liye
-            if isBypassing and fakeDropPart then
-                -- Real parts ko safe height par rakh kar network spoofing ho rhi hai, par look continuous niche ka aayega
-                for _, part in ipairs(character:GetChildren()) do
-                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                        part.CFrame = fakeDropPart.CFrame
-                    end
-                end
+            
+            local force = root:FindFirstChild("EAMovementForce")
+            if force then
+                force.Velocity = hum.MoveDirection * hum.WalkSpeed
+            end
+            
+            hum:ChangeState(Enum.HumanoidStateType.Running) 
+        else
+            if shieldActive then
+                removeShield(char)
             end
         end
     end
 end)
-
--- Clean reset jab player manually teleport kare ya re-spawn ho
-player.CharacterAdded:Connect(function()
-    isBypassing = false
-    if fakeDropPart then
-        fakeDropPart:Destroy()
-        fakeDropPart = nil
-    end
-    camera.CameraSubject = player.Character:WaitForChild("Humanoid")
-end)
-
