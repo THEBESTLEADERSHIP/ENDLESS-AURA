@@ -174,7 +174,7 @@ Title.Size = UDim2.new(1, 0, 0, 22)
 Title.Position = UDim2.new(0, 0, 0.11, 0)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
-Title.Text = "COSTUME SPAMMER 💀"
+Title.Text = "CUSTOM SPAMMER 💀"
 Title.TextColor3 = Color3.fromRGB(145, 10, 10)
 Title.TextSize = 14
 
