@@ -197,7 +197,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; _G.CopyAnim = false; _G.CopyChat = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
     
     btn("👁️ VIEW", T2, function(b) 
         _G.StrongView = b:GetAttribute("T")
@@ -280,7 +280,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 if t and t.Character and hrp then
                     local targetHrp = t.Character:FindFirstChild("HumanoidRootPart")
                     if targetHrp then
-                        -- Forces completely bypass setting rotvelocity and raw lookAt angles
                         hrp.RotVelocity = Vector3.zero
                         local lookPos = Vector3.new(targetHrp.Position.X, hrp.Position.Y, targetHrp.Position.Z)
                         if (lookPos - hrp.Position).Magnitude > 0.1 then
@@ -312,17 +311,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("🍑 FRONT BANG", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1.1 - math.sin(tick()*20)*0.55) * CFrame.Angles(0, math.pi, 0)) 
-            end 
-            task.wait(0.03)
-        end 
-    end)
-    
     btn("🧒 HEADSIT", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
@@ -346,41 +334,118 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             task.wait(0.04)
         end 
     end)
-    
-    btn("⬇️ DOWN", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.45 + (math.sin(tick()*15)*0.05), 0)) 
-            end 
-            task.wait(0.03)
-        end 
+
+    btn("🏃 COPY ANIM", T2, function(b)
+        _G.CopyAnim = b:GetAttribute("T")
+        task.spawn(function()
+            while _G.CopyAnim do
+                local t = getT()
+                if t and t.Character and t.Character:FindFirstChild("Humanoid") and player.Character and player.Character:FindFirstChild("Humanoid") then
+                    local targetAnimTracks = t.Character.Humanoid:GetPlayingAnimationTracks()
+                    local myHumanoid = player.Character.Humanoid
+                    for _, track in pairs(targetAnimTracks) do
+                        local found = false
+                        for _, myTrack in pairs(myHumanoid:GetPlayingAnimationTracks()) do
+                            if myTrack.Animation.AnimationId == track.Animation.AnimationId then
+                                found = true
+                                break
+                            end
+                        end
+                        if not found then
+                            local newTrack = myHumanoid:LoadAnimation(track.Animation)
+                            newTrack:Play()
+                            newTrack.TimePosition = track.TimePosition
+                            newTrack:AdjustSpeed(track.Speed)
+                        end
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
     end)
-    
-    btn("👅 SUCK", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.0, -0.75 - math.sin(tick()*20)*0.4) * CFrame.Angles(math.rad(80 + math.sin(tick()*15)*10), 0, 0)) 
-            end 
-            task.wait(0.03)
-        end 
+
+    btn("💬 COPY CHAT", T2, function(b)
+        _G.CopyChat = b:GetAttribute("T")
+        local chatConnection
+        if _G.CopyChat then
+            chatConnection = Players.PlayerChatted:Connect(function(chatType, chattingPlayer, message)
+                if not _G.CopyChat then if chatConnection then chatConnection:Disconnect() end return end
+                local t = getT()
+                if t and chattingPlayer == t then
+                    SendPublicChat(message)
+                end
+            end)
+        else
+            if chatConnection then chatConnection:Disconnect() end
+        end
     end)
-    
-    btn("🦟 MOSKITO ANNOY", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("Head") then 
-                local angle = tick() * 45
-                local radius = 0.6
-                local offset = Vector3.new(math.cos(angle) * radius, 1.2 + math.sin(tick()*30)*0.2, math.sin(angle) * radius)
-                SafeMoveTo(CFrame.new(t.Character.Head.Position + offset) * CFrame.Angles(0, -angle, 0))
-            end 
+
+    btn("⬅️ LEFT", T2, function(b)
+        _G.Loop = b:GetAttribute("T")
+        while _G.Loop do
+            local t = getT()
+            local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and hrp then
+                local targetHrp = t.Character.HumanoidRootPart
+                hrp.Velocity = Vector3.zero
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                hrp.AssemblyAngularVelocity = Vector3.zero
+                if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
+                hrp.CFrame = targetHrp.CFrame * CFrame.new(-5, 0, 0)
+            end
             task.wait(0.01)
-        end 
+        end
+    end)
+
+    btn("➡️ RIGHT", T2, function(b)
+        _G.Loop = b:GetAttribute("T")
+        while _G.Loop do
+            local t = getT()
+            local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and hrp then
+                local targetHrp = t.Character.HumanoidRootPart
+                hrp.Velocity = Vector3.zero
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                hrp.AssemblyAngularVelocity = Vector3.zero
+                if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
+                hrp.CFrame = targetHrp.CFrame * CFrame.new(5, 0, 0)
+            end
+            task.wait(0.01)
+        end
+    end)
+
+    btn("⬆️ FRONT", T2, function(b)
+        _G.Loop = b:GetAttribute("T")
+        while _G.Loop do
+            local t = getT()
+            local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and hrp then
+                local targetHrp = t.Character.HumanoidRootPart
+                hrp.Velocity = Vector3.zero
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                hrp.AssemblyAngularVelocity = Vector3.zero
+                if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
+                hrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, -5) * CFrame.Angles(0, math.pi, 0)
+            end
+            task.wait(0.01)
+        end
+    end)
+
+    btn("⬇️ BACK", T2, function(b)
+        _G.Loop = b:GetAttribute("T")
+        while _G.Loop do
+            local t = getT()
+            local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and hrp then
+                local targetHrp = t.Character.HumanoidRootPart
+                hrp.Velocity = Vector3.zero
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                hrp.AssemblyAngularVelocity = Vector3.zero
+                if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
+                hrp.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 5)
+            end
+            task.wait(0.01)
+        end
     end)
     
     -- TAB 3: SHIELD
