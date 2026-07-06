@@ -81,7 +81,8 @@ end
 local function SafeMoveTo(targetCFrame)
     local char = player.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
+    -- VOID PROTECTION SYSTEM: Don't follow the target if they are deep in the void
+    if hrp and targetCFrame.Position.Y > voidYLevel then
         hrp.Velocity = Vector3.new(0, 0.001, 0)
         hrp.AssemblyLinearVelocity = Vector3.new(0, 0.001, 0)
         hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
@@ -197,7 +198,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; _G.CopyAnim = false; _G.CopyChat = false; _G.TargetPosState = "OFF"; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
     
     btn("👁️ VIEW", T2, function(b) 
         _G.StrongView = b:GetAttribute("T")
@@ -311,17 +312,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("🍑 FRONT BANG", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1.1 - math.sin(tick()*20)*0.55) * CFrame.Angles(0, math.pi, 0)) 
-            end 
-            task.wait(0.03)
-        end 
-    end)
-    
     btn("🧒 HEADSIT", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
@@ -346,17 +336,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("⬇️ DOWN", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.45 + (math.sin(tick()*15)*0.05), 0)) 
-            end 
-            task.wait(0.03)
-        end 
-    end)
-    
     btn("👅 SUCK", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
@@ -367,19 +346,118 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             task.wait(0.03)
         end 
     end)
-    
-    btn("🦟 MOSKITO ANNOY", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("Head") then 
-                local angle = tick() * 45
-                local radius = 0.6
-                local offset = Vector3.new(math.cos(angle) * radius, 1.2 + math.sin(tick()*30)*0.2, math.sin(angle) * radius)
-                SafeMoveTo(CFrame.new(t.Character.Head.Position + offset) * CFrame.Angles(0, -angle, 0))
-            end 
-            task.wait(0.01)
-        end 
+
+    -- [[ 💥 NEW: 4-TAP POSITION SYSTEM BUTTON ]] --
+    _G.TargetPosState = "OFF"
+    local posBtn = Instance.new("TextButton", T2); posBtn.BackgroundColor3 = White; posBtn.Text = "POSITION: OFF"; posBtn.TextColor3 = Black; posBtn.Font = Enum.Font.GothamBold; posBtn.TextSize = 8.5; Instance.new("UICorner", posBtn)
+    posBtn.MouseButton1Click:Connect(function()
+        playS(CLICK_SOUND)
+        if _G.TargetPosState == "OFF" then
+            _G.TargetPosState = "LEFT"
+            posBtn.BackgroundColor3 = DarkRed; posBtn.TextColor3 = White
+        elseif _G.TargetPosState == "LEFT" then
+            _G.TargetPosState = "RIGHT"
+        elseif _G.TargetPosState == "RIGHT" then
+            _G.TargetPosState = "FRONT"
+        elseif _G.TargetPosState == "FRONT" then
+            _G.TargetPosState = "BACK"
+        else
+            _G.TargetPosState = "OFF"
+            posBtn.BackgroundColor3 = White; posBtn.TextColor3 = Black
+        end
+        posBtn.Text = "POSITION: " .. _G.TargetPosState
+    end)
+
+    task.spawn(function()
+        while task.wait(0.01) do
+            if _G.TargetPosState ~= "OFF" then
+                local t = getT()
+                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+                    local targetHrp = t.Character.HumanoidRootPart
+                    if _G.TargetPosState == "LEFT" then
+                        SafeMoveTo(targetHrp.CFrame * CFrame.new(-5, 0, 0) * CFrame.Angles(0, math.rad(90), 0))
+                    elseif _G.TargetPosState == "RIGHT" then
+                        SafeMoveTo(targetHrp.CFrame * CFrame.new(5, 0, 0) * CFrame.Angles(0, math.rad(-90), 0))
+                    elseif _G.TargetPosState == "FRONT" then
+                        SafeMoveTo(targetHrp.CFrame * CFrame.new(0, 0, -5) * CFrame.Angles(0, math.rad(180), 0))
+                    elseif _G.TargetPosState == "BACK" then
+                        SafeMoveTo(targetHrp.CFrame * CFrame.new(0, 0, 5))
+                    end
+                end
+            end
+        end
+    end)
+
+    -- [[ 🎭 NEW: NO GLITCH COPY ANIMATION ]] --
+    btn("👁️‍🗨️ COPY ANIM", T2, function(b)
+        _G.CopyAnim = b:GetAttribute("T")
+        local activeAnims = {}
+        task.spawn(function()
+            while _G.CopyAnim do
+                local t = getT()
+                local myChar = player.Character
+                local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
+                local myAnimator = myHum and myHum:FindFirstChildOfClass("Animator")
+                
+                if t and t.Character and t.Character:FindFirstChildOfClass("Humanoid") and myAnimator then
+                    local tHum = t.Character:FindFirstChildOfClass("Humanoid")
+                    local tAnimator = tHum:FindFirstChildOfClass("Animator") or tHum
+                    local playingTracks = tAnimator:GetPlayingAnimationTracks()
+                    
+                    -- Check missing anims to play
+                    for _, track in pairs(playingTracks) do
+                        if not activeAnims[track.Animation.AnimationId] then
+                            pcall(function()
+                                local newTrack = myAnimator:LoadAnimation(track.Animation)
+                                newTrack:Play()
+                                newTrack:AdjustSpeed(track.Speed)
+                                activeAnims[track.Animation.AnimationId] = newTrack
+                            end)
+                        else
+                            activeAnims[track.Animation.AnimationId]:AdjustSpeed(track.Speed)
+                        end
+                    end
+                    -- Stop anims target stopped playing
+                    for id, track in pairs(activeAnims) do
+                        local stillPlaying = false
+                        for _, tTrack in pairs(playingTracks) do
+                            if tTrack.Animation.AnimationId == id then stillPlaying = true break end
+                        end
+                        if not stillPlaying then
+                            track:Stop()
+                            activeAnims[id] = nil
+                        end
+                    end
+                else
+                    for id, track in pairs(activeAnims) do track:Stop() end
+                    activeAnims = {}
+                end
+                task.wait(0.1)
+            end
+            for id, track in pairs(activeAnims) do track:Stop() end
+        end)
+    end)
+
+    -- [[ 💬 NEW: NO GLITCH COPY CHAT ]] --
+    local chatConnection
+    btn("💬 COPY CHAT", T2, function(b)
+        _G.CopyChat = b:GetAttribute("T")
+        if _G.CopyChat then
+            local function onChatted(targetPlr, message)
+                if not _G.CopyChat or targetPlr ~= getT() then return end
+                -- Bypass duplicate calls and directly trigger chat
+                SendPublicChat(message)
+            end
+            
+            -- Hook players
+            local function hookPlayer(p)
+                p.Chatted:Connect(function(msg) onChatted(p, msg) end)
+            end
+            for _, p in pairs(Players:GetPlayers()) do if p ~= player then hookPlayer(p) end end
+            chatConnection = Players.PlayerAdded:Connect(hookPlayer)
+        else
+            if chatConnection then chatConnection:Disconnect(); chatConnection = nil end
+        end
     end)
     
     -- TAB 3: SHIELD
