@@ -119,14 +119,13 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- COPY NINJA LOGIC (FULL BODY COPY - TOOL SUPPORT)
+-- COPY NINJA LOGIC (FULL BODY COPY WITH TOOLS)
 -- ==========================================
 local copyNinjaActive = false
 local targetPlayer = nil
 local currentTracks = {}
 local myAnimationTracks = {}
 local copyLoopConnection = nil
-local toolCopyConnections = {}
 
 local function clearMyTracks()
     local char = player.Character
@@ -144,136 +143,30 @@ local function getTarget()
     return targetPlayer
 end
 
--- Copy target's tool animations
-local function copyToolAnimations(targetChar, myChar)
-    if not targetChar or not myChar then return end
+-- Copy animation with proper priority
+local function copyAnimationTrack(targetTrack, myHum)
+    local animId = targetTrack.Animation.AnimationId
+    if not animId or animId == "" then return nil end
     
-    -- Clear old tool copy connections
-    for _, conn in pairs(toolCopyConnections) do
-        conn:Disconnect()
-    end
-    toolCopyConnections = {}
+    local newAnim = Instance.new("Animation")
+    newAnim.AnimationId = animId
+    local newTrack = myHum:LoadAnimation(newAnim)
     
-    -- Copy all tools from target
-    for _, tool in pairs(targetChar:GetChildren()) do
-        if tool:IsA("Tool") or tool:IsA("HopperBin") then
-            -- Check if tool has animations
-            local toolAnim = tool:FindFirstChild("Animation")
-            if toolAnim and toolAnim:IsA("Animation") then
-                local myTool = myChar:FindFirstChild(tool.Name)
-                if myTool and (myTool:IsA("Tool") or myTool:IsA("HopperBin")) then
-                    -- Copy animation to my tool
-                    local myAnim = myTool:FindFirstChild("Animation")
-                    if not myAnim then
-                        myAnim = Instance.new("Animation")
-                        myAnim.Name = "Animation"
-                        myAnim.Parent = myTool
-                    end
-                    myAnim.AnimationId = toolAnim.AnimationId
-                end
-            end
-            
-            -- Copy tool activation animations
-            local activateAnim = tool:FindFirstChild("ActivateAnim")
-            if activateAnim and activateAnim:IsA("Animation") then
-                local myTool = myChar:FindFirstChild(tool.Name)
-                if myTool and (myTool:IsA("Tool") or myTool:IsA("HopperBin")) then
-                    local myActivate = myTool:FindFirstChild("ActivateAnim")
-                    if not myActivate then
-                        myActivate = Instance.new("Animation")
-                        myActivate.Name = "ActivateAnim"
-                        myActivate.Parent = myTool
-                    end
-                    myActivate.AnimationId = activateAnim.AnimationId
-                end
-            end
-        end
+    -- Set high priority to override other animations
+    newTrack.Priority = Enum.AnimationPriority.Action4
+    
+    -- Match time position
+    newTrack.TimePosition = targetTrack.TimePosition
+    
+    -- Set speed if needed
+    if targetTrack.Speed and targetTrack.Speed ~= 1 then
+        newTrack:AdjustSpeed(targetTrack.Speed)
     end
     
-    -- Also copy equipped tools from target's character
-    local targetTools = targetChar:GetChildren()
-    for _, tool in pairs(targetTools) do
-        if tool:IsA("Tool") and tool.Parent == targetChar then
-            -- Check if we have this tool
-            local myTool = myChar:FindFirstChild(tool.Name)
-            if not myTool then
-                -- Clone the tool
-                local newTool = tool:Clone()
-                newTool.Parent = myChar
-                newTool:SetAttribute("CopiedFromTarget", true)
-            end
-        end
-    end
+    return newTrack
 end
 
--- Watch for tool changes on target
-local function watchTargetTools(targetChar)
-    local toolAddedConn = targetChar.ChildAdded:Connect(function(child)
-        if copyNinjaActive and (child:IsA("Tool") or child:IsA("HopperBin")) then
-            local myChar = player.Character
-            if myChar then
-                -- Clone tool to us
-                local myTool = myChar:FindFirstChild(child.Name)
-                if not myTool then
-                    local newTool = child:Clone()
-                    newTool.Parent = myChar
-                    newTool:SetAttribute("CopiedFromTarget", true)
-                end
-                -- Copy animations from tool
-                copyToolAnimations(targetChar, myChar)
-            end
-        end
-    end)
-    table.insert(toolCopyConnections, toolAddedConn)
-    
-    local toolRemovedConn = targetChar.ChildRemoved:Connect(function(child)
-        if copyNinjaActive and (child:IsA("Tool") or child:IsA("HopperBin")) then
-            local myChar = player.Character
-            if myChar then
-                local myTool = myChar:FindFirstChild(child.Name)
-                if myTool and myTool:GetAttribute("CopiedFromTarget") then
-                    myTool:Destroy()
-                end
-            end
-        end
-    end)
-    table.insert(toolCopyConnections, toolRemovedConn)
-end
-
--- Watch for animation changes on target (including tool animations)
-local function watchTargetAnimations(targetHum)
-    local animAddedConn = targetHum.AnimationPlayed:Connect(function(animTrack)
-        if not copyNinjaActive then return end
-        local myChar = player.Character
-        local myHum = myChar and myChar:FindFirstChild("Humanoid")
-        if not myHum then return end
-        
-        local animId = animTrack.Animation.AnimationId
-        if animId and animId ~= "" then
-            -- Check if we already have this track
-            local alreadyExists = false
-            for _, ct in pairs(currentTracks) do
-                if ct.track.Animation.AnimationId == animId then
-                    alreadyExists = true
-                    break
-                end
-            end
-            
-            if not alreadyExists then
-                local newAnim = Instance.new("Animation")
-                newAnim.AnimationId = animId
-                local newTrack = myHum:LoadAnimation(newAnim)
-                newTrack.Priority = Enum.AnimationPriority.Action4
-                newTrack.TimePosition = animTrack.TimePosition
-                newTrack:Play()
-                table.insert(currentTracks, {track = animTrack, myTrack = newTrack})
-                table.insert(myAnimationTracks, newTrack)
-            end
-        end
-    end)
-    table.insert(toolCopyConnections, animAddedConn)
-end
-
+-- Copy all animations with proper syncing
 local function copyAnimations()
     local target = getTarget()
     if not target then return end
@@ -289,39 +182,41 @@ local function copyAnimations()
     currentTracks = {}
     myAnimationTracks = {}
     
-    -- Clear old connections
-    for _, conn in pairs(toolCopyConnections) do
-        conn:Disconnect()
-    end
-    toolCopyConnections = {}
-    
-    -- Copy all animations from target
-    for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
+    -- Get all playing tracks from target
+    local targetTracks = tHum:GetPlayingAnimationTracks()
+    for _, track in pairs(targetTracks) do
         if track.WeightCurrent > 0.1 then
-            local animId = track.Animation.AnimationId
-            if animId and animId ~= "" then
-                local newAnim = Instance.new("Animation")
-                newAnim.AnimationId = animId
-                local newTrack = myHum:LoadAnimation(newAnim)
-                newTrack.Priority = Enum.AnimationPriority.Action4
-                newTrack.TimePosition = track.TimePosition
+            local newTrack = copyAnimationTrack(track, myHum)
+            if newTrack then
                 newTrack:Play()
                 table.insert(myAnimationTracks, newTrack)
-                table.insert(currentTracks, {track = track, myTrack = newTrack})
+                table.insert(currentTracks, {
+                    targetTrack = track,
+                    myTrack = newTrack,
+                    animId = track.Animation.AnimationId
+                })
             end
         end
     end
     
-    -- Copy tools and tool animations
-    copyToolAnimations(tChar, myChar)
-    
-    -- Watch for new animations on target
-    watchTargetAnimations(tHum)
-    
-    -- Watch for tool changes
-    watchTargetTools(tChar)
+    -- Also copy any tool animations
+    for _, tool in pairs(tChar:GetDescendants()) do
+        if tool:IsA("Tool") or tool:IsA("HopperBin") then
+            for _, animTrack in pairs(tool:GetDescendants()) do
+                if animTrack:IsA("Animation") and animTrack.AnimationId then
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = animTrack.AnimationId
+                    local newTrack = myHum:LoadAnimation(newAnim)
+                    newTrack.Priority = Enum.AnimationPriority.Action4
+                    newTrack:Play()
+                    table.insert(myAnimationTracks, newTrack)
+                end
+            end
+        end
+    end
 end
 
+-- Update loop with better syncing
 local function updateCopyLoop()
     if not copyNinjaActive then return end
     local target = getTarget()
@@ -333,34 +228,16 @@ local function updateCopyLoop()
     local myHum = myChar:FindFirstChild("Humanoid")
     if not tHum or not myHum then return end
     
-    -- Check for new animations
+    -- Get current target animations
     local currentAnimIds = {}
+    local targetTracks = {}
+    
     for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
         if track.WeightCurrent > 0.1 then
             local id = track.Animation.AnimationId
             if id and id ~= "" then
                 currentAnimIds[id] = true
-                local found = false
-                for _, ct in pairs(currentTracks) do
-                    if ct.track.Animation.AnimationId == id then
-                        found = true
-                        if ct.myTrack and ct.myTrack.IsPlaying then
-                            ct.myTrack.TimePosition = track.TimePosition
-                        end
-                        break
-                    end
-                end
-                if not found then
-                    -- New animation found, load it
-                    local newAnim = Instance.new("Animation")
-                    newAnim.AnimationId = id
-                    local newTrack = myHum:LoadAnimation(newAnim)
-                    newTrack.Priority = Enum.AnimationPriority.Action4
-                    newTrack.TimePosition = track.TimePosition
-                    newTrack:Play()
-                    table.insert(currentTracks, {track = track, myTrack = newTrack})
-                    table.insert(myAnimationTracks, newTrack)
-                end
+                table.insert(targetTracks, track)
             end
         end
     end
@@ -368,24 +245,72 @@ local function updateCopyLoop()
     -- Remove tracks that are no longer playing
     for i = #currentTracks, 1, -1 do
         local ct = currentTracks[i]
-        if not currentAnimIds[ct.track.Animation.AnimationId] then
-            if ct.myTrack then ct.myTrack:Stop() end
+        if not currentAnimIds[ct.animId] then
+            if ct.myTrack then
+                ct.myTrack:Stop()
+            end
             table.remove(currentTracks, i)
         end
     end
     
-    -- Check for tool animations
-    for _, tool in pairs(tChar:GetChildren()) do
-        if tool:IsA("Tool") or tool:IsA("HopperBin") then
-            local myTool = myChar:FindFirstChild(tool.Name)
-            if not myTool and copyNinjaActive then
-                -- Clone tool if missing
-                local newTool = tool:Clone()
-                newTool.Parent = myChar
-                newTool:SetAttribute("CopiedFromTarget", true)
+    -- Add new tracks or update existing ones
+    for _, targetTrack in pairs(targetTracks) do
+        local id = targetTrack.Animation.AnimationId
+        local found = false
+        
+        for _, ct in pairs(currentTracks) do
+            if ct.animId == id then
+                found = true
+                -- Update time position to stay in sync
+                if ct.myTrack then
+                    ct.myTrack.TimePosition = targetTrack.TimePosition
+                    -- If track stopped playing, restart it
+                    if not ct.myTrack.IsPlaying then
+                        ct.myTrack:Play()
+                    end
+                end
+                break
+            end
+        end
+        
+        if not found then
+            -- New animation detected
+            local newTrack = copyAnimationTrack(targetTrack, myHum)
+            if newTrack then
+                newTrack:Play()
+                table.insert(currentTracks, {
+                    targetTrack = targetTrack,
+                    myTrack = newTrack,
+                    animId = id
+                })
+                table.insert(myAnimationTracks, newTrack)
             end
         end
     end
+end
+
+-- Start copy loop
+local function startCopyLoop()
+    if copyLoopConnection then
+        copyLoopConnection:Disconnect()
+        copyLoopConnection = nil
+    end
+    
+    copyLoopConnection = RunService.Heartbeat:Connect(function()
+        updateCopyLoop()
+    end)
+end
+
+-- Stop copy loop
+local function stopCopyLoop()
+    if copyLoopConnection then
+        copyLoopConnection:Disconnect()
+        copyLoopConnection = nil
+    end
+    copyNinjaActive = false
+    targetPlayer = nil
+    clearMyTracks()
+    currentTracks = {}
 end
 
 -- ==========================================
@@ -471,13 +396,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() 
-        _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid")
-        copyNinjaActive = false; targetPlayer = nil; clearMyTracks(); currentTracks = {}
-        for _, conn in pairs(toolCopyConnections) do conn:Disconnect() end
-        toolCopyConnections = {}
-        if copyLoopConnection then copyLoopConnection:Disconnect(); copyLoopConnection = nil end
-    end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop() end, true)
     
     btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
@@ -591,6 +510,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
+    -- Removed FRONT BANG, ANNOY, DOWN, SUCK
+    
     btn("🧒 HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         while _G.Loop do
@@ -615,7 +536,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- COPY ANIM BUTTON (UPDATED - FULL BODY + TOOLS)
+    -- COPY ANIM BUTTON (FIXED FOR TOOLS)
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
@@ -624,11 +545,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 copyNinjaActive = true
                 -- Initial copy
                 copyAnimations()
-                -- Start loop
-                if copyLoopConnection then copyLoopConnection:Disconnect() end
-                copyLoopConnection = RunService.RenderStepped:Connect(function()
-                    updateCopyLoop()
-                end)
+                -- Start loop with better sync
+                startCopyLoop()
             else
                 b:SetAttribute("T", false)
                 b.BackgroundColor3 = White
@@ -636,13 +554,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 playS(CLICK_SOUND)
             end
         else
-            copyNinjaActive = false
-            targetPlayer = nil
-            clearMyTracks()
-            currentTracks = {}
-            if copyLoopConnection then copyLoopConnection:Disconnect(); copyLoopConnection = nil end
-            for _, conn in pairs(toolCopyConnections) do conn:Disconnect() end
-            toolCopyConnections = {}
+            stopCopyLoop()
         end
     end)
     
