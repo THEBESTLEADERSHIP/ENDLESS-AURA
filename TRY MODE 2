@@ -81,8 +81,7 @@ end
 local function SafeMoveTo(targetCFrame)
     local char = player.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    -- VOID PROTECTION SYSTEM: Don't follow the target if they are deep in the void
-    if hrp and targetCFrame.Position.Y > voidYLevel then
+    if hrp then
         hrp.Velocity = Vector3.new(0, 0.001, 0)
         hrp.AssemblyLinearVelocity = Vector3.new(0, 0.001, 0)
         hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
@@ -198,7 +197,22 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; _G.CopyAnim = false; _G.CopyChat = false; _G.TargetPosState = "OFF"; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
+    local MyTrack = nil
+    local LastID = ""
+    local ChatSyncConnection = nil
+    local PositionState = 0 -- 0: OFF, 1: ON(LEFT), 2: RIGHT, 3: FRONT FF, 4: BACK
+    local PositionOffset = CFrame.new(0,0,0)
+    local ShieldPart = nil
+    local LookAtTarget = false
+
+    btn("🛑 STOP ALL", T2, function() 
+        _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false
+        _G.CopyAnim = false; _G.CopyChat = false; _G.StandMode = false; PositionState = 0; LookAtTarget = false
+        if MyTrack then MyTrack:Stop(); MyTrack = nil end; LastID = ""
+        if ChatSyncConnection then ChatSyncConnection:Disconnect(); ChatSyncConnection = nil end
+        if ShieldPart then ShieldPart:Destroy(); ShieldPart = nil end
+        workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") 
+    end, true)
     
     btn("👁️ VIEW", T2, function(b) 
         _G.StrongView = b:GetAttribute("T")
@@ -335,128 +349,122 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             task.wait(0.04)
         end 
     end)
-    
-    btn("👅 SUCK", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.0, -0.75 - math.sin(tick()*20)*0.4) * CFrame.Angles(math.rad(80 + math.sin(tick()*15)*10), 0, 0)) 
-            end 
-            task.wait(0.03)
-        end 
-    end)
 
-    -- [[ 💥 NEW: 4-TAP POSITION SYSTEM BUTTON ]] --
-    _G.TargetPosState = "OFF"
-    local posBtn = Instance.new("TextButton", T2); posBtn.BackgroundColor3 = White; posBtn.Text = "POSITION: OFF"; posBtn.TextColor3 = Black; posBtn.Font = Enum.Font.GothamBold; posBtn.TextSize = 8.5; Instance.new("UICorner", posBtn)
-    posBtn.MouseButton1Click:Connect(function()
-        playS(CLICK_SOUND)
-        if _G.TargetPosState == "OFF" then
-            _G.TargetPosState = "LEFT"
-            posBtn.BackgroundColor3 = DarkRed; posBtn.TextColor3 = White
-        elseif _G.TargetPosState == "LEFT" then
-            _G.TargetPosState = "RIGHT"
-        elseif _G.TargetPosState == "RIGHT" then
-            _G.TargetPosState = "FRONT"
-        elseif _G.TargetPosState == "FRONT" then
-            _G.TargetPosState = "BACK"
-        else
-            _G.TargetPosState = "OFF"
-            posBtn.BackgroundColor3 = White; posBtn.TextColor3 = Black
-        end
-        posBtn.Text = "POSITION: " .. _G.TargetPosState
-    end)
-
-    task.spawn(function()
-        while task.wait(0.01) do
-            if _G.TargetPosState ~= "OFF" then
-                local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                    local targetHrp = t.Character.HumanoidRootPart
-                    if _G.TargetPosState == "LEFT" then
-                        SafeMoveTo(targetHrp.CFrame * CFrame.new(-5, 0, 0) * CFrame.Angles(0, math.rad(90), 0))
-                    elseif _G.TargetPosState == "RIGHT" then
-                        SafeMoveTo(targetHrp.CFrame * CFrame.new(5, 0, 0) * CFrame.Angles(0, math.rad(-90), 0))
-                    elseif _G.TargetPosState == "FRONT" then
-                        SafeMoveTo(targetHrp.CFrame * CFrame.new(0, 0, -5) * CFrame.Angles(0, math.rad(180), 0))
-                    elseif _G.TargetPosState == "BACK" then
-                        SafeMoveTo(targetHrp.CFrame * CFrame.new(0, 0, 5))
-                    end
-                end
-            end
-        end
-    end)
-
-    -- [[ 🎭 NEW: NO GLITCH COPY ANIMATION ]] --
-    btn("👁️‍🗨️ COPY ANIM", T2, function(b)
+    btn("🥷 COPY ANIM", T2, function(b)
         _G.CopyAnim = b:GetAttribute("T")
-        local activeAnims = {}
         task.spawn(function()
             while _G.CopyAnim do
                 local t = getT()
-                local myChar = player.Character
-                local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
-                local myAnimator = myHum and myHum:FindFirstChildOfClass("Animator")
-                
-                if t and t.Character and t.Character:FindFirstChildOfClass("Humanoid") and myAnimator then
-                    local tHum = t.Character:FindFirstChildOfClass("Humanoid")
-                    local tAnimator = tHum:FindFirstChildOfClass("Animator") or tHum
-                    local playingTracks = tAnimator:GetPlayingAnimationTracks()
-                    
-                    -- Check missing anims to play
-                    for _, track in pairs(playingTracks) do
-                        if not activeAnims[track.Animation.AnimationId] then
-                            pcall(function()
-                                local newTrack = myAnimator:LoadAnimation(track.Animation)
-                                newTrack:Play()
-                                newTrack:AdjustSpeed(track.Speed)
-                                activeAnims[track.Animation.AnimationId] = newTrack
-                            end)
+                local MyHum = player.Character and player.Character:FindFirstChild("Humanoid")
+                if t and t.Character and MyHum then
+                    local THum = t.Character:FindFirstChildOfClass("Humanoid")
+                    if THum then
+                        local CurrentAnim = nil
+                        for _, track in pairs(THum:GetPlayingAnimationTracks()) do
+                            if track.WeightCurrent > 0.1 and not (track.Name:lower():find("idle") or track.Name:lower():find("walk") or track.Name:lower():find("run")) then
+                                CurrentAnim = track
+                                break
+                            end
+                        end
+                        if CurrentAnim then
+                            if CurrentAnim.Animation.AnimationId ~= LastID then
+                                if MyTrack then MyTrack:Stop() end
+                                LastID = CurrentAnim.Animation.AnimationId
+                                local anim = Instance.new("Animation")
+                                anim.AnimationId = LastID
+                                MyTrack = MyHum:LoadAnimation(anim)
+                                MyTrack.Priority = Enum.AnimationPriority.Action4
+                                MyTrack:Play()
+                            end
+                            if MyTrack then MyTrack.TimePosition = CurrentAnim.TimePosition end
                         else
-                            activeAnims[track.Animation.AnimationId]:AdjustSpeed(track.Speed)
+                            if MyTrack then MyTrack:Stop(); MyTrack = nil; LastID = "" end
                         end
                     end
-                    -- Stop anims target stopped playing
-                    for id, track in pairs(activeAnims) do
-                        local stillPlaying = false
-                        for _, tTrack in pairs(playingTracks) do
-                            if tTrack.Animation.AnimationId == id then stillPlaying = true break end
-                        end
-                        if not stillPlaying then
-                            track:Stop()
-                            activeAnims[id] = nil
-                        end
-                    end
-                else
-                    for id, track in pairs(activeAnims) do track:Stop() end
-                    activeAnims = {}
                 end
-                task.wait(0.1)
+                task.wait(0.05)
             end
-            for id, track in pairs(activeAnims) do track:Stop() end
+            if MyTrack then MyTrack:Stop(); MyTrack = nil; LastID = "" end
         end)
     end)
 
-    -- [[ 💬 NEW: NO GLITCH COPY CHAT ]] --
-    local chatConnection
     btn("💬 COPY CHAT", T2, function(b)
         _G.CopyChat = b:GetAttribute("T")
         if _G.CopyChat then
-            local function onChatted(targetPlr, message)
-                if not _G.CopyChat or targetPlr ~= getT() then return end
-                -- Bypass duplicate calls and directly trigger chat
-                SendPublicChat(message)
-            end
-            
-            -- Hook players
-            local function hookPlayer(p)
-                p.Chatted:Connect(function(msg) onChatted(p, msg) end)
-            end
-            for _, p in pairs(Players:GetPlayers()) do if p ~= player then hookPlayer(p) end end
-            chatConnection = Players.PlayerAdded:Connect(hookPlayer)
+            if ChatSyncConnection then ChatSyncConnection:Disconnect() end
+            ChatSyncConnection = TextChatService.MessageReceived:Connect(function(m)
+                local t = getT()
+                if _G.CopyChat and t and m.TextSource and m.TextSource.UserId == t.UserId then
+                    if TextChatService.TextChannels:FindFirstChild("RBXGeneral") then
+                        TextChatService.TextChannels.RBXGeneral:SendAsync(m.Text)
+                    end
+                end
+            end)
         else
-            if chatConnection then chatConnection:Disconnect(); chatConnection = nil end
+            if ChatSyncConnection then ChatSyncConnection:Disconnect(); ChatSyncConnection = nil end
+        end
+    end)
+
+    local PosBtn
+    PosBtn = Instance.new("TextButton", T2)
+    PosBtn.BackgroundColor3 = White; PosBtn.Text = "POSITION: OFF"
+    PosBtn.TextColor3 = Black; PosBtn.Font = Enum.Font.GothamBold; PosBtn.TextSize = 8.5
+    Instance.new("UICorner", PosBtn)
+    PosBtn.MouseButton1Click:Connect(function()
+        playS(CLICK_SOUND)
+        PositionState = PositionState + 1
+        if PositionState > 5 then PositionState = 0 end
+        
+        if PositionState == 0 then
+            PosBtn.Text = "POSITION: OFF"; PosBtn.BackgroundColor3 = White; PosBtn.TextColor3 = Black; _G.StandMode = false; LookAtTarget = false
+        elseif PositionState == 1 then
+            PosBtn.Text = "POSITION: ON(LEFT)"; PosBtn.BackgroundColor3 = DarkRed; PosBtn.TextColor3 = White; _G.StandMode = true; LookAtTarget = false; PositionOffset = CFrame.new(-5, 0, 0)
+        elseif PositionState == 2 then
+            PosBtn.Text = "POSITION: RIGHT"; PosBtn.BackgroundColor3 = DarkRed; PosBtn.TextColor3 = White; _G.StandMode = true; LookAtTarget = false; PositionOffset = CFrame.new(5, 0, 0)
+        elseif PositionState == 3 then
+            PosBtn.Text = "POSITION: FRONT FF"; PosBtn.BackgroundColor3 = DarkRed; PosBtn.TextColor3 = White; _G.StandMode = true; LookAtTarget = true; PositionOffset = CFrame.new(0, 0, -5)
+        elseif PositionState == 4 then
+            PosBtn.Text = "POSITION: BACK"; PosBtn.BackgroundColor3 = DarkRed; PosBtn.TextColor3 = White; _G.StandMode = true; LookAtTarget = false; PositionOffset = CFrame.new(0, 0, 5)
+        elseif PositionState == 5 then
+            PosBtn.Text = "POSITION: OFF"; PosBtn.BackgroundColor3 = White; PosBtn.TextColor3 = Black; _G.StandMode = false; LookAtTarget = false; PositionState = 0
+        end
+    end)
+
+    -- STICKY LOOP RUNNER WITH VOID PROTECTION FOR ATTACHMENTS
+    RunService.Stepped:Connect(function()
+        if not (player.Character and player.Character:FindFirstChild("HumanoidRootPart")) then return end
+        local MyRoot = player.Character.HumanoidRootPart
+        local FallenY = workspace.FallenPartsDestroyHeight
+        local SafetyY = FallenY + 30
+        local t = getT()
+
+        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+            local TRoot = t.Character.HumanoidRootPart
+            
+            if _G.StandMode then
+                if LookAtTarget then
+                    local targetPos = TRoot.Position
+                    local desiredPos = (TRoot.CFrame * PositionOffset).Position
+                    MyRoot.CFrame = CFrame.new(desiredPos, Vector3.new(targetPos.X, desiredPos.Y, targetPos.Z))
+                else
+                    MyRoot.CFrame = TRoot.CFrame * PositionOffset
+                end
+                MyRoot.Velocity = Vector3.zero
+                MyRoot.AssemblyLinearVelocity = Vector3.zero
+            end
+
+            if TRoot.Position.Y < (FallenY + 50) or MyRoot.Position.Y < (FallenY + 50) then
+                if not ShieldPart then
+                    ShieldPart = Instance.new("Part", workspace)
+                    ShieldPart.Size = Vector3.new(100, 1, 100); ShieldPart.Anharmonic = true; ShieldPart.Anchored = true; ShieldPart.Transparency = 1
+                end
+                ShieldPart.CFrame = CFrame.new(MyRoot.Position.X, SafetyY, MyRoot.Position.Z)
+                if MyRoot.Position.Y < (SafetyY + 2) then
+                    MyRoot.CFrame = CFrame.new(MyRoot.Position.X, SafetyY + 5, MyRoot.Position.Z)
+                end
+            else
+                if ShieldPart then ShieldPart:Destroy(); ShieldPart = nil end
+            end
         end
     end)
     
@@ -558,9 +566,9 @@ Verify.MouseButton1Click:Connect(function()
         if KF then KF:Destroy() end
         
         task.spawn(function()
-            SendPublicChat("HA_HA_ HA_HA_")
+            SendPublicChat("A_")
             task.wait(5)
-            SendPublicChat("[")
+            SendPublicChat("[.")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
