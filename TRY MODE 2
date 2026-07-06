@@ -197,13 +197,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    local Syncing, LastID, MyTrack = false, "", nil
-    
-    btn("🛑 STOP ALL", T2, function() 
-        _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; Syncing = false
-        if MyTrack then MyTrack:Stop(); MyTrack = nil end; LastID = ""
-        workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") 
-    end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
     
     btn("👁️ VIEW", T2, function(b) 
         _G.StrongView = b:GetAttribute("T")
@@ -317,6 +311,17 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
+    btn("🍑 FRONT BANG", T2, function(b) 
+        _G.Loop = b:GetAttribute("T") 
+        while _G.Loop do 
+            local t = getT() 
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
+                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1.1 - math.sin(tick()*20)*0.55) * CFrame.Angles(0, math.pi, 0)) 
+            end 
+            task.wait(0.03)
+        end 
+    end)
+    
     btn("🧒 HEADSIT", T2, function(b) 
         _G.Loop = b:GetAttribute("T") 
         while _G.Loop do 
@@ -341,46 +346,40 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end 
     end)
     
-    btn("COPY ANIM👤", T2, function(b)
-        Syncing = b:GetAttribute("T")
-        if Syncing then
-            task.spawn(function()
-                while Syncing do
-                    if player.Character and player.Character:FindFirstChild("Humanoid") then
-                        local MyHum = player.Character.Humanoid
-                        local t = getT()
-                        if t and t.Character and t.Character:FindFirstChildOfClass("Humanoid") then
-                            local THum = t.Character:FindFirstChildOfClass("Humanoid")
-                            local CurrentAnim = nil
-                            for _, track in pairs(THum:GetPlayingAnimationTracks()) do
-                                if track.WeightCurrent > 0.1 and not (track.Name:lower():find("idle") or track.Name:lower():find("walk") or track.Name:lower():find("run")) then
-                                    CurrentAnim = track
-                                    break
-                                end
-                            end
-                            if CurrentAnim then
-                                if CurrentAnim.Animation.AnimationId ~= LastID then
-                                    if MyTrack then MyTrack:Stop() end
-                                    LastID = CurrentAnim.Animation.AnimationId
-                                    local anim = Instance.new("Animation")
-                                    anim.AnimationId = LastID
-                                    MyTrack = MyHum:LoadAnimation(anim)
-                                    MyTrack.Priority = Enum.AnimationPriority.Action4
-                                    MyTrack:Play()
-                                end
-                                if MyTrack then MyTrack.TimePosition = CurrentAnim.TimePosition end
-                            else
-                                if MyTrack then MyTrack:Stop(); MyTrack = nil; LastID = "" end
-                            end
-                        end
-                    end
-                    task.wait()
-                end
-                if MyTrack then MyTrack:Stop(); MyTrack = nil end; LastID = ""
-            end)
-        else
-            if MyTrack then MyTrack:Stop(); MyTrack = nil end; LastID = ""
-        end
+    btn("⬇️ DOWN", T2, function(b) 
+        _G.Loop = b:GetAttribute("T") 
+        while _G.Loop do 
+            local t = getT() 
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
+                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.45 + (math.sin(tick()*15)*0.05), 0)) 
+            end 
+            task.wait(0.03)
+        end 
+    end)
+    
+    btn("👅 SUCK", T2, function(b) 
+        _G.Loop = b:GetAttribute("T") 
+        while _G.Loop do 
+            local t = getT() 
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
+                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.0, -0.75 - math.sin(tick()*20)*0.4) * CFrame.Angles(math.rad(80 + math.sin(tick()*15)*10), 0, 0)) 
+            end 
+            task.wait(0.03)
+        end 
+    end)
+    
+    btn("🦟 MOSKITO ANNOY", T2, function(b) 
+        _G.Loop = b:GetAttribute("T") 
+        while _G.Loop do 
+            local t = getT() 
+            if t and t.Character and t.Character:FindFirstChild("Head") then 
+                local angle = tick() * 45
+                local radius = 0.6
+                local offset = Vector3.new(math.cos(angle) * radius, 1.2 + math.sin(tick()*30)*0.2, math.sin(angle) * radius)
+                SafeMoveTo(CFrame.new(t.Character.Head.Position + offset) * CFrame.Angles(0, -angle, 0))
+            end 
+            task.wait(0.01)
+        end 
     end)
     
     -- TAB 3: SHIELD
