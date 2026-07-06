@@ -1,0 +1,76 @@
+-- Target list
+local targets = {
+    ["nameless82872262"] = true,
+    ["zhask9why"] = true,
+    ["bhumika_018"] = true,
+    ["ff_player1109"] = true,
+    ["ea_fang"] = true
+}
+
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local lastSentMessage = ""
+
+-- Seedha 1:1 sender
+local function mirrorChat(message)
+    lastSentMessage = message
+    task.wait(0.30) -- Exact delay
+    
+    local channels = TextChatService:FindFirstChild("TextChannels")
+    if channels and channels:FindFirstChild("RBXGeneral") then
+        channels.RBXGeneral:SendAsync(message)
+    else
+        local chatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+        if chatEvents and chatEvents:FindFirstChild("SayMessageRequest") then
+            chatEvents.SayMessageRequest:FireServer(message, "All")
+        end
+    end
+end
+
+-- Process Logic
+local function onChat(sender, message)
+    if not sender or sender == LocalPlayer.Name then return end
+    
+    if targets[string.lower(sender)] then
+        if #message > 50 and message ~= lastSentMessage then
+            mirrorChat(message)
+        end
+    end
+end
+
+-- Listeners
+if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+    TextChatService.MessageReceived:Connect(function(textResult)
+        if textResult.TextSource then
+            local p = Players:GetPlayerByUserId(textResult.TextSource.UserId)
+            if p then onChat(p.Name, textResult.Text) end
+        end
+    end)
+end
+
+for _, p in ipairs(Players:GetPlayers()) do
+    p.Chatted:Connect(function(msg) onChat(p.Name, msg) end)
+end
+Players.PlayerAdded:Connect(function(p)
+    p.Chatted:Connect(function(msg) onChat(p.Name, msg) end)
+end)
+
+-- UI Notification
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui") or LocalPlayer:WaitForChild("PlayerGui"))
+local TextLabel = Instance.new("TextLabel", ScreenGui)
+TextLabel.Size = UDim2.new(0, 200, 0, 50)
+TextLabel.Position = UDim2.new(0.85, 0, 0.05, 0)
+TextLabel.BackgroundTransparency = 1
+TextLabel.Text = "NAMELESS💢"
+TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.TextSize = 25
+TextLabel.Font = Enum.Font.SourceSansBold
+TextLabel.TextStrokeTransparency = 0
+task.spawn(function()
+    task.wait(3)
+    TextLabel:TweenPosition(UDim2.new(1.2, 0, 0.05, 0), "Out", "Quad", 0.5)
+    task.wait(0.5)
+    ScreenGui:Destroy()
+end)
