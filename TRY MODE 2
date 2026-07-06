@@ -1,6 +1,6 @@
--- [[ 🥷 ENDLESS COPY NINJA - V38.0 👑 ]] --
+-- [[ 🥷 ENDLESS COPY NINJA - V38.1 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
--- 🎨 UI: CLEAN COMPACT + STYLISH RED TEXT ✅
+-- 🎯 FIXED: TOOL ANIMATIONS COPY ✅
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -119,12 +119,14 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- COPY NINJA LOGIC (FULL BODY COPY)
+-- COPY NINJA LOGIC (FULL BODY COPY + TOOLS)
 -- ==========================================
 local copyNinjaActive = false
 local targetPlayer = nil
 local currentTracks = {}
 local myAnimationTracks = {}
+local targetTools = {}
+local myTools = {}
 
 local function clearMyTracks()
     local char = player.Character
@@ -142,6 +144,35 @@ local function getTarget()
     return targetPlayer
 end
 
+-- Copy tools from target
+local function copyTools()
+    local target = getTarget()
+    if not target then return end
+    local tChar = target.Character
+    local myChar = player.Character
+    if not tChar or not myChar then return end
+    
+    -- Clear old tools
+    for _, tool in pairs(myTools) do
+        if tool and tool.Parent then
+            tool:Destroy()
+        end
+    end
+    myTools = {}
+    targetTools = {}
+    
+    -- Find tools in target
+    for _, obj in pairs(tChar:GetChildren()) do
+        if obj:IsA("Tool") or obj:IsA("HopperBin") then
+            table.insert(targetTools, obj)
+            -- Clone tool to player
+            local clone = obj:Clone()
+            clone.Parent = myChar
+            table.insert(myTools, clone)
+        end
+    end
+end
+
 local function copyAnimations()
     local target = getTarget()
     if not target then return end
@@ -157,9 +188,9 @@ local function copyAnimations()
     currentTracks = {}
     myAnimationTracks = {}
     
-    -- Get all playing tracks from target
+    -- Get all playing tracks from target (including tool animations)
     for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
-        if track.WeightCurrent > 0.1 then
+        if track.WeightCurrent > 0.05 then  -- Lower threshold to catch tool anims
             local animId = track.Animation.AnimationId
             if animId and animId ~= "" then
                 local newAnim = Instance.new("Animation")
@@ -186,10 +217,35 @@ local function updateCopyLoop()
     local myHum = myChar:FindFirstChild("Humanoid")
     if not tHum or not myHum then return end
     
-    -- Check for new animations
+    -- Check for tool changes
+    local currentTargetTools = {}
+    for _, obj in pairs(tChar:GetChildren()) do
+        if obj:IsA("Tool") or obj:IsA("HopperBin") then
+            currentTargetTools[obj] = true
+        end
+    end
+    
+    -- Check if tools changed
+    local toolsChanged = false
+    if #targetTools ~= #currentTargetTools then
+        toolsChanged = true
+    else
+        for _, tool in pairs(targetTools) do
+            if not currentTargetTools[tool] then
+                toolsChanged = true
+                break
+            end
+        end
+    end
+    
+    if toolsChanged then
+        copyTools()
+    end
+    
+    -- Check for new animations (including tool animations)
     local currentAnimIds = {}
     for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
-        if track.WeightCurrent > 0.1 then
+        if track.WeightCurrent > 0.05 then
             local id = track.Animation.AnimationId
             if id and id ~= "" then
                 currentAnimIds[id] = true
@@ -309,7 +365,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); copyNinjaActive = false; targetPlayer = nil; clearMyTracks(); currentTracks = {} end, true)
+    btn("🛑 STOP ALL", T2, function() 
+        _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); 
+        copyNinjaActive = false; targetPlayer = nil; clearMyTracks(); currentTracks = {};
+        for _, tool in pairs(myTools) do if tool and tool.Parent then tool:Destroy() end end
+        myTools = {}; targetTools = {}
+    end, true)
     
     btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
@@ -423,8 +484,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- Removed FRONT BANG, ANNOY, DOWN, SUCK
-    
     btn("🧒 HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         while _G.Loop do
@@ -449,7 +508,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- COPY ANIM BUTTON
+    -- COPY ANIM BUTTON (FIXED FOR TOOLS)
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
@@ -457,12 +516,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             if targetPlayer then
                 copyNinjaActive = true
                 -- Initial copy
+                copyTools()
                 copyAnimations()
                 -- Start loop
                 task.spawn(function()
                     while copyNinjaActive do
                         updateCopyLoop()
-                        task.wait(0.1)
+                        task.wait(0.05)  -- Faster update for tool animations
                     end
                 end)
             else
@@ -476,6 +536,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             targetPlayer = nil
             clearMyTracks()
             currentTracks = {}
+            for _, tool in pairs(myTools) do
+                if tool and tool.Parent then
+                    tool:Destroy()
+                end
+            end
+            myTools = {}
+            targetTools = {}
         end
     end)
     
@@ -505,8 +572,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
     btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
 
-    -- TAB 5: OTHER
-    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
+    -- TAB 5: OTHER    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
     btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
     btn("🆙 FLY JUMP", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end)
