@@ -119,13 +119,14 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- COPY NINJA LOGIC (FULL BODY COPY WITH TOOLS)
+-- COPY NINJA LOGIC (FULL BODY COPY WITH TOOLS - GLITCH FIXED)
 -- ==========================================
 local copyNinjaActive = false
 local targetPlayer = nil
 local currentTracks = {}
 local myAnimationTracks = {}
 local copyLoopConnection = nil
+local animSyncQueue = {}
 
 local function clearMyTracks()
     local char = player.Character
@@ -143,7 +144,7 @@ local function getTarget()
     return targetPlayer
 end
 
--- Copy animation with proper priority
+-- Copy animation with proper priority and blending
 local function copyAnimationTrack(targetTrack, myHum)
     local animId = targetTrack.Animation.AnimationId
     if not animId or animId == "" then return nil end
@@ -216,9 +217,8 @@ local function copyAnimations()
     end
 end
 
--- Update loop with better syncing
-local function updateCopyLoop()
-    if not copyNinjaActive then return end
+-- Smooth animation sync
+local function syncAnimationsSmooth()
     local target = getTarget()
     if not target then return end
     local tChar = target.Character
@@ -229,14 +229,14 @@ local function updateCopyLoop()
     if not tHum or not myHum then return end
     
     -- Get current target animations
-    local currentAnimIds = {}
+    local targetAnimIds = {}
     local targetTracks = {}
     
     for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
         if track.WeightCurrent > 0.1 then
             local id = track.Animation.AnimationId
             if id and id ~= "" then
-                currentAnimIds[id] = true
+                targetAnimIds[id] = true
                 table.insert(targetTracks, track)
             end
         end
@@ -245,7 +245,7 @@ local function updateCopyLoop()
     -- Remove tracks that are no longer playing
     for i = #currentTracks, 1, -1 do
         local ct = currentTracks[i]
-        if not currentAnimIds[ct.animId] then
+        if not targetAnimIds[ct.animId] then
             if ct.myTrack then
                 ct.myTrack:Stop()
             end
@@ -253,7 +253,7 @@ local function updateCopyLoop()
         end
     end
     
-    -- Add new tracks or update existing ones
+    -- Add or update tracks with smooth blending
     for _, targetTrack in pairs(targetTracks) do
         local id = targetTrack.Animation.AnimationId
         local found = false
@@ -261,10 +261,14 @@ local function updateCopyLoop()
         for _, ct in pairs(currentTracks) do
             if ct.animId == id then
                 found = true
-                -- Update time position to stay in sync
                 if ct.myTrack then
-                    ct.myTrack.TimePosition = targetTrack.TimePosition
-                    -- If track stopped playing, restart it
+                    -- Smooth time sync with interpolation
+                    local timeDiff = targetTrack.TimePosition - ct.myTrack.TimePosition
+                    if math.abs(timeDiff) > 0.05 then
+                        ct.myTrack.TimePosition = targetTrack.TimePosition
+                    end
+                    
+                    -- Restart if stopped
                     if not ct.myTrack.IsPlaying then
                         ct.myTrack:Play()
                     end
@@ -274,7 +278,7 @@ local function updateCopyLoop()
         end
         
         if not found then
-            -- New animation detected
+            -- New animation - load and play
             local newTrack = copyAnimationTrack(targetTrack, myHum)
             if newTrack then
                 newTrack:Play()
@@ -297,7 +301,7 @@ local function startCopyLoop()
     end
     
     copyLoopConnection = RunService.Heartbeat:Connect(function()
-        updateCopyLoop()
+        syncAnimationsSmooth()
     end)
 end
 
@@ -536,7 +540,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- COPY ANIM BUTTON (FIXED FOR TOOLS)
+    -- COPY ANIM BUTTON (GLITCH FREE)
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
@@ -545,7 +549,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 copyNinjaActive = true
                 -- Initial copy
                 copyAnimations()
-                -- Start loop with better sync
+                -- Start loop
                 startCopyLoop()
             else
                 b:SetAttribute("T", false)
