@@ -197,7 +197,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; _G.SyncAnim = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
+    local Syncing, LastID, MyTrack = false, "", nil
+    
+    btn("🛑 STOP ALL", T2, function() 
+        _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; Syncing = false
+        if MyTrack then MyTrack:Stop(); MyTrack = nil end; LastID = ""
+        workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") 
+    end, true)
     
     btn("👁️ VIEW", T2, function(b) 
         _G.StrongView = b:GetAttribute("T")
@@ -334,19 +340,17 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             task.wait(0.04)
         end 
     end)
-
+    
     btn("COPY ANIM👤", T2, function(b)
-        _G.SyncAnim = b:GetAttribute("T")
-        task.spawn(function()
-            local MyTrack = nil
-            local LastID = ""
-            while _G.SyncAnim do
-                if player.Character and player.Character:FindFirstChild("Humanoid") then
-                    local MyHum = player.Character.Humanoid
-                    local t = getT()
-                    if t and t.Character and t.Character:FindFirstChild("Humanoid") then
-                        local THum = t.Character:FindFirstChildOfClass("Humanoid")
-                        if THum then
+        Syncing = b:GetAttribute("T")
+        if Syncing then
+            task.spawn(function()
+                while Syncing do
+                    if player.Character and player.Character:FindFirstChild("Humanoid") then
+                        local MyHum = player.Character.Humanoid
+                        local t = getT()
+                        if t and t.Character and t.Character:FindFirstChildOfClass("Humanoid") then
+                            local THum = t.Character:FindFirstChildOfClass("Humanoid")
                             local CurrentAnim = nil
                             for _, track in pairs(THum:GetPlayingAnimationTracks()) do
                                 if track.WeightCurrent > 0.1 and not (track.Name:lower():find("idle") or track.Name:lower():find("walk") or track.Name:lower():find("run")) then
@@ -370,12 +374,14 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                             end
                         end
                     end
+                    task.wait()
                 end
-                RunService.Stepped:Wait()
-            end
-            if MyTrack then MyTrack:Stop(); MyTrack = nil end
-        end)
-    end, false)
+                if MyTrack then MyTrack:Stop(); MyTrack = nil end; LastID = ""
+            end)
+        else
+            if MyTrack then MyTrack:Stop(); MyTrack = nil end; LastID = ""
+        end
+    end)
     
     -- TAB 3: SHIELD
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end task.wait(0.1) end end) end)
