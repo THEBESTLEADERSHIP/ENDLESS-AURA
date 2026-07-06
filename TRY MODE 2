@@ -1,6 +1,10 @@
--- [[ 🔱 ENDLESS AURA V300: INFINITE JUMP EDITION (MODDED) 🔱 ]] --
+-- [[ 🥷 ENDLESS COPY NINJA - V38.0 👑 ]] --
+-- 🔥 SCRIPT BY: NAMELESS 😎
+-- 🎨 UI: CLEAN COMPACT + STYLISH RED TEXT ✅
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,7 +15,7 @@ local player = Players.LocalPlayer
 
 local MASTER_ACC = "Nameless82872262"
 local CORRECT_KEY = "WHAT IS AURA"
-local CLICK_SOUND = "107406973902030" 
+local CLICK_SOUND = "107406973902030"
 local LOGO_IMAGE = "rbxassetid://129299711445020"
 local LOAD_SOUND = "129584950954499"
 if not _G.AdminLogs then _G.AdminLogs = {} end
@@ -61,7 +65,7 @@ local function playKeySuccess()
 end
 
 local function makeDraggable(f)
-    local d, di, ds, sp; 
+    local d, di, ds, sp;
     f.InputBegan:Connect(function(i)
         if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true; ds = i.Position; sp = f.Position end
     end)
@@ -98,9 +102,9 @@ Instance.new("UICorner", KF); local KS = Instance.new("UIStroke", KF); KS.Thickn
 local KeyLogo = Instance.new("ImageLabel", KF); KeyLogo.Size = UDim2.new(0, 40, 0, 40); KeyLogo.Position = UDim2.new(0.5, -20, 0, 10); KeyLogo.BackgroundTransparency = 1; KeyLogo.Image = LOGO_IMAGE
 
 local CloseKey = Instance.new("TextButton", KF); CloseKey.Size = UDim2.new(0,25,0,25); CloseKey.Position = UDim2.new(1,-30,0,5); CloseKey.Text = "X"; CloseKey.BackgroundColor3 = DarkRed; CloseKey.TextColor3 = White; Instance.new("UICorner", CloseKey)
-CloseKey.MouseButton1Click:Connect(function() 
-    playS(CLICK_SOUND) 
-    sg:Destroy() 
+CloseKey.MouseButton1Click:Connect(function()
+    playS(CLICK_SOUND)
+    sg:Destroy()
 end)
 
 local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = DarkRed; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1
@@ -113,6 +117,114 @@ end)
 
 local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 45); KeyBox.Position = UDim2.new(0.5, -120, 0, 230); KeyBox.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyBox.PlaceholderText = "KEY DALO..."; KeyBox.TextColor3 = DarkRed; KeyBox.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeyBox)
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
+
+-- ==========================================
+-- COPY NINJA LOGIC (FULL BODY COPY)
+-- ==========================================
+local copyNinjaActive = false
+local targetPlayer = nil
+local currentTracks = {}
+local myAnimationTracks = {}
+
+local function clearMyTracks()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then return end
+    for _, track in pairs(hum:GetPlayingAnimationTracks()) do
+        track:Stop()
+    end
+    myAnimationTracks = {}
+end
+
+local function getTarget()
+    if not targetPlayer then return nil end
+    return targetPlayer
+end
+
+local function copyAnimations()
+    local target = getTarget()
+    if not target then return end
+    local tChar = target.Character
+    local myChar = player.Character
+    if not tChar or not myChar then return end
+    local tHum = tChar:FindFirstChild("Humanoid")
+    local myHum = myChar:FindFirstChild("Humanoid")
+    if not tHum or not myHum then return end
+    
+    -- Clear old tracks
+    clearMyTracks()
+    currentTracks = {}
+    myAnimationTracks = {}
+    
+    -- Get all playing tracks from target
+    for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
+        if track.WeightCurrent > 0.1 then
+            local animId = track.Animation.AnimationId
+            if animId and animId ~= "" then
+                local newAnim = Instance.new("Animation")
+                newAnim.AnimationId = animId
+                local newTrack = myHum:LoadAnimation(newAnim)
+                newTrack.Priority = Enum.AnimationPriority.Action4
+                newTrack.TimePosition = track.TimePosition
+                newTrack:Play()
+                table.insert(myAnimationTracks, newTrack)
+                table.insert(currentTracks, {track = track, myTrack = newTrack})
+            end
+        end
+    end
+end
+
+local function updateCopyLoop()
+    if not copyNinjaActive then return end
+    local target = getTarget()
+    if not target then return end
+    local tChar = target.Character
+    local myChar = player.Character
+    if not tChar or not myChar then return end
+    local tHum = tChar:FindFirstChild("Humanoid")
+    local myHum = myChar:FindFirstChild("Humanoid")
+    if not tHum or not myHum then return end
+    
+    -- Check for new animations
+    local currentAnimIds = {}
+    for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
+        if track.WeightCurrent > 0.1 then
+            local id = track.Animation.AnimationId
+            if id and id ~= "" then
+                currentAnimIds[id] = true
+                local found = false
+                for _, ct in pairs(currentTracks) do
+                    if ct.track.Animation.AnimationId == id then
+                        found = true
+                        ct.myTrack.TimePosition = track.TimePosition
+                        break
+                    end
+                end
+                if not found then
+                    -- New animation found, load it
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = id
+                    local newTrack = myHum:LoadAnimation(newAnim)
+                    newTrack.Priority = Enum.AnimationPriority.Action4
+                    newTrack.TimePosition = track.TimePosition
+                    newTrack:Play()
+                    table.insert(currentTracks, {track = track, myTrack = newTrack})
+                    table.insert(myAnimationTracks, newTrack)
+                end
+            end
+        end
+    end
+    
+    -- Remove tracks that are no longer playing
+    for i = #currentTracks, 1, -1 do
+        local ct = currentTracks[i]
+        if not currentAnimIds[ct.track.Animation.AnimationId] then
+            ct.myTrack:Stop()
+            table.remove(currentTracks, i)
+        end
+    end
+end
 
 -- ==========================================
 -- MAIN MENU
@@ -157,7 +269,7 @@ local function Initialize()
     local function tab(n, p)
         local b = Instance.new("TextButton", Side); b.Size = UDim2.new(1, 0, 0, 30); b.BackgroundColor3 = Color3.fromRGB(15,15,15); b.Text = string.upper(n); b.TextColor3 = White; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
-            playS(CLICK_SOUND) 
+            playS(CLICK_SOUND)
             for _,v in pairs(Cont:GetChildren()) do v.Visible = false end
             p.Visible = true
             for _,v in pairs(Side:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = White end end
@@ -172,7 +284,7 @@ local function Initialize()
     local function btn(txt, par, func, isLoad)
         local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
-            playS(CLICK_SOUND) 
+            playS(CLICK_SOUND)
             if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
             func(b)
         end)
@@ -197,9 +309,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid") end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); copyNinjaActive = false; targetPlayer = nil; clearMyTracks(); currentTracks = {} end, true)
     
-    btn("👁️ VIEW", T2, function(b) 
+    btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -293,93 +405,78 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, false)
     
-    btn("🚀 GOTO", T2, function() 
-        local t = getT() 
-        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-            SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)) 
-        end 
+    btn("🚀 GOTO", T2, function()
+        local t = getT()
+        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+            SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
+        end
     end, true)
     
-    btn("🍆 BANG", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55)) 
-            end 
+    btn("🍆 BANG", T2, function(b)
+        _G.Loop = b:GetAttribute("T")
+        while _G.Loop do
+            local t = getT()
+            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
+            end
             task.wait(0.03)
-        end 
+        end
     end)
     
-    btn("🍑 FRONT BANG", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1.1 - math.sin(tick()*20)*0.55) * CFrame.Angles(0, math.pi, 0)) 
-            end 
-            task.wait(0.03)
-        end 
-    end)
+    -- Removed FRONT BANG, ANNOY, DOWN, SUCK
     
-    btn("🧒 HEADSIT", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("Head") then 
-                SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0)) 
+    btn("🧒 HEADSIT", T2, function(b)
+        _G.Loop = b:GetAttribute("T")
+        while _G.Loop do
+            local t = getT()
+            if t and t.Character and t.Character:FindFirstChild("Head") then
+                SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))
                 if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
-            end 
+            end
             task.wait(0.04)
-        end 
+        end
     end)
     
-    btn("🦒 FRONT HEADSIT", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("Head") then 
-                SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0)) 
+    btn("🦒 FRONT HEADSIT", T2, function(b)
+        _G.Loop = b:GetAttribute("T")
+        while _G.Loop do
+            local t = getT()
+            if t and t.Character and t.Character:FindFirstChild("Head") then
+                SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0))
                 if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
-            end 
+            end
             task.wait(0.04)
-        end 
+        end
     end)
     
-    btn("⬇️ DOWN", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.45 + (math.sin(tick()*15)*0.05), 0)) 
-            end 
-            task.wait(0.03)
-        end 
-    end)
-    
-    btn("👅 SUCK", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then 
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, -1.0, -0.75 - math.sin(tick()*20)*0.4) * CFrame.Angles(math.rad(80 + math.sin(tick()*15)*10), 0, 0)) 
-            end 
-            task.wait(0.03)
-        end 
-    end)
-    
-    btn("🦟 MOSKITO ANNOY", T2, function(b) 
-        _G.Loop = b:GetAttribute("T") 
-        while _G.Loop do 
-            local t = getT() 
-            if t and t.Character and t.Character:FindFirstChild("Head") then 
-                local angle = tick() * 45
-                local radius = 0.6
-                local offset = Vector3.new(math.cos(angle) * radius, 1.2 + math.sin(tick()*30)*0.2, math.sin(angle) * radius)
-                SafeMoveTo(CFrame.new(t.Character.Head.Position + offset) * CFrame.Angles(0, -angle, 0))
-            end 
-            task.wait(0.01)
-        end 
+    -- COPY ANIM BUTTON
+    btn("COPY ANIM👤", T2, function(b)
+        local isActive = b:GetAttribute("T")
+        if isActive then
+            targetPlayer = getT()
+            if targetPlayer then
+                copyNinjaActive = true
+                -- Initial copy
+                copyAnimations()
+                -- Start loop
+                task.spawn(function()
+                    while copyNinjaActive do
+                        updateCopyLoop()
+                        task.wait(0.1)
+                    end
+                end)
+            else
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                playS(CLICK_SOUND)
+            end
+        else
+            copyNinjaActive = false
+            targetPlayer = nil
+            clearMyTracks()
+            currentTracks = {}
+        end
     end)
     
     -- TAB 3: SHIELD
@@ -408,7 +505,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
     btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
 
-    -- TAB 5: OTHER 
+    -- TAB 5: OTHER
     btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
     btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
@@ -432,7 +529,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             while task.wait() do if b:GetAttribute("Disco") then b.BackgroundColor3 = Color3.fromHSV(tick() % 2 / 2, 0.8, 1) else b.BackgroundColor3 = White end end
         end)
         b.MouseButton1Click:Connect(function()
-            playS(CLICK_SOUND) 
+            playS(CLICK_SOUND)
             if currentPlaying == id then
                 for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end
                 for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end
@@ -460,12 +557,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
     
     local Logo = Instance.new("ImageButton", sg); Logo.Size = UDim2.new(0, 50, 0, 50); Logo.Position = UDim2.new(0, 10, 0.5, -25)
-    Logo.BackgroundTransparency = 1 
+    Logo.BackgroundTransparency = 1
     Logo.Image = LOGO_IMAGE; makeDraggable(Logo)
     
-    Logo.MouseButton1Click:Connect(function() 
-        playS(CLICK_SOUND) 
-        Main.Visible = not Main.Visible 
+    Logo.MouseButton1Click:Connect(function()
+        playS(CLICK_SOUND)
+        Main.Visible = not Main.Visible
     end)
 end
 
@@ -473,8 +570,8 @@ end
 -- VERIFY SEQUENCE
 -- ==========================================
 Verify.MouseButton1Click:Connect(function()
-    if KeyBox.Text == CORRECT_KEY then 
-        playS(CLICK_SOUND) 
+    if KeyBox.Text == CORRECT_KEY then
+        playS(CLICK_SOUND)
         playKeySuccess()
         
         if KF then KF:Destroy() end
@@ -501,11 +598,11 @@ Verify.MouseButton1Click:Connect(function()
             end)
 
             task.wait(0.2)
-            Initialize() 
+            Initialize()
         end)
-    else 
-        playS(CLICK_SOUND) 
+    else
+        playS(CLICK_SOUND)
         KeyBox.Text = ""
-        KeyBox.PlaceholderText = "WRONG KEY 😂" 
+        KeyBox.PlaceholderText = "WRONG KEY 😂"
     end
 end)
