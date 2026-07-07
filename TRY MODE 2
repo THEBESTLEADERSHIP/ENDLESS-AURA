@@ -1,6 +1,6 @@
--- [[ 🥷 ENDLESS COPY NINJA - V38.0 👑 ]] --
+-- [[ 🥷 ENDLESS CHAT NINJA - V38.0 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
--- 🎨 UI: CLEAN COMPACT + STYLISH RED TEXT ✅
+-- 🎯 0 DELAY SERVER SYNC - PERFECT CHAT COPY
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -119,7 +119,7 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- COPY NINJA LOGIC (FULL BODY COPY WITH TOOLS)
+-- COPY NINJA LOGIC - 0 DELAY SERVER SYNC
 -- ==========================================
 local copyNinjaActive = false
 local targetPlayer = nil
@@ -143,7 +143,7 @@ local function getTarget()
     return targetPlayer
 end
 
--- Copy animation with proper priority
+-- Copy animation with instant playback
 local function copyAnimationTrack(targetTrack, myHum)
     local animId = targetTrack.Animation.AnimationId
     if not animId or animId == "" then return nil end
@@ -152,13 +152,13 @@ local function copyAnimationTrack(targetTrack, myHum)
     newAnim.AnimationId = animId
     local newTrack = myHum:LoadAnimation(newAnim)
     
-    -- Set high priority to override other animations
+    -- Highest priority to override everything
     newTrack.Priority = Enum.AnimationPriority.Action4
     
-    -- Match time position
+    -- Match time position exactly
     newTrack.TimePosition = targetTrack.TimePosition
     
-    -- Set speed if needed
+    -- Match speed
     if targetTrack.Speed and targetTrack.Speed ~= 1 then
         newTrack:AdjustSpeed(targetTrack.Speed)
     end
@@ -166,7 +166,7 @@ local function copyAnimationTrack(targetTrack, myHum)
     return newTrack
 end
 
--- Copy all animations with proper syncing
+-- Copy all animations instantly
 local function copyAnimations()
     local target = getTarget()
     if not target then return end
@@ -199,7 +199,7 @@ local function copyAnimations()
         end
     end
     
-    -- Also copy any tool animations
+    -- Copy tool animations
     for _, tool in pairs(tChar:GetDescendants()) do
         if tool:IsA("Tool") or tool:IsA("HopperBin") then
             for _, animTrack in pairs(tool:GetDescendants()) do
@@ -216,7 +216,7 @@ local function copyAnimations()
     end
 end
 
--- Update loop with better syncing
+-- Update loop with 0 delay sync
 local function updateCopyLoop()
     if not copyNinjaActive then return end
     local target = getTarget()
@@ -253,7 +253,7 @@ local function updateCopyLoop()
         end
     end
     
-    -- Add new tracks or update existing ones
+    -- Add new tracks or update existing ones instantly
     for _, targetTrack in pairs(targetTracks) do
         local id = targetTrack.Animation.AnimationId
         local found = false
@@ -261,10 +261,10 @@ local function updateCopyLoop()
         for _, ct in pairs(currentTracks) do
             if ct.animId == id then
                 found = true
-                -- Update time position to stay in sync
+                -- Update time position instantly
                 if ct.myTrack then
                     ct.myTrack.TimePosition = targetTrack.TimePosition
-                    -- If track stopped playing, restart it
+                    -- Restart if stopped
                     if not ct.myTrack.IsPlaying then
                         ct.myTrack:Play()
                     end
@@ -274,7 +274,7 @@ local function updateCopyLoop()
         end
         
         if not found then
-            -- New animation detected
+            -- New animation detected - instant copy
             local newTrack = copyAnimationTrack(targetTrack, myHum)
             if newTrack then
                 newTrack:Play()
@@ -289,14 +289,15 @@ local function updateCopyLoop()
     end
 end
 
--- Start copy loop
+-- Start copy loop with 0 delay
 local function startCopyLoop()
     if copyLoopConnection then
         copyLoopConnection:Disconnect()
         copyLoopConnection = nil
     end
     
-    copyLoopConnection = RunService.Heartbeat:Connect(function()
+    -- Use RenderStepped for frame-perfect sync (0 delay)
+    copyLoopConnection = RunService.RenderStepped:Connect(function()
         updateCopyLoop()
     end)
 end
@@ -311,6 +312,28 @@ local function stopCopyLoop()
     targetPlayer = nil
     clearMyTracks()
     currentTracks = {}
+end
+
+-- ==========================================
+-- CHAT NINJA LOGIC - 0 DELAY SERVER SYNC
+-- ==========================================
+local chatSyncActive = false
+local chatTargetPlayer = nil
+local chatLoopConnection = nil
+
+-- Stop chat sync
+local function stopChatSync()
+    chatSyncActive = false
+    chatTargetPlayer = nil
+end
+
+-- Start chat sync with 0 delay
+local function startChatSync()
+    if chatLoopConnection then
+        chatLoopConnection:Disconnect()
+        chatLoopConnection = nil
+    end
+    chatSyncActive = true
 end
 
 -- ==========================================
@@ -396,7 +419,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop() end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync() end, true)
     
     btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
@@ -510,8 +533,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- Removed FRONT BANG, ANNOY, DOWN, SUCK
-    
     btn("🧒 HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         while _G.Loop do
@@ -536,16 +557,16 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- COPY ANIM BUTTON (FIXED FOR TOOLS)
+    -- COPY ANIM BUTTON - 0 DELAY SYNC
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             targetPlayer = getT()
             if targetPlayer then
                 copyNinjaActive = true
-                -- Initial copy
+                -- Initial copy instantly
                 copyAnimations()
-                -- Start loop with better sync
+                -- Start 0 delay loop
                 startCopyLoop()
             else
                 b:SetAttribute("T", false)
@@ -555,6 +576,25 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
         else
             stopCopyLoop()
+        end
+    end)
+    
+    -- COPY CHAT BUTTON - 0 DELAY SYNC
+    btn("COPY CHAT💬", T2, function(b)
+        local isActive = b:GetAttribute("T")
+        if isActive then
+            chatTargetPlayer = getT()
+            if chatTargetPlayer then
+                chatSyncActive = true
+                startChatSync()
+            else
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                playS(CLICK_SOUND)
+            end
+        else
+            stopChatSync()
         end
     end)
     
@@ -643,6 +683,24 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         playS(CLICK_SOUND)
         Main.Visible = not Main.Visible
     end)
+    
+    -- ==========================================
+    -- CHAT SYNC LISTENER - 0 DELAY
+    -- ==========================================
+    TextChatService.MessageReceived:Connect(function(msg)
+        if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
+            -- Send instantly with 0 delay
+            local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+            if channel then
+                channel:SendAsync(msg.Text)
+            end
+            -- Also try via remote for older games
+            local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+            if sayRemote then
+                sayRemote:FireServer(msg.Text, "All")
+            end
+        end
+    end)
 end
 
 -- ==========================================
@@ -656,9 +714,9 @@ Verify.MouseButton1Click:Connect(function()
         if KF then KF:Destroy() end
         
         task.spawn(function()
-            SendPublicChat("A_")
+            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
             task.wait(5)
-            SendPublicChat("...")
+            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
