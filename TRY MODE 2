@@ -1,6 +1,6 @@
--- [[ 🥷 ENDLESS CHAT NINJA - V38.0 👑 ]] --
+-- [[ 🥷 ENDLESS COPY NINJA - V38.0 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
--- 🎯 0 DELAY SERVER SYNC - PERFECT CHAT COPY
+-- 🎯 0 DELAY SERVER SYNC - PERFECT COPY
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -319,7 +319,6 @@ end
 -- ==========================================
 local chatSyncActive = false
 local chatTargetPlayer = nil
-local chatLoopConnection = nil
 
 -- Stop chat sync
 local function stopChatSync()
@@ -327,13 +326,60 @@ local function stopChatSync()
     chatTargetPlayer = nil
 end
 
--- Start chat sync with 0 delay
-local function startChatSync()
-    if chatLoopConnection then
-        chatLoopConnection:Disconnect()
-        chatLoopConnection = nil
+-- ==========================================
+-- STAND NINJA LOGIC
+-- ==========================================
+local standMode = false
+local standTargetPlayer = nil
+local standLookAtTarget = false
+local standOffset = CFrame.new(0, 0, 0)
+local standCurrentMode = 0 -- 0=OFF, 1=Front, 2=Back, 3=Left, 4=Right, 5=FF
+local standConnection = nil
+
+local function getStandTarget()
+    if not standTargetPlayer then return nil end
+    return standTargetPlayer
+end
+
+local function startStandLoop()
+    if standConnection then
+        standConnection:Disconnect()
+        standConnection = nil
     end
-    chatSyncActive = true
+    
+    standConnection = RunService.RenderStepped:Connect(function()
+        if not standMode then return end
+        
+        local target = getStandTarget()
+        if not target then return end
+        
+        local myChar = player.Character
+        local tChar = target.Character
+        if not myChar or not tChar then return end
+        
+        local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+        local tRoot = tChar:FindFirstChild("HumanoidRootPart")
+        if not myRoot or not tRoot then return end
+        
+        if standLookAtTarget then
+            local targetPos = tRoot.Position
+            local desiredPos = (tRoot.CFrame * standOffset).Position
+            myRoot.CFrame = CFrame.new(desiredPos, Vector3.new(targetPos.X, desiredPos.Y, targetPos.Z))
+        else
+            myRoot.CFrame = tRoot.CFrame * standOffset
+        end
+        myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+    end)
+end
+
+local function stopStandLoop()
+    if standConnection then
+        standConnection:Disconnect()
+        standConnection = nil
+    end
+    standMode = false
+    standTargetPlayer = nil
+    standCurrentMode = 0
 end
 
 -- ==========================================
@@ -419,7 +465,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync() end, true)
+    btn("🛑 STOP ALL", T2, function() 
+        _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); 
+        stopCopyLoop(); 
+        stopChatSync();
+        stopStandLoop();
+    end, true)
     
     btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
@@ -564,9 +615,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             targetPlayer = getT()
             if targetPlayer then
                 copyNinjaActive = true
-                -- Initial copy instantly
                 copyAnimations()
-                -- Start 0 delay loop
                 startCopyLoop()
             else
                 b:SetAttribute("T", false)
@@ -586,7 +635,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             chatTargetPlayer = getT()
             if chatTargetPlayer then
                 chatSyncActive = true
-                startChatSync()
             else
                 b:SetAttribute("T", false)
                 b.BackgroundColor3 = White
@@ -597,6 +645,38 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             stopChatSync()
         end
     end)
+    
+    -- STAND BUTTON - CYCLE MODE
+    btn("STAND 🧍", T2, function(b)
+        local isActive = b:GetAttribute("T")
+        if isActive then
+            standTargetPlayer = getT()
+            if standTargetPlayer then
+                standMode = true
+                standCurrentMode = 1
+                standLookAtTarget = false
+                standOffset = CFrame.new(0, 0, -5)
+                b.Text = "FRONT ⬆️"
+                b.BackgroundColor3 = DarkRed
+                b.TextColor3 = White
+                startStandLoop()
+            else
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                b.Text = "STAND 🧍"
+                playS(CLICK_SOUND)
+            end
+        else
+            stopStandLoop()
+            b.Text = "STAND 🧍"
+            b.BackgroundColor3 = White
+            b.TextColor3 = Black
+        end
+    end)
+    
+    -- STAND MODE CYCLE (when already ON, clicking cycles modes)
+    -- We'll handle this with a separate click on the same button when it's active
     
     -- TAB 3: SHIELD
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end task.wait(0.1) end end) end)
@@ -689,12 +769,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- ==========================================
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
-            -- Send instantly with 0 delay
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
             if channel then
                 channel:SendAsync(msg.Text)
             end
-            -- Also try via remote for older games
             local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
             if sayRemote then
                 sayRemote:FireServer(msg.Text, "All")
