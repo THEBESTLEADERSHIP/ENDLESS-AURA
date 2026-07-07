@@ -1,0 +1,219 @@
+--[[
+    Delta Fly Script v3
+    Toggle: Execute once = ON, again = OFF
+    Anti-cheat bypass: VirtualUser + property tweaks
+    Movement: Joystick controls direction, character faces movement direction (not camera)
+--]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local VirtualUser = game:GetService("VirtualUser")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local camera = Workspace.CurrentCamera
+
+-- Animation IDs (replace with your own if needed)
+local IDLE_ANIM_ID = "rbxassetid://77529400769588"
+local MOVE_ANIM_ID = "rbxassetid://132105268936736"
+
+local flySpeed = 50
+local lastMoveDirection = nil  -- used to keep orientation when idle
+
+-- Anti-Cheat Bypass (call frequently)
+local function antiCheatBypass()
+    pcall(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+    -- Disable collision warnings and network ownership tweaks
+    pcall(function()
+        local char = player.Character
+        if char then
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    v:SetAttribute("CanCollide", false)
+                    -- Optional: set network ownership to client (if allowed)
+                    -- v:SetNetworkOwner(player)
+                end
+            end
+        end
+    end)
+end
+
+-- Cleanup (Turn OFF)
+local function cleanupFly()
+    print("✈️ Fly: OFF")
+    _G.FlyActive = false
+
+    if _G.FlyConnection then
+        _G.FlyConnection:Disconnect()
+        _G.FlyConnection = nil
+    end
+
+    if _G.FlyObjects then
+        if _G.FlyObjects.bodyVel then _G.FlyObjects.bodyVel:Destroy() end
+        if _G.FlyObjects.bodyGyro then _G.FlyObjects.bodyGyro:Destroy() end
+        if _G.FlyObjects.idleTrack then _G.FlyObjects.idleTrack:Stop() end
+        if _G.FlyObjects.moveTrack then _G.FlyObjects.moveTrack:Stop() end
+        _G.FlyObjects = nil
+    end
+
+    local char = player.Character
+    if char and char:FindFirstChild("Humanoid") then
+        local hum = char.Humanoid
+        hum.PlatformStand = false
+        hum.AutoRotate = true   -- re-enable auto rotation if needed
+        hum.Sit = false
+    end
+    lastMoveDirection = nil
+end
+
+-- Start Fly (Turn ON)
+local function startFly()
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    if not hrp or not hum then return end
+
+    antiCheatBypass()
+    print("✈️ Fly: ON")
+    _G.FlyActive = true
+    _G.FlyObjects = {}
+
+    -- Animator
+    local animator = hum:FindFirstChildOfClass("Animator")
+    if not animator then
+        animator = Instance.new("Animator")
+        animator.Parent = hum
+    end
+
+    local idleAnim = Instance.new("Animation")
+    idleAnim.AnimationId = IDLE_ANIM_ID
+    local moveAnim = Instance.new("Animation")
+    moveAnim.AnimationId = MOVE_ANIM_ID
+
+    local idleTrack = animator:LoadAnimation(idleAnim)
+    local moveTrack = animator:LoadAnimation(moveAnim)
+    _G.FlyObjects.idleTrack = idleTrack
+    _G.FlyObjects.moveTrack = moveTrack
+
+    -- BodyMovers
+    local bodyVel = Instance.new("BodyVelocity")
+    bodyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    bodyVel.Velocity = Vector3.zero
+    bodyVel.Parent = hrp
+    _G.FlyObjects.bodyVel = bodyVel
+
+    local bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bodyGyro.P = 10000
+    bodyGyro.D = 500
+    bodyGyro.CFrame = hrp.CFrame  -- start with current orientation
+    bodyGyro.Parent = hrp
+    _G.FlyObjects.bodyGyro = bodyGyro
+
+    -- Humanoid settings
+    hum.PlatformStand = true
+    hum.AutoRotate = false
+    hum.Sit = false
+
+    pcall(function() idleTrack:Play() end)
+
+    -- Main loop
+    _G.FlyConnection = RunService.RenderStepped:Connect(function()
+        if not char or not char.Parent or hum.Health <= 0 then
+            cleanupFly()
+            return
+        end
+
+        -- Anti-cheat every frame
+        antiCheatBypass()
+
+        -- Get joystick input
+        local moveVector = Vector3.zero
+        pcall(function()
+            local controls = require(player.PlayerScripts.PlayerModule):GetControls()
+            moveVector = controls:GetMoveVector()
+        end)
+
+        if moveVector.Magnitude > 0.01 then
+            -- Moving: switch to move animation
+            if moveTrack and not moveTrack.IsPlaying then
+                pcall(function()
+                    idleTrack:Stop()
+                    moveTrack:Play()
+                end)
+            end
+
+            -- Calculate world direction from camera orientation
+            local camCF = camera.CFrame
+            local flyDir = (camCF.RightVector * moveVector.X) + (camCF.LookVector * -moveVector.Z)
+            flyDir = flyDir.Unit  -- normalize
+
+            -- Smooth velocity
+            local targetVel = flyDir * flySpeed
+            bodyVel.Velocity = bodyVel.Velocity:Lerp(targetVel, 0.15)
+
+            -- Face the movement direction (using bodyGyro)
+            if flyDir.Magnitude > 0.01 then
+                local targetCF = CFrame.lookAt(hrp.Position, hrp.Position + flyDir)
+                bodyGyro.CFrame = bodyGyro.CFrame:Lerp(targetCF, 0.2)
+                lastMoveDirection = flyDir  -- store for idle
+            end
+        else
+            -- Idle: switch to idle animation
+            if idleTrack and not idleTrack.IsPlaying then
+                pcall(function()
+                    moveTrack:Stop()
+                    idleTrack:Play()
+                end)
+            end
+
+            -- Stop velocity smoothly
+            bodyVel.Velocity = bodyVel.Velocity:Lerp(Vector3.zero, 0.1)
+
+            -- Keep facing last movement direction (NOT camera)
+            if lastMoveDirection then
+                local currentCF = bodyGyro.CFrame
+                local targetCF = CFrame.lookAt(hrp.Position, hrp.Position + lastMoveDirection)
+                bodyGyro.CFrame = currentCF:Lerp(targetCF, 0.05)
+            end
+            -- if no last direction, keep current orientation (do nothing)
+        end
+    end)
+end
+
+-- ========== TOGGLE LOGIC ==========
+if _G.FlyActive then
+    cleanupFly()   -- OFF
+else
+    startFly()     -- ON
+end
+
+-- Hotkey 'F' to toggle
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.F then
+        if _G.FlyActive then
+            cleanupFly()
+        else
+            startFly()
+        end
+    end
+end)
+
+-- Auto-restart on respawn if flying
+player.CharacterAdded:Connect(function(char)
+    task.wait(1)
+    if _G.FlyActive then
+        cleanupFly()
+        task.wait(0.1)
+        startFly()
+    end
+end)
+
+print("🔹 Delta Fly Toggle Ready")
+print("🔹 Execute again to switch " .. (_G.FlyActive and "OFF" or "ON"))
