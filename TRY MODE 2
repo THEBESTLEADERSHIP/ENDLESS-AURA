@@ -318,6 +318,45 @@ local function stopCopyLoop()
 end
 
 -- ==========================================
+-- CHAT COPY LOGIC
+-- ==========================================
+local chatSyncActive = false
+local chatTargetPlayer = nil
+local chatSyncConnection = nil
+
+local function getChatTarget()
+    return chatTargetPlayer
+end
+
+local function stopChatSync()
+    chatSyncActive = false
+    chatTargetPlayer = nil
+    if chatSyncConnection then
+        chatSyncConnection:Disconnect()
+        chatSyncConnection = nil
+    end
+end
+
+local function startChatSync(target)
+    chatTargetPlayer = target
+    chatSyncActive = true
+    
+    if chatSyncConnection then
+        chatSyncConnection:Disconnect()
+        chatSyncConnection = nil
+    end
+    
+    chatSyncConnection = TextChatService.MessageReceived:Connect(function(m)
+        if chatSyncActive and chatTargetPlayer and m.TextSource and m.TextSource.UserId == chatTargetPlayer.UserId then
+            local generalChannel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+            if generalChannel then
+                generalChannel:SendAsync(m.Text)
+            end
+        end
+    end)
+end
+
+-- ==========================================
 -- MAIN MENU
 -- ==========================================
 local function Initialize()
@@ -400,7 +439,11 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop() end, true)
+    -- Chat target textbox (same as target for simplicity)
+    local chatTarget = Instance.new("TextBox", T2); chatTarget.Size = UDim2.new(0.98, 0, 0, 30); chatTarget.Position = UDim2.new(0, 0, 0, 35); chatTarget.PlaceholderText = "CHAT TARGET NAME..."; chatTarget.BackgroundColor3 = Color3.fromRGB(20,20,20); chatTarget.TextColor3 = White; Instance.new("UICorner", chatTarget)
+    local function getChatT() local n = chatTarget.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
+    
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync() end, true)
     
     btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
@@ -559,6 +602,24 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
         else
             stopCopyLoop()
+        end
+    end)
+    
+    -- CHAT COPY BUTTON
+    btn("CHAT COPY💬", T2, function(b)
+        local isActive = b:GetAttribute("T")
+        if isActive then
+            local chatTargetName = getChatT()
+            if chatTargetName then
+                startChatSync(chatTargetName)
+            else
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                playS(CLICK_SOUND)
+            end
+        else
+            stopChatSync()
         end
     end)
     
