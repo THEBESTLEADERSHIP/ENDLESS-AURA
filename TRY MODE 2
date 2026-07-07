@@ -1,6 +1,6 @@
--- [[ 🥷 ENDLESS COPY NINJA - V38.0 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
--- 🎯 0 DELAY SERVER SYNC - PERFECT COPY
+-- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -327,59 +327,106 @@ local function stopChatSync()
 end
 
 -- ==========================================
--- STAND NINJA LOGIC
+-- STAND NINJA LOGIC - ANTI-VOID + ANTI-KILL
 -- ==========================================
 local standMode = false
-local standTargetPlayer = nil
-local standLookAtTarget = false
+local standTarget = nil
 local standOffset = CFrame.new(0, 0, 0)
-local standCurrentMode = 0 -- 0=OFF, 1=Front, 2=Back, 3=Left, 4=Right, 5=FF
-local standConnection = nil
+local standModeType = 0 -- 0=OFF, 1=Front, 2=Back, 3=Left, 4=Right, 5=FF
+local standLookTarget = false
+local standLoopConnection = nil
 
-local function getStandTarget()
-    if not standTargetPlayer then return nil end
-    return standTargetPlayer
-end
-
-local function startStandLoop()
-    if standConnection then
-        standConnection:Disconnect()
-        standConnection = nil
+-- Anti-kill/void protection
+local function protectFromVoid()
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then return end
+    
+    -- If falling into void, teleport to safe position
+    if hrp.Position.Y < voidYLevel then
+        hrp.CFrame = CFrame.new(safePosition)
+        hum.Health = 100
+        return true
     end
     
-    standConnection = RunService.RenderStepped:Connect(function()
-        if not standMode then return end
-        
-        local target = getStandTarget()
-        if not target then return end
-        
-        local myChar = player.Character
-        local tChar = target.Character
-        if not myChar or not tChar then return end
-        
-        local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-        local tRoot = tChar:FindFirstChild("HumanoidRootPart")
-        if not myRoot or not tRoot then return end
-        
-        if standLookAtTarget then
-            local targetPos = tRoot.Position
-            local desiredPos = (tRoot.CFrame * standOffset).Position
-            myRoot.CFrame = CFrame.new(desiredPos, Vector3.new(targetPos.X, desiredPos.Y, targetPos.Z))
-        else
-            myRoot.CFrame = tRoot.CFrame * standOffset
+    -- Anti-kill: if health low, restore
+    if hum.Health and hum.Health < 20 then
+        hum.Health = 100
+    end
+    
+    return false
+end
+
+-- Stand loop with anti-void + anti-kill
+local function updateStandLoop()
+    if not standMode then return end
+    
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    -- Anti-void protection
+    if protectFromVoid() then return end
+    
+    if not standTarget then return end
+    local tChar = standTarget.Character
+    if not tChar then return end
+    local tHrp = tChar:FindFirstChild("HumanoidRootPart")
+    if not tHrp then return end
+    
+    -- Stand positioning
+    if standLookTarget then
+        local targetPos = tHrp.Position
+        local desiredPos = (tHrp.CFrame * standOffset).Position
+        hrp.CFrame = CFrame.new(desiredPos, Vector3.new(targetPos.X, desiredPos.Y, targetPos.Z))
+    else
+        hrp.CFrame = tHrp.CFrame * standOffset
+    end
+    
+    -- Reset velocity to prevent flinging
+    hrp.AssemblyLinearVelocity = Vector3.new(0, 0.001, 0)
+    hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    
+    -- Keep sitting if needed
+    local hum = char:FindFirstChild("Humanoid")
+    if hum then
+        hum.Sit = false
+        -- Prevent death
+        if hum.Health and hum.Health < 20 then
+            hum.Health = 100
         end
-        myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+    end
+end
+
+-- Start stand loop
+local function startStandLoop()
+    if standLoopConnection then
+        standLoopConnection:Disconnect()
+        standLoopConnection = nil
+    end
+    
+    standLoopConnection = RunService.RenderStepped:Connect(function()
+        updateStandLoop()
     end)
 end
 
+-- Stop stand loop
 local function stopStandLoop()
-    if standConnection then
-        standConnection:Disconnect()
-        standConnection = nil
+    if standLoopConnection then
+        standLoopConnection:Disconnect()
+        standLoopConnection = nil
     end
     standMode = false
-    standTargetPlayer = nil
-    standCurrentMode = 0
+    standTarget = nil
+    standModeType = 0
+end
+
+local function getStandTarget()
+    return standTarget
 end
 
 -- ==========================================
@@ -465,12 +512,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() 
-        _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); 
-        stopCopyLoop(); 
-        stopChatSync();
-        stopStandLoop();
-    end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop() end, true)
     
     btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
@@ -615,7 +657,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             targetPlayer = getT()
             if targetPlayer then
                 copyNinjaActive = true
+                -- Initial copy instantly
                 copyAnimations()
+                -- Start 0 delay loop
                 startCopyLoop()
             else
                 b:SetAttribute("T", false)
@@ -646,37 +690,89 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- STAND BUTTON - CYCLE MODE
-    btn("STAND 🧍", T2, function(b)
-        local isActive = b:GetAttribute("T")
-        if isActive then
-            standTargetPlayer = getT()
-            if standTargetPlayer then
-                standMode = true
-                standCurrentMode = 1
-                standLookAtTarget = false
-                standOffset = CFrame.new(0, 0, -5)
-                b.Text = "FRONT ⬆️"
-                b.BackgroundColor3 = DarkRed
-                b.TextColor3 = White
-                startStandLoop()
-            else
-                b:SetAttribute("T", false)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                b.Text = "STAND 🧍"
-                playS(CLICK_SOUND)
+    -- STAND BUTTON - ANTI-VOID + ANTI-KILL
+    local standBtn = Instance.new("TextButton", T2)
+    standBtn.Size = UDim2.new(0.47, 0, 0, 32)
+    standBtn.Position = UDim2.new(0.05, 0, 0, 0)
+    standBtn.BackgroundColor3 = White
+    standBtn.Text = "STAND: OFF 🛑"
+    standBtn.TextColor3 = Black
+    standBtn.Font = Enum.Font.GothamBold
+    standBtn.TextSize = 8.5
+    Instance.new("UICorner", standBtn)
+    
+    -- Fix grid layout for T2
+    local grid = Instance.new("UIGridLayout", T2)
+    grid.CellSize = UDim2.new(0.47, 0, 0, 32)
+    grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
+    
+    -- Stand mode cycle
+    local standModeIdx = 0
+    standBtn.MouseButton1Click:Connect(function()
+        playS(CLICK_SOUND)
+        
+        -- If OFF, get target
+        if standModeIdx == 0 then
+            standTarget = getT()
+            if not standTarget then
+                standBtn.Text = "NOT FOUND!"
+                task.wait(0.5)
+                standBtn.Text = "STAND: OFF 🛑"
+                return
             end
-        else
+        end        
+        -- Cycle modes: 0=OFF, 1=Front, 2=Back, 3=Left, 4=Right, 5=FF
+        standModeIdx = (standModeIdx + 1) % 6
+        
+        if standModeIdx == 1 then
+            standMode = true
+            standLookTarget = false
+            standOffset = CFrame.new(0, 0, -5)
+            standBtn.Text = "FRONT ⬆️"
+            standBtn.BackgroundColor3 = DarkRed
+            standBtn.TextColor3 = White
+            startStandLoop()
+        elseif standModeIdx == 2 then
+            standMode = true
+            standLookTarget = false
+            standOffset = CFrame.new(0, 0, 5)
+            standBtn.Text = "BACK ⬇️"
+            standBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+            standBtn.TextColor3 = White
+            startStandLoop()
+        elseif standModeIdx == 3 then
+            standMode = true
+            standLookTarget = false
+            standOffset = CFrame.new(-5, 0, 0)
+            standBtn.Text = "LEFT ⬅️"
+            standBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+            standBtn.TextColor3 = White
+            startStandLoop()
+        elseif standModeIdx == 4 then
+            standMode = true
+            standLookTarget = false
+            standOffset = CFrame.new(5, 0, 0)
+            standBtn.Text = "RIGHT ➡️"
+            standBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+            standBtn.TextColor3 = White
+            startStandLoop()
+        elseif standModeIdx == 5 then
+            standMode = true
+            standLookTarget = true
+            standOffset = CFrame.new(0, 0, -5)
+            standBtn.Text = "FF 👀"
+            standBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 80)
+            standBtn.TextColor3 = White
+            startStandLoop()
+        elseif standModeIdx == 0 then
+            standMode = false
+            standTarget = nil
+            standBtn.Text = "STAND: OFF 🛑"
+            standBtn.BackgroundColor3 = White
+            standBtn.TextColor3 = Black
             stopStandLoop()
-            b.Text = "STAND 🧍"
-            b.BackgroundColor3 = White
-            b.TextColor3 = Black
         end
     end)
-    
-    -- STAND MODE CYCLE (when already ON, clicking cycles modes)
-    -- We'll handle this with a separate click on the same button when it's active
     
     -- TAB 3: SHIELD
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end task.wait(0.1) end end) end)
@@ -769,10 +865,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- ==========================================
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
+            -- Send instantly with 0 delay
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
             if channel then
                 channel:SendAsync(msg.Text)
             end
+            -- Also try via remote for older games
             local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
             if sayRemote then
                 sayRemote:FireServer(msg.Text, "All")
