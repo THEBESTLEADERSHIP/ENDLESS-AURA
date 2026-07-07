@@ -1,6 +1,6 @@
 -- [[ 🥷 ENDLESS COPY NINJA - V38.0 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
--- 🎯 FIX: ONLY COPY ANIMATIONS, NOT TOOLS
+-- 🎨 UI: CLEAN COMPACT + STYLISH RED TEXT ✅
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -119,14 +119,13 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- COPY NINJA LOGIC (ONLY ANIMATIONS - NO TOOLS)
+-- COPY NINJA LOGIC (FULL BODY COPY WITH TOOLS)
 -- ==========================================
 local copyNinjaActive = false
 local targetPlayer = nil
 local currentTracks = {}
 local myAnimationTracks = {}
 local copyLoopConnection = nil
-local skipNextSync = false
 
 local function clearMyTracks()
     local char = player.Character
@@ -144,36 +143,10 @@ local function getTarget()
     return targetPlayer
 end
 
--- Check if animation is a movement animation (idle, walk, run, jump, etc.)
-local function isMovementAnimation(animName)
-    if not animName then return true end
-    local lowerName = animName:lower()
-    local movementKeywords = {"idle", "walk", "run", "jump", "fall", "land", "swim", "climb", "sprint", "crouch", "slide"}
-    for _, keyword in pairs(movementKeywords) do
-        if lowerName:find(keyword) then
-            return true
-        end
-    end
-    return false
-end
-
--- Copy animation without tools
+-- Copy animation with proper priority
 local function copyAnimationTrack(targetTrack, myHum)
     local animId = targetTrack.Animation.AnimationId
     if not animId or animId == "" then return nil end
-    
-    -- Get animation name if available
-    local animName = targetTrack.Name or ""
-    
-    -- Skip movement animations (idle, walk, run, etc.)
-    if isMovementAnimation(animName) then
-        return nil
-    end
-    
-    -- Also skip by checking if it's a default Roblox animation
-    if animId:find("rbxassetid://0") or animId:find("rbxassetid://1") then
-        return nil
-    end
     
     local newAnim = Instance.new("Animation")
     newAnim.AnimationId = animId
@@ -193,7 +166,7 @@ local function copyAnimationTrack(targetTrack, myHum)
     return newTrack
 end
 
--- Copy only animation tracks (not tools)
+-- Copy all animations with proper syncing
 local function copyAnimations()
     local target = getTarget()
     if not target then return end
@@ -209,7 +182,7 @@ local function copyAnimations()
     currentTracks = {}
     myAnimationTracks = {}
     
-    -- Get only animation tracks from humanoid
+    -- Get all playing tracks from target
     local targetTracks = tHum:GetPlayingAnimationTracks()
     for _, track in pairs(targetTracks) do
         if track.WeightCurrent > 0.1 then
@@ -220,15 +193,30 @@ local function copyAnimations()
                 table.insert(currentTracks, {
                     targetTrack = track,
                     myTrack = newTrack,
-                    animId = track.Animation.AnimationId,
-                    animName = track.Name or ""
+                    animId = track.Animation.AnimationId
                 })
+            end
+        end
+    end
+    
+    -- Also copy any tool animations
+    for _, tool in pairs(tChar:GetDescendants()) do
+        if tool:IsA("Tool") or tool:IsA("HopperBin") then
+            for _, animTrack in pairs(tool:GetDescendants()) do
+                if animTrack:IsA("Animation") and animTrack.AnimationId then
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = animTrack.AnimationId
+                    local newTrack = myHum:LoadAnimation(newAnim)
+                    newTrack.Priority = Enum.AnimationPriority.Action4
+                    newTrack:Play()
+                    table.insert(myAnimationTracks, newTrack)
+                end
             end
         end
     end
 end
 
--- Update loop - only animations, no tools
+-- Update loop with better syncing
 local function updateCopyLoop()
     if not copyNinjaActive then return end
     local target = getTarget()
@@ -240,7 +228,7 @@ local function updateCopyLoop()
     local myHum = myChar:FindFirstChild("Humanoid")
     if not tHum or not myHum then return end
     
-    -- Get current target animations (only from humanoid)
+    -- Get current target animations
     local currentAnimIds = {}
     local targetTracks = {}
     
@@ -248,11 +236,8 @@ local function updateCopyLoop()
         if track.WeightCurrent > 0.1 then
             local id = track.Animation.AnimationId
             if id and id ~= "" then
-                -- Skip movement animations
-                if not isMovementAnimation(track.Name or "") then
-                    currentAnimIds[id] = true
-                    table.insert(targetTracks, track)
-                end
+                currentAnimIds[id] = true
+                table.insert(targetTracks, track)
             end
         end
     end
@@ -296,8 +281,7 @@ local function updateCopyLoop()
                 table.insert(currentTracks, {
                     targetTrack = targetTrack,
                     myTrack = newTrack,
-                    animId = id,
-                    animName = targetTrack.Name or ""
+                    animId = id
                 })
                 table.insert(myAnimationTracks, newTrack)
             end
@@ -552,7 +536,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- COPY ANIM BUTTON (ONLY ANIMATIONS - NO TOOLS)
+    -- COPY ANIM BUTTON (FIXED FOR TOOLS)
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
@@ -672,9 +656,9 @@ Verify.MouseButton1Click:Connect(function()
         if KF then KF:Destroy() end
         
         task.spawn(function()
-            SendPublicChat("")
+            SendPublicChat("A_")
             task.wait(5)
-            SendPublicChat("[...")
+            SendPublicChat("...")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
