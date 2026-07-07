@@ -108,7 +108,7 @@ CloseKey.MouseButton1Click:Connect(function()
 end)
 
 local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = DarkRed; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1
-local Bio = Instance.new("TextLabel", KF); Bio.Text = "SCRIPT BY NAMELESS 💀\n\nKEY CHAIYE TO NAMELESS SE MANG\nKISMAT HOGI TO DEDEGA 😂"; Bio.Position = UDim2.new(0,0,0,95); Bio.Size = UDim2.new(1,0,0,60); Bio.TextColor3 = White; Bio.TextSize = 12; Bio.BackgroundTransparency = 1
+local Bio = Instance.new("TextLabel", KF); Bio.Text = "SCRIPT BY NAMELESS 👑💀\n\nKEY CHAIYE TO NAMELESS SE MANG\nKISMAT HOGI TO DEDEGA 😂"; Bio.Position = UDim2.new(0,0,0,95); Bio.Size = UDim2.new(1,0,0,60); Bio.TextColor3 = White; Bio.TextSize = 12; Bio.BackgroundTransparency = 1
 local Insta = Instance.new("TextLabel", KF); Insta.Text = "INSTAGRAM ID - ea_nameless\nFOLLOW KARLO WRNA ID BAN 💀"; Insta.Position = UDim2.new(0,0,0,165); Insta.Size = UDim2.new(1,0,0,40); Insta.TextColor3 = White; Insta.TextSize = 13; Insta.Font = Enum.Font.GothamBold; Insta.BackgroundTransparency = 1
 
 task.spawn(function()
@@ -806,6 +806,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
     btn("🆙 FLY JUMP", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end)
     btn("🌀 SPIN 300", T5, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(20), 0) task.wait() end end) end)
+    btn("FLY 🦅", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FLY%20%F0%9F%A6%85"))() end, false)
     btn("GHOST NOCLIP", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end)
     btn("AIR WALK 🍃", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/tLukyENu"))() end, true)
     btn("AURA♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)
