@@ -36,19 +36,13 @@ local function toggleCustomEmote(shouldPlay)
     local animateScript = char:FindFirstChild("Animate")
 
     if shouldPlay then
-        -- Disable default movement pack
         if animateScript then animateScript.Disabled = true end
-        
-        -- Stop all currently playing animations except high priority actions
         for _, t in pairs(animator:GetPlayingAnimationTracks()) do
             t:Stop(0.1)
         end
-
-        -- Fetch and Setup Animation Object via game:GetObjects Bypass
         local success, objects = pcall(function() 
             return game:GetObjects("rbxassetid://" .. customAnimId) 
         end)
-
         local animation
         if success and objects[1] and objects[1]:IsA("Animation") then
             animation = objects[1]
@@ -56,15 +50,12 @@ local function toggleCustomEmote(shouldPlay)
             animation = Instance.new("Animation")
             animation.AnimationId = "rbxassetid://" .. customAnimId
         end
-
-        -- Play Track with High Priority
         customTrack = animator:LoadAnimation(animation)
         customTrack.Priority = Enum.AnimationPriority.Action4
         customTrack.Looped = true
         customTrack:Play()
         print("Emote Started with High Priority")
     else
-        -- Cleanup
         if customTrack then
             customTrack:Stop(0.1)
             customTrack = nil
@@ -132,15 +123,12 @@ local function makeDraggable(f)
     end)
 end
 
--- Ultimate Bypass Protection for Attach features
 local function godModeAttach()
     local char = player.Character
     if not char then return end
     local hum = char:FindFirstChild("Humanoid")
     local hrp = char:FindFirstChild("HumanoidRootPart")
-    
     if hum then
-        -- Force-disable death states globally while attaching in deep void
         hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
         if hum.Health and hum.Health < 99 then hum.Health = 100 end 
         if hum:GetState() == Enum.HumanoidStateType.Dead then hum:ChangeState(Enum.HumanoidStateType.Running) end
@@ -188,7 +176,7 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- COPY NINJA LOGIC - 0 DELAY SERVER SYNC
+-- COPY NINJA LOGIC
 -- ==========================================
 local copyNinjaActive = false
 local targetPlayer = nil
@@ -215,18 +203,14 @@ end
 local function copyAnimationTrack(targetTrack, myHum)
     local animId = targetTrack.Animation.AnimationId
     if not animId or animId == "" then return nil end
-    
     local newAnim = Instance.new("Animation")
     newAnim.AnimationId = animId
     local newTrack = myHum:LoadAnimation(newAnim)
-    
     newTrack.Priority = Enum.AnimationPriority.Action4
     newTrack.TimePosition = targetTrack.TimePosition
-    
     if targetTrack.Speed and targetTrack.Speed ~= 1 then
         newTrack:AdjustSpeed(targetTrack.Speed)
     end
-    
     return newTrack
 end
 
@@ -244,8 +228,7 @@ local function copyAnimations()
     currentTracks = {}
     myAnimationTracks = {}
     
-    local targetTracks = tHum:GetPlayingAnimationTracks()
-    for _, track in pairs(targetTracks) do
+    for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
         if track.WeightCurrent > 0.1 then
             local newTrack = copyAnimationTrack(track, myHum)
             if newTrack then
@@ -303,9 +286,7 @@ local function updateCopyLoop()
     for i = #currentTracks, 1, -1 do
         local ct = currentTracks[i]
         if not currentAnimIds[ct.animId] then
-            if ct.myTrack then
-                ct.myTrack:Stop()
-            end
+            if ct.myTrack then ct.myTrack:Stop() end
             table.remove(currentTracks, i)
         end
     end
@@ -313,20 +294,16 @@ local function updateCopyLoop()
     for _, targetTrack in pairs(targetTracks) do
         local id = targetTrack.Animation.AnimationId
         local found = false
-        
         for _, ct in pairs(currentTracks) do
             if ct.animId == id then
                 found = true
                 if ct.myTrack then
                     ct.myTrack.TimePosition = targetTrack.TimePosition
-                    if not ct.myTrack.IsPlaying then
-                        ct.myTrack:Play()
-                    end
+                    if not ct.myTrack.IsPlaying then ct.myTrack:Play() end
                 end
                 break
             end
         end
-        
         if not found then
             local newTrack = copyAnimationTrack(targetTrack, myHum)
             if newTrack then
@@ -343,60 +320,39 @@ local function updateCopyLoop()
 end
 
 local function startCopyLoop()
-    if copyLoopConnection then
-        copyLoopConnection:Disconnect()
-        copyLoopConnection = nil
-    end
-    copyLoopConnection = RunService.RenderStepped:Connect(function()
-        updateCopyLoop()
-    end)
+    if copyLoopConnection then copyLoopConnection:Disconnect() end
+    copyLoopConnection = RunService.RenderStepped:Connect(updateCopyLoop)
 end
 
 local function stopCopyLoop()
-    if copyLoopConnection then
-        copyLoopConnection:Disconnect()
-        copyLoopConnection = nil
-    end
-    copyNinjaActive = false
-    targetPlayer = nil
-    clearMyTracks()
-    currentTracks = {}
+    if copyLoopConnection then copyLoopConnection:Disconnect(); copyLoopConnection = nil end
+    copyNinjaActive = false; targetPlayer = nil; clearMyTracks(); currentTracks = {}
 end
 
 -- ==========================================
--- CHAT NINJA LOGIC - 0 DELAY SERVER SYNC
+-- CHAT NINJA LOGIC
 -- ==========================================
 local chatSyncActive = false
 local chatTargetPlayer = nil
-
-local function stopChatSync()
-    chatSyncActive = false
-    chatTargetPlayer = nil
-end
+local function stopChatSync() chatSyncActive = false; chatTargetPlayer = nil end
 
 -- ==========================================
--- STAND NINJA LOGIC - ANTI-VOID + ANTI-KILL
+-- STAND NINJA LOGIC
 -- ==========================================
 local standMode = false
 local standTarget = nil
 local standOffset = CFrame.new(0, 0, 0)
-local standModeType = 0
 local standLookTarget = false
 local standLoopConnection = nil
 
 local function updateStandLoop()
-    if not standMode then return end
-    
+    if not standMode or not standTarget then return end
     local char = player.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     godModeAttach()
-    if not standTarget then return end
     local tChar = standTarget.Character
-    if not tChar then return end
-    local tHrp = tChar:FindFirstChild("HumanoidRootPart")
+    local tHrp = tChar and tChar:FindFirstChild("HumanoidRootPart")
     if not tHrp then return end
     
     if standLookTarget then
@@ -406,32 +362,20 @@ local function updateStandLoop()
     else
         hrp.CFrame = tHrp.CFrame * standOffset
     end
-    
     local hum = char:FindFirstChild("Humanoid")
     if hum then hum.Sit = false end
 end
 
 local function startStandLoop()
-    if standLoopConnection then
-        standLoopConnection:Disconnect()
-        standLoopConnection = nil
-    end
-    standLoopConnection = RunService.RenderStepped:Connect(function()
-        updateStandLoop()
-    end)
+    if standLoopConnection then standLoopConnection:Disconnect() end
+    standLoopConnection = RunService.RenderStepped:Connect(updateStandLoop)
 end
 
 local function stopStandLoop()
-    if standLoopConnection then
-        standLoopConnection:Disconnect()
-        standLoopConnection = nil
-    end
-    standMode = false
-    standTarget = nil
-    standModeType = 0
-    local char = player.Character
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+    if standLoopConnection then standLoopConnection:Disconnect(); standLoopConnection = nil end
+    standMode = false; standTarget = nil
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
     end
 end
 
@@ -464,15 +408,14 @@ local function Initialize()
     
     local function pg()
         local p = Instance.new("ScrollingFrame", Cont); p.Size = UDim2.new(1, 0, 1, 0); p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 2; p.CanvasSize = UDim2.new(0,0,6,0); p.ScrollBarImageColor3 = DarkRed
-        local grid = Instance.new("UIGridLayout", p); grid.CellSize = UDim2.new(0.47, 0, 0, 32); grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0); return p
+        return p
     end
     
     local T1, T2, T3, T4, T5, T_Phonk, T_Adm = pg(), pg(), pg(), pg(), pg(), pg(), pg()
-    T1.UIGridLayout:Destroy()
     
     local rainbowActive = false
     task.spawn(function()
-        while task.wait() do if rainbowActive then local hue = tick() % 5 / 5 MS.Color = Color3.fromHSV(hue, 1, 1) end end
+        while task.wait() do if rainbowActive then MS.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1) end end
     end)
     
     local function tab(n, p)
@@ -483,320 +426,156 @@ local function Initialize()
             p.Visible = true
             for _,v in pairs(Side:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = White end end
             b.TextColor3 = DarkRed
-            if n == "PHONK" or n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = DarkRed end end
+            if n == "PHONK" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green else MS.Color = DarkRed end end
         end)
     end
     
     tab("👑 INFO", T1); tab("🌚 TROLL", T2); tab("🛡️ SHIELD", T3); tab("👺 SPAM", T4); tab("📁 OTHER", T5); tab("PHONK", T_Phonk)
     if player.Name == MASTER_ACC then tab("🛡️ ADMIN", T_Adm) end; T1.Visible = true
     
+    -- UI Creation helpers (Maintaining original sizes globally)
+    local buttonWidth = 135
+    local buttonHeight = 32
+    
     local function btn(txt, par, func, isLoad)
-        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
+        local b = Instance.new("TextButton", par); b.Size = UDim2.new(0, buttonWidth, 0, buttonHeight); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND)
             if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
             func(b)
         end)
+        return b
     end
     
     -- TAB 1: INFO
     local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE
-
     local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top"
-    it.Text = [[SCRIPT NAME - ENDLESS AURA
-__________________________________________
-SCRIPT BY: NAMELESS 👑💀
-INSTAGRAM ID: ea_nameless
+    it.Text = "SCRIPT NAME - ENDLESS AURA\n__________________________________________\nSCRIPT BY: NAMELESS 👑💀\nINSTAGRAM ID: ea_nameless\n\nFAMOUS FATHER: NAMELESS 💀\nTHE-LEADER OF [ENDLESS AURA]\nTHIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝\n__________________________________________\nOR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI"
+    
+    -- ==========================================
+    -- TAB 2: TROLL (CUSTOM HEADSHOT & SIDE TEXTBOX)
+    -- ==========================================
+    T2.CanvasSize = UDim2.new(0, 0, 0, 480) -- Extra room for layout scrolling
+    
+    -- 3D Target Display Container Panel
+    local DisplayFrame = Instance.new("Frame", T2)
+    DisplayFrame.Size = UDim2.new(0.98, 0, 0, 75)
+    DisplayFrame.Position = UDim2.new(0, 0, 0, 0)
+    DisplayFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Instance.new("UICorner", DisplayFrame)
+    Instance.new("UIStroke", DisplayFrame).Color = Color3.fromRGB(45, 45, 45)
 
-FAMOUS FATHER: NAMELESS 💀
-THE-LEADER OF [ENDLESS AURA]
-THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
-__________________________________________
-OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
+    -- 3D Viewport Frame for Headshot
+    local Viewport = Instance.new("ViewportFrame", DisplayFrame)
+    Viewport.Size = UDim2.new(0, 65, 0, 65)
+    Viewport.Position = UDim2.new(0, 5, 0, 5)
+    Viewport.BackgroundTransparency = 1
     
-    -- ==========================================
-    -- TAB 2: TROLL - REDESIGNED WITH 3D HEADSHOT + INFO
-    -- ==========================================
+    local vCam = Instance.new("Camera", Viewport)
+    Viewport.CurrentCamera = vCam
     
-    -- Remove default UIGridLayout from T2
-    if T2:FindFirstChild("UIGridLayout") then T2.UIGridLayout:Destroy() end
-    
-    -- Create main container for TROLL tab
-    local TrollMain = Instance.new("Frame", T2)
-    TrollMain.Size = UDim2.new(1, 0, 1, 0)
-    TrollMain.BackgroundTransparency = 1
-    
-    -- LEFT SIDE: 3D HEADSHOT VIEWPORT
-    local ViewportFrame = Instance.new("ViewportFrame", TrollMain)
-    ViewportFrame.Size = UDim2.new(0, 120, 0, 150)
-    ViewportFrame.Position = UDim2.new(0, 5, 0, 5)
-    ViewportFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    Instance.new("UICorner", ViewportFrame)
-    
-    -- CurrentTarget object for viewport
-    local currentTargetObj = nil
-    local viewportCamera = Instance.new("Camera", ViewportFrame)
-    ViewportFrame.CurrentCamera = viewportCamera
-    viewportCamera.FieldOfView = 50
-    
-    -- Function to update viewport with target
-    local function updateViewport(target)
-        if currentTargetObj then
-            currentTargetObj:Destroy()
-            currentTargetObj = nil
+    -- Labels on the right side of Headshot
+    local DNameLabel = Instance.new("TextLabel", DisplayFrame)
+    DNameLabel.Size = UDim2.new(0, 110, 0, 18)
+    DNameLabel.Position = UDim2.new(0, 75, 0, 8)
+    DNameLabel.BackgroundTransparency = 1
+    DNameLabel.Text = "Target: None"
+    DNameLabel.TextColor3 = White
+    DNameLabel.Font = Enum.Font.GothamBold
+    DNameLabel.TextSize = 11
+    DNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    local UNameLabel = Instance.new("TextLabel", DisplayFrame)
+    UNameLabel.Size = UDim2.new(0, 110, 0, 16)
+    UNameLabel.Position = UDim2.new(0, 75, 0, 26)
+    UNameLabel.BackgroundTransparency = 1
+    UNameLabel.Text = "@name"
+    UNameLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
+    UNameLabel.Font = Enum.Font.Gotham
+    UNameLabel.TextSize = 10
+    UNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    local StatusLabel = Instance.new("TextLabel", DisplayFrame)
+    StatusLabel.Size = UDim2.new(0, 110, 0, 16)
+    StatusLabel.Position = UDim2.new(0, 75, 0, 44)
+    StatusLabel.BackgroundTransparency = 1
+    StatusLabel.Text = "⚪ Offline"
+    StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+    StatusLabel.Font = Enum.Font.GothamBold
+    StatusLabel.TextSize = 10
+    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    -- SIDE TEXTBOX
+    local target = Instance.new("TextBox", DisplayFrame)
+    target.Size = UDim2.new(0, 100, 0, 30)
+    target.Position = UDim2.new(1, -105, 0.5, -15)
+    target.PlaceholderText = "TARGET NAME..."
+    target.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    target.TextColor3 = White
+    target.Font = Enum.Font.GothamBold
+    target.TextSize = 10
+    Instance.new("UICorner", target)
+    Instance.new("UIStroke", target).Color = DarkRed
+
+    -- Function to update 3D Avatar view
+    local function update3DHeadshot(plr)
+        Viewport:ClearAllChildren()
+        if not plr or not plr.Character then 
+            DNameLabel.Text = "Target: None"
+            UNameLabel.Text = "@name"
+            StatusLabel.Text = "⚪ Offline"
+            StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+            return 
         end
-        if target and target.Character then
-            local clone = target.Character:Clone()
-            clone.Parent = ViewportFrame
-            clone:SetAttribute("IsCloned", true)
-            -- Cleanup scripts and unnecessary parts
-            for _, v in pairs(clone:GetDescendants()) do
-                if v:IsA("Script") or v:IsA("LocalScript") or v:IsA("ModuleScript") then
-                    v:Destroy()
-                end
-                if v:IsA("BasePart") then
-                    v.CanCollide = false
-                    v.Transparency = 0.1
-                end
+        
+        DNameLabel.Text = plr.DisplayName
+        UNameLabel.Text = "@" .. plr.Name
+        StatusLabel.Text = "🟢 Online"
+        StatusLabel.TextColor3 = Green
+        
+        pcall(function()
+            t = plr.Character
+            t.Archivable = true
+            local clone = t:Clone()
+            clone.Parent = Viewport
+            
+            local head = clone:FindFirstChild("Head")
+            if head then
+                vCam.CFrame = CFrame.new(head.Position + (head.CFrame.LookVector * 2.5), head.Position)
             end
-            -- Position the clone
-            local hrp = clone:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.CFrame = CFrame.new(0, 0, 0)
-                -- Get the head
-                local head = clone:FindFirstChild("Head")
-                if head then
-                    -- Position camera to look at head
-                    viewportCamera.CFrame = CFrame.new(Vector3.new(0, 1.5, 5), Vector3.new(0, 1.5, 0))
-                    -- Keep a reference
-                    currentTargetObj = clone
-                    -- Adjust all parts to look good
-                    for _, part in pairs(clone:GetDescendants()) do
-                        if part:IsA("BasePart") and part ~= head then
-                            part.Transparency = 0.2
-                        end
-                    end
-                    head.Transparency = 0
-                end
-            end
-        else
-            -- Show default view
-            local defaultPart = Instance.new("Part", ViewportFrame)
-            defaultPart.Size = Vector3.new(1, 1, 1)
-            defaultPart.Shape = Enum.PartType.Ball
-            defaultPart.BrickColor = BrickColor.new("Really red")
-            defaultPart.Position = Vector3.new(0, 0, 0)
-            defaultPart.Anchored = true
-            defaultPart.CanCollide = false
-            currentTargetObj = defaultPart
-            viewportCamera.CFrame = CFrame.new(Vector3.new(0, 0, 3), Vector3.new(0, 0, 0))
-        end
-    end
-    
-    -- RIGHT SIDE: TEXT BOX WITH TARGET INFO (above all, attached to headshot)
-    local InfoBox = Instance.new("Frame", TrollMain)
-    InfoBox.Size = UDim2.new(0, 180, 0, 100)
-    InfoBox.Position = UDim2.new(0, 130, 0, 5)
-    InfoBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    InfoBox.BackgroundTransparency = 0.3
-    Instance.new("UICorner", InfoBox)
-    local InfoStroke = Instance.new("UIStroke", InfoBox)
-    InfoStroke.Thickness = 1
-    InfoStroke.Color = DarkRed
-    
-    -- Target Name (Display Name)
-    local TargetName = Instance.new("TextLabel", InfoBox)
-    TargetName.Size = UDim2.new(1, -10, 0, 25)
-    TargetName.Position = UDim2.new(0, 5, 0, 2)
-    TargetName.BackgroundTransparency = 1
-    TargetName.Text = "NO TARGET"
-    TargetName.TextColor3 = White
-    TargetName.TextSize = 18
-    TargetName.Font = Enum.Font.GothamBold
-    TargetName.TextXAlignment = Enum.TextXAlignment.Left
-    TargetName.TextYAlignment = Enum.TextYAlignment.Center
-    
-    -- User ID
-    local UserIdLabel = Instance.new("TextLabel", InfoBox)
-    UserIdLabel.Size = UDim2.new(1, -10, 0, 20)
-    UserIdLabel.Position = UDim2.new(0, 5, 0, 30)
-    UserIdLabel.BackgroundTransparency = 1
-    UserIdLabel.Text = "UserID: ---"
-    UserIdLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-    UserIdLabel.TextSize = 12
-    UserIdLabel.Font = Enum.Font.Gotham
-    UserIdLabel.TextXAlignment = Enum.TextXAlignment.Left
-    
-    -- Online Status
-    local OnlineStatus = Instance.new("TextLabel", InfoBox)
-    OnlineStatus.Size = UDim2.new(1, -10, 0, 20)
-    OnlineStatus.Position = UDim2.new(0, 5, 0, 52)
-    OnlineStatus.BackgroundTransparency = 1
-    OnlineStatus.Text = "🟢 ONLINE"
-    OnlineStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
-    OnlineStatus.TextSize = 12
-    OnlineStatus.Font = Enum.Font.Gotham
-    OnlineStatus.TextXAlignment = Enum.TextXAlignment.Left
-    
-    -- Separator line
-    local Separator = Instance.new("Frame", InfoBox)
-    Separator.Size = UDim2.new(0.9, 0, 0, 1)
-    Separator.Position = UDim2.new(0.05, 0, 0, 77)
-    Separator.BackgroundColor3 = DarkRed
-    Separator.BorderSizePixel = 0
-    
-    -- Server Info
-    local ServerInfo = Instance.new("TextLabel", InfoBox)
-    ServerInfo.Size = UDim2.new(1, -10, 0, 18)
-    ServerInfo.Position = UDim2.new(0, 5, 0, 80)
-    ServerInfo.BackgroundTransparency = 1
-    ServerInfo.Text = "Player: #0 / #0"
-    ServerInfo.TextColor3 = Color3.fromRGB(100, 100, 100)
-    ServerInfo.TextSize = 10
-    ServerInfo.Font = Enum.Font.Gotham
-    ServerInfo.TextXAlignment = Enum.TextXAlignment.Left
-    
-    -- Function to update info box
-    local function updateInfoBox(target)
-        if target then
-            TargetName.Text = target.DisplayName or target.Name or "UNKNOWN"
-            UserIdLabel.Text = "UserID: " .. (target.UserId or "---")
-            -- Check if online
-            if target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0 then
-                OnlineStatus.Text = "🟢 ONLINE"
-                OnlineStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
-            else
-                OnlineStatus.Text = "🔴 OFFLINE"
-                OnlineStatus.TextColor3 = Color3.fromRGB(255, 0, 0)
-            end
-            -- Update server info
-            local players = Players:GetPlayers()
-            ServerInfo.Text = "Player: #" .. #players .. " / #" .. Players.MaxPlayers
-            -- Update viewport
-            updateViewport(target)
-        else
-            TargetName.Text = "NO TARGET"
-            UserIdLabel.Text = "UserID: ---"
-            OnlineStatus.Text = "🟢 ONLINE"
-            OnlineStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
-            ServerInfo.Text = "Player: #0 / #0"
-            updateViewport(nil)
-        end
-    end
-    
-    -- TARGET INPUT (New TextBox below the info)
-    local TargetInput = Instance.new("TextBox", TrollMain)
-    TargetInput.Size = UDim2.new(0, 280, 0, 25)
-    TargetInput.Position = UDim2.new(0, 5, 0, 162)
-    TargetInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    TargetInput.PlaceholderText = "TARGET NAME..."
-    TargetInput.TextColor3 = White
-    TargetInput.Font = Enum.Font.GothamBold
-    TargetInput.TextSize = 12
-    Instance.new("UICorner", TargetInput)
-    
-    -- Function to get target from input
-    local function getT()
-        local n = TargetInput.Text:lower()
-        if n == "" then return nil end
-        for _,v in pairs(Players:GetPlayers()) do
-            if v ~= player and (v.Name:lower():find(n) or (v.DisplayName and v.DisplayName:lower():find(n))) then
-                return v
-            end
-        end
-        return nil
-    end
-    
-    -- Update info when target input changes
-    TargetInput:GetPropertyChangedSignal("Text"):Connect(function()
-        local target = getT()
-        targetPlayer = target
-        updateInfoBox(target)
-    end)
-    
-    -- Initial update
-    task.wait(0.1)
-    updateInfoBox(nil)
-    
-    -- Auto-update online status and viewport rotation
-    local viewportRotation = 0
-    task.spawn(function()
-        while task.wait(0.1) do
-            local target = getT()
-            if target then
-                updateInfoBox(target)
-                -- Rotate the viewport
-                if currentTargetObj then
-                    local hrp = currentTargetObj:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        viewportRotation = viewportRotation + 0.02
-                        hrp.CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(0, viewportRotation, 0)
-                    end
-                end
-            end
-        end
-    end)
-    
-    -- BUTTONS SECTION (below the target input)
-    local ButtonFrame = Instance.new("Frame", TrollMain)
-    ButtonFrame.Size = UDim2.new(1, -10, 0, 120)
-    ButtonFrame.Position = UDim2.new(0, 5, 0, 190)
-    ButtonFrame.BackgroundTransparency = 1
-    
-    -- Create grid for buttons
-    local buttonGrid = Instance.new("UIGridLayout", ButtonFrame)
-    buttonGrid.CellSize = UDim2.new(0.3, 0, 0, 28)
-    buttonGrid.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
-    
-    -- Function to create troll buttons
-    local function trollBtn(txt, func)
-        local b = Instance.new("TextButton", ButtonFrame)
-        b.BackgroundColor3 = White
-        b.Text = string.upper(txt)
-        b.TextColor3 = Black
-        b.Font = Enum.Font.GothamBold
-        b.TextSize = 8
-        Instance.new("UICorner", b)
-        b.MouseButton1Click:Connect(function()
-            playS(CLICK_SOUND)
-            func(b)
         end)
-        return b
+    end
+
+    local function getT() 
+        local n = target.Text:lower() 
+        if n == "" then return nil end
+        for _,v in pairs(Players:GetPlayers()) do 
+            if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then 
+                return v 
+            end 
+        end 
     end
     
-    -- STOP ALL Button
-    local stopBtn = Instance.new("TextButton", ButtonFrame)
-    stopBtn.Size = UDim2.new(0.3, 0, 0, 28)
-    stopBtn.BackgroundColor3 = DarkRed
-    stopBtn.Text = "🛑 STOP ALL"
-    stopBtn.TextColor3 = White
-    stopBtn.Font = Enum.Font.GothamBold
-    stopBtn.TextSize = 8
-    Instance.new("UICorner", stopBtn)
-    stopBtn.MouseButton1Click:Connect(function()
-        playS(CLICK_SOUND)
-        _G.Loop = false
-        _G.Fly = false
-        if player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.Sit = false
-        end
-        _G.InfJump = false
-        _G.StrongView = false
-        _G.TargetESP = false
-        _G.TargetLook = false
-        workspace.CurrentCamera.CameraSubject = player.Character and player.Character:FindFirstChild("Humanoid") or nil
-        stopCopyLoop()
-        stopChatSync()
-        stopStandLoop()
-        toggleCustomEmote(false)
+    target.FocusLost:Connect(function()
+        local tPlr = getT()
+        update3DHeadshot(tPlr)
     end)
+
+    -- Buttons layout frame underneath the Profile module
+    local ButtonsGrid = Instance.new("Frame", T2)
+    ButtonsGrid.Size = UDim2.new(1, 0, 0, 400)
+    ButtonsGrid.Position = UDim2.new(0, 0, 0, 85)
+    ButtonsGrid.BackgroundTransparency = 1
     
-    -- VIEW Button
-    trollBtn("👁️ VIEW", function(b)
-        _G.StrongView = not _G.StrongView
-        b:SetAttribute("T", _G.StrongView)
-        b.BackgroundColor3 = _G.StrongView and DarkRed or White
-        b.TextColor3 = _G.StrongView and White or Black
+    local layout = Instance.new("UIGridLayout", ButtonsGrid)
+    layout.CellSize = UDim2.fromOffset(buttonWidth, buttonHeight)
+    layout.CellPadding = UDim2.fromOffset(12, 6)
+
+    -- REGISTERING BUTTONS INSIDE GRID (ALL EXACT ORIGINAL SIZES PRESERVED)
+    btn("🛑 STOP ALL", ButtonsGrid, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
+    
+    btn("👁️ VIEW", ButtonsGrid, function(b)
+        _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
                 local t = getT()
@@ -812,13 +591,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
         end)
     end)
-    
-    -- TARGET ESP Button
-    trollBtn("🔴 ESP", function(b)
-        _G.TargetESP = not _G.TargetESP
-        b:SetAttribute("T", _G.TargetESP)
-        b.BackgroundColor3 = _G.TargetESP and DarkRed or White
-        b.TextColor3 = _G.TargetESP and White or Black
+
+    btn("🔴 TARGET ESP", ButtonsGrid, function(b)
+        _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
             local currentHighlight, currentBillboard
             local function cleanup()
@@ -844,7 +619,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         currentBillboard.Size = UDim2.new(0, 100, 0, 30)
                         currentBillboard.AlwaysOnTop = true
                         currentBillboard.StudsOffset = Vector3.new(0, 2, 0)
-                        
                         local tl = Instance.new("TextLabel", currentBillboard)
                         tl.Size = UDim2.new(1, 0, 1, 0)
                         tl.BackgroundTransparency = 1
@@ -852,11 +626,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         tl.TextColor3 = Color3.fromRGB(255, 0, 0)
                         tl.TextSize = 16
                         tl.Font = Enum.Font.GothamBlack
-                        
-                        local stroke = Instance.new("UIStroke", tl)
-                        stroke.Thickness = 3
-                        stroke.Color = Color3.fromRGB(0, 0, 0)
-                        
+                        Instance.new("UIStroke", tl).Color = Black
                         currentBillboard.Parent = head
                     end
                 else
@@ -868,12 +638,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    -- TARGET LOOK Button
-    trollBtn("👁️ LOOK", function(b)
-        _G.TargetLook = not _G.TargetLook
-        b:SetAttribute("T", _G.TargetLook)
-        b.BackgroundColor3 = _G.TargetLook and DarkRed or White
-        b.TextColor3 = _G.TargetLook and White or Black
+    btn("👁️ TARGET LOOK", ButtonsGrid, function(b)
+        _G.TargetLook = b:GetAttribute("T")
         local lookConnection
         if _G.TargetLook then
             lookConnection = RunService.RenderStepped:Connect(function()
@@ -895,22 +661,17 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             if lookConnection then lookConnection:Disconnect() end
         end
-    end)
+    end, false)
     
-    -- GOTO Button
-    trollBtn("🚀 GOTO", function()
+    btn("🚀 GOTO", ButtonsGrid, function()
         local t = getT()
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
             SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
         end
-    end)
+    end, true)
     
-    -- BANG Button
-    trollBtn("🍆 BANG", function(b)
-        _G.Loop = not _G.Loop
-        b:SetAttribute("T", _G.Loop)
-        b.BackgroundColor3 = _G.Loop and DarkRed or White
-        b.TextColor3 = _G.Loop and White or Black
+    btn("🍆 BANG", ButtonsGrid, function(b)
+        _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
@@ -922,17 +683,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 end
                 RunService.RenderStepped:Wait()
             end
-            local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
+            if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
     end)
     
-    -- HEADSIT Button
-    trollBtn("🧒 HEADSIT", function(b)
-        _G.Loop = not _G.Loop
-        b:SetAttribute("T", _G.Loop)
-        b.BackgroundColor3 = _G.Loop and DarkRed or White
-        b.TextColor3 = _G.Loop and White or Black
+    btn("🧒 HEADSIT", ButtonsGrid, function(b)
+        _G.Loop = b:GetAttribute("T")
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -944,17 +700,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 end
                 RunService.RenderStepped:Wait()
             end
-            local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
+            if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
     end)
     
-    -- FRONT HEADSIT Button
-    trollBtn("🦒 FRONT", function(b)
-        _G.Loop = not _G.Loop
-        b:SetAttribute("T", _G.Loop)
-        b.BackgroundColor3 = _G.Loop and DarkRed or White
-        b.TextColor3 = _G.Loop and White or Black
+    btn("🦒 FRONT HEADSIT", ButtonsGrid, function(b)
+        _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
@@ -967,17 +718,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 end
                 RunService.RenderStepped:Wait()
             end
-            local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
+            if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
     end)
     
-    -- COPY ANIM Button
-    trollBtn("👤 COPY ANIM", function(b)
-        local isActive = not b:GetAttribute("T")
-        b:SetAttribute("T", isActive)
-        b.BackgroundColor3 = isActive and DarkRed or White
-        b.TextColor3 = isActive and White or Black
+    btn("COPY ANIM👤", ButtonsGrid, function(b)
+        local isActive = b:GetAttribute("T")
         if isActive then
             targetPlayer = getT()
             if targetPlayer then
@@ -988,68 +734,46 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 b:SetAttribute("T", false)
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
-                playS(CLICK_SOUND)
             end
         else
             stopCopyLoop()
         end
     end)
     
-    -- COPY CHAT Button
-    trollBtn("💬 COPY CHAT", function(b)
-        local isActive = not b:GetAttribute("T")
-        b:SetAttribute("T", isActive)
-        b.BackgroundColor3 = isActive and DarkRed or White
-        b.TextColor3 = isActive and White or Black
+    btn("COPY CHAT💬", ButtonsGrid, function(b)
+        local isActive = b:GetAttribute("T")
         if isActive then
             chatTargetPlayer = getT()
-            if chatTargetPlayer then
-                chatSyncActive = true
-            else
-                b:SetAttribute("T", false)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                playS(CLICK_SOUND)
-            end
+            if chatTargetPlayer then chatSyncActive = true else b:SetAttribute("T", false); b.BackgroundColor3 = White; b.TextColor3 = Black end
         else
             stopChatSync()
         end
     end)
     
-    -- STAND Button (custom)
-    local standBtn = Instance.new("TextButton", ButtonFrame)
-    standBtn.Size = UDim2.new(0.3, 0, 0, 28)
+    local standBtn = Instance.new("TextButton", ButtonsGrid)
     standBtn.BackgroundColor3 = White
     standBtn.Text = "STAND: OFF 🛑"
     standBtn.TextColor3 = Black
     standBtn.Font = Enum.Font.GothamBold
-    standBtn.TextSize = 8
+    standBtn.TextSize = 8.5
     Instance.new("UICorner", standBtn)
     
     local standModeIdx = 0
     standBtn.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
-        
         if standModeIdx == 0 then
             standTarget = getT()
-            if not standTarget then
-                standBtn.Text = "NOT FOUND!"
-                task.wait(0.5)
-                standBtn.Text = "STAND: OFF 🛑"
-                return
-            end
-        end
-        
+            if not standTarget then standBtn.Text = "NOT FOUND!"; task.wait(0.5); standBtn.Text = "STAND: OFF 🛑"; return end
+        end        
         standModeIdx = (standModeIdx + 1) % 6
-        
         if standModeIdx == 1 then
             standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FRONT ⬆️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 2 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, 5); standBtn.Text = "BACK ⬇️"; standBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); standBtn.TextColor3 = White; startStandLoop()
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, 5); standBtn.Text = "BACK ⬇️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 3 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(-5, 0, 0); standBtn.Text = "LEFT ⬅️"; standBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0); standBtn.TextColor3 = White; startStandLoop()
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(-5, 0, 0); standBtn.Text = "LEFT ⬅️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 4 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(5, 0, 0); standBtn.Text = "RIGHT ➡️"; standBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0); standBtn.TextColor3 = White; startStandLoop()
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(5, 0, 0); standBtn.Text = "RIGHT ➡️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 5 then
             standMode = true; standLookTarget = true; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FF 👀"; standBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 80); standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 0 then
@@ -1058,6 +782,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
     
     -- TAB 3: SHIELD
+    local T3Layout = Instance.new("UIGridLayout", T3); T3Layout.CellSize = UDim2.fromOffset(buttonWidth, buttonHeight); T3Layout.CellPadding = UDim2.fromOffset(12, 6)
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end)
     btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, false)
     btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
@@ -1066,6 +791,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("🛡️ ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
     
     -- TAB 4: SPAM
+    local T4Layout = Instance.new("UIGridLayout", T4); T4Layout.CellSize = UDim2.fromOffset(buttonWidth, buttonHeight); T4Layout.CellPadding = UDim2.fromOffset(12, 6)
     btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/9S2h4aDC"))() end, true)
     btn("NAMELESS SPAMMER💢", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/bAdrcuP8"))() end, true)
     btn("BHUMIKA SPAMMER 💖", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/3UfyBuCx"))() end, true)
@@ -1084,6 +810,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
 
     -- TAB 5: OTHER
+    local T5Layout = Instance.new("UIGridLayout", T5); T5Layout.CellSize = UDim2.fromOffset(buttonWidth, buttonHeight); T5Layout.CellPadding = UDim2.fromOffset(12, 6)
     btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
     btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
@@ -1124,6 +851,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end
     
+    local TPhonkLayout = Instance.new("UIGridLayout", T_Phonk); TPhonkLayout.CellSize = UDim2.fromOffset(buttonWidth, buttonHeight); TPhonkLayout.CellPadding = UDim2.fromOffset(12, 6)
     phonkBtn("1", "139435437308948"); phonkBtn("2", "137787889626447"); phonkBtn("3", "138864288968383"); phonkBtn("4", "130973511966646")
     phonkBtn("5", "135674024616225"); phonkBtn("6", "137152491110539"); phonkBtn("7", "139606677237480"); phonkBtn("8", "139825057894568")
     phonkBtn("9", "140292910030604"); phonkBtn("10", "137466127206691"); phonkBtn("11", "139638751795258")
@@ -1144,9 +872,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         Main.Visible = not Main.Visible
     end)
     
-    -- ==========================================
-    -- CHAT SYNC LISTENER - 0 DELAY
-    -- ==========================================
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
@@ -1164,30 +889,25 @@ Verify.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then
         playS(CLICK_SOUND)
         playKeySuccess()
-        
         if KF then KF:Destroy() end
-        
         task.spawn(function()
-            SendPublicChat("")
+            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
             task.wait(5)
-            SendPublicChat("..")
+            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
             playS(LOAD_SOUND)
-            
             StarterGui:SetCore("SendNotification", {
                 Title = "ENDLESS AURA",
                 Text = "Loaded...",
                 Icon = LOGO_IMAGE,
                 Duration = 5
             })
-            
             task.spawn(function()
-                local success, err = pcall(function()
+                pcall(function()
                     local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
                     local func = loadstring(response)
                     if func then func() end
                 end)
             end)
-
             task.wait(0.2)
             Initialize()
         end)
