@@ -873,10 +873,10 @@ Verify.MouseButton1Click:Connect(function()
         
         if KF then KF:Destroy() end
         
-        task.spawn(functio
-            SendPublicChat("H_")
+        task.spawn(function()
+            SendPublicChat(" _HA_")
             task.wait(5)
-            SendPublicChat("L...")
+            SendPublicChat("..")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
