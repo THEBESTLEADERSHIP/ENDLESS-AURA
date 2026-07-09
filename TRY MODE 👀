@@ -23,76 +23,38 @@ if not _G.AdminLogs then _G.AdminLogs = {} end
 local voidYLevel = -99999999 -- Absolute Depth Limit Override
 local safePosition = Vector3.new(0, 50, 0)
 
--- ================================
--- 🔥 FIXED: CUSTOM EMOTE WITH VALID ANIMATION ID
--- ================================
--- ✅ Valid Animation IDs (Use any one):
--- "507771019"  - Dance 1
--- "507771955"  - Dance 2
--- "616122287"  - Walk
--- "616117076"  - Run
--- "616115533"  - Jump
--- "616111295"  - Idle
--- "429730430"  - Spin
--- "45834924"   - Moon Dance
-local customAnimId = "507771019"  -- 🔥 YAHAN VALID ANIMATION ID DAALEIN (catalog ID nahi)
+-- [ Custom Emote Logic Injection ]
+local customAnimId = "121803583995185"
 local customTrack = nil
 
 local function toggleCustomEmote(shouldPlay)
     local char = player.Character
-    if not char then
-        warn("❌ toggleCustomEmote: No character")
-        return
-    end
+    if not char then return end
     local hum = char:FindFirstChild("Humanoid")
-    if not hum then
-        warn("❌ toggleCustomEmote: No humanoid")
-        return
-    end
+    if not hum then return end
     
-    local animator = hum:FindFirstChildOfClass("Animator")
-    if not animator then
-        animator = Instance.new("Animator")
-        animator.Parent = hum
-        print("✅ Created new Animator")
-    end
-    
+    local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
     local animateScript = char:FindFirstChild("Animate")
 
     if shouldPlay then
-        if animateScript then
-            animateScript.Disabled = true
-            print("✅ Disabled Animate script")
-        end
-        
-        -- Stop all playing tracks
+        if animateScript then animateScript.Disabled = true end
         for _, t in pairs(animator:GetPlayingAnimationTracks()) do
             t:Stop(0.1)
         end
-        
-        -- Load animation
         local animation = Instance.new("Animation")
         animation.AnimationId = "rbxassetid://" .. customAnimId
-        print("🔍 Loading animation: " .. animation.AnimationId)
-        
         customTrack = animator:LoadAnimation(animation)
         if customTrack then
             customTrack.Priority = Enum.AnimationPriority.Action4
             customTrack.Looped = true
             customTrack:Play()
-            print("✅ Emote Started: " .. customAnimId)
-        else
-            warn("❌ Failed to load animation track")
         end
     else
         if customTrack then
             customTrack:Stop(0.1)
             customTrack = nil
-            print("⏹ Emote Stopped")
         end
-        if animateScript then
-            animateScript.Disabled = false
-        end
+        if animateScript then animateScript.Disabled = false end
     end
 end
 
@@ -666,12 +628,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, true)
     
-    -- ==========================================
-    -- 🔥 BANG BUTTON WITH FIXED EMOTE
-    -- ==========================================
+    -- BANG BUTTON (With Custom Emote Integrated)
     btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop) -- ✅ Now uses valid animation ID
+        toggleCustomEmote(_G.Loop) -- Trigger Animation Sync
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -705,12 +665,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    -- ==========================================
-    -- 🔥 FRONT HEADSIT WITH FIXED EMOTE
-    -- ==========================================
+    -- FRONT HEADSIT BUTTON (With Custom Emote Integrated)
     btn("🦒 FRONT HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop) -- ✅ Now uses valid animation ID
+        toggleCustomEmote(_G.Loop) -- Trigger Animation Sync
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -905,7 +863,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end
                 for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end
                 b:SetAttribute("Disco", true)
-                local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxassetid://"..id; s.Volume = 3; s:Play()
+                local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxasseetid://"..id; s.Volume = 3; s:Play()
                 currentPlaying = id
                 task.spawn(function() s.Ended:Wait(); if currentPlaying == id then b:SetAttribute("Disco", false); currentPlaying = nil; s:Destroy() end end)
             end
