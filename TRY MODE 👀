@@ -1,6 +1,6 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
--- 🔥 SCRIPT BY: NAMELESS 😎
--- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
+-- [[ █████████████████     ███████████████
+      █ E N D L E S S █     █  A U R A 💢█
+      █████████████████     ███████████████ ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -659,7 +659,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
     
     -- FRONT HEADSIT BUTTON
-    btn("🦒 FRONT HEADSIT", T2, function(b)
+    btn("🥵 BLOWJOB", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
         task.spawn(function()
