@@ -20,10 +20,10 @@ local LOGO_IMAGE = "rbxassetid://129299711445020"
 local LOAD_SOUND = "129584950954499"
 if not _G.AdminLogs then _G.AdminLogs = {} end
 
-local voidYLevel = -99999999 
+local voidYLevel = -99999999 -- Absolute Depth Limit Override
 local safePosition = Vector3.new(0, 50, 0)
 
--- [ Custom Emote Logic Injection ]
+-- [ Custom Emote Logic Injection - EXACT LOGIC USED FROM YOUR SECOND SCRIPT ]
 local customAnimId = "121803583995185"
 local customTrack = nil
 
@@ -36,11 +36,15 @@ local function toggleCustomEmote(shouldPlay)
     local animateScript = char:FindFirstChild("Animate")
 
     if shouldPlay then
+        -- Disable default movement pack
         if animateScript then animateScript.Disabled = true end
+        
+        -- Stop all currently playing animations except high priority actions
         for _, t in pairs(animator:GetPlayingAnimationTracks()) do
             t:Stop(0.1)
         end
 
+        -- Fetch and Setup Animation Object via game:GetObjects Bypass
         local success, objects = pcall(function() 
             return game:GetObjects("rbxassetid://" .. customAnimId) 
         end)
@@ -53,15 +57,17 @@ local function toggleCustomEmote(shouldPlay)
             animation.AnimationId = "rbxassetid://" .. customAnimId
         end
 
-        currentTrack = animator:LoadAnimation(animation)
-        currentTrack.Priority = Enum.AnimationPriority.Action4
-        currentTrack.Looped = true
-        currentTrack:Play()
+        -- Play Track with High Priority
+        customTrack = animator:LoadAnimation(animation)
+        customTrack.Priority = Enum.AnimationPriority.Action4
+        customTrack.Looped = true
+        customTrack:Play()
         print("Emote Started with High Priority")
     else
-        if currentTrack then
-            currentTrack:Stop(0.1)
-            currentTrack = nil
+        -- Cleanup
+        if customTrack then
+            customTrack:Stop(0.1)
+            customTrack = nil
         end
         if animateScript then animateScript.Disabled = false end
     end
@@ -126,6 +132,7 @@ local function makeDraggable(f)
     end)
 end
 
+-- Ultimate Bypass Protection for Attach features
 local function godModeAttach()
     local char = player.Character
     if not char then return end
@@ -133,6 +140,7 @@ local function godModeAttach()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     
     if hum then
+        -- Force-disable death states globally while attaching in deep void
         hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
         if hum.Health and hum.Health < 99 then hum.Health = 100 end 
         if hum:GetState() == Enum.HumanoidStateType.Dead then hum:ChangeState(Enum.HumanoidStateType.Running) end
@@ -180,7 +188,7 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- COPY NINJA LOGIC
+-- COPY NINJA LOGIC - 0 DELAY SERVER SYNC
 -- ==========================================
 local copyNinjaActive = false
 local targetPlayer = nil
@@ -251,6 +259,21 @@ local function copyAnimations()
             end
         end
     end
+    
+    for _, tool in pairs(tChar:GetDescendants()) do
+        if tool:IsA("Tool") or tool:IsA("HopperBin") then
+            for _, animTrack in pairs(tool:GetDescendants()) do
+                if animTrack:IsA("Animation") and animTrack.AnimationId then
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = animTrack.AnimationId
+                    local newTrack = myHum:LoadAnimation(newAnim)
+                    newTrack.Priority = Enum.AnimationPriority.Action4
+                    newTrack:Play()
+                    table.insert(myAnimationTracks, newTrack)
+                end
+            end
+        end
+    end
 end
 
 local function updateCopyLoop()
@@ -280,7 +303,9 @@ local function updateCopyLoop()
     for i = #currentTracks, 1, -1 do
         local ct = currentTracks[i]
         if not currentAnimIds[ct.animId] then
-            if ct.myTrack then ct.myTrack:Stop() end
+            if ct.myTrack then
+                ct.myTrack:Stop()
+            end
             table.remove(currentTracks, i)
         end
     end
@@ -294,7 +319,9 @@ local function updateCopyLoop()
                 found = true
                 if ct.myTrack then
                     ct.myTrack.TimePosition = targetTrack.TimePosition
-                    if not ct.myTrack.IsPlaying then ct.myTrack:Play() end
+                    if not ct.myTrack.IsPlaying then
+                        ct.myTrack:Play()
+                    end
                 end
                 break
             end
@@ -316,12 +343,20 @@ local function updateCopyLoop()
 end
 
 local function startCopyLoop()
-    if copyLoopConnection then copyLoopConnection:Disconnect() end
-    copyLoopConnection = RunService.RenderStepped:Connect(updateCopyLoop)
+    if copyLoopConnection then
+        copyLoopConnection:Disconnect()
+        copyLoopConnection = nil
+    end
+    copyLoopConnection = RunService.RenderStepped:Connect(function()
+        updateCopyLoop()
+    end)
 end
 
 local function stopCopyLoop()
-    if copyLoopConnection then copyLoopConnection:Disconnect(); copyLoopConnection = nil end
+    if copyLoopConnection then
+        copyLoopConnection:Disconnect()
+        copyLoopConnection = nil
+    end
     copyNinjaActive = false
     targetPlayer = nil
     clearMyTracks()
@@ -329,7 +364,7 @@ local function stopCopyLoop()
 end
 
 -- ==========================================
--- CHAT NINJA LOGIC
+-- CHAT NINJA LOGIC - 0 DELAY SERVER SYNC
 -- ==========================================
 local chatSyncActive = false
 local chatTargetPlayer = nil
@@ -340,7 +375,7 @@ local function stopChatSync()
 end
 
 -- ==========================================
--- STAND NINJA LOGIC
+-- STAND NINJA LOGIC - ANTI-VOID + ANTI-KILL
 -- ==========================================
 local standMode = false
 local standTarget = nil
@@ -351,6 +386,7 @@ local standLoopConnection = nil
 
 local function updateStandLoop()
     if not standMode then return end
+    
     local char = player.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -376,12 +412,20 @@ local function updateStandLoop()
 end
 
 local function startStandLoop()
-    if standLoopConnection then standLoopConnection:Disconnect() end
-    standLoopConnection = RunService.RenderStepped:Connect(updateStandLoop)
+    if standLoopConnection then
+        standLoopConnection:Disconnect()
+        standLoopConnection = nil
+    end
+    standLoopConnection = RunService.RenderStepped:Connect(function()
+        updateStandLoop()
+    end)
 end
 
 local function stopStandLoop()
-    if standLoopConnection then standLoopConnection:Disconnect(); standLoopConnection = nil end
+    if standLoopConnection then
+        standLoopConnection:Disconnect()
+        standLoopConnection = nil
+    end
     standMode = false
     standTarget = nil
     standModeType = 0
@@ -400,6 +444,10 @@ local function Initialize()
     for _, v in pairs(_G.AdminLogs) do if v == entry then alreadyLogged = true break end end
     if not alreadyLogged then table.insert(_G.AdminLogs, entry) end
     
+    task.spawn(function()
+        while task.wait(60) do print("💿 SCRIPTED BY NAMELESS💀👑") end
+    end)
+    
     local Main = Instance.new("Frame", sg); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Black; Main.BackgroundTransparency = 0.4; makeDraggable(Main)
     Instance.new("UICorner", Main); local MS = Instance.new("UIStroke", Main); MS.Thickness = 2; MS.Color = DarkRed
     
@@ -416,14 +464,15 @@ local function Initialize()
     
     local function pg()
         local p = Instance.new("ScrollingFrame", Cont); p.Size = UDim2.new(1, 0, 1, 0); p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 2; p.CanvasSize = UDim2.new(0,0,6,0); p.ScrollBarImageColor3 = DarkRed
-        return p
+        local grid = Instance.new("UIGridLayout", p); grid.CellSize = UDim2.new(0.47, 0, 0, 32); grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0); return p
     end
     
     local T1, T2, T3, T4, T5, T_Phonk, T_Adm = pg(), pg(), pg(), pg(), pg(), pg(), pg()
+    T1.UIGridLayout:Destroy()
     
     local rainbowActive = false
     task.spawn(function()
-        while task.wait() do if rainbowActive then MS.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1) end end
+        while task.wait() do if rainbowActive then local hue = tick() % 5 / 5 MS.Color = Color3.fromHSV(hue, 1, 1) end end
     end)
     
     local function tab(n, p)
@@ -434,7 +483,7 @@ local function Initialize()
             p.Visible = true
             for _,v in pairs(Side:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = White end end
             b.TextColor3 = DarkRed
-            if n == "PHONK" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green else MS.Color = DarkRed end end
+            if n == "PHONK" or n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = DarkRed end end
         end)
     end
     
@@ -452,143 +501,26 @@ local function Initialize()
     
     -- TAB 1: INFO
     local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE
+
     local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top"
-    it.Text = "SCRIPT NAME - ENDLESS AURA\n__________________________________________\nSCRIPT BY: NAMELESS 👑💀\nINSTAGRAM ID: ea_nameless\n\nFAMOUS FATHER: NAMELESS 💀\nTHE-LEADER OF [ENDLESS AURA]\nTHIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝\n__________________________________________\nOR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI"
+    it.Text = [[SCRIPT NAME - ENDLESS AURA
+__________________________________________
+SCRIPT BY: NAMELESS 👑💀
+INSTAGRAM ID: ea_nameless
+
+FAMOUS FATHER: NAMELESS 💀
+THE-LEADER OF [ENDLESS AURA]
+THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
+__________________________________________
+OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
-    -- ==========================================
-    -- UPDATED TROLL TAB LAYOUT (WITH HEADSHOT VIEWPORT)
-    -- ==========================================
-    -- Container for Profile & Textbox Layout (The Big Gap Area)
-    local infoArea = Instance.new("Frame", T2)
-    infoArea.Size = UDim2.new(0.96, 0, 0, 85)
-    infoArea.Position = UDim2.new(0.02, 0, 0, 5)
-    infoArea.BackgroundTransparency = 1
-
-    -- Left Side: 3D Headshot Viewport Box
-    local vpBox = Instance.new("Frame", infoArea)
-    vpBox.Size = UDim2.new(0, 70, 0, 70)
-    vpBox.Position = UDim2.new(0, 0, 0, 5)
-    vpBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    vpBox.BackgroundTransparency = 0.4
-    Instance.new("UICorner", vpBox).CornerRadius = UDim.new(0, 6)
-    local vpStroke = Instance.new("UIStroke", vpBox)
-    vpStroke.Color = DarkRed
-    vpStroke.Thickness = 1.5
-
-    local vp = Instance.new("ViewportFrame", vpBox)
-    vp.Size = UDim2.new(1, 0, 1, 0)
-    vp.BackgroundTransparency = 1
+    -- TAB 2: TROLL
+    local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
+    local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    local vpCam = Instance.new("Camera")
-    vp.CurrentCamera = vpCam
-    vpCam.Parent = vp
-
-    -- Profile Details Text Labels (Beside Viewport Box)
-    local dName = Instance.new("TextLabel", infoArea)
-    dName.Size = UDim2.new(0, 110, 0, 18)
-    dName.Position = UDim2.new(0, 78, 0, 8)
-    dName.BackgroundTransparency = 1
-    dName.Text = "Target: None"
-    dName.TextColor3 = White
-    dName.Font = Enum.Font.GothamBold
-    dName.TextSize = 11
-    dName.TextXAlignment = Enum.TextXAlignment.Left
-
-    local uName = Instance.new("TextLabel", infoArea)
-    uName.Size = UDim2.new(0, 110, 0, 15)
-    uName.Position = UDim2.new(0, 78, 0, 26)
-    uName.BackgroundTransparency = 1
-    uName.Text = "@Name"
-    uName.TextColor3 = Color3.fromRGB(160, 160, 160)
-    uName.Font = Enum.Font.Gotham
-    uName.TextSize = 9.5
-    uName.TextXAlignment = Enum.TextXAlignment.Left
-
-    local statusText = Instance.new("TextLabel", infoArea)
-    statusText.Size = UDim2.new(0, 110, 0, 15)
-    statusText.Position = UDim2.new(0, 78, 0, 42)
-    statusText.BackgroundTransparency = 1
-    statusText.Text = "🔴 Offline"
-    statusText.TextColor3 = Color3.fromRGB(180, 50, 50)
-    statusText.Font = Enum.Font.GothamBold
-    statusText.TextSize = 10
-    statusText.TextXAlignment = Enum.TextXAlignment.Left
-
-    -- Right Side: Textbox Side Placement
-    local target = Instance.new("TextBox", infoArea)
-    target.Size = UDim2.new(0, 95, 0, 32)
-    target.Position = UDim2.new(1, -95, 0, 24)
-    target.PlaceholderText = "TARGET NAME..."
-    target.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    target.TextColor3 = White
-    target.Font = Enum.Font.GothamBold
-    target.TextSize = 9
-    Instance.new("UICorner", target).CornerRadius = UDim.new(0, 6)
-    local tStroke = Instance.new("UIStroke", target)
-    tStroke.Color = DarkRed
-    tStroke.Thickness = 1
-
-    -- Grid for Buttons Layout (Placed perfectly below the 85px Big Gap Area)
-    local buttonGridFrame = Instance.new("Frame", T2)
-    buttonGridFrame.Size = UDim2.new(0.96, 0, 1, -95)
-    buttonGridFrame.Position = UDim2.new(0.02, 0, 0, 95)
-    buttonGridFrame.BackgroundTransparency = 1
-
-    local grid = Instance.new("UIGridLayout", buttonGridFrame)
-    grid.CellSize = UDim2.new(0.48, 0, 0, 32)
-    grid.CellPadding = UDim2.new(0.04, 0, 0, 6)
-
-    -- Dynamic Target Viewport Fetching Logic
-    local function getT() 
-        local n = target.Text:lower() 
-        if n == "" then return nil end
-        for _,v in pairs(Players:GetPlayers()) do 
-            if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end 
-        end 
-    end
-
-    local function updateViewport(tPlayer)
-        vp:ClearAllChildren()
-        if tPlayer and tPlayer.Character and tPlayer.Character:FindFirstChild("Head") then
-            local tHead = tPlayer.Character.Head
-            local fakeHead = tHead:Clone()
-            fakeHead.Parent = vp
-            fakeHead.CFrame = CFrame.new(0, 0, 0)
-            
-            -- Clone existing face or attachments inside the head if exist
-            for _, child in pairs(tHead:GetChildren()) do
-                if child:IsA("Decal") or child:IsA("SpecialMesh") then
-                    child:Clone().Parent = fakeHead
-                end
-            end
-            
-            vpCam.CFrame = CFrame.new(Vector3.new(0, 0, 2.2), fakeHead.Position)
-            dName.Text = tPlayer.DisplayName
-            uName.Text = "@" .. tPlayer.Name
-            statusText.Text = "🟢 Online"
-            statusText.TextColor3 = Green
-        else
-            dName.Text = "Target: None"
-            uName.Text = "@Name"
-            statusText.Text = "🔴 Offline"
-            statusText.TextColor3 = Color3.fromRGB(180, 50, 50)
-        end
-    end
-
-    target:GetPropertyChangedSignal("Text"):Connect(function()
-        local t = getT()
-        updateViewport(t)
-    end)
-
-    Players.PlayerRemoving:Connect(function(plr)
-        local currentT = getT()
-        if currentT == plr then updateViewport(nil) end
-    end)
-
-    -- Standard Action Buttons Inside the Protected Grid (Same Sizes)
-    btn("🛑 STOP ALL", buttonGridFrame, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
     
-    btn("👁️ VIEW", buttonGridFrame, function(b)
+    btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -606,7 +538,7 @@ local function Initialize()
         end)
     end)
 
-    btn("🔴 TARGET ESP", buttonGridFrame, function(b)
+    btn("🔴 TARGET ESP", T2, function(b)
         _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
             local currentHighlight, currentBillboard
@@ -657,7 +589,7 @@ local function Initialize()
         end)
     end)
     
-    btn("👁️ TARGET LOOK", buttonGridFrame, function(b)
+    btn("👁️ TARGET LOOK", T2, function(b)
         _G.TargetLook = b:GetAttribute("T")
         local lookConnection
         if _G.TargetLook then
@@ -682,16 +614,17 @@ local function Initialize()
         end
     end, false)
     
-    btn("🚀 GOTO", buttonGridFrame, function()
+    btn("🚀 GOTO", T2, function()
         local t = getT()
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
             SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
         end
     end, true)
     
-    btn("🍆 BANG", buttonGridFrame, function(b)
+    -- BANG BUTTON 
+    btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
+        toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -707,7 +640,7 @@ local function Initialize()
         end)
     end)
     
-    btn("🧒 HEADSIT", buttonGridFrame, function(b)
+    btn("🧒 HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         task.spawn(function()
             while _G.Loop do
@@ -725,13 +658,14 @@ local function Initialize()
         end)
     end)
     
-    btn("🦒 FRONT HEADSIT", buttonGridFrame, function(b)
+    -- FRONT HEADSIT BUTTON
+    btn("🦒 FRONT HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
+        toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
-                if t ImageLabel and t.Character and t.Character:FindFirstChild("Head") then
+                if t and t.Character and t.Character:FindFirstChild("Head") then
                     SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0))
                     if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
                 else
@@ -744,7 +678,8 @@ local function Initialize()
         end)
     end)
     
-    btn("COPY ANIM👤", buttonGridFrame, function(b)
+    -- COPY ANIM BUTTON
+    btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             targetPlayer = getT()
@@ -763,11 +698,14 @@ local function Initialize()
         end
     end)
     
-    btn("COPY CHAT💬", buttonGridFrame, function(b)
+    -- COPY CHAT BUTTON
+    btn("COPY CHAT💬", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             chatTargetPlayer = getT()
-            if chatTargetPlayer then chatSyncActive = true else
+            if chatTargetPlayer then
+                chatSyncActive = true
+            else
                 b:SetAttribute("T", false)
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
@@ -778,7 +716,10 @@ local function Initialize()
         end
     end)
     
-    local standBtn = Instance.new("TextButton", buttonGridFrame)
+    -- STAND BUTTON
+    local standBtn = Instance.new("TextButton", T2)
+    standBtn.Size = UDim2.new(0.47, 0, 0, 32)
+    standBtn.Position = UDim2.new(0.05, 0, 0, 0)
     standBtn.BackgroundColor3 = White
     standBtn.Text = "STAND: OFF 🛑"
     standBtn.TextColor3 = Black
@@ -786,9 +727,14 @@ local function Initialize()
     standBtn.TextSize = 8.5
     Instance.new("UICorner", standBtn)
     
+    local grid = Instance.new("UIGridLayout", T2)
+    grid.CellSize = UDim2.new(0.47, 0, 0, 32)
+    grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
+    
     local standModeIdx = 0
     standBtn.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
+        
         if standModeIdx == 0 then
             standTarget = getT()
             if not standTarget then
@@ -814,11 +760,8 @@ local function Initialize()
             standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
         end
     end)
-
-    -- ==========================================
-    -- OTHER TABS (REST OF SCRIPT REMAINS UNCHANGED)
-    -- ==========================================
-    local gridT3 = Instance.new("UIGridLayout", T3); gridT3.CellSize = UDim2.new(0.47, 0, 0, 32); gridT3.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
+    
+    -- TAB 3: SHIELD
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end)
     btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, false)
     btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
@@ -826,7 +769,7 @@ local function Initialize()
     btn("🛡️ ANTI AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
     btn("🛡️ ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
     
-    local gridT4 = Instance.new("UIGridLayout", T4); gridT4.CellSize = UDim2.new(0.47, 0, 0, 32); gridT4.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
+    -- TAB 4: SPAM
     btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/9S2h4aDC"))() end, true)
     btn("NAMELESS SPAMMER💢", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/bAdrcuP8"))() end, true)
     btn("BHUMIKA SPAMMER 💖", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/3UfyBuCx"))() end, true)
@@ -844,7 +787,7 @@ local function Initialize()
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
     btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
 
-    local gridT5 = Instance.new("UIGridLayout", T5); gridT5.CellSize = UDim2.new(0.47, 0, 0, 32); gridT5.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
+    -- TAB 5: OTHER
     btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
     btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
@@ -861,7 +804,6 @@ local function Initialize()
     btn("NAMELESS EMOTE👤", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)
     btn("🔄 REJOIN", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)
     
-    local gridPhonk = Instance.new("UIGridLayout", T_Phonk); gridPhonk.CellSize = UDim2.new(0.47, 0, 0, 32); gridPhonk.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
     local currentPlaying = nil
     local function phonkBtn(name, id)
         local b = Instance.new("TextButton", T_Phonk)
@@ -890,7 +832,6 @@ local function Initialize()
     phonkBtn("5", "135674024616225"); phonkBtn("6", "137152491110539"); phonkBtn("7", "139606677237480"); phonkBtn("8", "139825057894568")
     phonkBtn("9", "140292910030604"); phonkBtn("10", "137466127206691"); phonkBtn("11", "139638751795258")
     
-    local gridAdm = Instance.new("UIGridLayout", T_Adm); gridAdm.CellSize = UDim2.new(0.47, 0, 0, 32); gridAdm.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
     local LogL = Instance.new("TextLabel", T_Adm); LogL.Size = UDim2.new(1,0,1,0); LogL.BackgroundTransparency = 1; LogL.TextColor3 = Green; LogL.TextSize = 8.5; LogL.Font = Enum.Font.Code; LogL.TextXAlignment = "Left"; LogL.TextYAlignment = "Top"
     RunService.Heartbeat:Connect(function()
         local t = "[ MASTER ADMIN ACCESS ]\n--- ACTIVE USERS ---\n"
@@ -899,13 +840,17 @@ local function Initialize()
     end)
     
     local Logo = Instance.new("ImageButton", sg); Logo.Size = UDim2.new(0, 50, 0, 50); Logo.Position = UDim2.new(0, 10, 0.5, -25)
-    Logo.BackgroundTransparency = 1; Logo.Image = LOGO_IMAGE; makeDraggable(Logo)
+    Logo.BackgroundTransparency = 1
+    Logo.Image = LOGO_IMAGE; makeDraggable(Logo)
     
     Logo.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
         Main.Visible = not Main.Visible
     end)
     
+    -- ==========================================
+    -- CHAT SYNC LISTENER - 0 DELAY
+    -- ==========================================
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
@@ -923,6 +868,7 @@ Verify.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then
         playS(CLICK_SOUND)
         playKeySuccess()
+        
         if KF then KF:Destroy() end
         
         task.spawn(function()
@@ -939,7 +885,7 @@ Verify.MouseButton1Click:Connect(function()
             })
             
             task.spawn(function()
-                pcall(function()
+                local success, err = pcall(function()
                     local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
                     local func = loadstring(response)
                     if func then func() end
