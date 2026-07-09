@@ -918,9 +918,9 @@ Verify.MouseButton1Click:Connect(function()
         if KF then KF:Destroy() end
         
         task.spawn(function()
-            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
+            SendPublicChat("")
             task.wait(5)
-            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
+            SendPublicChat("Loaded...")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
