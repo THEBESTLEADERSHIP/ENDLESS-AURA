@@ -1,6 +1,8 @@
--- [[ █████████████████     ███████████████
-      █ E N D L E S S █     █  A U R A 💢█
-      █████████████████     ███████████████ ]] --
+-- [[
+█████████████████     ███████████████
+█ E N D L E S S █     █  A U R A 💢█
+█████████████████     ███████████████
+]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -659,7 +661,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
     
     -- FRONT HEADSIT BUTTON
-    btn("🥵 BLOWJOB", T2, function(b)
+    btn("🦒 FRONT HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
         task.spawn(function()
@@ -871,10 +873,10 @@ Verify.MouseButton1Click:Connect(function()
         
         if KF then KF:Destroy() end
         
-        task.spawn(function()
-            SendPublicChat("")
+        task.spawn(functio
+            SendPublicChat("H_")
             task.wait(5)
-            SendPublicChat(".")
+            SendPublicChat("L...")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
