@@ -23,7 +23,7 @@ if not _G.AdminLogs then _G.AdminLogs = {} end
 local voidYLevel = -99999999 -- Absolute Depth Limit Override
 local safePosition = Vector3.new(0, 50, 0)
 
--- [ Custom Emote Logic Injection ]
+-- [ Custom Emote Logic Injection - EXACT LOGIC USED FROM YOUR SECOND SCRIPT ]
 local customAnimId = "121803583995185"
 local customTrack = nil
 
@@ -32,24 +32,39 @@ local function toggleCustomEmote(shouldPlay)
     if not char then return end
     local hum = char:FindFirstChild("Humanoid")
     if not hum then return end
-    
-    local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+    local animator = hum:FindFirstChildOfClass("Animator") or hum:WaitForChild("Animator")
     local animateScript = char:FindFirstChild("Animate")
 
     if shouldPlay then
+        -- Disable default movement pack
         if animateScript then animateScript.Disabled = true end
+        
+        -- Stop all currently playing animations except high priority actions
         for _, t in pairs(animator:GetPlayingAnimationTracks()) do
             t:Stop(0.1)
         end
-        local animation = Instance.new("Animation")
-        animation.AnimationId = "rbxassetid://" .. customAnimId
-        customTrack = animator:LoadAnimation(animation)
-        if customTrack then
-            customTrack.Priority = Enum.AnimationPriority.Action4
-            customTrack.Looped = true
-            customTrack:Play()
+
+        -- Fetch and Setup Animation Object via game:GetObjects Bypass
+        local success, objects = pcall(function() 
+            return game:GetObjects("rbxassetid://" .. customAnimId) 
+        end)
+
+        local animation
+        if success and objects[1] and objects[1]:IsA("Animation") then
+            animation = objects[1]
+        else
+            animation = Instance.new("Animation")
+            animation.AnimationId = "rbxassetid://" .. customAnimId
         end
+
+        -- Play Track with High Priority
+        customTrack = animator:LoadAnimation(animation)
+        customTrack.Priority = Enum.AnimationPriority.Action4
+        customTrack.Looped = true
+        customTrack:Play()
+        print("Emote Started with High Priority")
     else
+        -- Cleanup
         if customTrack then
             customTrack:Stop(0.1)
             customTrack = nil
@@ -369,28 +384,6 @@ local standModeType = 0
 local standLookTarget = false
 local standLoopConnection = nil
 
-local function protectFromVoid()
-    local char = player.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    local hum = char:FindFirstChild("Humanoid")
-    if not hum then return end
-    
-    if not _G.Loop and not standMode then
-        if hrp.Position.Y < voidYLevel then
-            hrp.CFrame = CFrame.new(safePosition)
-            hum.Health = 100
-            return true
-        end
-    end
-    
-    if hum.Health and hum.Health < 20 then
-        hum.Health = 100
-    end
-    return false
-end
-
 local function updateStandLoop()
     if not standMode then return end
     
@@ -537,7 +530,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         workspace.CurrentCamera.CameraSubject = t.Character.Humanoid
                     end
                 end
-                task.wait(0.0000000000001)
+                task.wait(0.01)
             end
             if player.Character and player.Character:FindFirstChild("Humanoid") then
                 workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
@@ -628,10 +621,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, true)
     
-    -- BANG BUTTON (With Custom Emote Integrated)
+    -- BANG BUTTON 
     btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop) -- Trigger Animation Sync
+        toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -640,7 +633,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 else
                     godModeAttach()
                 end
-                run_frame_yield = RunService.RenderStepped:Wait()
+                RunService.RenderStepped:Wait()
             end
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
@@ -658,17 +651,17 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 else
                     godModeAttach()
                 end
-                run_frame_yield = RunService.RenderStepped:Wait()
+                RunService.RenderStepped:Wait()
             end
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
     end)
     
-    -- FRONT HEADSIT BUTTON (With Custom Emote Integrated)
+    -- FRONT HEADSIT BUTTON
     btn("🦒 FRONT HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop) -- Trigger Animation Sync
+        toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -678,14 +671,14 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 else
                     godModeAttach()
                 end
-                run_frame_yield = RunService.RenderStepped:Wait()
+                RunService.RenderStepped:Wait()
             end
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
     end)
     
-    -- COPY ANIM BUTTON - 0 DELAY SYNC
+    -- COPY ANIM BUTTON
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
@@ -705,7 +698,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- COPY CHAT BUTTON - 0 DELAY SYNC
+    -- COPY CHAT BUTTON
     btn("COPY CHAT💬", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
@@ -723,7 +716,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- STAND BUTTON - ANTI-VOID + ANTI-KILL
+    -- STAND BUTTON
     local standBtn = Instance.new("TextButton", T2)
     standBtn.Size = UDim2.new(0.47, 0, 0, 32)
     standBtn.Position = UDim2.new(0.05, 0, 0, 0)
@@ -754,57 +747,22 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         standModeIdx = (standModeIdx + 1) % 6
         
         if standModeIdx == 1 then
-            standMode = true
-            standLookTarget = false
-            standOffset = CFrame.new(0, 0, -5)
-            standBtn.Text = "FRONT ⬆️"
-            standBtn.BackgroundColor3 = DarkRed
-            standBtn.TextColor3 = White
-            startStandLoop()
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FRONT ⬆️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 2 then
-            standMode = true
-            standLookTarget = false
-            standOffset = CFrame.new(0, 0, 5)
-            standBtn.Text = "BACK ⬇️"
-            standBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-            standBtn.TextColor3 = White
-            startStandLoop()
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, 5); standBtn.Text = "BACK ⬇️"; standBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 3 then
-            standMode = true
-            standLookTarget = false
-            standOffset = CFrame.new(-5, 0, 0)
-            standBtn.Text = "LEFT ⬅️"
-            standBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-            standBtn.TextColor3 = White
-            startStandLoop()
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(-5, 0, 0); standBtn.Text = "LEFT ⬅️"; standBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0); standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 4 then
-            standMode = true
-            standLookTarget = false
-            standOffset = CFrame.new(5, 0, 0)
-            standBtn.Text = "RIGHT ➡️"
-            standBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
-            standBtn.TextColor3 = White
-            startStandLoop()
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(5, 0, 0); standBtn.Text = "RIGHT ➡️"; standBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0); standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 5 then
-            standMode = true
-            standLookTarget = true
-            standOffset = CFrame.new(0, 0, -5)
-            standBtn.Text = "FF 👀"
-            standBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 80)
-            standBtn.TextColor3 = White
-            startStandLoop()
+            standMode = true; standLookTarget = true; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FF 👀"; standBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 80); standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 0 then
-            standMode = false
-            standTarget = nil
-            standBtn.Text = "STAND: OFF 🛑"
-            standBtn.BackgroundColor3 = White
-            standBtn.TextColor3 = Black
-            stopStandLoop()
+            standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
         end
     end)
     
     -- TAB 3: SHIELD
-    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.0000000000001) end end) end)
+    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end)
     btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, false)
     btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
     btn("🛡️ ANTI SIT", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop then player.Character.Humanoid.Sit = false end task.wait() end end) end)
@@ -863,7 +821,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end
                 for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end
                 b:SetAttribute("Disco", true)
-                local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxasseetid://"..id; s.Volume = 3; s:Play()
+                local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxassetid://"..id; s.Volume = 3; s:Play()
                 currentPlaying = id
                 task.spawn(function() s.Ended:Wait(); if currentPlaying == id then b:SetAttribute("Disco", false); currentPlaying = nil; s:Destroy() end end)
             end
@@ -896,13 +854,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-            if channel then
-                channel:SendAsync(msg.Text)
-            end
+            if channel then channel:SendAsync(msg.Text) end
             local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
-            if sayRemote then
-                sayRemote:FireServer(msg.Text, "All")
-            end
+            if sayRemote then sayRemote:FireServer(msg.Text, "All") end
         end
     end)
 end
@@ -918,9 +872,9 @@ Verify.MouseButton1Click:Connect(function()
         if KF then KF:Destroy() end
         
         task.spawn(function()
-            SendPublicChat("")
+            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
             task.wait(5)
-            SendPublicChat("Loaded...")
+            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
