@@ -23,6 +23,41 @@ if not _G.AdminLogs then _G.AdminLogs = {} end
 local voidYLevel = -99999999 -- Absolute Depth Limit Override
 local safePosition = Vector3.new(0, 50, 0)
 
+-- [ Custom Emote Logic Injection ]
+local customAnimId = "121803583995185"
+local customTrack = nil
+
+local function toggleCustomEmote(shouldPlay)
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChild("Humanoid")
+    if not hum then return end
+    
+    local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+    local animateScript = char:FindFirstChild("Animate")
+
+    if shouldPlay then
+        if animateScript then animateScript.Disabled = true end
+        for _, t in pairs(animator:GetPlayingAnimationTracks()) do
+            t:Stop(0.1)
+        end
+        local animation = Instance.new("Animation")
+        animation.AnimationId = "rbxassetid://" .. customAnimId
+        customTrack = animator:LoadAnimation(animation)
+        if customTrack then
+            customTrack.Priority = Enum.AnimationPriority.Action4
+            customTrack.Looped = true
+            customTrack:Play()
+        end
+    else
+        if customTrack then
+            customTrack:Stop(0.1)
+            customTrack = nil
+        end
+        if animateScript then animateScript.Disabled = false end
+    end
+end
+
 if CoreGui:FindFirstChild("EndlessAura_Final") then
     CoreGui.EndlessAura_Final:Destroy()
 end
@@ -490,7 +525,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop() end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
     
     btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
@@ -502,7 +537,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         workspace.CurrentCamera.CameraSubject = t.Character.Humanoid
                     end
                 end
-                task.wait(0.0000000000001) -- Ultra-Low Delay Yield
+                task.wait(0.0000000000001)
             end
             if player.Character and player.Character:FindFirstChild("Humanoid") then
                 workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
@@ -593,8 +628,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, true)
     
+    -- BANG BUTTON (With Custom Emote Integrated)
     btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
+        toggleCustomEmote(_G.Loop) -- Trigger Animation Sync
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -603,7 +640,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 else
                     godModeAttach()
                 end
-                run_frame_yield = RunService.RenderStepped:Wait() -- 0-Delay Engine Loop
+                run_frame_yield = RunService.RenderStepped:Wait()
             end
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
@@ -621,15 +658,17 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 else
                     godModeAttach()
                 end
-                run_frame_yield = RunService.RenderStepped:Wait() -- 0-Delay Engine Loop
+                run_frame_yield = RunService.RenderStepped:Wait()
             end
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
     end)
     
+    -- FRONT HEADSIT BUTTON (With Custom Emote Integrated)
     btn("🦒 FRONT HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
+        toggleCustomEmote(_G.Loop) -- Trigger Animation Sync
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -639,7 +678,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 else
                     godModeAttach()
                 end
-                run_frame_yield = RunService.RenderStepped:Wait() -- 0-Delay Engine Loop
+                run_frame_yield = RunService.RenderStepped:Wait()
             end
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
@@ -879,9 +918,9 @@ Verify.MouseButton1Click:Connect(function()
         if KF then KF:Destroy() end
         
         task.spawn(function()
-            SendPublicChat("")
+            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
             task.wait(5)
-            SendPublicChat("..")
+            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
