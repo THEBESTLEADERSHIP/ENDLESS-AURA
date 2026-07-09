@@ -514,14 +514,289 @@ THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
-    -- TAB 2: TROLL
-    local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
-    local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
+    -- ==========================================
+    -- TAB 2: TROLL - REDESIGNED WITH 3D HEADSHOT + INFO
+    -- ==========================================
     
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
+    -- Remove default UIGridLayout from T2
+    if T2:FindFirstChild("UIGridLayout") then T2.UIGridLayout:Destroy() end
     
-    btn("👁️ VIEW", T2, function(b)
-        _G.StrongView = b:GetAttribute("T")
+    -- Create main container for TROLL tab
+    local TrollMain = Instance.new("Frame", T2)
+    TrollMain.Size = UDim2.new(1, 0, 1, 0)
+    TrollMain.BackgroundTransparency = 1
+    
+    -- LEFT SIDE: 3D HEADSHOT VIEWPORT
+    local ViewportFrame = Instance.new("ViewportFrame", TrollMain)
+    ViewportFrame.Size = UDim2.new(0, 120, 0, 150)
+    ViewportFrame.Position = UDim2.new(0, 5, 0, 5)
+    ViewportFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    Instance.new("UICorner", ViewportFrame)
+    
+    -- CurrentTarget object for viewport
+    local currentTargetObj = nil
+    local viewportCamera = Instance.new("Camera", ViewportFrame)
+    ViewportFrame.CurrentCamera = viewportCamera
+    viewportCamera.FieldOfView = 50
+    
+    -- Function to update viewport with target
+    local function updateViewport(target)
+        if currentTargetObj then
+            currentTargetObj:Destroy()
+            currentTargetObj = nil
+        end
+        if target and target.Character then
+            local clone = target.Character:Clone()
+            clone.Parent = ViewportFrame
+            clone:SetAttribute("IsCloned", true)
+            -- Cleanup scripts and unnecessary parts
+            for _, v in pairs(clone:GetDescendants()) do
+                if v:IsA("Script") or v:IsA("LocalScript") or v:IsA("ModuleScript") then
+                    v:Destroy()
+                end
+                if v:IsA("BasePart") then
+                    v.CanCollide = false
+                    v.Transparency = 0.1
+                end
+            end
+            -- Position the clone
+            local hrp = clone:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.CFrame = CFrame.new(0, 0, 0)
+                -- Get the head
+                local head = clone:FindFirstChild("Head")
+                if head then
+                    -- Position camera to look at head
+                    viewportCamera.CFrame = CFrame.new(Vector3.new(0, 1.5, 5), Vector3.new(0, 1.5, 0))
+                    -- Keep a reference
+                    currentTargetObj = clone
+                    -- Adjust all parts to look good
+                    for _, part in pairs(clone:GetDescendants()) do
+                        if part:IsA("BasePart") and part ~= head then
+                            part.Transparency = 0.2
+                        end
+                    end
+                    head.Transparency = 0
+                end
+            end
+        else
+            -- Show default view
+            local defaultPart = Instance.new("Part", ViewportFrame)
+            defaultPart.Size = Vector3.new(1, 1, 1)
+            defaultPart.Shape = Enum.PartType.Ball
+            defaultPart.BrickColor = BrickColor.new("Really red")
+            defaultPart.Position = Vector3.new(0, 0, 0)
+            defaultPart.Anchored = true
+            defaultPart.CanCollide = false
+            currentTargetObj = defaultPart
+            viewportCamera.CFrame = CFrame.new(Vector3.new(0, 0, 3), Vector3.new(0, 0, 0))
+        end
+    end
+    
+    -- RIGHT SIDE: TEXT BOX WITH TARGET INFO (above all, attached to headshot)
+    local InfoBox = Instance.new("Frame", TrollMain)
+    InfoBox.Size = UDim2.new(0, 180, 0, 100)
+    InfoBox.Position = UDim2.new(0, 130, 0, 5)
+    InfoBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    InfoBox.BackgroundTransparency = 0.3
+    Instance.new("UICorner", InfoBox)
+    local InfoStroke = Instance.new("UIStroke", InfoBox)
+    InfoStroke.Thickness = 1
+    InfoStroke.Color = DarkRed
+    
+    -- Target Name (Display Name)
+    local TargetName = Instance.new("TextLabel", InfoBox)
+    TargetName.Size = UDim2.new(1, -10, 0, 25)
+    TargetName.Position = UDim2.new(0, 5, 0, 2)
+    TargetName.BackgroundTransparency = 1
+    TargetName.Text = "NO TARGET"
+    TargetName.TextColor3 = White
+    TargetName.TextSize = 18
+    TargetName.Font = Enum.Font.GothamBold
+    TargetName.TextXAlignment = Enum.TextXAlignment.Left
+    TargetName.TextYAlignment = Enum.TextYAlignment.Center
+    
+    -- User ID
+    local UserIdLabel = Instance.new("TextLabel", InfoBox)
+    UserIdLabel.Size = UDim2.new(1, -10, 0, 20)
+    UserIdLabel.Position = UDim2.new(0, 5, 0, 30)
+    UserIdLabel.BackgroundTransparency = 1
+    UserIdLabel.Text = "UserID: ---"
+    UserIdLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+    UserIdLabel.TextSize = 12
+    UserIdLabel.Font = Enum.Font.Gotham
+    UserIdLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Online Status
+    local OnlineStatus = Instance.new("TextLabel", InfoBox)
+    OnlineStatus.Size = UDim2.new(1, -10, 0, 20)
+    OnlineStatus.Position = UDim2.new(0, 5, 0, 52)
+    OnlineStatus.BackgroundTransparency = 1
+    OnlineStatus.Text = "🟢 ONLINE"
+    OnlineStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
+    OnlineStatus.TextSize = 12
+    OnlineStatus.Font = Enum.Font.Gotham
+    OnlineStatus.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Separator line
+    local Separator = Instance.new("Frame", InfoBox)
+    Separator.Size = UDim2.new(0.9, 0, 0, 1)
+    Separator.Position = UDim2.new(0.05, 0, 0, 77)
+    Separator.BackgroundColor3 = DarkRed
+    Separator.BorderSizePixel = 0
+    
+    -- Server Info
+    local ServerInfo = Instance.new("TextLabel", InfoBox)
+    ServerInfo.Size = UDim2.new(1, -10, 0, 18)
+    ServerInfo.Position = UDim2.new(0, 5, 0, 80)
+    ServerInfo.BackgroundTransparency = 1
+    ServerInfo.Text = "Player: #0 / #0"
+    ServerInfo.TextColor3 = Color3.fromRGB(100, 100, 100)
+    ServerInfo.TextSize = 10
+    ServerInfo.Font = Enum.Font.Gotham
+    ServerInfo.TextXAlignment = Enum.TextXAlignment.Left
+    
+    -- Function to update info box
+    local function updateInfoBox(target)
+        if target then
+            TargetName.Text = target.DisplayName or target.Name or "UNKNOWN"
+            UserIdLabel.Text = "UserID: " .. (target.UserId or "---")
+            -- Check if online
+            if target.Character and target.Character:FindFirstChild("Humanoid") and target.Character.Humanoid.Health > 0 then
+                OnlineStatus.Text = "🟢 ONLINE"
+                OnlineStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
+            else
+                OnlineStatus.Text = "🔴 OFFLINE"
+                OnlineStatus.TextColor3 = Color3.fromRGB(255, 0, 0)
+            end
+            -- Update server info
+            local players = Players:GetPlayers()
+            ServerInfo.Text = "Player: #" .. #players .. " / #" .. Players.MaxPlayers
+            -- Update viewport
+            updateViewport(target)
+        else
+            TargetName.Text = "NO TARGET"
+            UserIdLabel.Text = "UserID: ---"
+            OnlineStatus.Text = "🟢 ONLINE"
+            OnlineStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
+            ServerInfo.Text = "Player: #0 / #0"
+            updateViewport(nil)
+        end
+    end
+    
+    -- TARGET INPUT (New TextBox below the info)
+    local TargetInput = Instance.new("TextBox", TrollMain)
+    TargetInput.Size = UDim2.new(0, 280, 0, 25)
+    TargetInput.Position = UDim2.new(0, 5, 0, 162)
+    TargetInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TargetInput.PlaceholderText = "TARGET NAME..."
+    TargetInput.TextColor3 = White
+    TargetInput.Font = Enum.Font.GothamBold
+    TargetInput.TextSize = 12
+    Instance.new("UICorner", TargetInput)
+    
+    -- Function to get target from input
+    local function getT()
+        local n = TargetInput.Text:lower()
+        if n == "" then return nil end
+        for _,v in pairs(Players:GetPlayers()) do
+            if v ~= player and (v.Name:lower():find(n) or (v.DisplayName and v.DisplayName:lower():find(n))) then
+                return v
+            end
+        end
+        return nil
+    end
+    
+    -- Update info when target input changes
+    TargetInput:GetPropertyChangedSignal("Text"):Connect(function()
+        local target = getT()
+        targetPlayer = target
+        updateInfoBox(target)
+    end)
+    
+    -- Initial update
+    task.wait(0.1)
+    updateInfoBox(nil)
+    
+    -- Auto-update online status and viewport rotation
+    local viewportRotation = 0
+    task.spawn(function()
+        while task.wait(0.1) do
+            local target = getT()
+            if target then
+                updateInfoBox(target)
+                -- Rotate the viewport
+                if currentTargetObj then
+                    local hrp = currentTargetObj:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        viewportRotation = viewportRotation + 0.02
+                        hrp.CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(0, viewportRotation, 0)
+                    end
+                end
+            end
+        end
+    end)
+    
+    -- BUTTONS SECTION (below the target input)
+    local ButtonFrame = Instance.new("Frame", TrollMain)
+    ButtonFrame.Size = UDim2.new(1, -10, 0, 120)
+    ButtonFrame.Position = UDim2.new(0, 5, 0, 190)
+    ButtonFrame.BackgroundTransparency = 1
+    
+    -- Create grid for buttons
+    local buttonGrid = Instance.new("UIGridLayout", ButtonFrame)
+    buttonGrid.CellSize = UDim2.new(0.3, 0, 0, 28)
+    buttonGrid.CellPadding = UDim2.new(0.02, 0, 0.02, 0)
+    
+    -- Function to create troll buttons
+    local function trollBtn(txt, func)
+        local b = Instance.new("TextButton", ButtonFrame)
+        b.BackgroundColor3 = White
+        b.Text = string.upper(txt)
+        b.TextColor3 = Black
+        b.Font = Enum.Font.GothamBold
+        b.TextSize = 8
+        Instance.new("UICorner", b)
+        b.MouseButton1Click:Connect(function()
+            playS(CLICK_SOUND)
+            func(b)
+        end)
+        return b
+    end
+    
+    -- STOP ALL Button
+    local stopBtn = Instance.new("TextButton", ButtonFrame)
+    stopBtn.Size = UDim2.new(0.3, 0, 0, 28)
+    stopBtn.BackgroundColor3 = DarkRed
+    stopBtn.Text = "🛑 STOP ALL"
+    stopBtn.TextColor3 = White
+    stopBtn.Font = Enum.Font.GothamBold
+    stopBtn.TextSize = 8
+    Instance.new("UICorner", stopBtn)
+    stopBtn.MouseButton1Click:Connect(function()
+        playS(CLICK_SOUND)
+        _G.Loop = false
+        _G.Fly = false
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.Sit = false
+        end
+        _G.InfJump = false
+        _G.StrongView = false
+        _G.TargetESP = false
+        _G.TargetLook = false
+        workspace.CurrentCamera.CameraSubject = player.Character and player.Character:FindFirstChild("Humanoid") or nil
+        stopCopyLoop()
+        stopChatSync()
+        stopStandLoop()
+        toggleCustomEmote(false)
+    end)
+    
+    -- VIEW Button
+    trollBtn("👁️ VIEW", function(b)
+        _G.StrongView = not _G.StrongView
+        b:SetAttribute("T", _G.StrongView)
+        b.BackgroundColor3 = _G.StrongView and DarkRed or White
+        b.TextColor3 = _G.StrongView and White or Black
         task.spawn(function()
             while _G.StrongView do
                 local t = getT()
@@ -537,9 +812,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
         end)
     end)
-
-    btn("🔴 TARGET ESP", T2, function(b)
-        _G.TargetESP = b:GetAttribute("T")
+    
+    -- TARGET ESP Button
+    trollBtn("🔴 ESP", function(b)
+        _G.TargetESP = not _G.TargetESP
+        b:SetAttribute("T", _G.TargetESP)
+        b.BackgroundColor3 = _G.TargetESP and DarkRed or White
+        b.TextColor3 = _G.TargetESP and White or Black
         task.spawn(function()
             local currentHighlight, currentBillboard
             local function cleanup()
@@ -589,8 +868,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    btn("👁️ TARGET LOOK", T2, function(b)
-        _G.TargetLook = b:GetAttribute("T")
+    -- TARGET LOOK Button
+    trollBtn("👁️ LOOK", function(b)
+        _G.TargetLook = not _G.TargetLook
+        b:SetAttribute("T", _G.TargetLook)
+        b.BackgroundColor3 = _G.TargetLook and DarkRed or White
+        b.TextColor3 = _G.TargetLook and White or Black
         local lookConnection
         if _G.TargetLook then
             lookConnection = RunService.RenderStepped:Connect(function()
@@ -612,19 +895,23 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             if lookConnection then lookConnection:Disconnect() end
         end
-    end, false)
+    end)
     
-    btn("🚀 GOTO", T2, function()
+    -- GOTO Button
+    trollBtn("🚀 GOTO", function()
         local t = getT()
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
             SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
         end
-    end, true)
+    end)
     
-    -- BANG BUTTON 
-    btn("🍆 BANG", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
+    -- BANG Button
+    trollBtn("🍆 BANG", function(b)
+        _G.Loop = not _G.Loop
+        b:SetAttribute("T", _G.Loop)
+        b.BackgroundColor3 = _G.Loop and DarkRed or White
+        b.TextColor3 = _G.Loop and White or Black
+        toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -640,8 +927,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    btn("🧒 HEADSIT", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
+    -- HEADSIT Button
+    trollBtn("🧒 HEADSIT", function(b)
+        _G.Loop = not _G.Loop
+        b:SetAttribute("T", _G.Loop)
+        b.BackgroundColor3 = _G.Loop and DarkRed or White
+        b.TextColor3 = _G.Loop and White or Black
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -658,10 +949,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    -- FRONT HEADSIT BUTTON
-    btn("🦒 FRONT HEADSIT", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
+    -- FRONT HEADSIT Button
+    trollBtn("🦒 FRONT", function(b)
+        _G.Loop = not _G.Loop
+        b:SetAttribute("T", _G.Loop)
+        b.BackgroundColor3 = _G.Loop and DarkRed or White
+        b.TextColor3 = _G.Loop and White or Black
+        toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -678,9 +972,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    -- COPY ANIM BUTTON
-    btn("COPY ANIM👤", T2, function(b)
-        local isActive = b:GetAttribute("T")
+    -- COPY ANIM Button
+    trollBtn("👤 COPY ANIM", function(b)
+        local isActive = not b:GetAttribute("T")
+        b:SetAttribute("T", isActive)
+        b.BackgroundColor3 = isActive and DarkRed or White
+        b.TextColor3 = isActive and White or Black
         if isActive then
             targetPlayer = getT()
             if targetPlayer then
@@ -698,9 +995,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- COPY CHAT BUTTON
-    btn("COPY CHAT💬", T2, function(b)
-        local isActive = b:GetAttribute("T")
+    -- COPY CHAT Button
+    trollBtn("💬 COPY CHAT", function(b)
+        local isActive = not b:GetAttribute("T")
+        b:SetAttribute("T", isActive)
+        b.BackgroundColor3 = isActive and DarkRed or White
+        b.TextColor3 = isActive and White or Black
         if isActive then
             chatTargetPlayer = getT()
             if chatTargetPlayer then
@@ -716,20 +1016,15 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- STAND BUTTON
-    local standBtn = Instance.new("TextButton", T2)
-    standBtn.Size = UDim2.new(0.47, 0, 0, 32)
-    standBtn.Position = UDim2.new(0.05, 0, 0, 0)
+    -- STAND Button (custom)
+    local standBtn = Instance.new("TextButton", ButtonFrame)
+    standBtn.Size = UDim2.new(0.3, 0, 0, 28)
     standBtn.BackgroundColor3 = White
     standBtn.Text = "STAND: OFF 🛑"
     standBtn.TextColor3 = Black
     standBtn.Font = Enum.Font.GothamBold
-    standBtn.TextSize = 8.5
+    standBtn.TextSize = 8
     Instance.new("UICorner", standBtn)
-    
-    local grid = Instance.new("UIGridLayout", T2)
-    grid.CellSize = UDim2.new(0.47, 0, 0, 32)
-    grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
     
     local standModeIdx = 0
     standBtn.MouseButton1Click:Connect(function()
@@ -743,7 +1038,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 standBtn.Text = "STAND: OFF 🛑"
                 return
             end
-        end        
+        end
+        
         standModeIdx = (standModeIdx + 1) % 6
         
         if standModeIdx == 1 then
