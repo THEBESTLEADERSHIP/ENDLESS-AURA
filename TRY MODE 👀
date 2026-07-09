@@ -1,8 +1,6 @@
--- [[
-█████████████████     ███████████████
-█ E N D L E S S █     █  A U R A 💢█
-█████████████████     ███████████████
-]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
+-- 🔥 SCRIPT BY: NAMELESS 😎
+-- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -874,7 +872,7 @@ Verify.MouseButton1Click:Connect(function()
         if KF then KF:Destroy() end
         
         task.spawn(function()
-            SendPublicChat(" _HA_")
+            SendPublicChat("")
             task.wait(5)
             SendPublicChat("..")
             playS(LOAD_SOUND)
