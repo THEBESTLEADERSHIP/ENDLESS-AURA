@@ -20,7 +20,7 @@ local LOGO_IMAGE = "rbxassetid://129299711445020"
 local LOAD_SOUND = "129584950954499"
 if not _G.AdminLogs then _G.AdminLogs = {} end
 
-local voidYLevel = -50
+local voidYLevel = -99999999 -- Absolute Depth Limit Override
 local safePosition = Vector3.new(0, 50, 0)
 
 if CoreGui:FindFirstChild("EndlessAura_Final") then
@@ -90,7 +90,9 @@ local function godModeAttach()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     
     if hum then
-        if hum.Health and hum.Health < 99 then hum.Health = 100 end -- Instant Health Regen
+        -- Force-disable death states globally while attaching in deep void
+        hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+        if hum.Health and hum.Health < 99 then hum.Health = 100 end 
         if hum:GetState() == Enum.HumanoidStateType.Dead then hum:ChangeState(Enum.HumanoidStateType.Running) end
     end
     if hrp then
@@ -399,6 +401,10 @@ local function stopStandLoop()
     standMode = false
     standTarget = nil
     standModeType = 0
+    local char = player.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+    end
 end
 
 -- ==========================================
@@ -496,7 +502,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         workspace.CurrentCamera.CameraSubject = t.Character.Humanoid
                     end
                 end
-                task.wait(0.05)
+                task.wait(0.0000000000001) -- Ultra-Low Delay Yield
             end
             if player.Character and player.Character:FindFirstChild("Humanoid") then
                 workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
@@ -549,7 +555,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 else
                     cleanup()
                 end
-                task.wait(0.1)
+                task.wait(0.01)
             end
             cleanup()
         end)
@@ -589,43 +595,55 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        while _G.Loop do
-            local t = getT()
-            if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
-            else
-                godModeAttach()
+        task.spawn(function()
+            while _G.Loop do
+                local t = getT()
+                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+                    SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
+                else
+                    godModeAttach()
+                end
+                run_frame_yield = RunService.RenderStepped:Wait() -- 0-Delay Engine Loop
             end
-            task.wait(0.01)
-        end
+            local char = player.Character
+            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
+        end)
     end)
     
     btn("🧒 HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        while _G.Loop do
-            local t = getT()
-            if t and t.Character and t.Character:FindFirstChild("Head") then
-                SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))
-                if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
-            else
-                godModeAttach()
+        task.spawn(function()
+            while _G.Loop do
+                local t = getT()
+                if t and t.Character and t.Character:FindFirstChild("Head") then
+                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))
+                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
+                else
+                    godModeAttach()
+                end
+                run_frame_yield = RunService.RenderStepped:Wait() -- 0-Delay Engine Loop
             end
-            task.wait(0.01)
-        end
+            local char = player.Character
+            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
+        end)
     end)
     
     btn("🦒 FRONT HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        while _G.Loop do
-            local t = getT()
-            if t and t.Character and t.Character:FindFirstChild("Head") then
-                SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0))
-                if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
-            else
-                godModeAttach()
+        task.spawn(function()
+            while _G.Loop do
+                local t = getT()
+                if t and t.Character and t.Character:FindFirstChild("Head") then
+                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0))
+                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
+                else
+                    godModeAttach()
+                end
+                run_frame_yield = RunService.RenderStepped:Wait() -- 0-Delay Engine Loop
             end
-            task.wait(0.01)
-        end
+            local char = player.Character
+            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
+        end)
     end)
     
     -- COPY ANIM BUTTON - 0 DELAY SYNC
@@ -747,7 +765,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
     
     -- TAB 3: SHIELD
-    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.1) end end) end)
+    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.0000000000001) end end) end)
     btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, false)
     btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
     btn("🛡️ ANTI SIT", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop then player.Character.Humanoid.Sit = false end task.wait() end end) end)
@@ -863,7 +881,7 @@ Verify.MouseButton1Click:Connect(function()
         task.spawn(function()
             SendPublicChat("")
             task.wait(5)
-            SendPublicChat(".")
+            SendPublicChat("..")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
