@@ -816,8 +816,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     Logo.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
         Main.Visible = not Main.Visible
-        local uiState = Main.Visible and "Opened 👀" or "Closed 🙈"
-        notify("UI PANEL", "Panel is " .. uiState, 1.5)
+        -- UI Open/Close notification completely lines removed from here
     end)
     
     TextChatService.MessageReceived:Connect(function(msg)
