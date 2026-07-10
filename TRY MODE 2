@@ -465,21 +465,21 @@ __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 
     -- ==========================================
-    -- TAB 2: TROLL - EXACT LAYOUT AS PER USER'S IMAGE
+    -- TAB 2: TROLL - PERFECT LAYOUT (HEADSHOT 1:1 + INFO + BUTTONS WITH GAP)
     -- ==========================================
     if T2:FindFirstChildOfClass("UIGridLayout") then T2:FindFirstChildOfClass("UIGridLayout"):Destroy() end
     T2.CanvasSize = UDim2.new(0, 0, 0, 560)
 
-    -- TOP ROW: Headshot (left) + TextBox & Info (right)
+    -- TOP ROW: Headshot (1:1) + TextBox & Info
     local TopRow = Instance.new("Frame", T2)
-    TopRow.Size = UDim2.new(1, 0, 0, 120)
+    TopRow.Size = UDim2.new(1, 0, 0, 130)
     TopRow.Position = UDim2.new(0, 0, 0, 0)
     TopRow.BackgroundTransparency = 1
 
-    -- Left: Headshot
+    -- Headshot (1:1 ratio, 100x100)
     local HeadshotFrame = Instance.new("Frame", TopRow)
     HeadshotFrame.Size = UDim2.new(0, 100, 0, 100)
-    HeadshotFrame.Position = UDim2.new(0.03, 0, 0.08, 0)
+    HeadshotFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
     HeadshotFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
     Instance.new("UICorner", HeadshotFrame).CornerRadius = UDim.new(1, 0)
     local HeadshotStroke = Instance.new("UIStroke", HeadshotFrame)
@@ -491,7 +491,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png"
     local hsc = Instance.new("UICorner", HeadshotImage); hsc.CornerRadius = UDim.new(1, 0)
 
-    -- Right side: TextBox (small) + Info
+    -- RIGHT SIDE: TextBox + Info (with proper spacing)
     local RightArea = Instance.new("Frame", TopRow)
     RightArea.Size = UDim2.new(0.6, 0, 1, 0)
     RightArea.Position = UDim2.new(0.28, 0, 0, 0)
@@ -500,16 +500,16 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- Small TextBox
     local target = Instance.new("TextBox", RightArea)
     target.Size = UDim2.new(0.98, 0, 0, 28)
-    target.Position = UDim2.new(0, 0, 0.02, 0)
+    target.Position = UDim2.new(0, 0, 0.04, 0)
     target.PlaceholderText = "TARGET NAME..."
     target.BackgroundColor3 = Color3.fromRGB(20,20,20)
     target.TextColor3 = White
     Instance.new("UICorner", target)
 
-    -- Display Name (below textbox)
+    -- Display Name
     local TargetNameLabel = Instance.new("TextLabel", RightArea)
     TargetNameLabel.Size = UDim2.new(1, 0, 0, 22)
-    TargetNameLabel.Position = UDim2.new(0, 0, 0.32, 0)
+    TargetNameLabel.Position = UDim2.new(0, 0, 0.30, 0)
     TargetNameLabel.BackgroundTransparency = 1
     TargetNameLabel.Text = "NO TARGET"
     TargetNameLabel.TextColor3 = White
@@ -520,7 +520,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- @name
     local AtNameLabel = Instance.new("TextLabel", RightArea)
     AtNameLabel.Size = UDim2.new(1, 0, 0, 18)
-    AtNameLabel.Position = UDim2.new(0, 0, 0.50, 0)
+    AtNameLabel.Position = UDim2.new(0, 0, 0.48, 0)
     AtNameLabel.BackgroundTransparency = 1
     AtNameLabel.Text = "@no_target"
     AtNameLabel.TextColor3 = Color3.fromRGB(150,150,150)
@@ -531,7 +531,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- Online Status
     local StatusLabel = Instance.new("TextLabel", RightArea)
     StatusLabel.Size = UDim2.new(1, 0, 0, 18)
-    StatusLabel.Position = UDim2.new(0, 0, 0.67, 0)
+    StatusLabel.Position = UDim2.new(0, 0, 0.66, 0)
     StatusLabel.BackgroundTransparency = 1
     StatusLabel.Text = "🔴 OFFLINE"
     StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
@@ -539,7 +539,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     StatusLabel.Font = Enum.Font.GothamBold
     StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Function to get target
+    -- Get target function
     local function getT()
         local n = target.Text:lower()
         for _,v in pairs(Players:GetPlayers()) do
@@ -547,7 +547,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end
 
-    -- Update headshot & info in real-time
+    -- Real-time update
     task.spawn(function()
         while task.wait(0.1) do
             local t = getT()
@@ -577,10 +577,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- STOP ALL (small, below the info row)
+    -- STOP ALL (small, centered)
     local StopAllBtn = Instance.new("TextButton", T2)
     StopAllBtn.Size = UDim2.new(0.35, 0, 0, 30)
-    StopAllBtn.Position = UDim2.new(0.325, 0, 0, 135) -- after TopRow (120 + 15 gap)
+    StopAllBtn.Position = UDim2.new(0.325, 0, 0, 145) -- below TopRow (130 + 15 gap)
     StopAllBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
     StopAllBtn.Text = "🛑 STOP ALL"
     StopAllBtn.TextColor3 = White
@@ -615,16 +615,14 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false)
     end)
 
-    -- GAP (just spacing, no UI element needed)
-
-    -- Buttons Grid (2 columns)
+    -- BUTTONS GRID (2 columns, proper gap)
     local BtnArea = Instance.new("Frame", T2)
-    BtnArea.Size = UDim2.new(1, 0, 0, 230)
-    BtnArea.Position = UDim2.new(0, 0, 0, 180) -- after STOP ALL (135+30+15 gap)
+    BtnArea.Size = UDim2.new(1, 0, 0, 240)
+    BtnArea.Position = UDim2.new(0, 0, 0, 195) -- after STOP ALL (145+30+20 gap)
     BtnArea.BackgroundTransparency = 1
     local BtnGrid = Instance.new("UIGridLayout", BtnArea)
     BtnGrid.CellSize = UDim2.new(0.47, 0, 0, 32)
-    BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
+    BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.03, 0)  -- slightly more vertical gap
 
     -- All buttons
     btn("👁️ VIEW", BtnArea, function(b)
@@ -960,9 +958,9 @@ Verify.MouseButton1Click:Connect(function()
         playKeySuccess()
         if KF then KF:Destroy() end
         task.spawn(function()
-            SendPublicChat("hi")
+            SendPublicChat("")
             task.wait(5)
-            SendPublicChat(".m.")
+            SendPublicChat("..")
             playS(LOAD_SOUND)
             StarterGui:SetCore("SendNotification", {
                 Title = "ENDLESS AURA",
