@@ -465,10 +465,10 @@ __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 
     -- ==========================================
-    -- TAB 2: TROLL - PERFECT LAYOUT (HEADSHOT 1:1 + INFO + BUTTONS WITH GAP)
+    -- TAB 2: TROLL - PERFECT LAYOUT WITH CORRECT BUTTON SPACING
     -- ==========================================
     if T2:FindFirstChildOfClass("UIGridLayout") then T2:FindFirstChildOfClass("UIGridLayout"):Destroy() end
-    T2.CanvasSize = UDim2.new(0, 0, 0, 560)
+    T2.CanvasSize = UDim2.new(0, 0, 0, 580)
 
     -- TOP ROW: Headshot (1:1) + TextBox & Info
     local TopRow = Instance.new("Frame", T2)
@@ -580,7 +580,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- STOP ALL (small, centered)
     local StopAllBtn = Instance.new("TextButton", T2)
     StopAllBtn.Size = UDim2.new(0.35, 0, 0, 30)
-    StopAllBtn.Position = UDim2.new(0.325, 0, 0, 145) -- below TopRow (130 + 15 gap)
+    StopAllBtn.Position = UDim2.new(0.325, 0, 0, 145)
     StopAllBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
     StopAllBtn.Text = "🛑 STOP ALL"
     StopAllBtn.TextColor3 = White
@@ -615,16 +615,16 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false)
     end)
 
-    -- BUTTONS GRID (2 columns, proper gap)
+    -- BUTTONS GRID (2 columns with exact spacing: CellSize 0.47x32, CellPadding 0.04x0.02)
     local BtnArea = Instance.new("Frame", T2)
-    BtnArea.Size = UDim2.new(1, 0, 0, 240)
-    BtnArea.Position = UDim2.new(0, 0, 0, 195) -- after STOP ALL (145+30+20 gap)
+    BtnArea.Size = UDim2.new(1, 0, 0, 260)
+    BtnArea.Position = UDim2.new(0, 0, 0, 195)
     BtnArea.BackgroundTransparency = 1
     local BtnGrid = Instance.new("UIGridLayout", BtnArea)
     BtnGrid.CellSize = UDim2.new(0.47, 0, 0, 32)
-    BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.03, 0)  -- slightly more vertical gap
+    BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
 
-    -- All buttons
+    -- All buttons in exact order
     btn("👁️ VIEW", BtnArea, function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
