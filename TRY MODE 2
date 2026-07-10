@@ -496,7 +496,7 @@ local function Initialize()
             -- Lock functionality exclusively for TROLL tab buttons when target is empty/invalid
             if par == T2 and txt ~= "🛑 STOP ALL" then
                 if target.Text == "" or not getT() then
-                    notify("⛔ ACCESS DENIED", "Please type a valid Target Name first! 🥷", 2)
+                    notify("⛔ ACCESS DENIED", "First Select Target🎯...", 2)
                     return
                 end
             end
@@ -533,23 +533,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS)
     btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
     
-    btn("👁️ VIEW", T2, function(b)
-        _G.StrongView = b:GetAttribute("T")
-        task.spawn(function()
-            while _G.StrongView do
-                local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("Humanoid") then
-                    if workspace.CurrentCamera.CameraSubject ~= t.Character.Humanoid then
-                        workspace.CurrentCamera.CameraSubject = t.Character.Humanoid
-                    end
-                end
-                task.wait(0.01)
-            end
-            if player.Character and player.Character:FindFirstChild("Humanoid") then
-                workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
-            end
-        end)
-    end)
+    btn("🚀 GOTO", T2, function()
+        local t = getT()
+        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+            SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
+        end
+    end, true)
 
     btn("🔴 TARGET ESP", T2, function(b)
         _G.TargetESP = b:GetAttribute("T")
@@ -627,12 +616,23 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, false)
     
-    btn("🚀 GOTO", T2, function()
-        local t = getT()
-        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-            SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
-        end
-    end, true)
+    btn("👁️ VIEW", T2, function(b)
+        _G.StrongView = b:GetAttribute("T")
+        task.spawn(function()
+            while _G.StrongView do
+                local t = getT()
+                if t and t.Character and t.Character:FindFirstChild("Humanoid") then
+                    if workspace.CurrentCamera.CameraSubject ~= t.Character.Humanoid then
+                        workspace.CurrentCamera.CameraSubject = t.Character.Humanoid
+                    end
+                end
+                task.wait(0.01)
+            end
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
+            end
+        end)
+    end)
     
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
@@ -692,7 +692,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         
         -- Target validation lock for Stand Button
         if target.Text == "" or not getT() then
-            notify("⛔ ACCESS DENIED", "Please type a valid Target Name first! 🥷", 2)
+            notify("⛔ ACCESS DENIED", "First Select Target🎯...", 2)
             return
         end
 
@@ -729,14 +729,14 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    btn("🍆 BANG", T2, function(b)
+    btn("🧒 HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                    SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
+                if t and t.Character and t.Character:FindFirstChild("Head") then
+                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))
+                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
                 else
                     godModeAttach()
                 end
@@ -747,14 +747,14 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    btn("🧒 HEADSIT", T2, function(b)
+    btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
+        toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("Head") then
-                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))
-                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
+                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+                    SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
                 else
                     godModeAttach()
                 end
