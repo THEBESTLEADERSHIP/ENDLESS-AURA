@@ -20,9 +20,10 @@ local LOGO_IMAGE = "rbxassetid://129299711445020"
 local LOAD_SOUND = "129584950954499"
 if not _G.AdminLogs then _G.AdminLogs = {} end
 
-local voidYLevel = -99999999
+local voidYLevel = -99999999 -- Absolute Depth Limit Override
 local safePosition = Vector3.new(0, 50, 0)
 
+-- [ Custom Emote Logic Injection - EXACT LOGIC USED FROM YOUR SECOND SCRIPT ]
 local customAnimId = "121803583995185"
 local customTrack = nil
 
@@ -35,11 +36,15 @@ local function toggleCustomEmote(shouldPlay)
     local animateScript = char:FindFirstChild("Animate")
 
     if shouldPlay then
+        -- Disable default movement pack
         if animateScript then animateScript.Disabled = true end
+        
+        -- Stop all currently playing animations except high priority actions
         for _, t in pairs(animator:GetPlayingAnimationTracks()) do
             t:Stop(0.1)
         end
 
+        -- Fetch and Setup Animation Object via game:GetObjects Bypass
         local success, objects = pcall(function() 
             return game:GetObjects("rbxassetid://" .. customAnimId) 
         end)
@@ -52,11 +57,14 @@ local function toggleCustomEmote(shouldPlay)
             animation.AnimationId = "rbxassetid://" .. customAnimId
         end
 
+        -- Play Track with High Priority
         customTrack = animator:LoadAnimation(animation)
         customTrack.Priority = Enum.AnimationPriority.Action4
         customTrack.Looped = true
         customTrack:Play()
+        print("Emote Started with High Priority")
     else
+        -- Cleanup
         if customTrack then
             customTrack:Stop(0.1)
             customTrack = nil
@@ -124,12 +132,15 @@ local function makeDraggable(f)
     end)
 end
 
+-- Ultimate Bypass Protection for Attach features
 local function godModeAttach()
     local char = player.Character
     if not char then return end
     local hum = char:FindFirstChild("Humanoid")
     local hrp = char:FindFirstChild("HumanoidRootPart")
+    
     if hum then
+        -- Force-disable death states globally while attaching in deep void
         hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
         if hum.Health and hum.Health < 99 then hum.Health = 100 end 
         if hum:GetState() == Enum.HumanoidStateType.Dead then hum:ChangeState(Enum.HumanoidStateType.Running) end
@@ -177,7 +188,7 @@ local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 4
 local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
--- COPY NINJA LOGIC
+-- COPY NINJA LOGIC - 0 DELAY SERVER SYNC
 -- ==========================================
 local copyNinjaActive = false
 local targetPlayer = nil
@@ -204,14 +215,18 @@ end
 local function copyAnimationTrack(targetTrack, myHum)
     local animId = targetTrack.Animation.AnimationId
     if not animId or animId == "" then return nil end
+    
     local newAnim = Instance.new("Animation")
     newAnim.AnimationId = animId
     local newTrack = myHum:LoadAnimation(newAnim)
+    
     newTrack.Priority = Enum.AnimationPriority.Action4
     newTrack.TimePosition = targetTrack.TimePosition
+    
     if targetTrack.Speed and targetTrack.Speed ~= 1 then
         newTrack:AdjustSpeed(targetTrack.Speed)
     end
+    
     return newTrack
 end
 
@@ -224,9 +239,11 @@ local function copyAnimations()
     local tHum = tChar:FindFirstChild("Humanoid")
     local myHum = myChar:FindFirstChild("Humanoid")
     if not tHum or not myHum then return end
+    
     clearMyTracks()
     currentTracks = {}
     myAnimationTracks = {}
+    
     local targetTracks = tHum:GetPlayingAnimationTracks()
     for _, track in pairs(targetTracks) do
         if track.WeightCurrent > 0.1 then
@@ -242,6 +259,7 @@ local function copyAnimations()
             end
         end
     end
+    
     for _, tool in pairs(tChar:GetDescendants()) do
         if tool:IsA("Tool") or tool:IsA("HopperBin") then
             for _, animTrack in pairs(tool:GetDescendants()) do
@@ -268,8 +286,10 @@ local function updateCopyLoop()
     local tHum = tChar:FindFirstChild("Humanoid")
     local myHum = myChar:FindFirstChild("Humanoid")
     if not tHum or not myHum then return end
+    
     local currentAnimIds = {}
     local targetTracks = {}
+    
     for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
         if track.WeightCurrent > 0.1 then
             local id = track.Animation.AnimationId
@@ -279,26 +299,34 @@ local function updateCopyLoop()
             end
         end
     end
+    
     for i = #currentTracks, 1, -1 do
         local ct = currentTracks[i]
         if not currentAnimIds[ct.animId] then
-            if ct.myTrack then ct.myTrack:Stop() end
+            if ct.myTrack then
+                ct.myTrack:Stop()
+            end
             table.remove(currentTracks, i)
         end
     end
+    
     for _, targetTrack in pairs(targetTracks) do
         local id = targetTrack.Animation.AnimationId
         local found = false
+        
         for _, ct in pairs(currentTracks) do
             if ct.animId == id then
                 found = true
                 if ct.myTrack then
                     ct.myTrack.TimePosition = targetTrack.TimePosition
-                    if not ct.myTrack.IsPlaying then ct.myTrack:Play() end
+                    if not ct.myTrack.IsPlaying then
+                        ct.myTrack:Play()
+                    end
                 end
                 break
             end
         end
+        
         if not found then
             local newTrack = copyAnimationTrack(targetTrack, myHum)
             if newTrack then
@@ -315,12 +343,20 @@ local function updateCopyLoop()
 end
 
 local function startCopyLoop()
-    if copyLoopConnection then copyLoopConnection:Disconnect(); copyLoopConnection = nil end
-    copyLoopConnection = RunService.RenderStepped:Connect(function() updateCopyLoop() end)
+    if copyLoopConnection then
+        copyLoopConnection:Disconnect()
+        copyLoopConnection = nil
+    end
+    copyLoopConnection = RunService.RenderStepped:Connect(function()
+        updateCopyLoop()
+    end)
 end
 
 local function stopCopyLoop()
-    if copyLoopConnection then copyLoopConnection:Disconnect(); copyLoopConnection = nil end
+    if copyLoopConnection then
+        copyLoopConnection:Disconnect()
+        copyLoopConnection = nil
+    end
     copyNinjaActive = false
     targetPlayer = nil
     clearMyTracks()
@@ -328,17 +364,18 @@ local function stopCopyLoop()
 end
 
 -- ==========================================
--- CHAT NINJA LOGIC
+-- CHAT NINJA LOGIC - 0 DELAY SERVER SYNC
 -- ==========================================
 local chatSyncActive = false
 local chatTargetPlayer = nil
+
 local function stopChatSync()
     chatSyncActive = false
     chatTargetPlayer = nil
 end
 
 -- ==========================================
--- STAND NINJA LOGIC
+-- STAND NINJA LOGIC - ANTI-VOID + ANTI-KILL
 -- ==========================================
 local standMode = false
 local standTarget = nil
@@ -349,16 +386,19 @@ local standLoopConnection = nil
 
 local function updateStandLoop()
     if not standMode then return end
+    
     local char = player.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
+    
     godModeAttach()
     if not standTarget then return end
     local tChar = standTarget.Character
     if not tChar then return end
     local tHrp = tChar:FindFirstChild("HumanoidRootPart")
     if not tHrp then return end
+    
     if standLookTarget then
         local targetPos = tHrp.Position
         local desiredPos = (tHrp.CFrame * standOffset).Position
@@ -366,17 +406,26 @@ local function updateStandLoop()
     else
         hrp.CFrame = tHrp.CFrame * standOffset
     end
+    
     local hum = char:FindFirstChild("Humanoid")
     if hum then hum.Sit = false end
 end
 
 local function startStandLoop()
-    if standLoopConnection then standLoopConnection:Disconnect(); standLoopConnection = nil end
-    standLoopConnection = RunService.RenderStepped:Connect(function() updateStandLoop() end)
+    if standLoopConnection then
+        standLoopConnection:Disconnect()
+        standLoopConnection = nil
+    end
+    standLoopConnection = RunService.RenderStepped:Connect(function()
+        updateStandLoop()
+    end)
 end
 
 local function stopStandLoop()
-    if standLoopConnection then standLoopConnection:Disconnect(); standLoopConnection = nil end
+    if standLoopConnection then
+        standLoopConnection:Disconnect()
+        standLoopConnection = nil
+    end
     standMode = false
     standTarget = nil
     standModeType = 0
@@ -394,38 +443,38 @@ local function Initialize()
     local alreadyLogged = false
     for _, v in pairs(_G.AdminLogs) do if v == entry then alreadyLogged = true break end end
     if not alreadyLogged then table.insert(_G.AdminLogs, entry) end
-
+    
     task.spawn(function()
         while task.wait(60) do print("💿 SCRIPTED BY NAMELESS💀👑") end
     end)
-
-    -- MAIN FRAME - original size 420x300
+    
     local Main = Instance.new("Frame", sg); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Black; Main.BackgroundTransparency = 0.4; makeDraggable(Main)
     Instance.new("UICorner", Main); local MS = Instance.new("UIStroke", Main); MS.Thickness = 2; MS.Color = DarkRed
-
+    
     local MainLogo = Instance.new("ImageLabel", Main); MainLogo.Size = UDim2.new(0, 28, 0, 28); MainLogo.Position = UDim2.new(0, 10, 0, 6); MainLogo.BackgroundTransparency = 1; MainLogo.Image = LOGO_IMAGE
+    
     local LogoText = Instance.new("TextLabel", Main); LogoText.Size = UDim2.new(0, 200, 0, 28); LogoText.Position = UDim2.new(0, 43, 0, 5); LogoText.BackgroundTransparency = 1
     LogoText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ"; LogoText.TextColor3 = DarkRed; LogoText.TextSize = 20; LogoText.Font = Enum.Font.GothamBlack; LogoText.TextXAlignment = Enum.TextXAlignment.Left
-
+    
     local TopLine = Instance.new("Frame", Main); TopLine.Size = UDim2.new(1, -20, 0, 2); TopLine.Position = UDim2.new(0, 10, 0, 38)
     TopLine.BackgroundColor3 = DarkRed; TopLine.BorderSizePixel = 0
-
+    
     local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 95, 1, -50); Side.Position = UDim2.new(0, 10, 0, 45); Side.BackgroundTransparency = 1; Instance.new("UIListLayout", Side).Padding = UDim.new(0, 4)
     local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 115, 0, 45); Cont.BackgroundTransparency = 1
-
+    
     local function pg()
         local p = Instance.new("ScrollingFrame", Cont); p.Size = UDim2.new(1, 0, 1, 0); p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 2; p.CanvasSize = UDim2.new(0,0,6,0); p.ScrollBarImageColor3 = DarkRed
         local grid = Instance.new("UIGridLayout", p); grid.CellSize = UDim2.new(0.47, 0, 0, 32); grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0); return p
     end
-
+    
     local T1, T2, T3, T4, T5, T_Phonk, T_Adm = pg(), pg(), pg(), pg(), pg(), pg(), pg()
-    T1.UIGridLayout:Destroy()  -- custom layout for INFO tab
-
+    T1.UIGridLayout:Destroy()
+    
     local rainbowActive = false
     task.spawn(function()
         while task.wait() do if rainbowActive then local hue = tick() % 5 / 5 MS.Color = Color3.fromHSV(hue, 1, 1) end end
     end)
-
+    
     local function tab(n, p)
         local b = Instance.new("TextButton", Side); b.Size = UDim2.new(1, 0, 0, 30); b.BackgroundColor3 = Color3.fromRGB(15,15,15); b.Text = string.upper(n); b.TextColor3 = White; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
@@ -437,10 +486,10 @@ local function Initialize()
             if n == "PHONK" or n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = DarkRed end end
         end)
     end
-
+    
     tab("👑 INFO", T1); tab("🌚 TROLL", T2); tab("🛡️ SHIELD", T3); tab("👺 SPAM", T4); tab("📁 OTHER", T5); tab("PHONK", T_Phonk)
     if player.Name == MASTER_ACC then tab("🛡️ ADMIN", T_Adm) end; T1.Visible = true
-
+    
     local function btn(txt, par, func, isLoad)
         local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
@@ -448,11 +497,11 @@ local function Initialize()
             if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
             func(b)
         end)
-        return b
     end
-
-    -- TAB 1: INFO (unchanged)
+    
+    -- TAB 1: INFO
     local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE
+
     local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top"
     it.Text = [[SCRIPT NAME - ENDLESS AURA
 __________________________________________
@@ -464,29 +513,44 @@ THE-LEADER OF [ENDLESS AURA]
 THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
-
+    
     -- ==========================================
-    -- TAB 2: TROLL - REDESIGNED PER USER REQUEST
+    -- TAB 2: TROLL - NEW LAYOUT (headshot + info + buttons)
     -- ==========================================
     -- Remove default grid from T2
     if T2:FindFirstChildOfClass("UIGridLayout") then T2:FindFirstChildOfClass("UIGridLayout"):Destroy() end
-    T2.CanvasSize = UDim2.new(0, 0, 0, 340)  -- make room
+    T2.CanvasSize = UDim2.new(0, 0, 0, 500) -- give enough vertical space
 
-    -- Create top section (headshot + info on left, textbox + buttons on right)
-    local TopSection = Instance.new("Frame", T2)
-    TopSection.Size = UDim2.new(1, 0, 0.75, 0)  -- 75% of height
-    TopSection.Position = UDim2.new(0, 0, 0, 0)
-    TopSection.BackgroundTransparency = 1
+    -- 1) Target TextBox (top, full width)
+    local target = Instance.new("TextBox", T2)
+    target.Size = UDim2.new(0.98, 0, 0, 30)
+    target.Position = UDim2.new(0.01, 0, 0, 0)
+    target.PlaceholderText = "TARGET NAME..."
+    target.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    target.TextColor3 = White
+    Instance.new("UICorner", target)
 
-    -- Left panel: headshot + info (closely stacked)
-    local LeftPanel = Instance.new("Frame", TopSection)
-    LeftPanel.Size = UDim2.new(0.35, 0, 1, 0)
-    LeftPanel.Position = UDim2.new(0, 0, 0, 0)
-    LeftPanel.BackgroundTransparency = 1
+    -- 2) STOP ALL button (right below textbox, centered)
+    local StopAllBtn = Instance.new("TextButton", T2)
+    StopAllBtn.Size = UDim2.new(0.4, 0, 0, 32)
+    StopAllBtn.Position = UDim2.new(0.3, 0, 0, 35) -- below textbox (30 height + 5 gap)
+    StopAllBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
+    StopAllBtn.Text = "🛑 STOP ALL"
+    StopAllBtn.TextColor3 = White
+    StopAllBtn.Font = Enum.Font.GothamBold
+    StopAllBtn.TextSize = 12
+    Instance.new("UICorner", StopAllBtn)
 
-    local HeadshotFrame = Instance.new("Frame", LeftPanel)
-    HeadshotFrame.Size = UDim2.new(0, 100, 0, 100)
-    HeadshotFrame.Position = UDim2.new(0.5, -50, 0.1, 0)
+    -- 3) Headshot + Info panel (below STOP ALL)
+    local InfoPanel = Instance.new("Frame", T2)
+    InfoPanel.Size = UDim2.new(1, 0, 0, 100)
+    InfoPanel.Position = UDim2.new(0, 0, 0, 75) -- after STOP ALL (35+32+gap)
+    InfoPanel.BackgroundTransparency = 1
+
+    -- Left: Headshot
+    local HeadshotFrame = Instance.new("Frame", InfoPanel)
+    HeadshotFrame.Size = UDim2.new(0, 90, 0, 90)
+    HeadshotFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
     HeadshotFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
     Instance.new("UICorner", HeadshotFrame).CornerRadius = UDim.new(1, 0)
     local HeadshotStroke = Instance.new("UIStroke", HeadshotFrame)
@@ -498,84 +562,50 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png"
     local hsc = Instance.new("UICorner", HeadshotImage); hsc.CornerRadius = UDim.new(1, 0)
 
-    -- Info labels directly below headshot (closely packed)
-    local TargetNameLabel = Instance.new("TextLabel", LeftPanel)
-    TargetNameLabel.Size = UDim2.new(1, 0, 0, 18)
-    TargetNameLabel.Position = UDim2.new(0, 0, 0.42, 0)  -- just below headshot
+    -- Right: Info labels (close to headshot)
+    local InfoRight = Instance.new("Frame", InfoPanel)
+    InfoRight.Size = UDim2.new(0.5, 0, 1, 0)
+    InfoRight.Position = UDim2.new(0.25, 0, 0, 0) -- next to headshot
+    InfoRight.BackgroundTransparency = 1
+
+    local TargetNameLabel = Instance.new("TextLabel", InfoRight)
+    TargetNameLabel.Size = UDim2.new(1, 0, 0, 25)
+    TargetNameLabel.Position = UDim2.new(0, 0, 0.1, 0)
     TargetNameLabel.BackgroundTransparency = 1
     TargetNameLabel.Text = "NO TARGET"
     TargetNameLabel.TextColor3 = White
-    TargetNameLabel.TextSize = 13
+    TargetNameLabel.TextSize = 16
     TargetNameLabel.Font = Enum.Font.GothamBold
-    TargetNameLabel.TextXAlignment = Enum.TextXAlignment.Center
+    TargetNameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-    local AtNameLabel = Instance.new("TextLabel", LeftPanel)
-    AtNameLabel.Size = UDim2.new(1, 0, 0, 16)
-    AtNameLabel.Position = UDim2.new(0, 0, 0.48, 0)
+    local AtNameLabel = Instance.new("TextLabel", InfoRight)
+    AtNameLabel.Size = UDim2.new(1, 0, 0, 20)
+    AtNameLabel.Position = UDim2.new(0, 0, 0.38, 0)
     AtNameLabel.BackgroundTransparency = 1
     AtNameLabel.Text = "@no_target"
     AtNameLabel.TextColor3 = Color3.fromRGB(150,150,150)
-    AtNameLabel.TextSize = 11
+    AtNameLabel.TextSize = 13
     AtNameLabel.Font = Enum.Font.Gotham
-    AtNameLabel.TextXAlignment = Enum.TextXAlignment.Center
+    AtNameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-    local StatusLabel = Instance.new("TextLabel", LeftPanel)
-    StatusLabel.Size = UDim2.new(1, 0, 0, 16)
-    StatusLabel.Position = UDim2.new(0, 0, 0.54, 0)
+    local StatusLabel = Instance.new("TextLabel", InfoRight)
+    StatusLabel.Size = UDim2.new(1, 0, 0, 20)
+    StatusLabel.Position = UDim2.new(0, 0, 0.6, 0)
     StatusLabel.BackgroundTransparency = 1
     StatusLabel.Text = "🔴 OFFLINE"
     StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
-    StatusLabel.TextSize = 12
+    StatusLabel.TextSize = 14
     StatusLabel.Font = Enum.Font.GothamBold
-    StatusLabel.TextXAlignment = Enum.TextXAlignment.Center
+    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Right panel: textbox + grid of buttons
-    local RightPanel = Instance.new("Frame", TopSection)
-    RightPanel.Size = UDim2.new(0.62, 0, 1, 0)
-    RightPanel.Position = UDim2.new(0.36, 0, 0, 0)
-    RightPanel.BackgroundTransparency = 1
-
-    -- TextBox for target name
-    local target = Instance.new("TextBox", RightPanel)
-    target.Size = UDim2.new(0.98, 0, 0, 28)
-    target.Position = UDim2.new(0, 0, 0, 0)
-    target.PlaceholderText = "TARGET NAME..."
-    target.BackgroundColor3 = Color3.fromRGB(20,20,20)
-    target.TextColor3 = White
-    Instance.new("UICorner", target)
-
-    -- Grid for buttons (2 columns, same size as before)
-    local BtnArea = Instance.new("Frame", RightPanel)
-    BtnArea.Size = UDim2.new(1, 0, 1, -32)  -- leave 32px for textbox
-    BtnArea.Position = UDim2.new(0, 0, 0, 32)
+    -- 4) Buttons Grid (below InfoPanel)
+    local BtnArea = Instance.new("Frame", T2)
+    BtnArea.Size = UDim2.new(1, 0, 0, 180) -- enough space for buttons
+    BtnArea.Position = UDim2.new(0, 0, 0, 185) -- after InfoPanel (75+100+10)
     BtnArea.BackgroundTransparency = 1
-
     local BtnGrid = Instance.new("UIGridLayout", BtnArea)
-    BtnGrid.CellSize = UDim2.new(0.47, 0, 0, 32)   -- original size
+    BtnGrid.CellSize = UDim2.new(0.47, 0, 0, 32)
     BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
-
-    -- Store references to all toggle buttons for reset
-    local toggleButtons = {}
-
-    -- Helper to create toggle buttons and add to grid
-    local function createToggleBtn(txt, func)
-        local b = Instance.new("TextButton", BtnArea)
-        b.BackgroundColor3 = White
-        b.Text = string.upper(txt)
-        b.TextColor3 = Black
-        b.Font = Enum.Font.GothamBold
-        b.TextSize = 8.5
-        Instance.new("UICorner", b)
-        b.MouseButton1Click:Connect(function()
-            playS(CLICK_SOUND)
-            b:SetAttribute("T", not b:GetAttribute("T"))
-            b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White
-            b.TextColor3 = b:GetAttribute("T") and White or Black
-            func(b)
-        end)
-        table.insert(toggleButtons, b)
-        return b
-    end
 
     -- Function to get target from textbox
     local function getT()
@@ -585,7 +615,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end
 
-    -- Update target info in real-time
+    -- Update headshot and info in real-time
     task.spawn(function()
         while task.wait(0.1) do
             local t = getT()
@@ -615,8 +645,47 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- Create buttons
-    createToggleBtn("👁️ VIEW", function(b)
+    -- STOP ALL functionality
+    StopAllBtn.MouseButton1Click:Connect(function()
+        playS(CLICK_SOUND)
+        -- Reset all toggle buttons in BtnArea
+        for _, v in pairs(BtnArea:GetChildren()) do
+            if v:IsA("TextButton") and v:GetAttribute("T") ~= nil then
+                v:SetAttribute("T", false)
+                v.BackgroundColor3 = White
+                v.TextColor3 = Black
+            end
+        end
+        -- Reset stand button (we'll find it by name or we can store reference)
+        for _, v in pairs(BtnArea:GetChildren()) do
+            if v:IsA("TextButton") and v.Text:find("STAND") then
+                v.Text = "STAND: OFF 🛑"
+                v.BackgroundColor3 = White
+                v.TextColor3 = Black
+                standModeIdx = 0
+                break
+            end
+        end
+        -- Stop all functions
+        _G.Loop = false
+        _G.Fly = false
+        if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
+        _G.InfJump = false
+        _G.StrongView = false
+        _G.TargetESP = false
+        _G.TargetLook = false
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
+        end
+        stopCopyLoop()
+        stopChatSync()
+        stopStandLoop()
+        toggleCustomEmote(false)
+    end)
+
+    -- Now add all buttons to BtnArea using btn() function
+    -- Buttons (same as original)
+    btn("👁️ VIEW", BtnArea, function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -632,9 +701,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
             end
         end)
-    end)
+    end, false)
 
-    createToggleBtn("🔴 TARGET ESP", function(b)
+    btn("🔴 TARGET ESP", BtnArea, function(b)
         _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
             local currentHighlight, currentBillboard
@@ -661,6 +730,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         currentBillboard.Size = UDim2.new(0, 100, 0, 30)
                         currentBillboard.AlwaysOnTop = true
                         currentBillboard.StudsOffset = Vector3.new(0, 2, 0)
+                        
                         local tl = Instance.new("TextLabel", currentBillboard)
                         tl.Size = UDim2.new(1, 0, 1, 0)
                         tl.BackgroundTransparency = 1
@@ -668,8 +738,11 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         tl.TextColor3 = Color3.fromRGB(255, 0, 0)
                         tl.TextSize = 16
                         tl.Font = Enum.Font.GothamBlack
+                        
                         local stroke = Instance.new("UIStroke", tl)
-                        stroke.Thickness = 3; stroke.Color = Color3.fromRGB(0, 0, 0)
+                        stroke.Thickness = 3
+                        stroke.Color = Color3.fromRGB(0, 0, 0)
+                        
                         currentBillboard.Parent = head
                     end
                 else
@@ -679,9 +752,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
             cleanup()
         end)
-    end)
-
-    createToggleBtn("👁️ TARGET LOOK", function(b)
+    end, false)
+    
+    btn("👁️ TARGET LOOK", BtnArea, function(b)
         _G.TargetLook = b:GetAttribute("T")
         local lookConnection
         if _G.TargetLook then
@@ -704,25 +777,16 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             if lookConnection then lookConnection:Disconnect() end
         end
-    end)
-
-    -- GOTO (non-toggle)
-    local gotoBtn = Instance.new("TextButton", BtnArea)
-    gotoBtn.BackgroundColor3 = DarkRed
-    gotoBtn.Text = "🚀 GOTO"
-    gotoBtn.TextColor3 = White
-    gotoBtn.Font = Enum.Font.GothamBold
-    gotoBtn.TextSize = 8.5
-    Instance.new("UICorner", gotoBtn)
-    gotoBtn.MouseButton1Click:Connect(function()
-        playS(CLICK_SOUND)
+    end, false)
+    
+    btn("🚀 GOTO", BtnArea, function()
         local t = getT()
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
             SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
         end
-    end)
-
-    createToggleBtn("🍆 BANG", function(b)
+    end, true)
+    
+    btn("🍆 BANG", BtnArea, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
@@ -738,9 +802,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end)
-
-    createToggleBtn("🧒 HEADSIT", function(b)
+    end, false)
+    
+    btn("🧒 HEADSIT", BtnArea, function(b)
         _G.Loop = b:GetAttribute("T")
         task.spawn(function()
             while _G.Loop do
@@ -756,9 +820,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end)
-
-    createToggleBtn("🦒 FRONT HEADSIT", function(b)
+    end, false)
+    
+    btn("🦒 FRONT HEADSIT", BtnArea, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
@@ -775,9 +839,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end)
-
-    createToggleBtn("COPY ANIM👤", function(b)
+    end, false)
+    
+    btn("COPY ANIM👤", BtnArea, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             targetPlayer = getT()
@@ -794,9 +858,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             stopCopyLoop()
         end
-    end)
-
-    createToggleBtn("COPY CHAT💬", function(b)
+    end, false)
+    
+    btn("COPY CHAT💬", BtnArea, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             chatTargetPlayer = getT()
@@ -811,20 +875,22 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             stopChatSync()
         end
-    end)
-
-    -- Stand button (special, not toggle but cycle)
+    end, false)
+    
+    -- STAND BUTTON (special)
     local standBtn = Instance.new("TextButton", BtnArea)
-    standBtn.Size = UDim2.new(0.47, 0, 0, 32)  -- match grid
+    standBtn.Size = UDim2.new(0.47, 0, 0, 32)
     standBtn.BackgroundColor3 = White
     standBtn.Text = "STAND: OFF 🛑"
     standBtn.TextColor3 = Black
     standBtn.Font = Enum.Font.GothamBold
     standBtn.TextSize = 8.5
     Instance.new("UICorner", standBtn)
+    
     local standModeIdx = 0
     standBtn.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
+        
         if standModeIdx == 0 then
             standTarget = getT()
             if not standTarget then
@@ -833,8 +899,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 standBtn.Text = "STAND: OFF 🛑"
                 return
             end
-        end
+        end        
         standModeIdx = (standModeIdx + 1) % 6
+        
         if standModeIdx == 1 then
             standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FRONT ⬆️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 2 then
@@ -849,64 +916,16 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
         end
     end)
-    table.insert(toggleButtons, standBtn) -- for resetting
 
-    -- STOP ALL button at the bottom of T2 (separate from grid)
-    local StopAllBtn = Instance.new("TextButton", T2)
-    StopAllBtn.Size = UDim2.new(0.4, 0, 0, 32)
-    StopAllBtn.Position = UDim2.new(0.3, 0, 0.82, 0)  -- below top section
-    StopAllBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
-    StopAllBtn.Text = "🛑 STOP ALL"
-    StopAllBtn.TextColor3 = White
-    StopAllBtn.Font = Enum.Font.GothamBold
-    StopAllBtn.TextSize = 12
-    Instance.new("UICorner", StopAllBtn)
-
-    StopAllBtn.MouseButton1Click:Connect(function()
-        playS(CLICK_SOUND)
-        -- Reset all toggle buttons in the grid
-        for _, v in pairs(BtnArea:GetChildren()) do
-            if v:IsA("TextButton") and v:GetAttribute("T") ~= nil then
-                v:SetAttribute("T", false)
-                v.BackgroundColor3 = White
-                v.TextColor3 = Black
-            end
-        end
-        -- Reset stand button
-        standBtn.Text = "STAND: OFF 🛑"
-        standBtn.BackgroundColor3 = White
-        standBtn.TextColor3 = Black
-        standModeIdx = 0
-        -- Stop all functions
-        _G.Loop = false
-        _G.Fly = false
-        if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
-        _G.InfJump = false
-        _G.StrongView = false
-        _G.TargetESP = false
-        _G.TargetLook = false
-        if player.Character and player.Character:FindFirstChild("Humanoid") then
-            workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
-        end
-        stopCopyLoop()
-        stopChatSync()
-        stopStandLoop()
-        toggleCustomEmote(false)
-    end)
-
-    -- ==========================================
-    -- TAB 3: SHIELD (unchanged)
-    -- ==========================================
+    -- TAB 3: SHIELD
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end, false)
     btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, true)
     btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
     btn("🛡️ ANTI SIT", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop then player.Character.Humanoid.Sit = false end task.wait() end end) end, false)
     btn("🛡️ ANTI AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
     btn("🛡️ ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end, false)
-
-    -- ==========================================
-    -- TAB 4: SPAM (unchanged)
-    -- ==========================================
+    
+    -- TAB 4: SPAM
     btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/9S2h4aDC"))() end, true)
     btn("NAMELESS SPAMMER💢", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/bAdrcuP8"))() end, true)
     btn("BHUMIKA SPAMMER 💖", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/3UfyBuCx"))() end, true)
@@ -924,9 +943,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
     btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
 
-    -- ==========================================
-    -- TAB 5: OTHER (unchanged)
-    -- ==========================================
+    -- TAB 5: OTHER
     btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
     btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end, false)
@@ -942,8 +959,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("🎭 EMOTE NAME", T5, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))() end) end, true)
     btn("NAMELESS EMOTE👤", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)
     btn("🔄 REJOIN", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)
-
-    -- PHONK tab (unchanged)
+    
     local currentPlaying = nil
     local function phonkBtn(name, id)
         local b = Instance.new("TextButton", T_Phonk)
@@ -967,27 +983,30 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
         end)
     end
+    
     phonkBtn("1", "139435437308948"); phonkBtn("2", "137787889626447"); phonkBtn("3", "138864288968383"); phonkBtn("4", "130973511966646")
     phonkBtn("5", "135674024616225"); phonkBtn("6", "137152491110539"); phonkBtn("7", "139606677237480"); phonkBtn("8", "139825057894568")
     phonkBtn("9", "140292910030604"); phonkBtn("10", "137466127206691"); phonkBtn("11", "139638751795258")
-
-    -- ADMIN tab (unchanged)
+    
     local LogL = Instance.new("TextLabel", T_Adm); LogL.Size = UDim2.new(1,0,1,0); LogL.BackgroundTransparency = 1; LogL.TextColor3 = Green; LogL.TextSize = 8.5; LogL.Font = Enum.Font.Code; LogL.TextXAlignment = "Left"; LogL.TextYAlignment = "Top"
     RunService.Heartbeat:Connect(function()
         local t = "[ MASTER ADMIN ACCESS ]\n--- ACTIVE USERS ---\n"
         for _,v in pairs(_G.AdminLogs) do t = t .. "> " .. v .. "\n" end
         LogL.Text = t
     end)
-
-    -- Logo button
+    
     local Logo = Instance.new("ImageButton", sg); Logo.Size = UDim2.new(0, 50, 0, 50); Logo.Position = UDim2.new(0, 10, 0.5, -25)
-    Logo.BackgroundTransparency = 1; Logo.Image = LOGO_IMAGE; makeDraggable(Logo)
+    Logo.BackgroundTransparency = 1
+    Logo.Image = LOGO_IMAGE; makeDraggable(Logo)
+    
     Logo.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
         Main.Visible = not Main.Visible
     end)
-
-    -- Chat sync listener
+    
+    -- ==========================================
+    -- CHAT SYNC LISTENER - 0 DELAY
+    -- ==========================================
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
@@ -1005,18 +1024,22 @@ Verify.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then
         playS(CLICK_SOUND)
         playKeySuccess()
+        
         if KF then KF:Destroy() end
+        
         task.spawn(function()
             SendPublicChat("")
             task.wait(5)
             SendPublicChat("..")
             playS(LOAD_SOUND)
+            
             StarterGui:SetCore("SendNotification", {
                 Title = "ENDLESS AURA",
                 Text = "Loaded...",
                 Icon = LOGO_IMAGE,
                 Duration = 5
             })
+            
             task.spawn(function()
                 local success, err = pcall(function()
                     local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
@@ -1024,6 +1047,7 @@ Verify.MouseButton1Click:Connect(function()
                     if func then func() end
                 end)
             end)
+
             task.wait(0.2)
             Initialize()
         end)
