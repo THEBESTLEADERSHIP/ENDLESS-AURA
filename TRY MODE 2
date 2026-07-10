@@ -22,6 +22,16 @@ if not _G.AdminLogs then _G.AdminLogs = {} end
 local voidYLevel = -99999999
 local safePosition = Vector3.new(0, 50, 0)
 
+-- [ Custom Notification Helper ]
+local function notify(title, text, duration)
+    StarterGui:SetCore("SendNotification", {
+        Title = title or "ENDLESS AURA",
+        Text = text or "",
+        Icon = LOGO_IMAGE,
+        Duration = duration or 2
+    })
+end
+
 -- [ Custom Emote Logic Injection ]
 local customAnimId = "121803583995185"
 local customTrack = nil
@@ -437,7 +447,18 @@ local function Initialize()
         local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND)
-            if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
+            if not isLoad then 
+                b:SetAttribute("T", not b:GetAttribute("T")) 
+                b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White 
+                b.TextColor3 = b:GetAttribute("T") and White or Black
+                
+                -- Toggle notifications
+                local state = b:GetAttribute("T") and "ON 🟢" or "OFF 🔴"
+                notify(txt, "Status: " .. state)
+            else
+                -- Run/Execute notifications
+                notify(txt, "Running / Executed Successfully! ⚡")
+            end
             func(b)
         end)
     end
@@ -577,6 +598,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
                 playS(CLICK_SOUND)
+                notify("COPY ANIM👤", "Target not found!", 2)
             end
         else
             stopCopyLoop()
@@ -594,6 +616,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
                 playS(CLICK_SOUND)
+                notify("COPY CHAT💬", "Target not found!", 2)
             end
         else
             stopChatSync()
@@ -622,6 +645,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             standTarget = getT()
             if not standTarget then
                 standBtn.Text = "NOT FOUND!"
+                notify("STAND SYSTEM", "Target not found! ❌")
                 task.wait(0.5)
                 standBtn.Text = "STAND: OFF 🛑"
                 return
@@ -631,16 +655,22 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         
         if standModeIdx == 1 then
             standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FRONT ⬆️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
+            notify("STAND SYSTEM", "Position: FRONT ⬆️")
         elseif standModeIdx == 2 then
             standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, 5); standBtn.Text = "BACK ⬇️"; standBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); standBtn.TextColor3 = White; startStandLoop()
+            notify("STAND SYSTEM", "Position: BACK ⬇️")
         elseif standModeIdx == 3 then
             standMode = true; standLookTarget = false; standOffset = CFrame.new(-5, 0, 0); standBtn.Text = "LEFT ⬅️"; standBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0); standBtn.TextColor3 = White; startStandLoop()
+            notify("STAND SYSTEM", "Position: LEFT ⬅️")
         elseif standModeIdx == 4 then
             standMode = true; standLookTarget = false; standOffset = CFrame.new(5, 0, 0); standBtn.Text = "RIGHT ➡️"; standBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0); standBtn.TextColor3 = White; startStandLoop()
+            notify("STAND SYSTEM", "Position: RIGHT ➡️")
         elseif standModeIdx == 5 then
             standMode = true; standLookTarget = true; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FF 👀"; standBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 80); standBtn.TextColor3 = White; startStandLoop()
+            notify("STAND SYSTEM", "Position: FACE TO FACE 👀")
         elseif standModeIdx == 0 then
             standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
+            notify("STAND SYSTEM", "Status: DISABLED 🛑")
         end
     end)
 
@@ -755,12 +785,14 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end
                 for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end
                 currentPlaying = nil
+                notify("PHONK TRACK " .. name, "Audio Stopped 🛑")
             else
                 for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end
                 for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end
                 b:SetAttribute("Disco", true)
                 local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxassetid://"..id; s.Volume = 3; s:Play()
                 currentPlaying = id
+                notify("PHONK TRACK " .. name, "Playing Audio 🎵 🔥")
                 task.spawn(function() s.Ended:Wait(); if currentPlaying == id then b:SetAttribute("Disco", false); currentPlaying = nil; s:Destroy() end end)
             end
         end)
@@ -784,6 +816,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     Logo.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
         Main.Visible = not Main.Visible
+        local uiState = Main.Visible and "Opened 👀" or "Closed 🙈"
+        notify("UI PANEL", "Panel is " .. uiState, 1.5)
     end)
     
     TextChatService.MessageReceived:Connect(function(msg)
@@ -802,9 +836,10 @@ end
 task.spawn(function()
     playS(LOAD_SOUND)
     
+    -- Notification changes to 'Loaded...'
     StarterGui:SetCore("SendNotification", {
         Title = "ENDLESS AURA",
-        Text = "Executing...",
+        Text = "Loaded...",
         Icon = LOGO_IMAGE,
         Duration = 3
     })
