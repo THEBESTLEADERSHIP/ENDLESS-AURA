@@ -1,4 +1,4 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.5 (NO KEY) 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
 -- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
 
@@ -14,7 +14,6 @@ local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 
 local MASTER_ACC = "Nameless82872262"
-local CORRECT_KEY = "WHAT IS AURA"
 local CLICK_SOUND = "107406973902030"
 local LOGO_IMAGE = "rbxassetid://129299711445020"
 local LOAD_SOUND = "129584950954499"
@@ -23,7 +22,7 @@ if not _G.AdminLogs then _G.AdminLogs = {} end
 local voidYLevel = -99999999 -- Absolute Depth Limit Override
 local safePosition = Vector3.new(0, 50, 0)
 
--- [ Custom Emote Logic Injection - EXACT LOGIC USED FROM YOUR SECOND SCRIPT ]
+-- [ Custom Emote Logic Injection ]
 local customAnimId = "121803583995185"
 local customTrack = nil
 
@@ -36,15 +35,12 @@ local function toggleCustomEmote(shouldPlay)
     local animateScript = char:FindFirstChild("Animate")
 
     if shouldPlay then
-        -- Disable default movement pack
         if animateScript then animateScript.Disabled = true end
         
-        -- Stop all currently playing animations except high priority actions
         for _, t in pairs(animator:GetPlayingAnimationTracks()) do
             t:Stop(0.1)
         end
 
-        -- Fetch and Setup Animation Object via game:GetObjects Bypass
         local success, objects = pcall(function() 
             return game:GetObjects("rbxassetid://" .. customAnimId) 
         end)
@@ -57,14 +53,11 @@ local function toggleCustomEmote(shouldPlay)
             animation.AnimationId = "rbxassetid://" .. customAnimId
         end
 
-        -- Play Track with High Priority
         customTrack = animator:LoadAnimation(animation)
         customTrack.Priority = Enum.AnimationPriority.Action4
         customTrack.Looped = true
         customTrack:Play()
-        print("Emote Started with High Priority")
     else
-        -- Cleanup
         if customTrack then
             customTrack:Stop(0.1)
             customTrack = nil
@@ -81,32 +74,10 @@ local sg = Instance.new("ScreenGui", CoreGui); sg.Name = "EndlessAura_Final"
 local DarkRed = Color3.fromRGB(150, 0, 0)
 local Black, White, Green = Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)
 
-local function SendPublicChat(msg)
-    task.spawn(function()
-        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-            local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-            if channel then channel:SendAsync(msg) end
-        end
-        local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
-        if sayRemote then sayRemote:FireServer(msg, "All") end
-    end)
-end
-
 local function playS(id)
     local s = Instance.new("Sound", workspace)
     s.SoundId = "rbxassetid://"..(id or CLICK_SOUND)
     s.Volume = 2
-    s:Play()
-    task.spawn(function()
-        s.Ended:Wait()
-        s:Destroy()
-    end)
-end
-
-local function playKeySuccess()
-    local s = Instance.new("Sound", workspace)
-    s.SoundId = "rbxassetid://123071085988261"
-    s.Volume = 0.8
     s:Play()
     task.spawn(function()
         s.Ended:Wait()
@@ -132,7 +103,6 @@ local function makeDraggable(f)
     end)
 end
 
--- Ultimate Bypass Protection for Attach features
 local function godModeAttach()
     local char = player.Character
     if not char then return end
@@ -140,7 +110,6 @@ local function godModeAttach()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     
     if hum then
-        -- Force-disable death states globally while attaching in deep void
         hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
         if hum.Health and hum.Health < 99 then hum.Health = 100 end 
         if hum:GetState() == Enum.HumanoidStateType.Dead then hum:ChangeState(Enum.HumanoidStateType.Running) end
@@ -161,31 +130,6 @@ local function SafeMoveTo(targetCFrame)
         hrp.CFrame = targetCFrame
     end
 end
-
--- ==========================================
--- KEY SYSTEM
--- ==========================================
-local KF = Instance.new("Frame", sg); KF.Size = UDim2.new(0, 340, 0, 440); KF.Position = UDim2.new(0.5, -170, 0.5, -220); KF.BackgroundColor3 = Black; KF.BackgroundTransparency = 0.2; makeDraggable(KF)
-Instance.new("UICorner", KF); local KS = Instance.new("UIStroke", KF); KS.Thickness = 3; KS.Color = DarkRed
-
-local KeyLogo = Instance.new("ImageLabel", KF); KeyLogo.Size = UDim2.new(0, 40, 0, 40); KeyLogo.Position = UDim2.new(0.5, -20, 0, 10); KeyLogo.BackgroundTransparency = 1; KeyLogo.Image = LOGO_IMAGE
-
-local CloseKey = Instance.new("TextButton", KF); CloseKey.Size = UDim2.new(0,25,0,25); CloseKey.Position = UDim2.new(1,-30,0,5); CloseKey.Text = "X"; CloseKey.BackgroundColor3 = DarkRed; CloseKey.TextColor3 = White; Instance.new("UICorner", CloseKey)
-CloseKey.MouseButton1Click:Connect(function()
-    playS(CLICK_SOUND)
-    sg:Destroy()
-end)
-
-local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = DarkRed; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1
-local Bio = Instance.new("TextLabel", KF); Bio.Text = "SCRIPT BY NAMELESS 👑💀\n\nKEY CHAIYE TO NAMELESS SE MANG\nKISMAT HOGI TO DEDEGA 😂"; Bio.Position = UDim2.new(0,0,0,95); Bio.Size = UDim2.new(1,0,0,60); Bio.TextColor3 = White; Bio.TextSize = 12; Bio.BackgroundTransparency = 1
-local Insta = Instance.new("TextLabel", KF); Insta.Text = "INSTAGRAM ID - ea_nameless\nFOLLOW KARLO WRNA ID BAN 💀"; Insta.Position = UDim2.new(0,0,0,165); Insta.Size = UDim2.new(1,0,0,40); Insta.TextColor3 = White; Insta.TextSize = 13; Insta.Font = Enum.Font.GothamBold; Insta.BackgroundTransparency = 1
-
-task.spawn(function()
-    while task.wait(0.5) do Insta.TextColor3 = (Insta.TextColor3 == DarkRed and White or DarkRed) end
-end)
-
-local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 45); KeyBox.Position = UDim2.new(0.5, -120, 0, 230); KeyBox.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyBox.PlaceholderText = "KEY DALO..."; KeyBox.TextColor3 = DarkRed; KeyBox.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeyBox)
-local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
 
 -- ==========================================
 -- COPY NINJA LOGIC - 0 DELAY SERVER SYNC
@@ -364,7 +308,7 @@ local function stopCopyLoop()
 end
 
 -- ==========================================
--- CHAT NINJA LOGIC - 0 DELAY SERVER SYNC
+-- CHAT NINJA LOGIC
 -- ==========================================
 local chatSyncActive = false
 local chatTargetPlayer = nil
@@ -436,7 +380,7 @@ local function stopStandLoop()
 end
 
 -- ==========================================
--- MAIN MENU
+-- MAIN MENU INITIALIZATION
 -- ==========================================
 local function Initialize()
     local entry = player.Name .. " (" .. player.UserId .. ")"
@@ -621,7 +565,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, true)
     
-    -- [ RESTORED/MOVED BUTTONS: GOTO KE BAAD COPY ANIM & CHAT ]
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
@@ -658,7 +601,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- [ STAND BUTTON SYSTEM ]
+    -- STAND SYSTEM
     local standBtn = Instance.new("TextButton", T2)
     standBtn.Size = UDim2.new(0.47, 0, 0, 32)
     standBtn.Position = UDim2.new(0.05, 0, 0, 0)
@@ -703,7 +646,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- [ BAAKI SARE TROLL BUTTONS STAND KE BAAD ]
     btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
@@ -740,7 +682,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    -- REBRANDED BUTTON: FRONT HEADSIT IS NOW BLOWJOP
     btn("🦒 BLOWJOP", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
@@ -847,9 +788,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         Main.Visible = not Main.Visible
     end)
     
-    -- ==========================================
-    -- CHAT SYNC LISTENER - 0 DELAY
-    -- ==========================================
+    -- CHAT SYNC LISTENER
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
@@ -861,42 +800,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 end
 
 -- ==========================================
--- VERIFY SEQUENCE
+-- INSTANT EXECUTION (NO KEY)
 -- ==========================================
-Verify.MouseButton1Click:Connect(function()
-    if KeyBox.Text == CORRECT_KEY then
-        playS(CLICK_SOUND)
-        playKeySuccess()
-        
-        if KF then KF:Destroy() end
-        
-        task.spawn(function()
-            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
-            task.wait(5)
-            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
-            playS(LOAD_SOUND)
-            
-            StarterGui:SetCore("SendNotification", {
-                Title = "ENDLESS AURA",
-                Text = "Loaded...",
-                Icon = LOGO_IMAGE,
-                Duration = 5
-            })
-            
-            task.spawn(function()
-                local success, err = pcall(function()
-                    local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
-                    local func = loadstring(response)
-                    if func then func() end
-                end)
-            end)
-
-            task.wait(0.2)
-            Initialize()
-        end)
-    else
-        playS(CLICK_SOUND)
-        KeyBox.Text = ""
-        KeyBox.PlaceholderText = "WRONG KEY 😂"
-    end
-end)
+playS(LOAD_SOUND)
+StarterGui:SetCore("SendNotification", {
+    Title = "ENDLESS AURA",
+    Text = "Loaded Instantly...",
+    Icon = LOGO_IMAGE,
+    Duration = 4
+})
+Initialize()
