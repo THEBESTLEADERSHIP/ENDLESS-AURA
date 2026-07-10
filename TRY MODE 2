@@ -1,4 +1,4 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.6 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.7 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
 -- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
 
@@ -465,7 +465,6 @@ local function Initialize()
         return nil 
     end
 
-    -- Real-time Text Monitoring for Smart Auto-Fill
     target:GetPropertyChangedSignal("Text"):Connect(function()
         local currentText = target.Text
         local textLength = string.len(currentText)
@@ -495,7 +494,6 @@ local function Initialize()
         end
     end)
 
-    -- Universal function to shut down Troll loops if target leaves
     local function forceShutdownTroll()
         _G.Loop = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false
         stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false)
@@ -516,7 +514,6 @@ local function Initialize()
         end
     end
 
-    -- Monitor leaving target
     Players.PlayerRemoving:Connect(function(leavingPlayer)
         if trackedTargetName ~= "" and lastTrackedUserId and leavingPlayer.UserId == lastTrackedUserId then
             notify("⚠️ TARGET LEFT", "Target '" .. trackedTargetName .. "' left! Stopping all loops... ❌", 5)
@@ -529,7 +526,6 @@ local function Initialize()
         end
     end)
 
-    -- Monitor rejoining target
     Players.PlayerAdded:Connect(function(joiningPlayer)
         if trackedTargetName ~= "" and joiningPlayer.Name:lower() == trackedTargetName:lower() then
             lastTrackedUserId = joiningPlayer.UserId 
@@ -539,17 +535,28 @@ local function Initialize()
             if target.Text:lower() == trackedTargetName:lower() and trollButtonsState.Loop then
                 for _, b in pairs(T2:GetChildren()) do
                     if b:IsA("TextButton") and trollButtonsState[b.Text] or (b.Name == "StandBtn" and trollButtonsState.StandMode) then
-                        -- Safe Auto configuration resume link
                     end
                 end
             end
         end
     end)
 
-    -- Universal Safe Button Creator
     local function btn(txt, par, func, isLoad)
         local b = Instance.new("TextButton", par); b.BackgroundColor3 = White; b.Text = string.upper(txt); b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         
+        -- Custom Setup for STOP ALL Button (Wala Red Hi Rakho)
+        if txt == "🛑 STOP ALL" then
+            b.Name = "🛑 STOP ALL"
+            b.BackgroundColor3 = DarkRed
+            b.TextColor3 = White
+            b.MouseButton1Click:Connect(function()
+                playS(CLICK_SOUND)
+                func(b)
+                notify(txt, "All loops stopped successfully! 🛑")
+            end)
+            return
+        end
+
         -- Custom Setup for GOTO Button Behavior
         if txt == "🚀 GOTO" then
             b.MouseButton1Click:Connect(function()
@@ -572,7 +579,7 @@ local function Initialize()
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND)
             
-            if par == T2 and txt ~= "🛑 STOP ALL" then
+            if par == T2 then
                 if target.Text == "" or not getT() then
                     notify("⛔ ACCESS DENIED", "First Select Target 🎯", 3)
                     return
