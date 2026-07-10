@@ -1,6 +1,6 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.6 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
--- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
+-- 🎯 AUTO-COMPLETE + AUTO-SYNC TRACKER SYSTEM
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -443,11 +443,13 @@ local function Initialize()
     tab("👑 INFO", T1); tab("🌚 TROLL", T2); tab("🛡️ SHIELD", T3); tab("👺 SPAM", T4); tab("📁 OTHER", T5); tab("PHONK", T_Phonk)
     if player.Name == MASTER_ACC then tab("🛡️ ADMIN", T_Adm) end; T1.Visible = true
     
-    -- TAB 2: TARGET CORE LOGIC (GLOBAL VARIABLE SETTINGS)
+    -- TAB 2: TARGET SYSTEM WITH AUTO-COMPLETE & MEMORY RECOVERY LOGIC
     local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     
     local trackedTargetName = ""
-    local lastTrackedUserId = nil
+    local savedStates = {} 
+    local activeTrollButtons = {} 
+    local isProcessingAutoComplete = false
 
     local function getT() 
         local n = target.Text:lower() 
@@ -460,43 +462,111 @@ local function Initialize()
         return nil 
     end
 
-    -- Real-time Leave/Join Notification Tracker System
+    local function forceStopAllTrollFeatures(silent)
+        _G.Loop = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false
+        if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
+        workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid")
+        stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false)
+        
+        for _, btnObj in pairs(activeTrollButtons) do
+            btnObj:SetAttribute("T", false)
+            btnObj.BackgroundColor3 = White
+            btnObj.TextColor3 = Black
+        end
+        if not silent then
+            notify("⚠️ TARGET LEFT", "Target left! All active features forced OFF. 🛑", 4)
+        end
+    end
+
+    -- Real-time 2-3 Word/Letter Auto-Complete Engine
     target:GetPropertyChangedSignal("Text"):Connect(function()
-        local currentTarget = getT()
-        if currentTarget then
-            trackedTargetName = currentTarget.Name
-            lastTrackedUserId = currentTarget.UserId
-        else
-            if target.Text == "" then
-                trackedTargetName = ""
-                lastTrackedUserId = nil
+        if isProcessingAutoComplete then return end
+        local text = target.Text
+        
+        if text == "" then
+            trackedTargetName = ""
+            forceStopAllTrollFeatures(true)
+            return
+        end
+        
+        if #text >= 2 then 
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= player and (p.Name:lower():sub(1, #text) == text:lower() or p.DisplayName:lower():sub(1, #text) == text:lower()) then
+                    isProcessingAutoComplete = true
+                    target.Text = p.Name 
+                    trackedTargetName = p.Name
+                    isProcessingAutoComplete = false
+                    
+                    playS(CLICK_SOUND)
+                    notify("🎯 TARGET CHOSEN", "Selected: " .. p.Name, 3)
+                    
+                    -- Memory Restoration System (Wapis aane par check auto-on)
+                    if savedStates[p.Name] then
+                        task.spawn(function()
+                            notify("🔄 TARGET TRACKER", "Target returned! Restoring previous actions...", 3)
+                            for btnTxt, state in pairs(savedStates[p.Name]) do
+                                for _, btnObj in pairs(activeTrollButtons) do
+                                    if btnObj.Text == string.upper(btnTxt) and state == true then
+                                        btnObj:SetAttribute("T", true)
+                                        btnObj.BackgroundColor3 = DarkRed
+                                        btnObj.TextColor3 = White
+                                        -- Trigger underlying click logic safely
+                                        local cleanTxt = btnTxt:gsub("🟢", ""):gsub("🔴", ""):strip()
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                    break
+                end
             end
         end
     end)
 
+    -- Auto Leave Handler
     Players.PlayerRemoving:Connect(function(leavingPlayer)
-        if trackedTargetName ~= "" and lastTrackedUserId and leavingPlayer.UserId == lastTrackedUserId then
-            notify("⚠️ TARGET TRACKER", "Target '" .. trackedTargetName .. "' has left the server! ❌", 5)
+        if trackedTargetName ~= "" and leavingPlayer.Name:lower() == trackedTargetName:lower() then
+            savedStates[trackedTargetName] = {
+                ["VIEW"] = _G.StrongView,
+                ["TARGET ESP"] = _G.TargetESP,
+                ["TARGET LOOK"] = _G.TargetLook,
+                ["BANG"] = _G.Loop,
+                ["HEADSIT"] = _G.Loop,
+                ["BLOWJOP"] = _G.Loop
+            }
+            forceStopAllTrollFeatures(false)
         end
     end)
 
+    -- Auto Re-Join Handler
     Players.PlayerAdded:Connect(function(joiningPlayer)
-        if trackedTargetName ~= "" and joiningPlayer.Name:lower():find(trackedTargetName:lower()) then
-            lastTrackedUserId = joiningPlayer.UserId -- Re-sync UserId
-            notify("🎯 TARGET TRACKER", "Target '" .. joiningPlayer.Name .. "' joined back the server! 🟢", 5)
+        if trackedTargetName ~= "" and joiningPlayer.Name:lower() == trackedTargetName:lower() then
+            task.wait(1.5) 
+            notify("🎯 TARGET TRACKER", "Target '" .. joiningPlayer.Name .. "' is back! Turning ON systems...", 4)
+            if savedStates[joiningPlayer.Name] then
+                -- Re-execute global loops automatically
+                if savedStates[joiningPlayer.Name]["VIEW"] then _G.StrongView = true end
+                if savedStates[joiningPlayer.Name]["TARGET ESP"] then _G.TargetESP = true end
+                if savedStates[joiningPlayer.Name]["TARGET LOOK"] then _G.TargetLook = true end
+            end
         end
     end)
 
-    -- Universal Safe Button Creator with Target Check Lock
+    -- Core Button Creation Engine with Safety Interlocks
     local function btn(txt, par, func, isLoad)
         local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
+        
+        if par == T2 and txt ~= "🛑 STOP ALL" then
+            table.insert(activeTrollButtons, b)
+        end
+
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND)
             
-            -- Lock functionality exclusively for TROLL tab buttons when target is empty/invalid
+            -- Interlock Constraint Validation Check
             if par == T2 and txt ~= "🛑 STOP ALL" then
                 if target.Text == "" or not getT() then
-                    notify("⛔ ACCESS DENIED", "Please type a valid Target Name first! 🥷", 2)
+                    notify("FIRST SELECT TARGET 🎯", "Please type target details to proceed!", 3)
                     return
                 end
             end
@@ -530,8 +600,8 @@ THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
-    -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS)
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
+    -- TAB 2: TROLL PANEL FEATURES
+    btn("🛑 STOP ALL", T2, function() forceStopAllTrollFeatures(true) end, true)
     
     btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
@@ -690,9 +760,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     standBtn.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
         
-        -- Target validation lock for Stand Button
         if target.Text == "" or not getT() then
-            notify("⛔ ACCESS DENIED", "Please type a valid Target Name first! 🥷", 2)
+            notify("FIRST SELECT TARGET 🎯", "Please type target details to proceed!", 3)
             return
         end
 
