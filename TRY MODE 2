@@ -466,21 +466,27 @@ __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 
     -- ==========================================
-    -- TAB 2: TROLL - NEW LAYOUT PER USER REQUEST
+    -- TAB 2: TROLL - REDESIGNED PER USER REQUEST
     -- ==========================================
     -- Remove default grid from T2
     if T2:FindFirstChildOfClass("UIGridLayout") then T2:FindFirstChildOfClass("UIGridLayout"):Destroy() end
-    T2.CanvasSize = UDim2.new(0, 0, 0, 420)  -- extra vertical space
+    T2.CanvasSize = UDim2.new(0, 0, 0, 340)  -- make room
 
-    -- LEFT PANEL: Headshot
-    local LeftPanel = Instance.new("Frame", T2)
-    LeftPanel.Size = UDim2.new(0.35, 0, 0.65, 0)   -- 65% height, rest for buttons
+    -- Create top section (headshot + info on left, textbox + buttons on right)
+    local TopSection = Instance.new("Frame", T2)
+    TopSection.Size = UDim2.new(1, 0, 0.75, 0)  -- 75% of height
+    TopSection.Position = UDim2.new(0, 0, 0, 0)
+    TopSection.BackgroundTransparency = 1
+
+    -- Left panel: headshot + info (closely stacked)
+    local LeftPanel = Instance.new("Frame", TopSection)
+    LeftPanel.Size = UDim2.new(0.35, 0, 1, 0)
     LeftPanel.Position = UDim2.new(0, 0, 0, 0)
     LeftPanel.BackgroundTransparency = 1
 
     local HeadshotFrame = Instance.new("Frame", LeftPanel)
     HeadshotFrame.Size = UDim2.new(0, 100, 0, 100)
-    HeadshotFrame.Position = UDim2.new(0.5, -50, 0.15, 0)
+    HeadshotFrame.Position = UDim2.new(0.5, -50, 0.1, 0)
     HeadshotFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
     Instance.new("UICorner", HeadshotFrame).CornerRadius = UDim.new(1, 0)
     local HeadshotStroke = Instance.new("UIStroke", HeadshotFrame)
@@ -492,13 +498,44 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png"
     local hsc = Instance.new("UICorner", HeadshotImage); hsc.CornerRadius = UDim.new(1, 0)
 
-    -- RIGHT PANEL: TextBox + Info
-    local RightPanel = Instance.new("Frame", T2)
-    RightPanel.Size = UDim2.new(0.6, 0, 0.65, 0)
-    RightPanel.Position = UDim2.new(0.38, 0, 0, 0)
+    -- Info labels directly below headshot (closely packed)
+    local TargetNameLabel = Instance.new("TextLabel", LeftPanel)
+    TargetNameLabel.Size = UDim2.new(1, 0, 0, 18)
+    TargetNameLabel.Position = UDim2.new(0, 0, 0.42, 0)  -- just below headshot
+    TargetNameLabel.BackgroundTransparency = 1
+    TargetNameLabel.Text = "NO TARGET"
+    TargetNameLabel.TextColor3 = White
+    TargetNameLabel.TextSize = 13
+    TargetNameLabel.Font = Enum.Font.GothamBold
+    TargetNameLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+    local AtNameLabel = Instance.new("TextLabel", LeftPanel)
+    AtNameLabel.Size = UDim2.new(1, 0, 0, 16)
+    AtNameLabel.Position = UDim2.new(0, 0, 0.48, 0)
+    AtNameLabel.BackgroundTransparency = 1
+    AtNameLabel.Text = "@no_target"
+    AtNameLabel.TextColor3 = Color3.fromRGB(150,150,150)
+    AtNameLabel.TextSize = 11
+    AtNameLabel.Font = Enum.Font.Gotham
+    AtNameLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+    local StatusLabel = Instance.new("TextLabel", LeftPanel)
+    StatusLabel.Size = UDim2.new(1, 0, 0, 16)
+    StatusLabel.Position = UDim2.new(0, 0, 0.54, 0)
+    StatusLabel.BackgroundTransparency = 1
+    StatusLabel.Text = "🔴 OFFLINE"
+    StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
+    StatusLabel.TextSize = 12
+    StatusLabel.Font = Enum.Font.GothamBold
+    StatusLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+    -- Right panel: textbox + grid of buttons
+    local RightPanel = Instance.new("Frame", TopSection)
+    RightPanel.Size = UDim2.new(0.62, 0, 1, 0)
+    RightPanel.Position = UDim2.new(0.36, 0, 0, 0)
     RightPanel.BackgroundTransparency = 1
 
-    -- Target input (TextBox) - placed at top of right panel
+    -- TextBox for target name
     local target = Instance.new("TextBox", RightPanel)
     target.Size = UDim2.new(0.98, 0, 0, 28)
     target.Position = UDim2.new(0, 0, 0, 0)
@@ -507,33 +544,38 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     target.TextColor3 = White
     Instance.new("UICorner", target)
 
-    -- Info labels below the textbox
-    local TargetNameLabel = Instance.new("TextLabel", RightPanel)
-    TargetNameLabel.Size = UDim2.new(1, 0, 0, 20)
-    TargetNameLabel.Position = UDim2.new(0, 0, 0.15, 0)
-    TargetNameLabel.BackgroundTransparency = 1
-    TargetNameLabel.Text = "NO TARGET"
-    TargetNameLabel.TextColor3 = White
-    TargetNameLabel.TextSize = 14
-    TargetNameLabel.Font = Enum.Font.GothamBold
+    -- Grid for buttons (2 columns, same size as before)
+    local BtnArea = Instance.new("Frame", RightPanel)
+    BtnArea.Size = UDim2.new(1, 0, 1, -32)  -- leave 32px for textbox
+    BtnArea.Position = UDim2.new(0, 0, 0, 32)
+    BtnArea.BackgroundTransparency = 1
 
-    local AtNameLabel = Instance.new("TextLabel", RightPanel)
-    AtNameLabel.Size = UDim2.new(1, 0, 0, 16)
-    AtNameLabel.Position = UDim2.new(0, 0, 0.24, 0)
-    AtNameLabel.BackgroundTransparency = 1
-    AtNameLabel.Text = "@no_target"
-    AtNameLabel.TextColor3 = Color3.fromRGB(150,150,150)
-    AtNameLabel.TextSize = 11
-    AtNameLabel.Font = Enum.Font.Gotham
+    local BtnGrid = Instance.new("UIGridLayout", BtnArea)
+    BtnGrid.CellSize = UDim2.new(0.47, 0, 0, 32)   -- original size
+    BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
 
-    local StatusLabel = Instance.new("TextLabel", RightPanel)
-    StatusLabel.Size = UDim2.new(1, 0, 0, 16)
-    StatusLabel.Position = UDim2.new(0, 0, 0.32, 0)
-    StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Text = "🔴 OFFLINE"
-    StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
-    StatusLabel.TextSize = 12
-    StatusLabel.Font = Enum.Font.GothamBold
+    -- Store references to all toggle buttons for reset
+    local toggleButtons = {}
+
+    -- Helper to create toggle buttons and add to grid
+    local function createToggleBtn(txt, func)
+        local b = Instance.new("TextButton", BtnArea)
+        b.BackgroundColor3 = White
+        b.Text = string.upper(txt)
+        b.TextColor3 = Black
+        b.Font = Enum.Font.GothamBold
+        b.TextSize = 8.5
+        Instance.new("UICorner", b)
+        b.MouseButton1Click:Connect(function()
+            playS(CLICK_SOUND)
+            b:SetAttribute("T", not b:GetAttribute("T"))
+            b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White
+            b.TextColor3 = b:GetAttribute("T") and White or Black
+            func(b)
+        end)
+        table.insert(toggleButtons, b)
+        return b
+    end
 
     -- Function to get target from textbox
     local function getT()
@@ -573,18 +615,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- BUTTONS GRID (below the left/right panels)
-    local BtnArea = Instance.new("Frame", T2)
-    BtnArea.Size = UDim2.new(1, 0, 0.3, 0)  -- 30% height for buttons
-    BtnArea.Position = UDim2.new(0, 0, 0.68, 0)
-    BtnArea.BackgroundTransparency = 1
-    local BtnGrid = Instance.new("UIGridLayout", BtnArea)
-    BtnGrid.CellSize = UDim2.new(0.22, 0, 0, 32)  -- original size 0.47, but we have more columns? Actually original had 2 columns with 0.47. We'll use 4 columns with 0.22 so buttons are smaller, but the user said "sbke button size bhi ho pehele jees karo" – they want original size. Original size was 0.47 width and 32 height, with 2 columns. We'll keep that: 2 columns, cell size 0.47, but we have limited space. Actually we can keep the same grid layout as before, but we need to fit all buttons. The original TROLL tab had a grid with two columns. We can keep that grid and place it in BtnArea. So we'll set CellSize = UDim2.new(0.47, 0, 0, 32) and CellPadding = UDim2.new(0.04, 0, 0.02, 0). That will create 2 columns. Since we have about 11 buttons, they will wrap. That should be fine.
-
-    -- Re-create the buttons (same as before) inside BtnArea
-    -- We'll define them with the same functionality.
-
-    btn("👁️ VIEW", BtnArea, function(b)
+    -- Create buttons
+    createToggleBtn("👁️ VIEW", function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -600,9 +632,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
             end
         end)
-    end, false)
+    end)
 
-    btn("🔴 TARGET ESP", BtnArea, function(b)
+    createToggleBtn("🔴 TARGET ESP", function(b)
         _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
             local currentHighlight, currentBillboard
@@ -647,9 +679,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
             cleanup()
         end)
-    end, false)
+    end)
 
-    btn("👁️ TARGET LOOK", BtnArea, function(b)
+    createToggleBtn("👁️ TARGET LOOK", function(b)
         _G.TargetLook = b:GetAttribute("T")
         local lookConnection
         if _G.TargetLook then
@@ -672,16 +704,25 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             if lookConnection then lookConnection:Disconnect() end
         end
-    end, false)
+    end)
 
-    btn("🚀 GOTO", BtnArea, function()
+    -- GOTO (non-toggle)
+    local gotoBtn = Instance.new("TextButton", BtnArea)
+    gotoBtn.BackgroundColor3 = DarkRed
+    gotoBtn.Text = "🚀 GOTO"
+    gotoBtn.TextColor3 = White
+    gotoBtn.Font = Enum.Font.GothamBold
+    gotoBtn.TextSize = 8.5
+    Instance.new("UICorner", gotoBtn)
+    gotoBtn.MouseButton1Click:Connect(function()
+        playS(CLICK_SOUND)
         local t = getT()
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
             SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
         end
-    end, true)
+    end)
 
-    btn("🍆 BANG", BtnArea, function(b)
+    createToggleBtn("🍆 BANG", function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
@@ -697,9 +738,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end, false)
+    end)
 
-    btn("🧒 HEADSIT", BtnArea, function(b)
+    createToggleBtn("🧒 HEADSIT", function(b)
         _G.Loop = b:GetAttribute("T")
         task.spawn(function()
             while _G.Loop do
@@ -715,9 +756,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end, false)
+    end)
 
-    btn("🦒 FRONT HEADSIT", BtnArea, function(b)
+    createToggleBtn("🦒 FRONT HEADSIT", function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
@@ -734,9 +775,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end, false)
+    end)
 
-    btn("COPY ANIM👤", BtnArea, function(b)
+    createToggleBtn("COPY ANIM👤", function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             targetPlayer = getT()
@@ -753,9 +794,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             stopCopyLoop()
         end
-    end, false)
+    end)
 
-    btn("COPY CHAT💬", BtnArea, function(b)
+    createToggleBtn("COPY CHAT💬", function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             chatTargetPlayer = getT()
@@ -770,18 +811,17 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             stopChatSync()
         end
-    end, false)
+    end)
 
-    -- Stand button (special)
+    -- Stand button (special, not toggle but cycle)
     local standBtn = Instance.new("TextButton", BtnArea)
-    standBtn.Size = UDim2.new(0.47, 0, 0, 32)  -- match grid cell size
+    standBtn.Size = UDim2.new(0.47, 0, 0, 32)  -- match grid
     standBtn.BackgroundColor3 = White
     standBtn.Text = "STAND: OFF 🛑"
     standBtn.TextColor3 = Black
     standBtn.Font = Enum.Font.GothamBold
     standBtn.TextSize = 8.5
     Instance.new("UICorner", standBtn)
-
     local standModeIdx = 0
     standBtn.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
@@ -809,11 +849,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
         end
     end)
+    table.insert(toggleButtons, standBtn) -- for resetting
 
-    -- STOP ALL button - centered at the bottom of T2
+    -- STOP ALL button at the bottom of T2 (separate from grid)
     local StopAllBtn = Instance.new("TextButton", T2)
     StopAllBtn.Size = UDim2.new(0.4, 0, 0, 32)
-    StopAllBtn.Position = UDim2.new(0.3, 0, 0.92, 0)  -- below buttons
+    StopAllBtn.Position = UDim2.new(0.3, 0, 0.82, 0)  -- below top section
     StopAllBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
     StopAllBtn.Text = "🛑 STOP ALL"
     StopAllBtn.TextColor3 = White
@@ -823,7 +864,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 
     StopAllBtn.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
-        -- Reset all toggle buttons in BtnArea
+        -- Reset all toggle buttons in the grid
         for _, v in pairs(BtnArea:GetChildren()) do
             if v:IsA("TextButton") and v:GetAttribute("T") ~= nil then
                 v:SetAttribute("T", false)
