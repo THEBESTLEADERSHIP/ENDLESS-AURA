@@ -465,6 +465,7 @@ local function Initialize()
         return nil 
     end
 
+    -- Real-time Text Monitoring for Smart Auto-Fill
     target:GetPropertyChangedSignal("Text"):Connect(function()
         local currentText = target.Text
         local textLength = string.len(currentText)
@@ -494,6 +495,7 @@ local function Initialize()
         end
     end)
 
+    -- Universal function to shut down Troll loops if target leaves
     local function forceShutdownTroll()
         _G.Loop = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false
         stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false)
@@ -514,10 +516,10 @@ local function Initialize()
         end
     end
 
+    -- Monitor leaving target
     Players.PlayerRemoving:Connect(function(leavingPlayer)
         if trackedTargetName ~= "" and lastTrackedUserId and leavingPlayer.UserId == lastTrackedUserId then
             notify("⚠️ TARGET LEFT", "Target '" .. trackedTargetName .. "' left! Stopping all loops... ❌", 5)
-            
             trollButtonsState = {
                 Loop = _G.Loop, StrongView = _G.StrongView, TargetESP = _G.TargetESP, TargetLook = _G.TargetLook,
                 CopyNinja = copyNinjaActive, ChatSync = chatSyncActive, StandMode = standMode, StandModeIdx = _G.SavedStandIdx or 0
@@ -526,33 +528,25 @@ local function Initialize()
         end
     end)
 
+    -- Monitor rejoining target
     Players.PlayerAdded:Connect(function(joiningPlayer)
         if trackedTargetName ~= "" and joiningPlayer.Name:lower() == trackedTargetName:lower() then
             lastTrackedUserId = joiningPlayer.UserId 
             notify("🎯 TARGET RETURNED", "Target '" .. joiningPlayer.Name .. "' came back! Resuming loops... 🟢", 5)
-            
-            task.wait(1.5) 
-            if target.Text:lower() == trackedTargetName:lower() and trollButtonsState.Loop then
-                for _, b in pairs(T2:GetChildren()) do
-                    if b:IsA("TextButton") and trollButtonsState[b.Text] or (b.Name == "StandBtn" and trollButtonsState.StandMode) then
-                    end
-                end
-            end
         end
     end)
 
+    -- Universal Safe Button Creator
     local function btn(txt, par, func, isLoad)
         local b = Instance.new("TextButton", par); b.BackgroundColor3 = White; b.Text = string.upper(txt); b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         
-        -- Custom Setup for STOP ALL Button (Wala Red Hi Rakho)
+        -- Custom Setup for STOP ALL (Wala Red Hi Rakho)
         if txt == "🛑 STOP ALL" then
-            b.Name = "🛑 STOP ALL"
             b.BackgroundColor3 = DarkRed
             b.TextColor3 = White
             b.MouseButton1Click:Connect(function()
                 playS(CLICK_SOUND)
                 func(b)
-                notify(txt, "All loops stopped successfully! 🛑")
             end)
             return
         end
@@ -561,25 +555,15 @@ local function Initialize()
         if txt == "🚀 GOTO" then
             b.MouseButton1Click:Connect(function()
                 playS(CLICK_SOUND)
-                if target.Text == "" or not getT() then
-                    notify("⛔ ACCESS DENIED", "First Select Target 🎯", 3)
-                    return
-                end
-                
-                b.BackgroundColor3 = DarkRed
-                b.TextColor3 = White
                 func(b)
-                task.wait(0.12)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
+                notify("🚀 GOTO", "successfully goto⚡", 2)
             end)
             return
         end
 
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND)
-            
-            if par == T2 then
+            if par == T2 and txt ~= "🛑 STOP ALL" then
                 if target.Text == "" or not getT() then
                     notify("⛔ ACCESS DENIED", "First Select Target 🎯", 3)
                     return
@@ -620,7 +604,7 @@ THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
-    -- TAB 2: TROLL (ORIGINAL POSITION ORDER RESTORED)
+    -- TAB 2: TROLL (ORIGINAL ORDER AND POSITIONS COMPLETELY RESTORED)
     btn("🛑 STOP ALL", T2, function() forceShutdownTroll() end, true)
     
     btn("👁️ VIEW", T2, function(b)
@@ -737,7 +721,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
                 playS(CLICK_SOUND)
-                notify("COPY ANIM👤", "Target not found!", 2)
             end
         else
             stopCopyLoop()
@@ -755,7 +738,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
                 playS(CLICK_SOUND)
-                notify("COPY CHAT💬", "Target not found!", 2)
             end
         else
             stopChatSync()
@@ -775,7 +757,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local standModeIdx = 0
     standBtn.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
-        
         if target.Text == "" or not getT() then
             notify("⛔ ACCESS DENIED", "First Select Target 🎯", 3)
             return
@@ -785,7 +766,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             standTarget = getT()
             if not standTarget then
                 standBtn.Text = "NOT FOUND!"
-                notify("STAND SYSTEM", "Target not found! ❌")
                 task.wait(0.5)
                 standBtn.Text = "STAND: OFF 🛑"
                 return
@@ -974,14 +954,12 @@ end
 -- ==========================================
 task.spawn(function()
     playS(LOAD_SOUND)
-    
     StarterGui:SetCore("SendNotification", {
         Title = "ENDLESS AURA",
         Text = "Loaded...",
         Icon = LOGO_IMAGE,
         Duration = 3
     })
-    
     task.spawn(function()
         pcall(function()
             local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
@@ -989,7 +967,6 @@ task.spawn(function()
             if func then func() end
         end)
     end)
-
     task.wait(0.1)
     Initialize()
 end)
