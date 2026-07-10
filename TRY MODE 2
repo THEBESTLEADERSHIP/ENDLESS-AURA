@@ -13,496 +13,437 @@ local TextChatService = game:GetService("TextChatService")
 local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 
-local MASTER_ACC = "Nameless82872262"
-local CORRECT_KEY = "WHAT IS AURA"
-local CLICK_SOUND = "107406973902030"
-local LOGO_IMAGE = "rbxassetid://129299711445020"
-local LOAD_SOUND = "129584950954499"
-if not _G.AdminLogs then _G.AdminLogs = {} end
+local MASTER_ACC = "Nameless82872262[span_1](start_span)"[span_1](end_span)
+local CORRECT_KEY = "WHAT IS AURA[span_2](start_span)"[span_2](end_span)
+local CLICK_SOUND = "107406973902030[span_3](start_span)"[span_3](end_span)
+local LOGO_IMAGE = "rbxassetid://129299711445020[span_4](start_span)"[span_4](end_span)
+local LOAD_SOUND = "129584950954499[span_5](start_span)"[span_5](end_span)
+if not _G.AdminLogs then _G.AdminLogs = {} end[span_6](start_span)[span_6](end_span)
 
-local voidYLevel = -99999999 -- Absolute Depth Limit Override
-local safePosition = Vector3.new(0, 50, 0)
+local voidYLevel = -99999999 -- Absolute Depth Limit Override[span_7](start_span)[span_7](end_span)
+local safePosition = Vector3.new(0, 50, 0)[span_8](start_span)[span_8](end_span)
 
--- [ Custom Emote Logic Injection - EXACT LOGIC USED FROM YOUR SECOND SCRIPT ]
-local customAnimId = "121803583995185"
-local customTrack = nil
+-- [ Custom Emote Logic Injection ]
+local customAnimId = "121803583995185[span_9](start_span)"[span_9](end_span)
+local customTrack = nil[span_10](start_span)[span_10](end_span)
 
-local function toggleCustomEmote(shouldPlay)
-    local char = player.Character
-    if not char then return end
-    local hum = char:FindFirstChild("Humanoid")
-    if not hum then return end
-    local animator = hum:FindFirstChildOfClass("Animator") or hum:WaitForChild("Animator")
-    local animateScript = char:FindFirstChild("Animate")
+local function toggleCustomEmote(shouldPlay)[span_11](start_span)[span_11](end_span)
+    local char = player.Character[span_12](start_span)[span_12](end_span)
+    if not char then return end[span_13](start_span)[span_13](end_span)
+    local hum = char:FindFirstChild("Humanoid")[span_14](start_span)[span_14](end_span)
+    if not hum then return end[span_15](start_span)[span_15](end_span)
+    local animator = hum:FindFirstChildOfClass("Animator") or hum:WaitForChild("Animator")[span_16](start_span)[span_16](end_span)
+    local animateScript = char:FindFirstChild("Animate")[span_17](start_span)[span_17](end_span)
 
-    if shouldPlay then
-        -- Disable default movement pack
-        if animateScript then animateScript.Disabled = true end
-        
-        -- Stop all currently playing animations except high priority actions
-        for _, t in pairs(animator:GetPlayingAnimationTracks()) do
-            t:Stop(0.1)
-        end
+    if shouldPlay then[span_18](start_span)[span_18](end_span)
+        if animateScript then animateScript.Disabled = true end[span_19](start_span)[span_19](end_span)
+        for _, t in pairs(animator:GetPlayingAnimationTracks()) do[span_20](start_span)[span_20](end_span)
+            t:Stop(0.1)[span_21](start_span)[span_21](end_span)
+        end[span_22](start_span)[span_22](end_span)
 
-        -- Fetch and Setup Animation Object via game:GetObjects Bypass
-        local success, objects = pcall(function() 
-            return game:GetObjects("rbxassetid://" .. customAnimId) 
-        end)
+        local success, objects = pcall(function()[span_23](start_span)[span_23](end_span)
+            return game:GetObjects("rbxassetid://" .. customAnimId)[span_24](start_span)[span_24](end_span)
+        end)[span_25](start_span)[span_25](end_span)
 
-        local animation
-        if success and objects[1] and objects[1]:IsA("Animation") then
-            animation = objects[1]
-        else
-            animation = Instance.new("Animation")
-            animation.AnimationId = "rbxassetid://" .. customAnimId
-        end
+        local animation[span_26](start_span)[span_26](end_span)
+        if success and objects[1] and objects[1]:IsA("Animation") then[span_27](start_span)[span_27](end_span)
+            animation = objects[1][span_28](start_span)[span_28](end_span)
+        else[span_29](start_span)[span_29](end_span)
+            animation = Instance.new("Animation")[span_30](start_span)[span_30](end_span)
+            animation.AnimationId = "rbxassetid://" .. customAnimId[span_31](start_span)[span_31](end_span)
+        end[span_32](start_span)[span_32](end_span)
 
-        -- Play Track with High Priority
-        customTrack = animator:LoadAnimation(animation)
-        customTrack.Priority = Enum.AnimationPriority.Action4
-        customTrack.Looped = true
-        customTrack:Play()
-        print("Emote Started with High Priority")
-    else
-        -- Cleanup
-        if customTrack then
-            customTrack:Stop(0.1)
-            customTrack = nil
-        end
-        if animateScript then animateScript.Disabled = false end
-    end
-end
+        customTrack = animator:LoadAnimation(animation)[span_33](start_span)[span_33](end_span)
+        customTrack.Priority = Enum.AnimationPriority.Action4[span_34](start_span)[span_34](end_span)
+        customTrack.Looped = true[span_35](start_span)[span_35](end_span)
+        customTrack:Play()[span_36](start_span)[span_36](end_span)
+        print("Emote Started with High Priority")[span_37](start_span)[span_37](end_span)
+    else[span_38](start_span)[span_38](end_span)
+        if customTrack then[span_39](start_span)[span_39](end_span)
+            customTrack:Stop(0.1)[span_40](start_span)[span_40](end_span)
+            customTrack = nil[span_41](start_span)[span_41](end_span)
+        end[span_42](start_span)[span_42](end_span)
+        if animateScript then animateScript.Disabled = false end[span_43](start_span)[span_43](end_span)
+    end[span_44](start_span)[span_44](end_span)
+end[span_45](start_span)[span_45](end_span)
 
-if CoreGui:FindFirstChild("EndlessAura_Final") then
-    CoreGui.EndlessAura_Final:Destroy()
-end
+if CoreGui:FindFirstChild("EndlessAura_Final") then[span_46](start_span)[span_46](end_span)
+    CoreGui.EndlessAura_Final:Destroy()[span_47](start_span)[span_47](end_span)
+end[span_48](start_span)[span_48](end_span)
 
-local sg = Instance.new("ScreenGui", CoreGui); sg.Name = "EndlessAura_Final"
-local DarkRed = Color3.fromRGB(150, 0, 0)
-local Black, White, Green = Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)
+local sg = Instance.new("ScreenGui", CoreGui); sg.Name = "EndlessAura_Final[span_49](start_span)"[span_49](end_span)
+local DarkRed = Color3.fromRGB(150, 0, 0)[span_50](start_span)[span_50](end_span)
+local Black, White, Green = Color3.fromRGB(0, 0, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 255, 0)[span_51](start_span)[span_51](end_span)
 
-local function SendPublicChat(msg)
-    task.spawn(function()
-        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-            local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-            if channel then channel:SendAsync(msg) end
-        end
-        local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
-        if sayRemote then sayRemote:FireServer(msg, "All") end
-    end)
-end
+local function SendPublicChat(msg)[span_52](start_span)[span_52](end_span)
+    task.spawn(function()[span_53](start_span)[span_53](end_span)
+        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then[span_54](start_span)[span_54](end_span)
+            local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")[span_55](start_span)[span_55](end_span)
+            if channel then channel:SendAsync(msg) end[span_56](start_span)[span_56](end_span)
+        end[span_57](start_span)[span_57](end_span)
+        local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")[span_58](start_span)[span_58](end_span)
+        if sayRemote then sayRemote:FireServer(msg, "All") end[span_59](start_span)[span_59](end_span)
+    end)[span_60](start_span)[span_60](end_span)
+end[span_61](start_span)[span_61](end_span)
 
-local function playS(id)
-    local s = Instance.new("Sound", workspace)
-    s.SoundId = "rbxassetid://"..(id or CLICK_SOUND)
-    s.Volume = 2
-    s:Play()
-    task.spawn(function()
-        s.Ended:Wait()
-        s:Destroy()
-    end)
-end
+local function playS(id)[span_62](start_span)[span_62](end_span)
+    local s = Instance.new("Sound", workspace)[span_63](start_span)[span_63](end_span)
+    s.SoundId = "rbxassetid://"..(id or CLICK_SOUND)[span_64](start_span)[span_64](end_span)
+    s.Volume = 2[span_65](start_span)[span_65](end_span)
+    s:Play()[span_66](start_span)[span_66](end_span)
+    task.spawn(function()[span_67](start_span)[span_67](end_span)
+        s.Ended:Wait()[span_68](start_span)[span_68](end_span)
+        s:Destroy()[span_69](start_span)[span_69](end_span)
+    end)[span_70](start_span)[span_70](end_span)
+end[span_71](start_span)[span_71](end_span)
 
-local function playKeySuccess()
-    local s = Instance.new("Sound", workspace)
-    s.SoundId = "rbxassetid://123071085988261"
-    s.Volume = 0.8
-    s:Play()
-    task.spawn(function()
-        s.Ended:Wait()
-        s:Destroy()
-    end)
-end
+local function playKeySuccess()[span_72](start_span)[span_72](end_span)
+    local s = Instance.new("Sound", workspace)[span_73](start_span)[span_73](end_span)
+    s.SoundId = "rbxassetid://123071085988261[span_74](start_span)"[span_74](end_span)
+    s.Volume = 0.8[span_75](start_span)[span_75](end_span)
+    s:Play()[span_76](start_span)[span_76](end_span)
+    task.spawn(function()[span_77](start_span)[span_77](end_span)
+        s.Ended:Wait()[span_78](start_span)[span_78](end_span)
+        s:Destroy()[span_79](start_span)[span_79](end_span)
+    end)[span_80](start_span)[span_80](end_span)
+end[span_81](start_span)[span_81](end_span)
 
-local function makeDraggable(f)
-    local d, di, ds, sp;
-    f.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true; ds = i.Position; sp = f.Position end
-    end)
-    f.InputChanged:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseMovement then di = i end
-    end)
-    RunService.RenderStepped:Connect(function()
-        if d and di then
-            local delta = di.Position - ds; f.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end
-    end)
-end
+local function makeDraggable(f)[span_82](start_span)[span_82](end_span)
+    local d, di, ds, sp;[span_83](start_span)[span_83](end_span)
+    f.InputBegan:Connect(function(i)[span_84](start_span)[span_84](end_span)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true; ds = i.Position; sp = f.Position end[span_85](start_span)[span_85](end_span)
+    end)[span_86](start_span)[span_86](end_span)
+    f.InputChanged:Connect(function(i)[span_87](start_span)[span_87](end_span)
+        if i.UserInputType == Enum.UserInputType.MouseMovement then di = i end[span_88](start_span)[span_88](end_span)
+    end)[span_89](start_span)[span_89](end_span)
+    RunService.RenderStepped:Connect(function()[span_90](start_span)[span_90](end_span)
+        if d and di then[span_91](start_span)[span_91](end_span)
+            local delta = di.Position - ds; f.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y)[span_92](start_span)[span_92](end_span)
+        end[span_93](start_span)[span_93](end_span)
+    end)[span_94](start_span)[span_94](end_span)
+    UserInputService.InputEnded:Connect(function(i)[span_95](start_span)[span_95](end_span)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end[span_96](start_span)[span_96](end_span)
+    end)[span_97](start_span)[span_97](end_span)
+end[span_98](start_span)[span_98](end_span)
 
--- Ultimate Bypass Protection for Attach features
-local function godModeAttach()
-    local char = player.Character
-    if not char then return end
-    local hum = char:FindFirstChild("Humanoid")
-    local hrp = char:FindFirstChild("HumanoidRootPart")
+local function godModeAttach()[span_99](start_span)[span_99](end_span)
+    local char = player.Character[span_100](start_span)[span_100](end_span)
+    if not char then return end[span_101](start_span)[span_101](end_span)
+    local hum = char:FindFirstChild("Humanoid")[span_102](start_span)[span_102](end_span)
+    local hrp = char:FindFirstChild("HumanoidRootPart")[span_103](start_span)[span_103](end_span)
     
-    if hum then
-        -- Force-disable death states globally while attaching in deep void
-        hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-        if hum.Health and hum.Health < 99 then hum.Health = 100 end 
-        if hum:GetState() == Enum.HumanoidStateType.Dead then hum:ChangeState(Enum.HumanoidStateType.Running) end
-    end
-    if hrp then
-        hrp.Velocity = Vector3.new(0, 0, 0)
-        hrp.RotVelocity = Vector3.new(0, 0, 0)
-        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-    end
-end
+    if hum then[span_104](start_span)[span_104](end_span)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)[span_105](start_span)[span_105](end_span)
+        if hum.Health and hum.Health < 99 then hum.Health = 100 end[span_106](start_span)[span_106](end_span)
+        if hum:GetState() == Enum.HumanoidStateType.Dead then hum:ChangeState(Enum.HumanoidStateType.Running) end[span_107](start_span)[span_107](end_span)
+    end[span_108](start_span)[span_108](end_span)
+    if hrp then[span_109](start_span)[span_109](end_span)
+        hrp.Velocity = Vector3.new(0, 0, 0)[span_110](start_span)[span_110](end_span)
+        hrp.RotVelocity = Vector3.new(0, 0, 0)[span_111](start_span)[span_111](end_span)
+        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)[span_112](start_span)[span_112](end_span)
+        hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)[span_113](start_span)[span_113](end_span)
+    end[span_114](start_span)[span_114](end_span)
+end[span_115](start_span)[span_115](end_span)
 
-local function SafeMoveTo(targetCFrame)
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        godModeAttach()
-        hrp.CFrame = targetCFrame
-    end
-end
+local function SafeMoveTo(targetCFrame)[span_116](start_span)[span_116](end_span)
+    local char = player.Character[span_117](start_span)[span_117](end_span)
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")[span_118](start_span)[span_118](end_span)
+    if hrp then[span_119](start_span)[span_119](end_span)
+        godModeAttach()[span_120](start_span)[span_120](end_span)
+        hrp.CFrame = targetCFrame[span_121](start_span)[span_121](end_span)
+    end[span_122](start_span)[span_122](end_span)
+end[span_123](start_span)[span_123](end_span)
 
 -- ==========================================
 -- KEY SYSTEM
 -- ==========================================
-local KF = Instance.new("Frame", sg); KF.Size = UDim2.new(0, 340, 0, 440); KF.Position = UDim2.new(0.5, -170, 0.5, -220); KF.BackgroundColor3 = Black; KF.BackgroundTransparency = 0.2; makeDraggable(KF)
-Instance.new("UICorner", KF); local KS = Instance.new("UIStroke", KF); KS.Thickness = 3; KS.Color = DarkRed
+local KF = Instance.new("Frame", sg); KF.Size = UDim2.new(0, 340, 0, 440); KF.Position = UDim2.new(0.5, -170, 0.5, -220); KF.BackgroundColor3 = Black; KF.BackgroundTransparency = 0.2; makeDraggable(KF)[span_124](start_span)[span_124](end_span)
+Instance.new("UICorner", KF); local KS = Instance.new("UIStroke", KF); KS.Thickness = 3; KS.Color = DarkRed[span_125](start_span)[span_125](end_span)
 
-local KeyLogo = Instance.new("ImageLabel", KF); KeyLogo.Size = UDim2.new(0, 40, 0, 40); KeyLogo.Position = UDim2.new(0.5, -20, 0, 10); KeyLogo.BackgroundTransparency = 1; KeyLogo.Image = LOGO_IMAGE
+local KeyLogo = Instance.new("ImageLabel", KF); KeyLogo.Size = UDim2.new(0, 40, 0, 40); KeyLogo.Position = UDim2.new(0.5, -20, 0, 10); KeyLogo.BackgroundTransparency = 1; KeyLogo.Image = LOGO_IMAGE[span_126](start_span)[span_126](end_span)
 
-local CloseKey = Instance.new("TextButton", KF); CloseKey.Size = UDim2.new(0,25,0,25); CloseKey.Position = UDim2.new(1,-30,0,5); CloseKey.Text = "X"; CloseKey.BackgroundColor3 = DarkRed; CloseKey.TextColor3 = White; Instance.new("UICorner", CloseKey)
-CloseKey.MouseButton1Click:Connect(function()
-    playS(CLICK_SOUND)
-    sg:Destroy()
-end)
+local CloseKey = Instance.new("TextButton", KF); CloseKey.Size = UDim2.new(0,25,0,25); CloseKey.Position = UDim2.new(1,-30,0,5); CloseKey.Text = "X"; CloseKey.BackgroundColor3 = DarkRed; CloseKey.TextColor3 = White; Instance.new("UICorner", CloseKey)[span_127](start_span)[span_127](end_span)
+CloseKey.MouseButton1Click:Connect(function()[span_128](start_span)[span_128](end_span)
+    playS(CLICK_SOUND)[span_129](start_span)[span_129](end_span)
+    sg:Destroy()[span_130](start_span)[span_130](end_span)
+end)[span_131](start_span)[span_131](end_span)
 
-local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = DarkRed; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1
-local Bio = Instance.new("TextLabel", KF); Bio.Text = "SCRIPT BY NAMELESS 👑💀\n\nKEY CHAIYE TO NAMELESS SE MANG\nKISMAT HOGI TO DEDEGA 😂"; Bio.Position = UDim2.new(0,0,0,95); Bio.Size = UDim2.new(1,0,0,60); Bio.TextColor3 = White; Bio.TextSize = 12; Bio.BackgroundTransparency = 1
-local Insta = Instance.new("TextLabel", KF); Insta.Text = "INSTAGRAM ID - ea_nameless\nFOLLOW KARLO WRNA ID BAN 💀"; Insta.Position = UDim2.new(0,0,0,165); Insta.Size = UDim2.new(1,0,0,40); Insta.TextColor3 = White; Insta.TextSize = 13; Insta.Font = Enum.Font.GothamBold; Insta.BackgroundTransparency = 1
+local Title = Instance.new("TextLabel", KF); Title.Text = "ENDLESS AURA"; Title.Size = UDim2.new(1,0,0,40); Title.Position = UDim2.new(0,0,0,50); Title.TextColor3 = DarkRed; Title.TextSize = 22; Title.Font = Enum.Font.GothamBlack; Title.BackgroundTransparency = 1[span_132](start_span)[span_132](end_span)
+local Bio = Instance.new("TextLabel", KF); Bio.Text = "SCRIPT BY NAMELESS 👑💀\n\nKEY CHAIYE TO NAMELESS SE MANG\nKISMAT HOGI TO DEDEGA 😂"; Bio.Position = UDim2.new(0,0,0,95); Bio.Size = UDim2.new(1,0,0,60); Bio.TextColor3 = White; Bio.TextSize = 12; Bio.BackgroundTransparency = 1[span_133](start_span)[span_133](end_span)
+local Insta = Instance.new("TextLabel", KF); Insta.Text = "INSTAGRAM ID - ea_nameless\nFOLLOW KARLO WRNA ID BAN 💀"; Insta.Position = UDim2.new(0,0,0,165); Insta.Size = UDim2.new(1,0,0,40); Insta.TextColor3 = White; Insta.TextSize = 13; Insta.Font = Enum.Font.GothamBold; Insta.BackgroundTransparency = 1[span_134](start_span)[span_134](end_span)
 
-task.spawn(function()
-    while task.wait(0.5) do Insta.TextColor3 = (Insta.TextColor3 == DarkRed and White or DarkRed) end
-end)
+task.spawn(function()[span_135](start_span)[span_135](end_span)
+    while task.wait(0.5) do Insta.TextColor3 = (Insta.TextColor3 == DarkRed and White or DarkRed) end[span_136](start_span)[span_136](end_span)
+end)[span_137](start_span)[span_137](end_span)
 
-local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 45); KeyBox.Position = UDim2.new(0.5, -120, 0, 230); KeyBox.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyBox.PlaceholderText = "KEY DALO..."; KeyBox.TextColor3 = DarkRed; KeyBox.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeyBox)
-local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)
+local KeyBox = Instance.new("TextBox", KF); KeyBox.Size = UDim2.new(0, 240, 0, 45); KeyBox.Position = UDim2.new(0.5, -120, 0, 230); KeyBox.BackgroundColor3 = Color3.fromRGB(20,20,20); KeyBox.PlaceholderText = "KEY DALO..."; KeyBox.TextColor3 = DarkRed; KeyBox.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeyBox)[span_138](start_span)[span_138](end_span)
+local Verify = Instance.new("TextButton", KF); Verify.Size = UDim2.new(0, 140, 0, 45); Verify.Position = UDim2.new(0.5, -70, 0, 310); Verify.BackgroundColor3 = White; Verify.Text = "VERIFY"; Verify.TextColor3 = Black; Verify.Font = Enum.Font.GothamBold; Instance.new("UICorner", Verify)[span_139](start_span)[span_139](end_span)
 
 -- ==========================================
--- COPY NINJA LOGIC - 0 DELAY SERVER SYNC
+-- NINJA TRACKING LOGIC SYNC
 -- ==========================================
-local copyNinjaActive = false
-local targetPlayer = nil
-local currentTracks = {}
-local myAnimationTracks = {}
-local copyLoopConnection = nil
+local copyNinjaActive = false[span_140](start_span)[span_140](end_span)
+local targetPlayer = nil[span_141](start_span)[span_141](end_span)
+local currentTracks = {}[span_142](start_span)[span_142](end_span)
+local myAnimationTracks = {}[span_143](start_span)[span_143](end_span)
+local copyLoopConnection = nil[span_144](start_span)[span_144](end_span)
 
-local function clearMyTracks()
-    local char = player.Character
-    if not char then return end
-    local hum = char:FindFirstChild("Humanoid")
-    if not hum then return end
-    for _, track in pairs(hum:GetPlayingAnimationTracks()) do
-        track:Stop()
-    end
-    myAnimationTracks = {}
-end
+local function clearMyTracks()[span_145](start_span)[span_145](end_span)
+    local char = player.Character[span_146](start_span)[span_146](end_span)
+    if not char then return end[span_147](start_span)[span_147](end_span)
+    local hum = char:FindFirstChild("Humanoid")[span_148](start_span)[span_148](end_span)
+    if not hum then return end[span_149](start_span)[span_149](end_span)
+    for _, track in pairs(hum:GetPlayingAnimationTracks()) do[span_150](start_span)[span_150](end_span)
+        track:Stop()[span_151](start_span)[span_151](end_span)
+    end[span_152](start_span)[span_152](end_span)
+    myAnimationTracks = {}[span_153](start_span)[span_153](end_span)
+end[span_154](start_span)[span_154](end_span)
 
-local function getTarget()
-    if not targetPlayer then return nil end
-    return targetPlayer
-end
+local function getTarget()[span_155](start_span)[span_155](end_span)
+    if not targetPlayer then return nil end[span_156](start_span)[span_156](end_span)
+    return targetPlayer[span_157](start_span)[span_157](end_span)
+end[span_158](start_span)[span_158](end_span)
 
-local function copyAnimationTrack(targetTrack, myHum)
-    local animId = targetTrack.Animation.AnimationId
-    if not animId or animId == "" then return nil end
+local function copyAnimationTrack(targetTrack, myHum)[span_159](start_span)[span_159](end_span)
+    local animId = targetTrack.Animation.AnimationId[span_160](start_span)[span_160](end_span)
+    if not animId or animId == "" then return nil end[span_161](start_span)[span_161](end_span)
     
-    local newAnim = Instance.new("Animation")
-    newAnim.AnimationId = animId
-    local newTrack = myHum:LoadAnimation(newAnim)
+    local newAnim = Instance.new("Animation")[span_162](start_span)[span_162](end_span)
+    newAnim.AnimationId = animId[span_163](start_span)[span_163](end_span)
+    local newTrack = myHum:LoadAnimation(newAnim)[span_164](start_span)[span_164](end_span)
     
-    newTrack.Priority = Enum.AnimationPriority.Action4
-    newTrack.TimePosition = targetTrack.TimePosition
+    newTrack.Priority = Enum.AnimationPriority.Action4[span_165](start_span)[span_165](end_span)
+    newTrack.TimePosition = targetTrack.TimePosition[span_166](start_span)[span_166](end_span)
     
-    if targetTrack.Speed and targetTrack.Speed ~= 1 then
-        newTrack:AdjustSpeed(targetTrack.Speed)
-    end
+    if targetTrack.Speed and targetTrack.Speed ~= 1 then[span_167](start_span)[span_167](end_span)
+        newTrack:AdjustSpeed(targetTrack.Speed)[span_168](start_span)[span_168](end_span)
+    end[span_169](start_span)[span_169](end_span)
     
-    return newTrack
-end
+    return newTrack[span_170](start_span)[span_170](end_span)
+end[span_171](start_span)[span_171](end_span)
 
-local function copyAnimations()
-    local target = getTarget()
-    if not target then return end
-    local tChar = target.Character
-    local myChar = player.Character
-    if not tChar or not myChar then return end
-    local tHum = tChar:FindFirstChild("Humanoid")
-    local myHum = myChar:FindFirstChild("Humanoid")
-    if not tHum or not myHum then return end
+local function copyAnimations()[span_172](start_span)[span_172](end_span)
+    local target = getTarget()[span_173](start_span)[span_173](end_span)
+    if not target then return end[span_174](start_span)[span_174](end_span)
+    local tChar = target.Character[span_175](start_span)[span_175](end_span)
+    local myChar = player.Character[span_176](start_span)[span_176](end_span)
+    if not tChar or not myChar then return end[span_177](start_span)[span_177](end_span)
+    local tHum = tChar:FindFirstChild("Humanoid")[span_178](start_span)[span_178](end_span)
+    local myHum = myChar:FindFirstChild("Humanoid")[span_179](start_span)[span_179](end_span)
+    if not tHum or not myHum then return end[span_180](start_span)[span_180](end_span)
     
-    clearMyTracks()
-    currentTracks = {}
-    myAnimationTracks = {}
+    clearMyTracks()[span_181](start_span)[span_181](end_span)
+    currentTracks = {}[span_182](start_span)[span_182](end_span)
+    myAnimationTracks = {}[span_183](start_span)[span_183](end_span)
     
-    local targetTracks = tHum:GetPlayingAnimationTracks()
-    for _, track in pairs(targetTracks) do
-        if track.WeightCurrent > 0.1 then
-            local newTrack = copyAnimationTrack(track, myHum)
-            if newTrack then
-                newTrack:Play()
-                table.insert(myAnimationTracks, newTrack)
-                table.insert(currentTracks, {
-                    targetTrack = track,
-                    myTrack = newTrack,
-                    animId = track.Animation.AnimationId
-                })
-            end
-        end
-    end
-    
-    for _, tool in pairs(tChar:GetDescendants()) do
-        if tool:IsA("Tool") or tool:IsA("HopperBin") then
-            for _, animTrack in pairs(tool:GetDescendants()) do
-                if animTrack:IsA("Animation") and animTrack.AnimationId then
-                    local newAnim = Instance.new("Animation")
-                    newAnim.AnimationId = animTrack.AnimationId
-                    local newTrack = myHum:LoadAnimation(newAnim)
-                    newTrack.Priority = Enum.AnimationPriority.Action4
-                    newTrack:Play()
-                    table.insert(myAnimationTracks, newTrack)
-                end
-            end
-        end
-    end
-end
+    local targetTracks = tHum:GetPlayingAnimationTracks()[span_184](start_span)[span_184](end_span)
+    for _, track in pairs(targetTracks) do[span_185](start_span)[span_185](end_span)
+        if track.WeightCurrent > 0.1 then[span_186](start_span)[span_186](end_span)
+            local newTrack = copyAnimationTrack(track, myHum)[span_187](start_span)[span_187](end_span)
+            if newTrack then[span_188](start_span)[span_188](end_span)
+                newTrack:Play()[span_189](start_span)[span_189](end_span)
+                table.insert(myAnimationTracks, newTrack)[span_190](start_span)[span_190](end_span)
+                table.insert(currentTracks, {[span_191](start_span)[span_191](end_span)
+                    targetTrack = track,[span_192](start_span)[span_192](end_span)
+                    myTrack = newTrack,[span_193](start_span)[span_193](end_span)
+                    animId = track.Animation.AnimationId[span_194](start_span)[span_194](end_span)
+                })[span_195](start_span)[span_195](end_span)
+            end[span_196](start_span)[span_196](end_span)
+        end[span_197](start_span)[span_197](end_span)
+    end[span_198](start_span)[span_198](end_span)
+end[span_199](start_span)[span_199](end_span)
 
-local function updateCopyLoop()
-    if not copyNinjaActive then return end
-    local target = getTarget()
-    if not target then return end
-    local tChar = target.Character
-    local myChar = player.Character
-    if not tChar or not myChar then return end
-    local tHum = tChar:FindFirstChild("Humanoid")
-    local myHum = myChar:FindFirstChild("Humanoid")
-    if not tHum or not myHum then return end
+local function updateCopyLoop()[span_200](start_span)[span_200](end_span)
+    if not copyNinjaActive then return end[span_201](start_span)[span_201](end_span)
+    local target = getTarget()[span_202](start_span)[span_202](end_span)
+    if not target then return end[span_203](start_span)[span_203](end_span)
+    local tChar = target.Character[span_204](start_span)[span_204](end_span)
+    local myChar = player.Character[span_205](start_span)[span_205](end_span)
+    if not tChar or not myChar then return end[span_206](start_span)[span_206](end_span)
+    local tHum = tChar:FindFirstChild("Humanoid")[span_207](start_span)[span_207](end_span)
+    local myHum = myChar:FindFirstChild("Humanoid")[span_208](start_span)[span_208](end_span)
+    if not tHum or not myHum then return end[span_209](start_span)[span_209](end_span)
     
-    local currentAnimIds = {}
-    local targetTracks = {}
+    local currentAnimIds = {}[span_210](start_span)[span_210](end_span)
+    local targetTracks = {}[span_211](start_span)[span_211](end_span)
     
-    for _, track in pairs(tHum:GetPlayingAnimationTracks()) do
-        if track.WeightCurrent > 0.1 then
-            local id = track.Animation.AnimationId
-            if id and id ~= "" then
-                currentAnimIds[id] = true
-                table.insert(targetTracks, track)
-            end
-        end
-    end
+    for _, track in pairs(tHum:GetPlayingAnimationTracks()) do[span_212](start_span)[span_212](end_span)
+        if track.WeightCurrent > 0.1 then[span_213](start_span)[span_213](end_span)
+            local id = track.Animation.AnimationId[span_214](start_span)[span_214](end_span)
+            if id and id ~= "" then[span_215](start_span)[span_215](end_span)
+                currentAnimIds[id] = true[span_216](start_span)[span_216](end_span)
+                table.insert(targetTracks, track)[span_217](start_span)[span_217](end_span)
+            end[span_218](start_span)[span_218](end_span)
+        end[span_219](start_span)[span_219](end_span)
+    end[span_220](start_span)[span_220](end_span)
     
-    for i = #currentTracks, 1, -1 do
-        local ct = currentTracks[i]
-        if not currentAnimIds[ct.animId] then
-            if ct.myTrack then
-                ct.myTrack:Stop()
-            end
-            table.remove(currentTracks, i)
-        end
-    end
+    for i = #currentTracks, 1, -1 do[span_221](start_span)[span_221](end_span)
+        local ct = currentTracks[i][span_222](start_span)[span_222](end_span)
+        if not currentAnimIds[ct.animId] then[span_223](start_span)[span_223](end_span)
+            if ct.myTrack then ct.myTrack:Stop() end[span_224](start_span)[span_224](end_span)
+            table.remove(currentTracks, i)[span_225](start_span)[span_225](end_span)
+        end[span_226](start_span)[span_226](end_span)
+    end[span_227](start_span)[span_227](end_span)
     
-    for _, targetTrack in pairs(targetTracks) do
-        local id = targetTrack.Animation.AnimationId
-        local found = false
+    for _, targetTrack in pairs(targetTracks) do[span_228](start_span)[span_228](end_span)
+        local id = targetTrack.Animation.AnimationId[span_229](start_span)[span_229](end_span)
+        local found = false[span_230](start_span)[span_230](end_span)
         
-        for _, ct in pairs(currentTracks) do
-            if ct.animId == id then
-                found = true
-                if ct.myTrack then
-                    ct.myTrack.TimePosition = targetTrack.TimePosition
-                    if not ct.myTrack.IsPlaying then
-                        ct.myTrack:Play()
-                    end
-                end
-                break
-            end
-        end
+        for _, ct in pairs(currentTracks) do[span_231](start_span)[span_231](end_span)
+            if ct.animId == id then[span_232](start_span)[span_232](end_span)
+                found = true[span_233](start_span)[span_233](end_span)
+                if ct.myTrack then[span_234](start_span)[span_234](end_span)
+                    ct.myTrack.TimePosition = targetTrack.TimePosition[span_235](start_span)[span_235](end_span)
+                    if not ct.myTrack.IsPlaying then ct.myTrack:Play() end[span_236](start_span)[span_236](end_span)
+                end[span_237](start_span)[span_237](end_span)
+                break[span_238](start_span)[span_238](end_span)
+            end[span_239](start_span)[span_239](end_span)
+        end[span_240](start_span)[span_240](end_span)
         
-        if not found then
-            local newTrack = copyAnimationTrack(targetTrack, myHum)
-            if newTrack then
-                newTrack:Play()
-                table.insert(currentTracks, {
-                    targetTrack = targetTrack,
-                    myTrack = newTrack,
-                    animId = id
-                })
-                table.insert(myAnimationTracks, newTrack)
-            end
-        end
-    end
-end
+        if not found then[span_241](start_span)[span_241](end_span)
+            local newTrack = copyAnimationTrack(targetTrack, myHum)[span_242](start_span)[span_242](end_span)
+            if newTrack then[span_243](start_span)[span_243](end_span)
+                newTrack:Play()[span_244](start_span)[span_244](end_span)
+                table.insert(currentTracks, {[span_245](start_span)[span_245](end_span)
+                    targetTrack = targetTrack,[span_246](start_span)[span_246](end_span)
+                    myTrack = newTrack,[span_247](start_span)[span_247](end_span)
+                    animId = id[span_248](start_span)[span_248](end_span)
+                })[span_249](start_span)[span_249](end_span)
+                table.insert(myAnimationTracks, newTrack)[span_250](start_span)[span_250](end_span)
+            end[span_251](start_span)[span_251](end_span)
+        end[span_252](start_span)[span_252](end_span)
+    end[span_253](start_span)[span_253](end_span)
+end[span_254](start_span)[span_254](end_span)
 
-local function startCopyLoop()
-    if copyLoopConnection then
-        copyLoopConnection:Disconnect()
-        copyLoopConnection = nil
-    end
-    copyLoopConnection = RunService.RenderStepped:Connect(function()
-        updateCopyLoop()
-    end)
-end
+local function startCopyLoop()[span_255](start_span)[span_255](end_span)
+    if copyLoopConnection then copyLoopConnection:Disconnect(); copyLoopConnection = nil end[span_256](start_span)[span_256](end_span)
+    copyLoopConnection = RunService.RenderStepped:Connect(function() updateCopyLoop() end)[span_257](start_span)[span_257](end_span)
+end[span_258](start_span)[span_258](end_span)
 
-local function stopCopyLoop()
-    if copyLoopConnection then
-        copyLoopConnection:Disconnect()
-        copyLoopConnection = nil
-    end
-    copyNinjaActive = false
-    targetPlayer = nil
-    clearMyTracks()
-    currentTracks = {}
-end
+local function stopCopyLoop()[span_259](start_span)[span_259](end_span)
+    if copyLoopConnection then copyLoopConnection:Disconnect(); copyLoopConnection = nil end[span_260](start_span)[span_260](end_span)
+    copyNinjaActive = false[span_261](start_span)[span_261](end_span)
+    targetPlayer = nil[span_262](start_span)[span_262](end_span)
+    clearMyTracks()[span_263](start_span)[span_263](end_span)
+    currentTracks = {}[span_264](start_span)[span_264](end_span)
+end[span_265](start_span)[span_265](end_span)
 
--- ==========================================
--- CHAT NINJA LOGIC - 0 DELAY SERVER SYNC
--- ==========================================
-local chatSyncActive = false
-local chatTargetPlayer = nil
+local chatSyncActive = false[span_266](start_span)[span_266](end_span)
+local chatTargetPlayer = nil[span_267](start_span)[span_267](end_span)
+local function stopChatSync() chatSyncActive = false; chatTargetPlayer = nil end[span_268](start_span)[span_268](end_span)
 
-local function stopChatSync()
-    chatSyncActive = false
-    chatTargetPlayer = nil
-end
+local standMode = false[span_269](start_span)[span_269](end_span)
+local standTarget = nil[span_270](start_span)[span_270](end_span)
+local standOffset = CFrame.new(0, 0, 0)[span_271](start_span)[span_271](end_span)
+local standLookTarget = false[span_272](start_span)[span_272](end_span)
+local standLoopConnection = nil[span_273](start_span)[span_273](end_span)
 
--- ==========================================
--- STAND NINJA LOGIC - ANTI-VOID + ANTI-KILL
--- ==========================================
-local standMode = false
-local standTarget = nil
-local standOffset = CFrame.new(0, 0, 0)
-local standModeType = 0
-local standLookTarget = false
-local standLoopConnection = nil
-
-local function updateStandLoop()
-    if not standMode then return end
+local function updateStandLoop()[span_274](start_span)[span_274](end_span)
+    if not standMode then return end[span_275](start_span)[span_275](end_span)
+    local char = player.Character[span_276](start_span)[span_276](end_span)
+    if not char then return end[span_277](start_span)[span_277](end_span)
+    local hrp = char:FindFirstChild("HumanoidRootPart")[span_278](start_span)[span_278](end_span)
+    if not hrp then return end[span_279](start_span)[span_279](end_span)
     
-    local char = player.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    godModeAttach()[span_280](start_span)[span_280](end_span)
+    if not standTarget then return end[span_281](start_span)[span_281](end_span)
+    local tChar = standTarget.Character[span_282](start_span)[span_282](end_span)
+    if not tChar then return end[span_283](start_span)[span_283](end_span)
+    local tHrp = tChar:FindFirstChild("HumanoidRootPart")[span_284](start_span)[span_284](end_span)
+    if not tHrp then return end[span_285](start_span)[span_285](end_span)
     
-    godModeAttach()
-    if not standTarget then return end
-    local tChar = standTarget.Character
-    if not tChar then return end
-    local tHrp = tChar:FindFirstChild("HumanoidRootPart")
-    if not tHrp then return end
+    if standLookTarget then[span_286](start_span)[span_286](end_span)
+        local targetPos = tHrp.Position[span_287](start_span)[span_287](end_span)
+        local desiredPos = (tHrp.CFrame * standOffset).Position[span_288](start_span)[span_288](end_span)
+        hrp.CFrame = CFrame.new(desiredPos, Vector3.new(targetPos.X, desiredPos.Y, targetPos.Z))[span_289](start_span)[span_289](end_span)
+    else[span_290](start_span)[span_290](end_span)
+        hrp.CFrame = tHrp.CFrame * standOffset[span_291](start_span)[span_291](end_span)
+    end[span_292](start_span)[span_292](end_span)
     
-    if standLookTarget then
-        local targetPos = tHrp.Position
-        local desiredPos = (tHrp.CFrame * standOffset).Position
-        hrp.CFrame = CFrame.new(desiredPos, Vector3.new(targetPos.X, desiredPos.Y, targetPos.Z))
-    else
-        hrp.CFrame = tHrp.CFrame * standOffset
-    end
-    
-    local hum = char:FindFirstChild("Humanoid")
-    if hum then hum.Sit = false end
-end
+    local hum = char:FindFirstChild("Humanoid")[span_293](start_span)[span_293](end_span)
+    if hum then hum.Sit = false end[span_294](start_span)[span_294](end_span)
+end[span_295](start_span)[span_295](end_span)
 
-local function startStandLoop()
-    if standLoopConnection then
-        standLoopConnection:Disconnect()
-        standLoopConnection = nil
-    end
-    standLoopConnection = RunService.RenderStepped:Connect(function()
-        updateStandLoop()
-    end)
-end
+local function startStandLoop()[span_296](start_span)[span_296](end_span)
+    if standLoopConnection then standLoopConnection:Disconnect(); standLoopConnection = nil end[span_297](start_span)[span_297](end_span)
+    standLoopConnection = RunService.RenderStepped:Connect(function() updateStandLoop() end)[span_298](start_span)[span_298](end_span)
+end[span_299](start_span)[span_299](end_span)
 
-local function stopStandLoop()
-    if standLoopConnection then
-        standLoopConnection:Disconnect()
-        standLoopConnection = nil
-    end
-    standMode = false
-    standTarget = nil
-    standModeType = 0
-    local char = player.Character
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
-    end
-end
+local function stopStandLoop()[span_300](start_span)[span_300](end_span)
+    if standLoopConnection then standLoopConnection:Disconnect(); standLoopConnection = nil end[span_301](start_span)[span_301](end_span)
+    standMode = false[span_302](start_span)[span_302](end_span)
+    standTarget = nil[span_303](start_span)[span_303](end_span)
+    local char = player.Character[span_304](start_span)[span_304](end_span)
+    if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end[span_305](start_span)[span_305](end_span)
+end[span_306](start_span)[span_306](end_span)
 
 -- ==========================================
--- MAIN MENU
+-- MAIN MENU INTERFACE
 -- ==========================================
-local function Initialize()
-    local entry = player.Name .. " (" .. player.UserId .. ")"
-    local alreadyLogged = false
-    for _, v in pairs(_G.AdminLogs) do if v == entry then alreadyLogged = true break end end
-    if not alreadyLogged then table.insert(_G.AdminLogs, entry) end
+local function Initialize()[span_307](start_span)[span_307](end_span)
+    local entry = player.Name .. " (" .. player.UserId .. ")[span_308](start_span)"[span_308](end_span)
+    local alreadyLogged = false[span_309](start_span)[span_309](end_span)
+    for _, v in pairs(_G.AdminLogs) do if v == entry then alreadyLogged = true break end end[span_310](start_span)[span_310](end_span)
+    if not alreadyLogged then table.insert(_G.AdminLogs, entry) end[span_311](start_span)[span_311](end_span)
     
-    task.spawn(function()
-        while task.wait(60) do print("💿 SCRIPTED BY NAMELESS💀👑") end
-    end)
+    task.spawn(function()[span_312](start_span)[span_312](end_span)
+        while task.wait(60) do print("💿 SCRIPTED BY NAMELESS💀👑") end[span_313](start_span)[span_313](end_span)
+    end)[span_314](start_span)[span_314](end_span)
     
-    local Main = Instance.new("Frame", sg); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Black; Main.BackgroundTransparency = 0.4; makeDraggable(Main)
-    Instance.new("UICorner", Main); local MS = Instance.new("UIStroke", Main); MS.Thickness = 2; MS.Color = DarkRed
+    local Main = Instance.new("Frame", sg); Main.Size = UDim2.new(0, 420, 0, 300); Main.Position = UDim2.new(0.5, -210, 0.5, -150); Main.BackgroundColor3 = Black; Main.BackgroundTransparency = 0.4; makeDraggable(Main)[span_315](start_span)[span_315](end_span)
+    Instance.new("UICorner", Main); local MS = Instance.new("UIStroke", Main); MS.Thickness = 2; MS.Color = DarkRed[span_316](start_span)[span_316](end_span)
     
-    local MainLogo = Instance.new("ImageLabel", Main); MainLogo.Size = UDim2.new(0, 28, 0, 28); MainLogo.Position = UDim2.new(0, 10, 0, 6); MainLogo.BackgroundTransparency = 1; MainLogo.Image = LOGO_IMAGE
+    local MainLogo = Instance.new("ImageLabel", Main); MainLogo.Size = UDim2.new(0, 28, 0, 28); MainLogo.Position = UDim2.new(0, 10, 0, 6); MainLogo.BackgroundTransparency = 1; MainLogo.Image = LOGO_IMAGE[span_317](start_span)[span_317](end_span)
     
-    local LogoText = Instance.new("TextLabel", Main); LogoText.Size = UDim2.new(0, 200, 0, 28); LogoText.Position = UDim2.new(0, 43, 0, 5); LogoText.BackgroundTransparency = 1
-    LogoText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ"; LogoText.TextColor3 = DarkRed; LogoText.TextSize = 20; LogoText.Font = Enum.Font.GothamBlack; LogoText.TextXAlignment = Enum.TextXAlignment.Left
+    local LogoText = Instance.new("TextLabel", Main); LogoText.Size = UDim2.new(0, 200, 0, 28); LogoText.Position = UDim2.new(0, 43, 0, 5); LogoText.BackgroundTransparency = 1[span_318](start_span)[span_318](end_span)
+    LogoText.Text = "Eɴᴅʟᴇss Aᴜʀᴀ"; LogoText.TextColor3 = DarkRed; LogoText.TextSize = 20; LogoText.Font = Enum.Font.GothamBlack; LogoText.TextXAlignment = Enum.TextXAlignment.Left[span_319](start_span)[span_319](end_span)
     
-    local TopLine = Instance.new("Frame", Main); TopLine.Size = UDim2.new(1, -20, 0, 2); TopLine.Position = UDim2.new(0, 10, 0, 38)
-    TopLine.BackgroundColor3 = DarkRed; TopLine.BorderSizePixel = 0
+    local TopLine = Instance.new("Frame", Main); TopLine.Size = UDim2.new(1, -20, 0, 2); TopLine.Position = UDim2.new(0, 10, 0, 38)[span_320](start_span)[span_320](end_span)
+    TopLine.BackgroundColor3 = DarkRed; TopLine.BorderSizePixel = 0[span_321](start_span)[span_321](end_span)
     
-    local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 95, 1, -50); Side.Position = UDim2.new(0, 10, 0, 45); Side.BackgroundTransparency = 1; Instance.new("UIListLayout", Side).Padding = UDim.new(0, 4)
-    local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 115, 0, 45); Cont.BackgroundTransparency = 1
+    local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 95, 1, -50); Side.Position = UDim2.new(0, 10, 0, 45); Side.BackgroundTransparency = 1; Instance.new("UIListLayout", Side).Padding = UDim.new(0, 4)[span_322](start_span)[span_322](end_span)
+    local Cont = Instance.new("Frame", Main); Cont.Size = UDim2.new(1, -125, 1, -50); Cont.Position = UDim2.new(0, 115, 0, 45); Cont.BackgroundTransparency = 1[span_323](start_span)[span_323](end_span)
     
-    local function pg()
-        local p = Instance.new("ScrollingFrame", Cont); p.Size = UDim2.new(1, 0, 1, 0); p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 2; p.CanvasSize = UDim2.new(0,0,6,0); p.ScrollBarImageColor3 = DarkRed
-        local grid = Instance.new("UIGridLayout", p); grid.CellSize = UDim2.new(0.47, 0, 0, 32); grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0); return p
-    end
+    local function pg()[span_324](start_span)[span_324](end_span)
+        local p = Instance.new("ScrollingFrame", Cont); p.Size = UDim2.new(1, 0, 1, 0); p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 2; p.CanvasSize = UDim2.new(0,0,6,0); p.ScrollBarImageColor3 = DarkRed[span_325](start_span)[span_325](end_span)
+        local grid = Instance.new("UIGridLayout", p); grid.CellSize = UDim2.new(0.47, 0, 0, 32); grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0); return p[span_326](start_span)[span_326](end_span)
+    end[span_327](start_span)[span_327](end_span)
     
-    local T1, T2, T3, T4, T5, T_Phonk, T_Adm = pg(), pg(), pg(), pg(), pg(), pg(), pg()
-    T1.UIGridLayout:Destroy()
+    local T1, T2, T3, T4, T5, T_Phonk, T_Adm = pg(), pg(), pg(), pg(), pg(), pg(), pg()[span_328](start_span)[span_328](end_span)
+    T1.UIGridLayout:Destroy()[span_329](start_span)[span_329](end_span)
     
-    local rainbowActive = false
-    task.spawn(function()
-        while task.wait() do if rainbowActive then local hue = tick() % 5 / 5 MS.Color = Color3.fromHSV(hue, 1, 1) end end
-    end)
+    local rainbowActive = false[span_330](start_span)[span_330](end_span)
+    task.spawn(function()[span_331](start_span)[span_331](end_span)
+        while task.wait() do if rainbowActive then local hue = tick() % 5 / 5 MS.Color = Color3.fromHSV(hue, 1, 1) end end[span_332](start_span)[span_332](end_span)
+    end)[span_333](start_span)[span_333](end_span)
     
-    local function tab(n, p)
-        local b = Instance.new("TextButton", Side); b.Size = UDim2.new(1, 0, 0, 30); b.BackgroundColor3 = Color3.fromRGB(15,15,15); b.Text = string.upper(n); b.TextColor3 = White; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
-        b.MouseButton1Click:Connect(function()
-            playS(CLICK_SOUND)
-            for _,v in pairs(Cont:GetChildren()) do v.Visible = false end
-            p.Visible = true
-            for _,v in pairs(Side:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = White end end
-            b.TextColor3 = DarkRed
-            if n == "PHONK" or n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = DarkRed end end
-        end)
-    end
+    local function tab(n, p)[span_334](start_span)[span_334](end_span)
+        local b = Instance.new("TextButton", Side); b.Size = UDim2.new(1, 0, 0, 30); b.BackgroundColor3 = Color3.fromRGB(15,15,15); b.Text = string.upper(n); b.TextColor3 = White; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)[span_335](start_span)[span_335](end_span)
+        b.MouseButton1Click:Connect(function()[span_336](start_span)[span_336](end_span)
+            playS(CLICK_SOUND)[span_337](start_span)[span_337](end_span)
+            for _,v in pairs(Cont:GetChildren()) do v.Visible = false end[span_338](start_span)[span_338](end_span)
+            p.Visible = true[span_339](start_span)[span_339](end_span)
+            for _,v in pairs(Side:GetChildren()) do if v:IsA("TextButton") then v.TextColor3 = White end end[span_340](start_span)[span_340](end_span)
+            b.TextColor3 = DarkRed[span_341](start_span)[span_341](end_span)
+            if n == "PHONK" or n == "Phonk" then rainbowActive = true else rainbowActive = false if n == "🛡️ ADMIN" then MS.Color = Green; playS("3308875045") else MS.Color = DarkRed end end[span_342](start_span)[span_342](end_span)
+        end)[span_343](start_span)[span_343](end_span)
+    end[span_344](start_span)[span_344](end_span)
     
-    tab("👑 INFO", T1); tab("🌚 TROLL", T2); tab("🛡️ SHIELD", T3); tab("👺 SPAM", T4); tab("📁 OTHER", T5); tab("PHONK", T_Phonk)
-    if player.Name == MASTER_ACC then tab("🛡️ ADMIN", T_Adm) end; T1.Visible = true
+    tab("👑 INFO", T1); tab("🌚 TROLL", T2); tab("🛡️ SHIELD", T3); tab("👺 SPAM", T4); tab("📁 OTHER", T5); tab("PHONK", T_Phonk)[span_345](start_span)[span_345](end_span)
+    if player.Name == MASTER_ACC then tab("🛡️ ADMIN", T_Adm) end; T1.Visible = true[span_346](start_span)[span_346](end_span)
     
-    local function btn(txt, par, func, isLoad)
-        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
-        b.MouseButton1Click:Connect(function()
-            playS(CLICK_SOUND)
-            if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
-            func(b)
-        end)
-    end
+    local function btn(txt, par, func, isLoad)[span_347](start_span)[span_347](end_span)
+        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)[span_348](start_span)[span_348](end_span)
+        b.MouseButton1Click:Connect(function()[span_349](start_span)[span_349](end_span)
+            playS(CLICK_SOUND)[span_350](start_span)[span_350](end_span)
+            if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end[span_351](start_span)[span_351](end_span)
+            func(b)[span_352](start_span)[span_352](end_span)
+        end)[span_353](start_span)[span_353](end_span)
+    end[span_354](start_span)[span_354](end_span)
     
     -- TAB 1: INFO
-    local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE
-
-    local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top"
+    local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE[span_355](start_span)[span_355](end_span)
+    local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top[span_356](start_span)"[span_356](end_span)
     it.Text = [[SCRIPT NAME - ENDLESS AURA
 __________________________________________
 SCRIPT BY: NAMELESS 👑💀
@@ -512,548 +453,542 @@ FAMOUS FATHER: NAMELESS 💀
 THE-LEADER OF [ENDLESS AURA]
 THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
-OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
+OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]][span_357](start_span)[span_357](end_span)
     
     -- ==========================================
-    -- TAB 2: TROLL - NEW LAYOUT (headshot + info + buttons)
+    -- TAB 2: TROLL [BLUEPRINT CORRECTION MATCH]
     -- ==========================================
-    -- Remove default grid from T2
-    if T2:FindFirstChildOfClass("UIGridLayout") then T2:FindFirstChildOfClass("UIGridLayout"):Destroy() end
-    T2.CanvasSize = UDim2.new(0, 0, 0, 500) -- give enough vertical space
+    if T2:FindFirstChildOfClass("UIGridLayout") then T2:FindFirstChildOfClass("UIGridLayout"):Destroy() end[span_358](start_span)[span_358](end_span)
+    T2.CanvasSize = UDim2.new(0, 0, 0, 420)[span_359](start_span)[span_359](end_span)
 
-    -- 1) Target TextBox (top, full width)
-    local target = Instance.new("TextBox", T2)
-    target.Size = UDim2.new(0.98, 0, 0, 30)
-    target.Position = UDim2.new(0.01, 0, 0, 0)
-    target.PlaceholderText = "TARGET NAME..."
-    target.BackgroundColor3 = Color3.fromRGB(20,20,20)
-    target.TextColor3 = White
-    Instance.new("UICorner", target)
+    -- [LAYOUT FRAME: TARGET PROFILES AND DATA AREA]
+    local TargetProfileArea = Instance.new("Frame", T2)[span_360](start_span)[span_360](end_span)
+    TargetProfileArea.Size = UDim2.new(1, 0, 0, 95)[span_361](start_span)[span_361](end_span)
+    TargetProfileArea.Position = UDim2.new(0, 0, 0, 5)[span_362](start_span)[span_362](end_span)
+    TargetProfileArea.BackgroundTransparency = 1[span_363](start_span)[span_363](end_span)
 
-    -- 2) STOP ALL button (right below textbox, centered)
-    local StopAllBtn = Instance.new("TextButton", T2)
-    StopAllBtn.Size = UDim2.new(0.4, 0, 0, 32)
-    StopAllBtn.Position = UDim2.new(0.3, 0, 0, 35) -- below textbox (30 height + 5 gap)
-    StopAllBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
-    StopAllBtn.Text = "🛑 STOP ALL"
-    StopAllBtn.TextColor3 = White
-    StopAllBtn.Font = Enum.Font.GothamBold
-    StopAllBtn.TextSize = 12
-    Instance.new("UICorner", StopAllBtn)
+    -- Left: Headshot Render Window [TARGET KA HEADSHOT 3D SLOW VIEW]
+    local HeadshotFrame = Instance.new("Frame", TargetProfileArea)[span_364](start_span)[span_364](end_span)
+    HeadshotFrame.Size = UDim2.new(0, 85, 0, 85)[span_365](start_span)[span_365](end_span)
+    HeadshotFrame.Position = UDim2.new(0, 5, 0, 5)[span_366](start_span)[span_366](end_span)
+    HeadshotFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)[span_367](start_span)[span_367](end_span)
+    Instance.new("UICorner", HeadshotFrame).CornerRadius = UDim.new(1, 0)[span_368](start_span)[span_368](end_span)
+    local HeadshotStroke = Instance.new("UIStroke", HeadshotFrame)[span_369](start_span)[span_369](end_span)
+    HeadshotStroke.Thickness = 2; HeadshotStroke.Color = DarkRed[span_370](start_span)[span_370](end_span)
 
-    -- 3) Headshot + Info panel (below STOP ALL)
-    local InfoPanel = Instance.new("Frame", T2)
-    InfoPanel.Size = UDim2.new(1, 0, 0, 100)
-    InfoPanel.Position = UDim2.new(0, 0, 0, 75) -- after STOP ALL (35+32+gap)
-    InfoPanel.BackgroundTransparency = 1
+    local HeadshotImage = Instance.new("ImageLabel", HeadshotFrame)[span_371](start_span)[span_371](end_span)
+    HeadshotImage.Size = UDim2.new(1, -6, 1, -6)[span_372](start_span)[span_372](end_span)
+    HeadshotImage.Position = UDim2.new(0, 3, 0, 3)[span_373](start_span)[span_373](end_span)
+    HeadshotImage.BackgroundTransparency = 1[span_374](start_span)[span_374](end_span)
+    HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png[span_375](start_span)"[span_375](end_span)
+    Instance.new("UICorner", HeadshotImage).CornerRadius = UDim.new(1, 0)[span_376](start_span)[span_376](end_span)
 
-    -- Left: Headshot
-    local HeadshotFrame = Instance.new("Frame", InfoPanel)
-    HeadshotFrame.Size = UDim2.new(0, 90, 0, 90)
-    HeadshotFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-    HeadshotFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    Instance.new("UICorner", HeadshotFrame).CornerRadius = UDim.new(1, 0)
-    local HeadshotStroke = Instance.new("UIStroke", HeadshotFrame)
-    HeadshotStroke.Thickness = 3; HeadshotStroke.Color = DarkRed
+    -- Right Top: Text Input Entry Panel [TAXT BOX]
+    local target = Instance.new("TextBox", TargetProfileArea)[span_377](start_span)[span_377](end_span)
+    target.Size = UDim2.new(1, -110, 0, 32)[span_378](start_span)[span_378](end_span)
+    target.Position = UDim2.new(0, 100, 0, 5)[span_379](start_span)[span_379](end_span)
+    target.PlaceholderText = "TARGET NAME...[span_380](start_span)"[span_380](end_span)
+    target.Text = "[span_381](start_span)"[span_381](end_span)
+    target.BackgroundColor3 = Color3.fromRGB(20, 20, 20)[span_382](start_span)[span_382](end_span)
+    target.TextColor3 = White[span_383](start_span)[span_383](end_span)
+    target.Font = Enum.Font.GothamBold[span_384](start_span)[span_384](end_span)
+    target.TextSize = 12[span_385](start_span)[span_385](end_span)
+    Instance.new("UICorner", target)[span_386](start_span)[span_386](end_span)
+    local BoxStroke = Instance.new("UIStroke", target); BoxStroke.Thickness = 1; BoxStroke.Color = Color3.fromRGB(50, 50, 50)
 
-    local HeadshotImage = Instance.new("ImageLabel", HeadshotFrame)
-    HeadshotImage.Size = UDim2.new(1, 0, 1, 0)
-    HeadshotImage.BackgroundTransparency = 1
-    HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png"
-    local hsc = Instance.new("UICorner", HeadshotImage); hsc.CornerRadius = UDim.new(1, 0)
+    -- Right Body: Analytics Displays
+    local TargetNameLabel = Instance.new("TextLabel", TargetProfileArea)[span_387](start_span)[span_387](end_span)
+    TargetNameLabel.Size = UDim2.new(1, -110, 0, 18)[span_388](start_span)[span_388](end_span)
+    TargetNameLabel.Position = UDim2.new(0, 100, 0, 42)[span_389](start_span)[span_389](end_span)
+    TargetNameLabel.BackgroundTransparency = 1[span_390](start_span)[span_390](end_span)
+    TargetNameLabel.Text = "Display name[span_391](start_span)"[span_391](end_span)
+    TargetNameLabel.TextColor3 = White[span_392](start_span)[span_392](end_span)
+    TargetNameLabel.TextSize = 14[span_393](start_span)[span_393](end_span)
+    TargetNameLabel.Font = Enum.Font.GothamBold[span_394](start_span)[span_394](end_span)
+    TargetNameLabel.TextXAlignment = Enum.TextXAlignment.Left[span_395](start_span)[span_395](end_span)
 
-    -- Right: Info labels (close to headshot)
-    local InfoRight = Instance.new("Frame", InfoPanel)
-    InfoRight.Size = UDim2.new(0.5, 0, 1, 0)
-    InfoRight.Position = UDim2.new(0.25, 0, 0, 0) -- next to headshot
-    InfoRight.BackgroundTransparency = 1
+    local AtNameLabel = Instance.new("TextLabel", TargetProfileArea)[span_396](start_span)[span_396](end_span)
+    AtNameLabel.Size = UDim2.new(1, -110, 0, 16)[span_397](start_span)[span_397](end_span)
+    AtNameLabel.Position = UDim2.new(0, 100, 0, 60)[span_398](start_span)[span_398](end_span)
+    AtNameLabel.BackgroundTransparency = 1[span_399](start_span)[span_399](end_span)
+    AtNameLabel.Text = "@name[span_400](start_span)"[span_400](end_span)
+    AtNameLabel.TextColor3 = Color3.fromRGB(160, 160, 160)[span_401](start_span)[span_401](end_span)
+    AtNameLabel.TextSize = 12[span_402](start_span)[span_402](end_span)
+    AtNameLabel.Font = Enum.Font.Gotham[span_403](start_span)[span_403](end_span)
+    AtNameLabel.TextXAlignment = Enum.TextXAlignment.Left[span_404](start_span)[span_404](end_span)
 
-    local TargetNameLabel = Instance.new("TextLabel", InfoRight)
-    TargetNameLabel.Size = UDim2.new(1, 0, 0, 25)
-    TargetNameLabel.Position = UDim2.new(0, 0, 0.1, 0)
-    TargetNameLabel.BackgroundTransparency = 1
-    TargetNameLabel.Text = "NO TARGET"
-    TargetNameLabel.TextColor3 = White
-    TargetNameLabel.TextSize = 16
-    TargetNameLabel.Font = Enum.Font.GothamBold
-    TargetNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    -- Online Status Dot Indicator Assembly
+    local StatusDot = Instance.new("Frame", TargetProfileArea)[span_405](start_span)[span_405](end_span)
+    StatusDot.Size = UDim2.new(0, 12, 0, 12)[span_406](start_span)[span_406](end_span)
+    StatusDot.Position = UDim2.new(0, 100, 0, 79)[span_407](start_span)[span_407](end_span)
+    StatusDot.BackgroundColor3 = Color3.fromRGB(255, 50, 50)[span_408](start_span)[span_408](end_span)
+    Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1, 0)[span_409](start_span)[span_409](end_span)
 
-    local AtNameLabel = Instance.new("TextLabel", InfoRight)
-    AtNameLabel.Size = UDim2.new(1, 0, 0, 20)
-    AtNameLabel.Position = UDim2.new(0, 0, 0.38, 0)
-    AtNameLabel.BackgroundTransparency = 1
-    AtNameLabel.Text = "@no_target"
-    AtNameLabel.TextColor3 = Color3.fromRGB(150,150,150)
-    AtNameLabel.TextSize = 13
-    AtNameLabel.Font = Enum.Font.Gotham
-    AtNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    local StatusLabel = Instance.new("TextLabel", TargetProfileArea)[span_410](start_span)[span_410](end_span)
+    StatusLabel.Size = UDim2.new(1, -130, 0, 16)[span_411](start_span)[span_411](end_span)
+    StatusLabel.Position = UDim2.new(0, 118, 0, 76)[span_412](start_span)[span_412](end_span)
+    StatusLabel.BackgroundTransparency = 1[span_413](start_span)[span_413](end_span)
+    StatusLabel.Text = "Offline[span_414](start_span)"[span_414](end_span)
+    StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)[span_415](start_span)[span_415](end_span)
+    StatusLabel.TextSize = 12[span_416](start_span)[span_416](end_span)
+    StatusLabel.Font = Enum.Font.GothamBold[span_417](start_span)[span_417](end_span)
+    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left[span_418](start_span)[span_418](end_span)
 
-    local StatusLabel = Instance.new("TextLabel", InfoRight)
-    StatusLabel.Size = UDim2.new(1, 0, 0, 20)
-    StatusLabel.Position = UDim2.new(0, 0, 0.6, 0)
-    StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Text = "🔴 OFFLINE"
-    StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
-    StatusLabel.TextSize = 14
-    StatusLabel.Font = Enum.Font.GothamBold
-    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    -- [STOP ALL MASTER SWITCH EXECUTION INTERFACE]
+    local StopAllBtn = Instance.new("TextButton", T2)[span_419](start_span)[span_419](end_span)
+    StopAllBtn.Size = UDim2.new(0.96, 0, 0, 28)[span_420](start_span)[span_420](end_span)
+    StopAllBtn.Position = UDim2.new(0, 5, 0, 105)[span_421](start_span)[span_421](end_span)
+    StopAllBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)[span_422](start_span)[span_422](end_span)
+    StopAllBtn.Text = "🛑 STOP ALL[span_423](start_span)"[span_423](end_span)
+    StopAllBtn.TextColor3 = White[span_424](start_span)[span_424](end_span)
+    StopAllBtn.Font = Enum.Font.GothamBlack[span_425](start_span)[span_425](end_span)
+    StopAllBtn.TextSize = 11[span_426](start_span)[span_426](end_span)
+    Instance.new("UICorner", StopAllBtn)[span_427](start_span)[span_427](end_span)
 
-    -- 4) Buttons Grid (below InfoPanel)
-    local BtnArea = Instance.new("Frame", T2)
-    BtnArea.Size = UDim2.new(1, 0, 0, 180) -- enough space for buttons
-    BtnArea.Position = UDim2.new(0, 0, 0, 185) -- after InfoPanel (75+100+10)
-    BtnArea.BackgroundTransparency = 1
-    local BtnGrid = Instance.new("UIGridLayout", BtnArea)
-    BtnGrid.CellSize = UDim2.new(0.47, 0, 0, 32)
-    BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
+    -- [BUTTON FUNCTION GRID SPACE CONTAINER]
+    local BtnArea = Instance.new("Frame", T2)[span_428](start_span)[span_428](end_span)
+    BtnArea.Size = UDim2.new(1, 0, 1, -140)[span_429](start_span)[span_429](end_span)
+    BtnArea.Position = UDim2.new(0, 0, 0, 140)[span_430](start_span)[span_430](end_span)
+    BtnArea.BackgroundTransparency = 1[span_431](start_span)[span_431](end_span)
+    local BtnGrid = Instance.new("UIGridLayout", BtnArea)[span_432](start_span)[span_432](end_span)
+    BtnGrid.CellSize = UDim2.new(0.47, 0, 0, 32)[span_433](start_span)[span_433](end_span)
+    BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)[span_434](start_span)[span_434](end_span)
 
-    -- Function to get target from textbox
-    local function getT()
-        local n = target.Text:lower()
-        for _,v in pairs(Players:GetPlayers()) do
-            if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end
-        end
-    end
+    local function getT()[span_435](start_span)[span_435](end_span)
+        local n = target.Text:lower()[span_436](start_span)[span_436](end_span)
+        if n == "" then return nil end[span_437](start_span)[span_437](end_span)
+        for _,v in pairs(Players:GetPlayers()) do[span_438](start_span)[span_438](end_span)
+            if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end[span_439](start_span)[span_439](end_span)
+        end[span_440](start_span)[span_440](end_span)
+    end[span_441](start_span)[span_441](end_span)
 
-    -- Update headshot and info in real-time
-    task.spawn(function()
-        while task.wait(0.1) do
-            local t = getT()
-            if t then
-                TargetNameLabel.Text = t.DisplayName or t.Name
-                AtNameLabel.Text = "@" .. t.Name
-                if t.Character and t.Character:FindFirstChild("Humanoid") and t.Character.Humanoid.Health > 0 then
-                    StatusLabel.Text = "🟢 ONLINE"
-                    StatusLabel.TextColor3 = Color3.fromRGB(50,255,50)
-                else
-                    StatusLabel.Text = "🔴 OFFLINE"
-                    StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
-                end
-                local thumbType = Enum.ThumbnailType.HeadShot
-                local thumbSize = Enum.ThumbnailSize.Size420x420
-                local success, url = pcall(function()
-                    return Players:GetUserThumbnailAsync(t.UserId, thumbType, thumbSize)
-                end)
-                if success and url then HeadshotImage.Image = url end
-            else
-                TargetNameLabel.Text = "NO TARGET"
-                AtNameLabel.Text = "@no_target"
-                StatusLabel.Text = "🔴 OFFLINE"
-                StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
-                HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png"
-            end
-        end
-    end)
+    -- Live Profiler Engine Injection
+    task.spawn(function()[span_442](start_span)[span_442](end_span)
+        while task.wait(0.2) do[span_443](start_span)[span_443](end_span)
+            local t = getT()[span_444](start_span)[span_444](end_span)
+            if t then[span_445](start_span)[span_445](end_span)
+                TargetNameLabel.Text = t.DisplayName[span_446](start_span)[span_446](end_span)
+                AtNameLabel.Text = "@" .. t.Name[span_447](start_span)[span_447](end_span)
+                if t.Character and t.Character:FindFirstChild("Humanoid") and t.Character.Humanoid.Health > 0 then[span_448](start_span)[span_448](end_span)
+                    StatusLabel.Text = "Online[span_449](start_span)"[span_449](end_span)
+                    StatusDot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)[span_450](start_span)[span_450](end_span)
+                else[span_451](start_span)[span_451](end_span)
+                    StatusLabel.Text = "Offline[span_452](start_span)"[span_452](end_span)
+                    StatusDot.BackgroundColor3 = Color3.fromRGB(255, 50, 50)[span_453](start_span)[span_453](end_span)
+                end[span_454](start_span)[span_454](end_span)
+                task.spawn(function()[span_455](start_span)[span_455](end_span)
+                    local url, ready = Players:GetUserThumbnailAsync(t.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size180x180)[span_456](start_span)[span_456](end_span)
+                    if ready then HeadshotImage.Image = url end[span_457](start_span)[span_457](end_span)
+                end)[span_458](start_span)[span_458](end_span)
+            else[span_459](start_span)[span_459](end_span)
+                TargetNameLabel.Text = "Display name[span_460](start_span)"[span_460](end_span)
+                AtNameLabel.Text = "@name[span_461](start_span)"[span_461](end_span)
+                StatusLabel.Text = "Offline[span_462](start_span)"[span_462](end_span)
+                StatusDot.BackgroundColor3 = Color3.fromRGB(100, 100, 100)[span_463](start_span)[span_463](end_span)
+                HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png[span_464](start_span)"[span_464](end_span)
+            end[span_465](start_span)[span_465](end_span)
+        end[span_466](start_span)[span_466](end_span)
+    end)[span_467](start_span)[span_467](end_span)
 
-    -- STOP ALL functionality
-    StopAllBtn.MouseButton1Click:Connect(function()
-        playS(CLICK_SOUND)
-        -- Reset all toggle buttons in BtnArea
-        for _, v in pairs(BtnArea:GetChildren()) do
-            if v:IsA("TextButton") and v:GetAttribute("T") ~= nil then
-                v:SetAttribute("T", false)
-                v.BackgroundColor3 = White
-                v.TextColor3 = Black
-            end
-        end
-        -- Reset stand button (we'll find it by name or we can store reference)
-        for _, v in pairs(BtnArea:GetChildren()) do
-            if v:IsA("TextButton") and v.Text:find("STAND") then
-                v.Text = "STAND: OFF 🛑"
-                v.BackgroundColor3 = White
-                v.TextColor3 = Black
-                standModeIdx = 0
-                break
-            end
-        end
-        -- Stop all functions
-        _G.Loop = false
-        _G.Fly = false
-        if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
-        _G.InfJump = false
-        _G.StrongView = false
-        _G.TargetESP = false
-        _G.TargetLook = false
-        if player.Character and player.Character:FindFirstChild("Humanoid") then
-            workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
-        end
-        stopCopyLoop()
-        stopChatSync()
-        stopStandLoop()
-        toggleCustomEmote(false)
-    end)
+    StopAllBtn.MouseButton1Click:Connect(function()[span_468](start_span)[span_468](end_span)
+        playS(CLICK_SOUND)[span_469](start_span)[span_469](end_span)
+        for _, v in pairs(BtnArea:GetChildren()) do[span_470](start_span)[span_470](end_span)
+            if v:IsA("TextButton") and v:GetAttribute("T") ~= nil then[span_471](start_span)[span_471](end_span)
+                v:SetAttribute("T", false)[span_472](start_span)[span_472](end_span)
+                v.BackgroundColor3 = White[span_473](start_span)[span_473](end_span)
+                v.TextColor3 = Black[span_474](start_span)[span_474](end_span)
+            end[span_475](start_span)[span_475](end_span)
+        end[span_476](start_span)[span_476](end_span)
+        for _, v in pairs(BtnArea:GetChildren()) do[span_477](start_span)[span_477](end_span)
+            if v:IsA("TextButton") and v.Text:find("STAND") then[span_478](start_span)[span_478](end_span)
+                v.Text = "STAND: OFF 🛑[span_479](start_span)"[span_479](end_span)
+                v.BackgroundColor3 = White[span_480](start_span)[span_480](end_span)
+                v.TextColor3 = Black[span_481](start_span)[span_481](end_span)
+                break[span_482](start_span)[span_482](end_span)
+            end[span_483](start_span)[span_483](end_span)
+        end[span_484](start_span)[span_484](end_span)
+        _G.Loop = false[span_485](start_span)[span_485](end_span)
+        _G.Fly = false[span_486](start_span)[span_486](end_span)
+        if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end[span_487](start_span)[span_487](end_span)
+        _G.InfJump = false[span_488](start_span)[span_488](end_span)
+        _G.StrongView = false[span_489](start_span)[span_489](end_span)
+        _G.TargetESP = false[span_490](start_span)[span_490](end_span)
+        _G.TargetLook = false[span_491](start_span)[span_491](end_span)
+        if player.Character and player.Character:FindFirstChild("Humanoid") then[span_492](start_span)[span_492](end_span)
+            workspace.CurrentCamera.CameraSubject = player.Character.Humanoid[span_493](start_span)[span_493](end_span)
+        end[span_494](start_span)[span_494](end_span)
+        stopCopyLoop()[span_495](start_span)[span_495](end_span)
+        stopChatSync()[span_496](start_span)[span_496](end_span)
+        stopStandLoop()[span_497](start_span)[span_497](end_span)
+        toggleCustomEmote(false)[span_498](start_span)[span_498](end_span)
+    end)[span_499](start_span)[span_499](end_span)
 
-    -- Now add all buttons to BtnArea using btn() function
-    -- Buttons (same as original)
-    btn("👁️ VIEW", BtnArea, function(b)
-        _G.StrongView = b:GetAttribute("T")
-        task.spawn(function()
-            while _G.StrongView do
-                local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("Humanoid") then
-                    if workspace.CurrentCamera.CameraSubject ~= t.Character.Humanoid then
-                        workspace.CurrentCamera.CameraSubject = t.Character.Humanoid
-                    end
-                end
-                task.wait(0.01)
-            end
-            if player.Character and player.Character:FindFirstChild("Humanoid") then
-                workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
-            end
-        end)
-    end, false)
+    -- Setup Grid Utility Operations
+    btn("👁️ VIEW", BtnArea, function(b)[span_500](start_span)[span_500](end_span)
+        _G.StrongView = b:GetAttribute("T")[span_501](start_span)[span_501](end_span)
+        task.spawn(function()[span_502](start_span)[span_502](end_span)
+            while _G.StrongView do[span_503](start_span)[span_503](end_span)
+                local t = getT()[span_504](start_span)[span_504](end_span)
+                if t and t.Character and t.Character:FindFirstChild("Humanoid") then[span_505](start_span)[span_505](end_span)
+                    if workspace.CurrentCamera.CameraSubject != t.Character.Humanoid then[span_506](start_span)[span_506](end_span)
+                        workspace.CurrentCamera.CameraSubject = t.Character.Humanoid[span_507](start_span)[span_507](end_span)
+                    end[span_508](start_span)[span_508](end_span)
+                end[span_509](start_span)[span_509](end_span)
+                task.wait(0.01)[span_510](start_span)[span_510](end_span)
+            end[span_511](start_span)[span_511](end_span)
+            if player.Character and player.Character:FindFirstChild("Humanoid") then[span_512](start_span)[span_512](end_span)
+                workspace.CurrentCamera.CameraSubject = player.Character.Humanoid[span_513](start_span)[span_513](end_span)
+            end[span_514](start_span)[span_514](end_span)
+        end)[span_515](start_span)[span_515](end_span)
+    end, false)[span_516](start_span)[span_516](end_span)
 
-    btn("🔴 TARGET ESP", BtnArea, function(b)
-        _G.TargetESP = b:GetAttribute("T")
-        task.spawn(function()
-            local currentHighlight, currentBillboard
-            local function cleanup()
-                if currentHighlight then currentHighlight:Destroy(); currentHighlight = nil end
-                if currentBillboard then currentBillboard:Destroy(); currentBillboard = nil end
-            end
-            while _G.TargetESP do
-                local t = getT()
-                if t and t.Character then
-                    if not currentHighlight or currentHighlight.Parent ~= t.Character then
-                        cleanup()
-                        currentHighlight = Instance.new("Highlight")
-                        currentHighlight.FillColor = Color3.fromRGB(255, 0, 0)
-                        currentHighlight.FillTransparency = 0.6
-                        currentHighlight.OutlineColor = Color3.fromRGB(255, 0, 0)
-                        currentHighlight.OutlineTransparency = 0
-                        currentHighlight.Parent = t.Character
-                    end
-                    local head = t.Character:FindFirstChild("Head")
-                    if head and (not currentBillboard or currentBillboard.Parent ~= head) then
-                        if currentBillboard then currentBillboard:Destroy() end
-                        currentBillboard = Instance.new("BillboardGui")
-                        currentBillboard.Size = UDim2.new(0, 100, 0, 30)
-                        currentBillboard.AlwaysOnTop = true
-                        currentBillboard.StudsOffset = Vector3.new(0, 2, 0)
+    btn("🔴 TARGET ESP", BtnArea, function(b)[span_517](start_span)[span_517](end_span)
+        _G.TargetESP = b:GetAttribute("T")[span_518](start_span)[span_518](end_span)
+        task.spawn(function()[span_519](start_span)[span_519](end_span)
+            local currentHighlight, currentBillboard[span_520](start_span)[span_520](end_span)
+            local function cleanup()[span_521](start_span)[span_521](end_span)
+                if currentHighlight then currentHighlight:Destroy(); currentHighlight = nil end[span_522](start_span)[span_522](end_span)
+                if currentBillboard then currentBillboard:Destroy(); currentBillboard = nil end[span_523](start_span)[span_523](end_span)
+            end[span_524](start_span)[span_524](end_span)
+            while _G.TargetESP do[span_525](start_span)[span_525](end_span)
+                local t = getT()[span_526](start_span)[span_526](end_span)
+                if t and t.Character then[span_527](start_span)[span_527](end_span)
+                    if not currentHighlight or currentHighlight.Parent != t.Character then[span_528](start_span)[span_528](end_span)
+                        cleanup()[span_529](start_span)[span_529](end_span)
+                        currentHighlight = Instance.new("Highlight")[span_530](start_span)[span_530](end_span)
+                        currentHighlight.FillColor = Color3.fromRGB(255, 0, 0)[span_531](start_span)[span_531](end_span)
+                        currentHighlight.FillTransparency = 0.6[span_532](start_span)[span_532](end_span)
+                        currentHighlight.OutlineColor = Color3.fromRGB(255, 0, 0)[span_533](start_span)[span_533](end_span)
+                        currentHighlight.OutlineTransparency = 0[span_534](start_span)[span_534](end_span)
+                        currentHighlight.Parent = t.Character[span_535](start_span)[span_535](end_span)
+                    end[span_536](start_span)[span_536](end_span)
+                    local head = t.Character:FindFirstChild("Head")[span_537](start_span)[span_537](end_span)
+                    if head and (not currentBillboard or currentBillboard.Parent != head) then[span_538](start_span)[span_538](end_span)
+                        if currentBillboard then currentBillboard:Destroy() end[span_539](start_span)[span_539](end_span)
+                        currentBillboard = Instance.new("BillboardGui")[span_540](start_span)[span_540](end_span)
+                        currentBillboard.Size = UDim2.new(0, 100, 0, 30)[span_541](start_span)[span_541](end_span)
+                        currentBillboard.AlwaysOnTop = true[span_542](start_span)[span_542](end_span)
+                        currentBillboard.StudsOffset = Vector3.new(0, 2, 0)[span_543](start_span)[span_543](end_span)
                         
-                        local tl = Instance.new("TextLabel", currentBillboard)
-                        tl.Size = UDim2.new(1, 0, 1, 0)
-                        tl.BackgroundTransparency = 1
-                        tl.Text = "ᴛᴀʀɢᴇᴛ"
-                        tl.TextColor3 = Color3.fromRGB(255, 0, 0)
-                        tl.TextSize = 16
-                        tl.Font = Enum.Font.GothamBlack
+                        local tl = Instance.new("TextLabel", currentBillboard)[span_544](start_span)[span_544](end_span)
+                        tl.Size = UDim2.new(1, 0, 1, 0)[span_545](start_span)[span_545](end_span)
+                        tl.BackgroundTransparency = 1[span_546](start_span)[span_546](end_span)
+                        tl.Text = "ᴛᴀʀɢᴇᴛ[span_547](start_span)"[span_547](end_span)
+                        tl.TextColor3 = Color3.fromRGB(255, 0, 0)[span_548](start_span)[span_548](end_span)
+                        tl.TextSize = 16[span_549](start_span)[span_549](end_span)
+                        tl.Font = Enum.Font.GothamBlack[span_550](start_span)[span_550](end_span)
                         
-                        local stroke = Instance.new("UIStroke", tl)
-                        stroke.Thickness = 3
-                        stroke.Color = Color3.fromRGB(0, 0, 0)
+                        local stroke = Instance.new("UIStroke", tl)[span_551](start_span)[span_551](end_span)
+                        stroke.Thickness = 3[span_552](start_span)[span_552](end_span)
+                        stroke.Color = Color3.fromRGB(0, 0, 0)[span_553](start_span)[span_553](end_span)
                         
-                        currentBillboard.Parent = head
-                    end
-                else
-                    cleanup()
-                end
-                task.wait(0.01)
-            end
-            cleanup()
-        end)
-    end, false)
+                        currentBillboard.Parent = head[span_554](start_span)[span_554](end_span)
+                    end[span_555](start_span)[span_555](end_span)
+                else[span_556](start_span)[span_556](end_span)
+                    cleanup()[span_557](start_span)[span_557](end_span)
+                end[span_558](start_span)[span_558](end_span)
+                task.wait(0.01)[span_559](start_span)[span_559](end_span)
+            end[span_560](start_span)[span_560](end_span)
+            cleanup()[span_561](start_span)[span_561](end_span)
+        end)[span_562](start_span)[span_562](end_span)
+    end, false)[span_563](start_span)[span_563](end_span)
     
-    btn("👁️ TARGET LOOK", BtnArea, function(b)
-        _G.TargetLook = b:GetAttribute("T")
-        local lookConnection
-        if _G.TargetLook then
-            lookConnection = RunService.RenderStepped:Connect(function()
-                if not _G.TargetLook then if lookConnection then lookConnection:Disconnect() end return end
-                local t = getT()
-                local char = player.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if t and t.Character and hrp then
-                    local targetHrp = t.Character:FindFirstChild("HumanoidRootPart")
-                    if targetHrp then
-                        hrp.RotVelocity = Vector3.zero
-                        local lookPos = Vector3.new(targetHrp.Position.X, hrp.Position.Y, targetHrp.Position.Z)
-                        if (lookPos - hrp.Position).Magnitude > 0.1 then
-                            hrp.CFrame = CFrame.lookAt(hrp.Position, lookPos)
-                        end
-                    end
-                end
-            end)
-        else
-            if lookConnection then lookConnection:Disconnect() end
-        end
-    end, false)
+    btn("👁️ TARGET LOOK", BtnArea, function(b)[span_564](start_span)[span_564](end_span)
+        _G.TargetLook = b:GetAttribute("T")[span_565](start_span)[span_565](end_span)
+        local lookConnection[span_566](start_span)[span_566](end_span)
+        if _G.TargetLook then[span_567](start_span)[span_567](end_span)
+            lookConnection = RunService.RenderStepped:Connect(function()[span_568](start_span)[span_568](end_span)
+                if not _G.TargetLook then if lookConnection then lookConnection:Disconnect() end return end[span_569](start_span)[span_569](end_span)
+                local t = getT()[span_570](start_span)[span_570](end_span)
+                local char = player.Character[span_571](start_span)[span_571](end_span)
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")[span_572](start_span)[span_572](end_span)
+                if t and t.Character and hrp then[span_573](start_span)[span_573](end_span)
+                    local targetHrp = t.Character:FindFirstChild("HumanoidRootPart")[span_574](start_span)[span_574](end_span)
+                    if targetHrp then[span_575](start_span)[span_575](end_span)
+                        hrp.RotVelocity = Vector3.zero[span_576](start_span)[span_576](end_span)
+                        local lookPos = Vector3.new(targetHrp.Position.X, hrp.Position.Y, targetHrp.Position.Z)[span_577](start_span)[span_577](end_span)
+                        if (lookPos - hrp.Position).Magnitude > 0.1 then[span_578](start_span)[span_578](end_span)
+                            hrp.CFrame = CFrame.lookAt(hrp.Position, lookPos)[span_579](start_span)[span_579](end_span)
+                        end[span_580](start_span)[span_580](end_span)
+                    end[span_581](start_span)[span_581](end_span)
+                end[span_582](start_span)[span_582](end_span)
+            end)[span_583](start_span)[span_583](end_span)
+        else[span_584](start_span)[span_584](end_span)
+            if lookConnection then lookConnection:Disconnect() end[span_585](start_span)[span_585](end_span)
+        end[span_586](start_span)[span_586](end_span)
+    end, false)[span_587](start_span)[span_587](end_span)
     
-    btn("🚀 GOTO", BtnArea, function()
-        local t = getT()
-        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-            SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
-        end
-    end, true)
+    btn("🚀 GOTO", BtnArea, function()[span_588](start_span)[span_588](end_span)
+        local t = getT()[span_589](start_span)[span_589](end_span)
+        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then[span_590](start_span)[span_590](end_span)
+            SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))[span_591](start_span)[span_591](end_span)
+        end[span_592](start_span)[span_592](end_span)
+    end, true)[span_593](start_span)[span_593](end_span)
     
-    btn("🍆 BANG", BtnArea, function(b)
-        _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
-        task.spawn(function()
-            while _G.Loop do
-                local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                    SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
-                else
-                    godModeAttach()
-                end
-                RunService.RenderStepped:Wait()
-            end
-            local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
-        end)
-    end, false)
+    btn("🍆 BANG", BtnArea, function(b)[span_594](start_span)[span_594](end_span)
+        _G.Loop = b:GetAttribute("T")[span_595](start_span)[span_595](end_span)
+        toggleCustomEmote(_G.Loop)[span_596](start_span)[span_596](end_span)
+        task.spawn(function()[span_597](start_span)[span_597](end_span)
+            while _G.Loop do[span_598](start_span)[span_598](end_span)
+                local t = getT()[span_599](start_span)[span_599](end_span)
+                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then[span_600](start_span)[span_600](end_span)
+                    SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))[span_601](start_span)[span_601](end_span)
+                else[span_602](start_span)[span_602](end_span)
+                    godModeAttach()[span_603](start_span)[span_603](end_span)
+                end[span_604](start_span)[span_604](end_span)
+                RunService.RenderStepped:Wait()[span_605](start_span)[span_605](end_span)
+            end[span_606](start_span)[span_606](end_span)
+            local char = player.Character[span_607](start_span)[span_607](end_span)
+            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end[span_608](start_span)[span_608](end_span)
+        end)[span_609](start_span)[span_609](end_span)
+    end, false)[span_610](start_span)[span_610](end_span)
     
-    btn("🧒 HEADSIT", BtnArea, function(b)
-        _G.Loop = b:GetAttribute("T")
-        task.spawn(function()
-            while _G.Loop do
-                local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("Head") then
-                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))
-                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
-                else
-                    godModeAttach()
-                end
-                RunService.RenderStepped:Wait()
-            end
-            local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
-        end)
-    end, false)
+    btn("🧒 HEADSIT", BtnArea, function(b)[span_611](start_span)[span_611](end_span)
+        _G.Loop = b:GetAttribute("T")[span_612](start_span)[span_612](end_span)
+        task.spawn(function()[span_613](start_span)[span_613](end_span)
+            while _G.Loop do[span_614](start_span)[span_614](end_span)
+                local t = getT()[span_615](start_span)[span_615](end_span)
+                if t and t.Character and t.Character:FindFirstChild("Head") then[span_616](start_span)[span_616](end_span)
+                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))[span_617](start_span)[span_617](end_span)
+                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end[span_618](start_span)[span_618](end_span)
+                else[span_619](start_span)[span_619](end_span)
+                    godModeAttach()[span_620](start_span)[span_620](end_span)
+                end[span_621](start_span)[span_621](end_span)
+                RunService.RenderStepped:Wait()[span_622](start_span)[span_622](end_span)
+            end[span_623](start_span)[span_623](end_span)
+            local char = player.Character[span_624](start_span)[span_624](end_span)
+            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end[span_625](start_span)[span_625](end_span)
+        end)[span_626](start_span)[span_626](end_span)
+    end, false)[span_627](start_span)[span_627](end_span)
     
-    btn("🦒 FRONT HEADSIT", BtnArea, function(b)
-        _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
-        task.spawn(function()
-            while _G.Loop do
-                local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("Head") then
-                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0))
-                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
-                else
-                    godModeAttach()
-                end
-                RunService.RenderStepped:Wait()
-            end
-            local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
-        end)
-    end, false)
+    btn("🦒 FRONT HEADSIT", BtnArea, function(b)[span_628](start_span)[span_628](end_span)
+        _G.Loop = b:GetAttribute("T")[span_629](start_span)[span_629](end_span)
+        toggleCustomEmote(_G.Loop)[span_630](start_span)[span_630](end_span)
+        task.spawn(function()[span_631](start_span)[span_631](end_span)
+            while _G.Loop do[span_632](start_span)[span_632](end_span)
+                local t = getT()[span_633](start_span)[span_633](end_span)
+                if t and t.Character and t.Character:FindFirstChild("Head") then[span_634](start_span)[span_634](end_span)
+                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0))[span_635](start_span)[span_635](end_span)
+                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end[span_636](start_span)[span_636](end_span)
+                else[span_637](start_span)[span_637](end_span)
+                    godModeAttach()[span_638](start_span)[span_638](end_span)
+                end[span_639](start_span)[span_639](end_span)
+                RunService.RenderStepped:Wait()[span_640](start_span)[span_640](end_span)
+            end[span_641](start_span)[span_641](end_span)
+            local char = player.Character[span_642](start_span)[span_642](end_span)
+            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end[span_643](start_span)[span_643](end_span)
+        end)[span_644](start_span)[span_644](end_span)
+    end, false)[span_645](start_span)[span_645](end_span)
     
-    btn("COPY ANIM👤", BtnArea, function(b)
-        local isActive = b:GetAttribute("T")
-        if isActive then
-            targetPlayer = getT()
-            if targetPlayer then
-                copyNinjaActive = true
-                copyAnimations()
-                startCopyLoop()
-            else
-                b:SetAttribute("T", false)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                playS(CLICK_SOUND)
-            end
-        else
-            stopCopyLoop()
-        end
-    end, false)
+    btn("COPY ANIM👤", BtnArea, function(b)[span_646](start_span)[span_646](end_span)
+        local isActive = b:GetAttribute("T")[span_647](start_span)[span_647](end_span)
+        if isActive then[span_648](start_span)[span_648](end_span)
+            targetPlayer = getT()[span_649](start_span)[span_649](end_span)
+            if targetPlayer then[span_650](start_span)[span_650](end_span)
+                copyNinjaActive = true[span_651](start_span)[span_651](end_span)
+                copyAnimations()[span_652](start_span)[span_652](end_span)
+                startCopyLoop()[span_653](start_span)[span_653](end_span)
+            else[span_654](start_span)[span_654](end_span)
+                b:SetAttribute("T", false)[span_655](start_span)[span_655](end_span)
+                b.BackgroundColor3 = White[span_656](start_span)[span_656](end_span)
+                b.TextColor3 = Black[span_657](start_span)[span_657](end_span)
+                playS(CLICK_SOUND)[span_658](start_span)[span_658](end_span)
+            end[span_659](start_span)[span_659](end_span)
+        else[span_660](start_span)[span_660](end_span)
+            stopCopyLoop()[span_661](start_span)[span_661](end_span)
+        end[span_662](start_span)[span_662](end_span)
+    end, false)[span_663](start_span)[span_663](end_span)
     
-    btn("COPY CHAT💬", BtnArea, function(b)
-        local isActive = b:GetAttribute("T")
-        if isActive then
-            chatTargetPlayer = getT()
-            if chatTargetPlayer then
-                chatSyncActive = true
-            else
-                b:SetAttribute("T", false)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                playS(CLICK_SOUND)
-            end
-        else
-            stopChatSync()
-        end
-    end, false)
+    btn("COPY CHAT💬", BtnArea, function(b)[span_664](start_span)[span_664](end_span)
+        local isActive = b:GetAttribute("T")[span_665](start_span)[span_665](end_span)
+        if isActive then[span_666](start_span)[span_666](end_span)
+            chatTargetPlayer = getT()[span_667](start_span)[span_667](end_span)
+            if chatTargetPlayer then[span_668](start_span)[span_668](end_span)
+                chatSyncActive = true[span_669](start_span)[span_669](end_span)
+            else[span_670](start_span)[span_670](end_span)
+                b:SetAttribute("T", false)[span_671](start_span)[span_671](end_span)
+                b.BackgroundColor3 = White[span_672](start_span)[span_672](end_span)
+                b.TextColor3 = Black[span_673](start_span)[span_673](end_span)
+                playS(CLICK_SOUND)[span_674](start_span)[span_674](end_span)
+            end[span_675](start_span)[span_675](end_span)
+        else[span_676](start_span)[span_676](end_span)
+            stopChatSync()[span_677](start_span)[span_677](end_span)
+        end[span_678](start_span)[span_678](end_span)
+    end, false)[span_679](start_span)[span_679](end_span)
     
-    -- STAND BUTTON (special)
-    local standBtn = Instance.new("TextButton", BtnArea)
-    standBtn.Size = UDim2.new(0.47, 0, 0, 32)
-    standBtn.BackgroundColor3 = White
-    standBtn.Text = "STAND: OFF 🛑"
-    standBtn.TextColor3 = Black
-    standBtn.Font = Enum.Font.GothamBold
-    standBtn.TextSize = 8.5
-    Instance.new("UICorner", standBtn)
+    -- Stand Engine Deployment Switch
+    local standBtn = Instance.new("TextButton", BtnArea)[span_680](start_span)[span_680](end_span)
+    standBtn.Size = UDim2.new(0.47, 0, 0, 32)[span_681](start_span)[span_681](end_span)
+    standBtn.BackgroundColor3 = White[span_682](start_span)[span_682](end_span)
+    standBtn.Text = "STAND: OFF 🛑[span_683](start_span)"[span_683](end_span)
+    standBtn.TextColor3 = Black[span_684](start_span)[span_684](end_span)
+    standBtn.Font = Enum.Font.GothamBold[span_685](start_span)[span_685](end_span)
+    standBtn.TextSize = 8.5[span_686](start_span)[span_686](end_span)
+    Instance.new("UICorner", standBtn)[span_687](start_span)[span_687](end_span)
     
-    local standModeIdx = 0
-    standBtn.MouseButton1Click:Connect(function()
-        playS(CLICK_SOUND)
-        
-        if standModeIdx == 0 then
-            standTarget = getT()
-            if not standTarget then
-                standBtn.Text = "NOT FOUND!"
-                task.wait(0.5)
-                standBtn.Text = "STAND: OFF 🛑"
-                return
-            end
+    local standModeIdx = 0[span_688](start_span)[span_688](end_span)
+    standBtn.MouseButton1Click:Connect(function()[span_689](start_span)[span_689](end_span)
+        playS(CLICK_SOUND)[span_690](start_span)[span_690](end_span)
+        if standModeIdx == 0 then[span_691](start_span)[span_691](end_span)
+            standTarget = getT()[span_692](start_span)[span_692](end_span)
+            if not standTarget then[span_693](start_span)[span_693](end_span)
+                standBtn.Text = "NOT FOUND[span_694](start_span)!"[span_694](end_span)
+                task.wait(0.5)[span_695](start_span)[span_695](end_span)
+                standBtn.Text = "STAND: OFF 🛑[span_696](start_span)"[span_696](end_span)
+                return[span_697](start_span)[span_697](end_span)
+            end[span_698](start_span)[span_698](end_span)
         end        
-        standModeIdx = (standModeIdx + 1) % 6
+        standModeIdx = (standModeIdx + 1) % 6[span_699](start_span)[span_699](end_span)
         
-        if standModeIdx == 1 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FRONT ⬆️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
-        elseif standModeIdx == 2 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, 5); standBtn.Text = "BACK ⬇️"; standBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); standBtn.TextColor3 = White; startStandLoop()
-        elseif standModeIdx == 3 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(-5, 0, 0); standBtn.Text = "LEFT ⬅️"; standBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0); standBtn.TextColor3 = White; startStandLoop()
-        elseif standModeIdx == 4 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(5, 0, 0); standBtn.Text = "RIGHT ➡️"; standBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0); standBtn.TextColor3 = White; startStandLoop()
-        elseif standModeIdx == 5 then
-            standMode = true; standLookTarget = true; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FF 👀"; standBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 80); standBtn.TextColor3 = White; startStandLoop()
-        elseif standModeIdx == 0 then
-            standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
-        end
-    end)
+        if standModeIdx == 1 then[span_700](start_span)[span_700](end_span)
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FRONT ⬆️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()[span_701](start_span)[span_701](end_span)
+        elseif standModeIdx == 2 then[span_702](start_span)[span_702](end_span)
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, 5); standBtn.Text = "BACK ⬇️"; standBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); standBtn.TextColor3 = White; startStandLoop()[span_703](start_span)[span_703](end_span)
+        elseif standModeIdx == 3 then[span_704](start_span)[span_704](end_span)
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(-5, 0, 0); standBtn.Text = "LEFT ⬅️"; standBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0); standBtn.TextColor3 = White; startStandLoop()[span_705](start_span)[span_705](end_span)
+        elseif standModeIdx == 4 then[span_706](start_span)[span_706](end_span)
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(5, 0, 0); standBtn.Text = "RIGHT ➡️"; standBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0); standBtn.TextColor3 = White; startStandLoop()[span_707](start_span)[span_707](end_span)
+        elseif standModeIdx == 5 then[span_708](start_span)[span_708](end_span)
+            standMode = true; standLookTarget = true; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FF 👀"; standBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 80); standBtn.TextColor3 = White; startStandLoop()[span_709](start_span)[span_709](end_span)
+        elseif standModeIdx == 0 then[span_710](start_span)[span_710](end_span)
+            standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()[span_711](start_span)[span_711](end_span)
+        end[span_712](start_span)[span_712](end_span)
+    end)[span_713](start_span)[span_713](end_span)
 
     -- TAB 3: SHIELD
-    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end, false)
-    btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, true)
-    btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
-    btn("🛡️ ANTI SIT", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop then player.Character.Humanoid.Sit = false end task.wait() end end) end, false)
-    btn("🛡️ ANTI AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
-    btn("🛡️ ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end, false)
+    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end, false)[span_714](start_span)[span_714](end_span)
+    btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, true)[span_715](start_span)[span_715](end_span)
+    btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)[span_716](start_span)[span_716](end_span)
+    btn("🛡️ ANTI SIT", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop then player.Character.Humanoid.Sit = false end task.wait() end end) end, false)[span_717](start_span)[span_717](end_span)
+    btn("🛡️ ANTI AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)[span_718](start_span)[span_718](end_span)
+    btn("🛡️ ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end, false)[span_719](start_span)[span_719](end_span)
     
     -- TAB 4: SPAM
-    btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/9S2h4aDC"))() end, true)
-    btn("NAMELESS SPAMMER💢", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/bAdrcuP8"))() end, true)
-    btn("BHUMIKA SPAMMER 💖", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/3UfyBuCx"))() end, true)
-    btn("🎵 MUSIC SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/U0NdycvQ"))() end, true)
-    btn("📢 WARD SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
-    btn("💀 @ SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)
-    btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true)
-    btn("CUSTOM SPAMMER V1💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER%20V2"))() end, true)
-    btn("MIDDLE CUSTOM SPAM🌈", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/MIDDLE%20COSTOME%20SPAM"))() end, true)
-    btn("FIRE SPAMMER🔥", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5"))() end, true)
-    btn("OCEAN SPAMMER🌊", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A"))() end, true)
-    btn("GRASS SPAMMER🌲", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2"))() end, true)
-    btn("GORZILLA SPAMMER🦍", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/84c5d1ed122de825817a657502382f358a21efaa/GORZILLA%20SPAMMER%F0%9F%A6%8D"))() end, true)
-    btn("FROG SPAMMER🐸", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FROG%20SPAMMER%F0%9F%90%B8"))() end, true)
-    btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
-    btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
+    btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/9S2h4aDC"))() end, true)[span_720](start_span)[span_720](end_span)
+    btn("NAMELESS SPAMMER💢", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/bAdrcuP8"))() end, true)[span_721](start_span)[span_721](end_span)
+    btn("BHUMIKA SPAMMER 💖", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/3UfyBuCx"))() end, true)[span_722](start_span)[span_722](end_span)
+    btn("🎵 MUSIC SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/U0NdycvQ"))() end, true)[span_723](start_span)[span_723](end_span)
+    btn("📢 WARD SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)[span_724](start_span)[span_724](end_span)
+    btn("💀 @ SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/Gv6RtAmL"))() end, true)[span_725](start_span)[span_725](end_span)
+    btn("CUSTOM SPAMMER💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER"))() end, true)[span_726](start_span)[span_726](end_span)
+    btn("CUSTOM SPAMMER V1💢", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/CUSTOM%20SPAMMER%20V2"))() end, true)[span_727](start_span)[span_727](end_span)
+    btn("MIDDLE CUSTOM SPAM🌈", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/MIDDLE%20COSTOME%20SPAM"))() end, true)[span_728](start_span)[span_728](end_span)
+    btn("FIRE SPAMMER🔥", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FIRE%20SPAMMER%F0%9F%94%A5"))() end, true)[span_729](start_span)[span_729](end_span)
+    btn("OCEAN SPAMMER🌊", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/OCEAN%20SPAMMER%F0%9F%8C%8A"))() end, true)[span_730](start_span)[span_730](end_span)
+    btn("GRASS SPAMMER🌲", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/GRASS%20SPAMMER%F0%9F%8C%B2"))() end, true)[span_731](start_span)[span_731](end_span)
+    btn("GORZILLA SPAMMER🦍", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/84c5d1ed122de825817a657502382f358a21efaa/GORZILLA%20SPAMMER%F0%9F%A6%8D"))() end, true)[span_732](start_span)[span_732](end_span)
+    btn("FROG SPAMMER🐸", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FROG%20SPAMMER%F0%9F%90%B8"))() end, true)[span_733](start_span)[span_733](end_span)
+    btn("JHATU EMPIRE SPAM😂", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)[span_734](start_span)[span_734](end_span)
+    btn("RANDI SPAM😂", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)[span_735](start_span)[span_735](end_span)
 
     -- TAB 5: OTHER
-    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
-    btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
-    btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end, false)
-    btn("🆙 FLY JUMP", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end, false)
-    btn("🌀 SPIN 300", T5, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(20), 0) task.wait() end end) end, false)
-    btn("FLY 🦅", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FLY%20%F0%9F%A6%85"))() end, true)
-    btn("GHOST NOCLIP", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end, false)
-    btn("AIR WALK 🍃", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/tLukyENu"))() end, true)
-    btn("AURA♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)
-    btn("HIDE BUTTONS 🔘", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/DtJPutfe"))() end, true)
-    btn("🥷 COPY NINJA", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/7QTTJFFa"))() end, true)
-    btn("🪓 SKY DESTROYER", T5, function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640"))() end, true)
-    btn("🎭 EMOTE NAME", T5, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))() end) end, true)
-    btn("NAMELESS EMOTE👤", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)
-    btn("🔄 REJOIN", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)
+    btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)[span_736](start_span)[span_736](end_span)
+    btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)[span_737](start_span)[span_737](end_span)
+    btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end, false)[span_738](start_span)[span_738](end_span)
+    btn("🆙 FLY JUMP", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end, false)[span_739](start_span)[span_739](end_span)
+    btn("🌀 SPIN 300", T5, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(20), 0) task.wait() end end) end, false)[span_740](start_span)[span_740](end_span)
+    btn("FLY 🦅", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FLY%20%F0%9F%A6%85"))() end, true)[span_741](start_span)[span_741](end_span)
+    btn("GHOST NOCLIP", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end, false)[span_742](start_span)[span_742](end_span)
+    btn("AIR WALK 🍃", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/tLukyENu"))() end, true)[span_743](start_span)[span_743](end_span)
+    btn("AURA♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)[span_744](start_span)[span_744](end_span)
+    btn("HIDE BUTTONS 🔘", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/DtJPutfe"))() end, true)[span_745](start_span)[span_745](end_span)
+    btn("🥷 COPY NINJA", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/7QTTJFFa"))() end, true)[span_746](start_span)[span_746](end_span)
+    btn("🪓 SKY DESTROYER", T5, function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640"))() end, true)[span_747](start_span)[span_747](end_span)
+    btn("🎭 EMOTE NAME", T5, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))() end) end, true)[span_748](start_span)[span_748](end_span)
+    btn("NAMELESS EMOTE👤", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)[span_749](start_span)[span_749](end_span)
+    btn("🔄 REJOIN", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)[span_750](start_span)[span_750](end_span)
     
-    local currentPlaying = nil
-    local function phonkBtn(name, id)
-        local b = Instance.new("TextButton", T_Phonk)
-        b.BackgroundColor3 = White; b.Text = name; b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)
-        task.spawn(function()
-            while task.wait() do if b:GetAttribute("Disco") then b.BackgroundColor3 = Color3.fromHSV(tick() % 2 / 2, 0.8, 1) else b.BackgroundColor3 = White end end
-        end)
-        b.MouseButton1Click:Connect(function()
-            playS(CLICK_SOUND)
-            if currentPlaying == id then
-                for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end
-                for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end
-                currentPlaying = nil
-            else
-                for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end
-                for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end
-                b:SetAttribute("Disco", true)
-                local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxassetid://"..id; s.Volume = 3; s:Play()
-                currentPlaying = id
-                task.spawn(function() s.Ended:Wait(); if currentPlaying == id then b:SetAttribute("Disco", false); currentPlaying = nil; s:Destroy() end end)
-            end
-        end)
-    end
+    local currentPlaying = nil[span_751](start_span)[span_751](end_span)
+    local function phonkBtn(name, id)[span_752](start_span)[span_752](end_span)
+        local b = Instance.new("TextButton", T_Phonk)[span_753](start_span)[span_753](end_span)
+        b.BackgroundColor3 = White; b.Text = name; b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 10; Instance.new("UICorner", b)[span_754](start_span)[span_754](end_span)
+        task.spawn(function()[span_755](start_span)[span_755](end_span)
+            while task.wait() do if b:GetAttribute("Disco") then b.BackgroundColor3 = Color3.fromHSV(tick() % 2 / 2, 0.8, 1) else b.BackgroundColor3 = White end end[span_756](start_span)[span_756](end_span)
+        end)[span_757](start_span)[span_757](end_span)
+        b.MouseButton1Click:Connect(function()[span_758](start_span)[span_758](end_span)
+            playS(CLICK_SOUND)[span_759](start_span)[span_759](end_span)
+            if currentPlaying == id then[span_760](start_span)[span_760](end_span)
+                for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end[span_761](start_span)[span_761](end_span)
+                for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end[span_762](start_span)[span_762](end_span)
+                currentPlaying = nil[span_763](start_span)[span_763](end_span)
+            else[span_764](start_span)[span_764](end_span)
+                for _, v in pairs(workspace:GetChildren()) do if v:IsA("Sound") and v.Name == "PhonkSound" then v:Destroy() end end[span_765](start_span)[span_765](end_span)
+                for _, v in pairs(T_Phonk:GetChildren()) do if v:IsA("TextButton") then v:SetAttribute("Disco", false) end end[span_766](start_span)[span_766](end_span)
+                b:SetAttribute("Disco", true)[span_767](start_span)[span_767](end_span)
+                local s = Instance.new("Sound", workspace); s.Name = "PhonkSound"; s.SoundId = "rbxassetid://"..id; s.Volume = 3; s:Play()[span_768](start_span)[span_768](end_span)
+                currentPlaying = id[span_769](start_span)[span_769](end_span)
+                task.spawn(function() s.Ended:Wait(); if currentPlaying == id then b:SetAttribute("Disco", false); currentPlaying = nil; s:Destroy() end end)[span_770](start_span)[span_770](end_span)
+            end[span_771](start_span)[span_771](end_span)
+        end)[span_772](start_span)[span_772](end_span)
+    end[span_773](start_span)[span_773](end_span)
     
-    phonkBtn("1", "139435437308948"); phonkBtn("2", "137787889626447"); phonkBtn("3", "138864288968383"); phonkBtn("4", "130973511966646")
-    phonkBtn("5", "135674024616225"); phonkBtn("6", "137152491110539"); phonkBtn("7", "139606677237480"); phonkBtn("8", "139825057894568")
-    phonkBtn("9", "140292910030604"); phonkBtn("10", "137466127206691"); phonkBtn("11", "139638751795258")
+    phonkBtn("1", "139435437308948"); phonkBtn("2", "137787889626447"); phonkBtn("3", "138864288968383"); phonkBtn("4", "130973511966646")[span_774](start_span)[span_774](end_span)
+    phonkBtn("5", "135674024616225"); phonkBtn("6", "137152491110539"); phonkBtn("7", "139606677237480"); phonkBtn("8", "139825057894568")[span_775](start_span)[span_775](end_span)
+    phonkBtn("9", "140292910030604"); phonkBtn("10", "137466127206691"); phonkBtn("11", "139638751795258")[span_776](start_span)[span_776](end_span)
     
-    local LogL = Instance.new("TextLabel", T_Adm); LogL.Size = UDim2.new(1,0,1,0); LogL.BackgroundTransparency = 1; LogL.TextColor3 = Green; LogL.TextSize = 8.5; LogL.Font = Enum.Font.Code; LogL.TextXAlignment = "Left"; LogL.TextYAlignment = "Top"
-    RunService.Heartbeat:Connect(function()
-        local t = "[ MASTER ADMIN ACCESS ]\n--- ACTIVE USERS ---\n"
-        for _,v in pairs(_G.AdminLogs) do t = t .. "> " .. v .. "\n" end
-        LogL.Text = t
-    end)
+    local LogL = Instance.new("TextLabel", T_Adm); LogL.Size = UDim2.new(1,0,1,0); LogL.BackgroundTransparency = 1; LogL.TextColor3 = Green; LogL.TextSize = 8.5; LogL.Font = Enum.Font.Code; LogL.TextXAlignment = "Left"; LogL.TextYAlignment = "Top[span_777](start_span)"[span_777](end_span)
+    RunService.Heartbeat:Connect(function()[span_778](start_span)[span_778](end_span)
+        local t = "[ MASTER ADMIN ACCESS ]\n--- ACTIVE USERS ---\n[span_779](start_span)"[span_779](end_span)
+        for _,v in pairs(_G.AdminLogs) do t = t .. "> " .. v .. "\n" end[span_780](start_span)[span_780](end_span)
+        LogL.Text = t[span_781](start_span)[span_781](end_span)
+    end)[span_782](start_span)[span_782](end_span)
     
-    local Logo = Instance.new("ImageButton", sg); Logo.Size = UDim2.new(0, 50, 0, 50); Logo.Position = UDim2.new(0, 10, 0.5, -25)
-    Logo.BackgroundTransparency = 1
-    Logo.Image = LOGO_IMAGE; makeDraggable(Logo)
+    local Logo = Instance.new("ImageButton", sg); Logo.Size = UDim2.new(0, 50, 0, 50); Logo.Position = UDim2.new(0, 10, 0.5, -25)[span_783](start_span)[span_783](end_span)
+    Logo.BackgroundTransparency = 1[span_784](start_span)[span_784](end_span)
+    Logo.Image = LOGO_IMAGE; makeDraggable(Logo)[span_785](start_span)[span_785](end_span)
     
-    Logo.MouseButton1Click:Connect(function()
-        playS(CLICK_SOUND)
-        Main.Visible = not Main.Visible
-    end)
+    Logo.MouseButton1Click:Connect(function()[span_786](start_span)[span_786](end_span)
+        playS(CLICK_SOUND)[span_787](start_span)[span_787](end_span)
+        Main.Visible = not Main.Visible[span_788](start_span)[span_788](end_span)
+    end)[span_789](start_span)[span_789](end_span)
     
-    -- ==========================================
-    -- CHAT SYNC LISTENER - 0 DELAY
-    -- ==========================================
-    TextChatService.MessageReceived:Connect(function(msg)
-        if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
-            local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-            if channel then channel:SendAsync(msg.Text) end
-            local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
-            if sayRemote then sayRemote:FireServer(msg.Text, "All") end
-        end
-    end)
+    -- Sync Hook Receiver
+    TextChatService.MessageReceived:Connect(function(msg)[span_790](start_span)[span_790](end_span)
+        if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then[span_791](start_span)[span_791](end_span)
+            local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")[span_792](start_span)[span_792](end_span)
+            if channel then channel:SendAsync(msg.Text) end[span_793](start_span)[span_793](end_span)
+            local sayRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")[span_794](start_span)[span_794](end_span)
+            if sayRemote then sayRemote:FireServer(msg.Text, "All") end[span_795](start_span)[span_795](end_span)
+        end[span_796](start_span)[span_796](end_span)
+    end)[span_797](start_span)[span_797](end_span)
 end
 
 -- ==========================================
 -- VERIFY SEQUENCE
 -- ==========================================
-Verify.MouseButton1Click:Connect(function()
-    if KeyBox.Text == CORRECT_KEY then
-        playS(CLICK_SOUND)
-        playKeySuccess()
+Verify.MouseButton1Click:Connect(function()[span_798](start_span)[span_798](end_span)
+    if KeyBox.Text == CORRECT_KEY then[span_799](start_span)[span_799](end_span)
+        playS(CLICK_SOUND)[span_800](start_span)[span_800](end_span)
+        playKeySuccess()[span_801](start_span)[span_801](end_span)
+        if KF then KF:Destroy() end[span_802](start_span)[span_802](end_span)
         
-        if KF then KF:Destroy() end
-        
-        task.spawn(function()
-            SendPublicChat("")
-            task.wait(5)
-            SendPublicChat("..")
-            playS(LOAD_SOUND)
+        task.spawn(function()[span_803](start_span)[span_803](end_span)
+            SendPublicChat("")[span_804](start_span)[span_804](end_span)
+            task.wait(5)[span_805](start_span)[span_805](end_span)
+            SendPublicChat("..")[span_806](start_span)[span_806](end_span)
+            playS(LOAD_SOUND)[span_807](start_span)[span_807](end_span)
             
-            StarterGui:SetCore("SendNotification", {
-                Title = "ENDLESS AURA",
-                Text = "Loaded...",
-                Icon = LOGO_IMAGE,
-                Duration = 5
-            })
+            StarterGui:SetCore("SendNotification", {[span_808](start_span)[span_808](end_span)
+                Title = "ENDLESS AURA",[span_809](start_span)[span_809](end_span)
+                Text = "Loaded...",[span_810](start_span)[span_810](end_span)
+                Icon = LOGO_IMAGE,[span_811](start_span)[span_811](end_span)
+                Duration = 5[span_812](start_span)[span_812](end_span)
+            })[span_813](start_span)[span_813](end_span)
             
-            task.spawn(function()
-                local success, err = pcall(function()
-                    local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
-                    local func = loadstring(response)
-                    if func then func() end
-                end)
-            end)
+            task.spawn(function()[span_814](start_span)[span_814](end_span)
+                local success, err = pcall(function()[span_815](start_span)[span_815](end_span)
+                    local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")[span_816](start_span)[span_816](end_span)
+                    local func = loadstring(response)[span_817](start_span)[span_817](end_span)
+                    if func then func() end[span_818](start_span)[span_818](end_span)
+                end)[span_819](start_span)[span_819](end_span)
+            end)[span_820](start_span)[span_820](end_span)
 
-            task.wait(0.2)
-            Initialize()
-        end)
-    else
-        playS(CLICK_SOUND)
-        KeyBox.Text = ""
-        KeyBox.PlaceholderText = "WRONG KEY 😂"
-    end
-end)
+            task.wait(0.2)[span_821](start_span)[span_821](end_span)
+            Initialize()[span_822](start_span)[span_822](end_span)
+        end)[span_823](start_span)[span_823](end_span)
+    else[span_824](start_span)[span_824](end_span)
+        playS(CLICK_SOUND)[span_825](start_span)[span_825](end_span)
+        KeyBox.Text = "[span_826](start_span)"[span_826](end_span)
+        KeyBox.PlaceholderText = "WRONG KEY 😂[span_827](start_span)"[span_827](end_span)
+    end[span_828](start_span)[span_828](end_span)
+end)[span_829](start_span)[span_829](end_span)
