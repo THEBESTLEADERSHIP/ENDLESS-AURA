@@ -467,8 +467,15 @@ local function Initialize()
         local grid = Instance.new("UIGridLayout", p); grid.CellSize = UDim2.new(0.47, 0, 0, 32); grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0); return p
     end
     
+    -- Yahan T2 ka custom UI list configuration apply hoga gap ke liye
     local T1, T2, T3, T4, T5, T_Phonk, T_Adm = pg(), pg(), pg(), pg(), pg(), pg(), pg()
     T1.UIGridLayout:Destroy()
+    T2.UIGridLayout:Destroy() -- Tab 2 ke grid layout ko destroy kiya taaki baaki tabs jesa look aaye
+    
+    -- Tab 2 ke buttons me gap dene ke liye UIListLayout lagaya gaya hai
+    local T2List = Instance.new("UIListLayout", T2)
+    T2List.Padding = UDim.new(0, 6)
+    T2List.SortOrder = Enum.SortOrder.LayoutOrder
     
     local rainbowActive = false
     task.spawn(function()
@@ -492,6 +499,12 @@ local function Initialize()
     
     local function btn(txt, par, func, isLoad)
         local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
+        
+        -- Tab 2 ke individual list sizing configuration ke liye override logic
+        if par == T2 then
+            b.Size = UDim2.new(0.96, 0, 0, 32)
+        end
+        
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND)
             if not isLoad then b:SetAttribute("T", not b:GetAttribute("T")) b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White b.TextColor3 = b:GetAttribute("T") and White or Black end
@@ -514,178 +527,13 @@ THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
-    -- ==========================================
-    -- TAB 2: TROLL - NEW LAYOUT (headshot + info + buttons)
-    -- ==========================================
-    -- Remove default grid from T2
-    if T2:FindFirstChildOfClass("UIGridLayout") then T2:FindFirstChildOfClass("UIGridLayout"):Destroy() end
-    T2.CanvasSize = UDim2.new(0, 0, 0, 500) -- give enough vertical space
-
-    -- 1) Target TextBox (top, full width)
-    local target = Instance.new("TextBox", T2)
-    target.Size = UDim2.new(0.98, 0, 0, 30)
-    target.Position = UDim2.new(0.01, 0, 0, 0)
-    target.PlaceholderText = "TARGET NAME..."
-    target.BackgroundColor3 = Color3.fromRGB(20,20,20)
-    target.TextColor3 = White
-    Instance.new("UICorner", target)
-
-    -- 2) STOP ALL button (right below textbox, centered)
-    local StopAllBtn = Instance.new("TextButton", T2)
-    StopAllBtn.Size = UDim2.new(0.4, 0, 0, 32)
-    StopAllBtn.Position = UDim2.new(0.3, 0, 0, 35) -- below textbox (30 height + 5 gap)
-    StopAllBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
-    StopAllBtn.Text = "🛑 STOP ALL"
-    StopAllBtn.TextColor3 = White
-    StopAllBtn.Font = Enum.Font.GothamBold
-    StopAllBtn.TextSize = 12
-    Instance.new("UICorner", StopAllBtn)
-
-    -- 3) Headshot + Info panel (below STOP ALL)
-    local InfoPanel = Instance.new("Frame", T2)
-    InfoPanel.Size = UDim2.new(1, 0, 0, 100)
-    InfoPanel.Position = UDim2.new(0, 0, 0, 75) -- after STOP ALL (35+32+gap)
-    InfoPanel.BackgroundTransparency = 1
-
-    -- Left: Headshot
-    local HeadshotFrame = Instance.new("Frame", InfoPanel)
-    HeadshotFrame.Size = UDim2.new(0, 90, 0, 90)
-    HeadshotFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-    HeadshotFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    Instance.new("UICorner", HeadshotFrame).CornerRadius = UDim.new(1, 0)
-    local HeadshotStroke = Instance.new("UIStroke", HeadshotFrame)
-    HeadshotStroke.Thickness = 3; HeadshotStroke.Color = DarkRed
-
-    local HeadshotImage = Instance.new("ImageLabel", HeadshotFrame)
-    HeadshotImage.Size = UDim2.new(1, 0, 1, 0)
-    HeadshotImage.BackgroundTransparency = 1
-    HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png"
-    local hsc = Instance.new("UICorner", HeadshotImage); hsc.CornerRadius = UDim.new(1, 0)
-
-    -- Right: Info labels (close to headshot)
-    local InfoRight = Instance.new("Frame", InfoPanel)
-    InfoRight.Size = UDim2.new(0.5, 0, 1, 0)
-    InfoRight.Position = UDim2.new(0.25, 0, 0, 0) -- next to headshot
-    InfoRight.BackgroundTransparency = 1
-
-    local TargetNameLabel = Instance.new("TextLabel", InfoRight)
-    TargetNameLabel.Size = UDim2.new(1, 0, 0, 25)
-    TargetNameLabel.Position = UDim2.new(0, 0, 0.1, 0)
-    TargetNameLabel.BackgroundTransparency = 1
-    TargetNameLabel.Text = "NO TARGET"
-    TargetNameLabel.TextColor3 = White
-    TargetNameLabel.TextSize = 16
-    TargetNameLabel.Font = Enum.Font.GothamBold
-    TargetNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-    local AtNameLabel = Instance.new("TextLabel", InfoRight)
-    AtNameLabel.Size = UDim2.new(1, 0, 0, 20)
-    AtNameLabel.Position = UDim2.new(0, 0, 0.38, 0)
-    AtNameLabel.BackgroundTransparency = 1
-    AtNameLabel.Text = "@no_target"
-    AtNameLabel.TextColor3 = Color3.fromRGB(150,150,150)
-    AtNameLabel.TextSize = 13
-    AtNameLabel.Font = Enum.Font.Gotham
-    AtNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-    local StatusLabel = Instance.new("TextLabel", InfoRight)
-    StatusLabel.Size = UDim2.new(1, 0, 0, 20)
-    StatusLabel.Position = UDim2.new(0, 0, 0.6, 0)
-    StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Text = "🔴 OFFLINE"
-    StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
-    StatusLabel.TextSize = 14
-    StatusLabel.Font = Enum.Font.GothamBold
-    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-    -- 4) Buttons Grid (below InfoPanel)
-    local BtnArea = Instance.new("Frame", T2)
-    BtnArea.Size = UDim2.new(1, 0, 0, 180) -- enough space for buttons
-    BtnArea.Position = UDim2.new(0, 0, 0, 185) -- after InfoPanel (75+100+10)
-    BtnArea.BackgroundTransparency = 1
-    local BtnGrid = Instance.new("UIGridLayout", BtnArea)
-    BtnGrid.CellSize = UDim2.new(0.47, 0, 0, 32)
-    BtnGrid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
-
-    -- Function to get target from textbox
-    local function getT()
-        local n = target.Text:lower()
-        for _,v in pairs(Players:GetPlayers()) do
-            if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end
-        end
-    end
-
-    -- Update headshot and info in real-time
-    task.spawn(function()
-        while task.wait(0.1) do
-            local t = getT()
-            if t then
-                TargetNameLabel.Text = t.DisplayName or t.Name
-                AtNameLabel.Text = "@" .. t.Name
-                if t.Character and t.Character:FindFirstChild("Humanoid") and t.Character.Humanoid.Health > 0 then
-                    StatusLabel.Text = "🟢 ONLINE"
-                    StatusLabel.TextColor3 = Color3.fromRGB(50,255,50)
-                else
-                    StatusLabel.Text = "🔴 OFFLINE"
-                    StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
-                end
-                local thumbType = Enum.ThumbnailType.HeadShot
-                local thumbSize = Enum.ThumbnailSize.Size420x420
-                local success, url = pcall(function()
-                    return Players:GetUserThumbnailAsync(t.UserId, thumbType, thumbSize)
-                end)
-                if success and url then HeadshotImage.Image = url end
-            else
-                TargetNameLabel.Text = "NO TARGET"
-                AtNameLabel.Text = "@no_target"
-                StatusLabel.Text = "🔴 OFFLINE"
-                StatusLabel.TextColor3 = Color3.fromRGB(255,50,50)
-                HeadshotImage.Image = "rbxasset://textures/ui/PlaceholderAvatar.png"
-            end
-        end
-    end)
-
-    -- STOP ALL functionality
-    StopAllBtn.MouseButton1Click:Connect(function()
-        playS(CLICK_SOUND)
-        -- Reset all toggle buttons in BtnArea
-        for _, v in pairs(BtnArea:GetChildren()) do
-            if v:IsA("TextButton") and v:GetAttribute("T") ~= nil then
-                v:SetAttribute("T", false)
-                v.BackgroundColor3 = White
-                v.TextColor3 = Black
-            end
-        end
-        -- Reset stand button (we'll find it by name or we can store reference)
-        for _, v in pairs(BtnArea:GetChildren()) do
-            if v:IsA("TextButton") and v.Text:find("STAND") then
-                v.Text = "STAND: OFF 🛑"
-                v.BackgroundColor3 = White
-                v.TextColor3 = Black
-                standModeIdx = 0
-                break
-            end
-        end
-        -- Stop all functions
-        _G.Loop = false
-        _G.Fly = false
-        if player.Character and player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = false end
-        _G.InfJump = false
-        _G.StrongView = false
-        _G.TargetESP = false
-        _G.TargetLook = false
-        if player.Character and player.Character:FindFirstChild("Humanoid") then
-            workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
-        end
-        stopCopyLoop()
-        stopChatSync()
-        stopStandLoop()
-        toggleCustomEmote(false)
-    end)
-
-    -- Now add all buttons to BtnArea using btn() function
-    -- Buttons (same as original)
-    btn("👁️ VIEW", BtnArea, function(b)
+    -- TAB 2: TROLL
+    local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.96, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
+    local function getT() local n = target.Text:lower() for _,v in pairs(Players:GetPlayers()) do if v ~= player and (v.Name:lower():find(n) or v.DisplayName:lower():find(n)) then return v end end end
+    
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
+    
+    btn("👁️ VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -701,9 +549,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
             end
         end)
-    end, false)
+    end)
 
-    btn("🔴 TARGET ESP", BtnArea, function(b)
+    btn("🔴 TARGET ESP", T2, function(b)
         _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
             local currentHighlight, currentBillboard
@@ -752,9 +600,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
             cleanup()
         end)
-    end, false)
+    end)
     
-    btn("👁️ TARGET LOOK", BtnArea, function(b)
+    btn("👁️ TARGET LOOK", T2, function(b)
         _G.TargetLook = b:GetAttribute("T")
         local lookConnection
         if _G.TargetLook then
@@ -779,16 +627,17 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, false)
     
-    btn("🚀 GOTO", BtnArea, function()
+    btn("🚀 GOTO", T2, function()
         local t = getT()
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
             SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
         end
     end, true)
     
-    btn("🍆 BANG", BtnArea, function(b)
+    -- BANG BUTTON 
+    btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
+        toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -802,9 +651,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end, false)
+    end)
     
-    btn("🧒 HEADSIT", BtnArea, function(b)
+    btn("🧒 HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         task.spawn(function()
             while _G.Loop do
@@ -820,11 +669,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end, false)
+    end)
     
-    btn("🦒 FRONT HEADSIT", BtnArea, function(b)
+    -- FRONT HEADSIT BUTTON
+    btn("🦒 FRONT HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
+        toggleCustomEmote(_G.Loop) -- Plays using your unique game:GetObjects logic
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
@@ -839,9 +689,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
-    end, false)
+    end)
     
-    btn("COPY ANIM👤", BtnArea, function(b)
+    -- COPY ANIM BUTTON
+    btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             targetPlayer = getT()
@@ -858,9 +709,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             stopCopyLoop()
         end
-    end, false)
+    end)
     
-    btn("COPY CHAT💬", BtnArea, function(b)
+    -- COPY CHAT BUTTON
+    btn("COPY CHAT💬", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             chatTargetPlayer = getT()
@@ -875,11 +727,11 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             stopChatSync()
         end
-    end, false)
+    end)
     
-    -- STAND BUTTON (special)
-    local standBtn = Instance.new("TextButton", BtnArea)
-    standBtn.Size = UDim2.new(0.47, 0, 0, 32)
+    -- STAND BUTTON (STAND configuration styled seamlessly for UIListLayout alignment)
+    local standBtn = Instance.new("TextButton", T2)
+    standBtn.Size = UDim2.new(0.96, 0, 0, 32)
     standBtn.BackgroundColor3 = White
     standBtn.Text = "STAND: OFF 🛑"
     standBtn.TextColor3 = Black
@@ -916,14 +768,14 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
         end
     end)
-
+    
     -- TAB 3: SHIELD
-    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end, false)
-    btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, true)
+    btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end)
+    btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, false)
     btn("ANTI BANG🛡️", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
-    btn("🛡️ ANTI SIT", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop then player.Character.Humanoid.Sit = false end task.wait() end end) end, false)
+    btn("🛡️ ANTI SIT", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop then player.Character.Humanoid.Sit = false end task.wait() end end) end)
     btn("🛡️ ANTI AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
-    btn("🛡️ ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end, false)
+    btn("🛡️ ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
     
     -- TAB 4: SPAM
     btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/9S2h4aDC"))() end, true)
@@ -946,11 +798,11 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- TAB 5: OTHER
     btn("BANG PANEL 💀💢", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
     btn("ANTIBANG PANEL 💀🛡️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
-    btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end, false)
-    btn("🆙 FLY JUMP", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end, false)
-    btn("🌀 SPIN 300", T5, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(20), 0) task.wait() end end) end, false)
-    btn("FLY 🦅", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FLY%20%F0%9F%A6%85"))() end, true)
-    btn("GHOST NOCLIP", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end, false)
+    btn("⚡ SPEED 300", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
+    btn("🆙 FLY JUMP", T5, function(b) _G.InfJump = b:GetAttribute("T") UserInputService.JumpRequest:Connect(function() if _G.InfJump then player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end)
+    btn("🌀 SPIN 300", T5, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.CFrame *= CFrame.Angles(0, math.rad(20), 0) task.wait() end end) end)
+    btn("FLY 🦅", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/FLY%20%F0%9F%A6%85"))() end, false)
+    btn("GHOST NOCLIP", T5, function(b) RunService.Stepped:Connect(function() if b:GetAttribute("T") then for _,v in pairs(player.Character:GetChildren()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end)
     btn("AIR WALK 🍃", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/tLukyENu"))() end, true)
     btn("AURA♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)
     btn("HIDE BUTTONS 🔘", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/DtJPutfe"))() end, true)
@@ -1028,9 +880,9 @@ Verify.MouseButton1Click:Connect(function()
         if KF then KF:Destroy() end
         
         task.spawn(function()
-            SendPublicChat("")
+            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
             task.wait(5)
-            SendPublicChat("..")
+            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
             playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
