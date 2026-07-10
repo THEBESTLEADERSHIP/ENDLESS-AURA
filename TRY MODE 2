@@ -1,4 +1,4 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.6 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
 -- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
 
@@ -450,7 +450,7 @@ local function Initialize()
     
     local trackedTargetName = ""
     local lastTrackedUserId = nil
-    local trollButtonsState = {} -- Store states to turn back ON upon rejoin
+    local trollButtonsState = {} 
     local isAutofilled = false
     local lastInputLength = 0
 
@@ -470,7 +470,6 @@ local function Initialize()
         local currentText = target.Text
         local textLength = string.len(currentText)
         
-        -- If user is cutting/backspacing, reset auto-fill lock and allow editing
         if textLength < lastInputLength then
             isAutofilled = false
             lastInputLength = textLength
@@ -502,7 +501,6 @@ local function Initialize()
         stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false)
         workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid")
         
-        -- Reset visual button buttons inside Troll UI Frame
         for _, b in pairs(T2:GetChildren()) do
             if b:IsA("TextButton") and b.Name ~= "🛑 STOP ALL" then
                 b:SetAttribute("T", false)
@@ -523,7 +521,6 @@ local function Initialize()
         if trackedTargetName ~= "" and lastTrackedUserId and leavingPlayer.UserId == lastTrackedUserId then
             notify("⚠️ TARGET LEFT", "Target '" .. trackedTargetName .. "' left! Stopping all loops... ❌", 5)
             
-            -- Save states before killing them
             trollButtonsState = {
                 Loop = _G.Loop, StrongView = _G.StrongView, TargetESP = _G.TargetESP, TargetLook = _G.TargetLook,
                 CopyNinja = copyNinjaActive, ChatSync = chatSyncActive, StandMode = standMode, StandModeIdx = _G.SavedStandIdx or 0
@@ -534,30 +531,47 @@ local function Initialize()
 
     -- Monitor rejoining target
     Players.PlayerAdded:Connect(function(joiningPlayer)
-        -- Restores loops dynamically if the textbox name matches the rejoining player
         if trackedTargetName ~= "" and joiningPlayer.Name:lower() == trackedTargetName:lower() then
             lastTrackedUserId = joiningPlayer.UserId 
             notify("🎯 TARGET RETURNED", "Target '" .. joiningPlayer.Name .. "' came back! Resuming loops... 🟢", 5)
             
-            task.wait(1.5) -- Wait for character assembly assignment
+            task.wait(1.5) 
             if target.Text:lower() == trackedTargetName:lower() and trollButtonsState.Loop then
-                -- Re-trigger stored configurations
                 for _, b in pairs(T2:GetChildren()) do
                     if b:IsA("TextButton") and trollButtonsState[b.Text] or (b.Name == "StandBtn" and trollButtonsState.StandMode) then
-                        -- Simulates click configuration update safely
+                        -- Safe Auto configuration resume link
                     end
                 end
             end
         end
     end)
 
-    -- Universal Safe Button Creator with Target Check Lock
+    -- Universal Safe Button Creator
     local function btn(txt, par, func, isLoad)
-        local b = Instance.new("TextButton", par); b.BackgroundColor3 = isLoad and DarkRed or White; b.Text = string.upper(txt); b.TextColor3 = isLoad and White or Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
+        local b = Instance.new("TextButton", par); b.BackgroundColor3 = White; b.Text = string.upper(txt); b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
+        
+        -- Custom Setup for GOTO Button Behavior
+        if txt == "🚀 GOTO" then
+            b.MouseButton1Click:Connect(function()
+                playS(CLICK_SOUND)
+                if target.Text == "" or not getT() then
+                    notify("⛔ ACCESS DENIED", "First Select Target 🎯", 3)
+                    return
+                end
+                
+                b.BackgroundColor3 = DarkRed
+                b.TextColor3 = White
+                func(b)
+                task.wait(0.12)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+            end)
+            return
+        end
+
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND)
             
-            -- Lock functionality exclusively for TROLL tab buttons when target is empty/invalid
             if par == T2 and txt ~= "🛑 STOP ALL" then
                 if target.Text == "" or not getT() then
                     notify("⛔ ACCESS DENIED", "First Select Target 🎯", 3)
@@ -573,7 +587,12 @@ local function Initialize()
                 local state = b:GetAttribute("T") and "ON 🟢" or "OFF 🔴"
                 notify(txt, "Status: " .. state)
             else
+                b.BackgroundColor3 = DarkRed
+                b.TextColor3 = White
                 notify(txt, "Running / Executed Successfully! ⚡")
+                task.wait(0.2)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
             end
             func(b)
         end)
@@ -594,7 +613,7 @@ THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
-    -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS)
+    -- TAB 2: TROLL (ORIGINAL POSITION ORDER RESTORED)
     btn("🛑 STOP ALL", T2, function() forceShutdownTroll() end, true)
     
     btn("👁️ VIEW", T2, function(b)
@@ -739,17 +758,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local standBtn = Instance.new("TextButton", T2)
     standBtn.Name = "StandBtn"
     standBtn.Size = UDim2.new(0.47, 0, 0, 32)
-    standBtn.Position = UDim2.new(0.05, 0, 0, 0)
     standBtn.BackgroundColor3 = White
     standBtn.Text = "STAND: OFF 🛑"
     standBtn.TextColor3 = Black
     standBtn.Font = Enum.Font.GothamBold
     standBtn.TextSize = 8.5
     Instance.new("UICorner", standBtn)
-    
-    local grid = Instance.new("UIGridLayout", T2)
-    grid.CellSize = UDim2.new(0.47, 0, 0, 32)
-    grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
     
     local standModeIdx = 0
     standBtn.MouseButton1Click:Connect(function()
