@@ -1,4 +1,4 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.7 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V40.0 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
 -- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
 
@@ -446,7 +446,7 @@ local function Initialize()
     -- ==========================================
     -- SMART TROLL & AUTO-FILL CORE SYSTEM
     -- ==========================================
-    local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.98, 0, 0, 30); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
+    local target = Instance.new("TextBox", T2); target.Size = UDim2.new(0.47, 0, 0, 32); target.PlaceholderText = "TARGET NAME..."; target.BackgroundColor3 = Color3.fromRGB(20,20,20); target.TextColor3 = White; Instance.new("UICorner", target)
     
     local trackedTargetName = ""
     local lastTrackedUserId = nil
@@ -465,7 +465,6 @@ local function Initialize()
         return nil 
     end
 
-    -- Real-time Text Monitoring for Smart Auto-Fill
     target:GetPropertyChangedSignal("Text"):Connect(function()
         local currentText = target.Text
         local textLength = string.len(currentText)
@@ -495,17 +494,16 @@ local function Initialize()
         end
     end)
 
-    -- Universal function to shut down Troll loops if target leaves
     local function forceShutdownTroll()
         _G.Loop = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false
         stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false)
         workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid")
         
         for _, b in pairs(T2:GetChildren()) do
-            if b:IsA("TextButton") and b.Name ~= "🛑 STOP ALL" then
+            if b:IsA("TextButton") and b.Name ~= "StopAllBtn" then
                 b:SetAttribute("T", false)
                 if b.Name == "StandBtn" then
-                    b.Text = "STAND: OFF 🛑"
+                    b.Text = "STAND"
                     b.BackgroundColor3 = White
                     b.TextColor3 = Black
                 else
@@ -516,7 +514,6 @@ local function Initialize()
         end
     end
 
-    -- Monitor leaving target
     Players.PlayerRemoving:Connect(function(leavingPlayer)
         if trackedTargetName ~= "" and lastTrackedUserId and leavingPlayer.UserId == lastTrackedUserId then
             notify("⚠️ TARGET LEFT", "Target '" .. trackedTargetName .. "' left! Stopping all loops... ❌", 5)
@@ -528,7 +525,6 @@ local function Initialize()
         end
     end)
 
-    -- Monitor rejoining target
     Players.PlayerAdded:Connect(function(joiningPlayer)
         if trackedTargetName ~= "" and joiningPlayer.Name:lower() == trackedTargetName:lower() then
             lastTrackedUserId = joiningPlayer.UserId 
@@ -536,34 +532,13 @@ local function Initialize()
         end
     end)
 
-    -- Universal Safe Button Creator
     local function btn(txt, par, func, isLoad)
         local b = Instance.new("TextButton", par); b.BackgroundColor3 = White; b.Text = string.upper(txt); b.TextColor3 = Black; b.Font = Enum.Font.GothamBold; b.TextSize = 8.5; Instance.new("UICorner", b)
         
-        -- Custom Setup for STOP ALL (Wala Red Hi Rakho)
-        if txt == "🛑 STOP ALL" then
-            b.BackgroundColor3 = DarkRed
-            b.TextColor3 = White
-            b.MouseButton1Click:Connect(function()
-                playS(CLICK_SOUND)
-                func(b)
-            end)
-            return
-        end
-
-        -- Custom Setup for GOTO Button Behavior
-        if txt == "🚀 GOTO" then
-            b.MouseButton1Click:Connect(function()
-                playS(CLICK_SOUND)
-                func(b)
-                notify("🚀 GOTO", "successfully goto⚡", 2)
-            end)
-            return
-        end
-
         b.MouseButton1Click:Connect(function()
             playS(CLICK_SOUND)
-            if par == T2 and txt ~= "🛑 STOP ALL" then
+            
+            if par == T2 and txt ~= "🛑 STOP ALL" and txt ~= "⚡ TP" then
                 if target.Text == "" or not getT() then
                     notify("⛔ ACCESS DENIED", "First Select Target 🎯", 3)
                     return
@@ -574,24 +549,20 @@ local function Initialize()
                 b:SetAttribute("T", not b:GetAttribute("T")) 
                 b.BackgroundColor3 = b:GetAttribute("T") and DarkRed or White 
                 b.TextColor3 = b:GetAttribute("T") and White or Black
-                
-                local state = b:GetAttribute("T") and "ON 🟢" or "OFF 🔴"
-                notify(txt, "Status: " .. state)
             else
                 b.BackgroundColor3 = DarkRed
                 b.TextColor3 = White
-                notify(txt, "Running / Executed Successfully! ⚡")
                 task.wait(0.2)
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
             end
             func(b)
         end)
+        return b
     end
     
     -- TAB 1: INFO
     local InfoLogo = Instance.new("ImageLabel", T1); InfoLogo.Size = UDim2.new(0, 65, 0, 65); InfoLogo.Position = UDim2.new(0.5, -32.5, 0, 5); InfoLogo.BackgroundTransparency = 1; InfoLogo.Image = LOGO_IMAGE
-
     local it = Instance.new("TextLabel", T1); it.Size = UDim2.new(1,0,1,-75); it.Position = UDim2.new(0, 0, 0, 75); it.BackgroundTransparency = 1; it.TextColor3 = White; it.TextSize = 10; it.Font = Enum.Font.GothamBold; it.TextXAlignment = "Left"; it.TextYAlignment = "Top"
     it.Text = [[SCRIPT NAME - ENDLESS AURA
 __________________________________________
@@ -604,10 +575,27 @@ THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
-    -- TAB 2: TROLL (ORIGINAL ORDER AND POSITIONS COMPLETELY RESTORED)
-    btn("🛑 STOP ALL", T2, function() forceShutdownTroll() end, true)
+    -- ==========================================
+    -- TAB 2: TROLL (EXACT 1 2 | 3 4 GRID ROW LAYOUT)
+    -- ==========================================
     
-    btn("👁️ VIEW", T2, function(b)
+    -- ROW 1: [TEXT BOX] (Already Created above) | 🛑 STOP ALL
+    local stopBtn = btn("🛑 STOP ALL", T2, function() forceShutdownTroll() end, true)
+    stopBtn.Name = "StopAllBtn"
+    
+    -- ROW 2: ⚡ TP | VIEW 🪟
+    local tpBtn = Instance.new("TextButton", T2)
+    tpBtn.BackgroundColor3 = White; tpBtn.Text = "⚡ TP"; tpBtn.TextColor3 = Black; tpBtn.Font = Enum.Font.GothamBold; tpBtn.TextSize = 8.5; Instance.new("UICorner", tpBtn)
+    tpBtn.MouseButton1Click:Connect(function()
+        playS(CLICK_SOUND)
+        notify("⚡ TP", "successfully goto⚡", 2)
+        local t = getT()
+        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+            SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
+        end
+    end)
+
+    btn("VIEW 🪟", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -625,7 +613,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
 
-    btn("🔴 TARGET ESP", T2, function(b)
+    -- ROW 3: 👓 TARGET ESP | 👁️ TARGET LOOK
+    btn("👓 TARGET ESP", T2, function(b)
         _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
             local currentHighlight, currentBillboard
@@ -701,13 +690,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, false)
     
-    btn("🚀 GOTO", T2, function()
-        local t = getT()
-        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-            SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
-        end
-    end, true)
-    
+    -- ROW 4: COPY ANIM👤 | COPY CHAT💬
     btn("COPY ANIM👤", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
@@ -744,11 +727,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
+    -- ROW 5: STAND | 🧒 HEADSIT
     local standBtn = Instance.new("TextButton", T2)
     standBtn.Name = "StandBtn"
     standBtn.Size = UDim2.new(0.47, 0, 0, 32)
     standBtn.BackgroundColor3 = White
-    standBtn.Text = "STAND: OFF 🛑"
+    standBtn.Text = "STAND"
     standBtn.TextColor3 = Black
     standBtn.Font = Enum.Font.GothamBold
     standBtn.TextSize = 8.5
@@ -761,48 +745,33 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             notify("⛔ ACCESS DENIED", "First Select Target 🎯", 3)
             return
         end
-
-        if standModeIdx == 0 then
-            standTarget = getT()
-            if not standTarget then
-                standBtn.Text = "NOT FOUND!"
-                task.wait(0.5)
-                standBtn.Text = "STAND: OFF 🛑"
-                return
-            end
-        end        
+        if standModeIdx == 0 then standTarget = getT() end        
         standModeIdx = (standModeIdx + 1) % 6
         _G.SavedStandIdx = standModeIdx
         
         if standModeIdx == 1 then
             standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FRONT ⬆️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
-            notify("STAND SYSTEM", "Position: FRONT ⬆️")
         elseif standModeIdx == 2 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, 5); standBtn.Text = "BACK ⬇️"; standBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0); standBtn.TextColor3 = White; startStandLoop()
-            notify("STAND SYSTEM", "Position: BACK ⬇️")
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(0, 0, 5); standBtn.Text = "BACK ⬇️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 3 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(-5, 0, 0); standBtn.Text = "LEFT ⬅️"; standBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0); standBtn.TextColor3 = White; startStandLoop()
-            notify("STAND SYSTEM", "Position: LEFT ⬅️")
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(-5, 0, 0); standBtn.Text = "LEFT ⬅️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 4 then
-            standMode = true; standLookTarget = false; standOffset = CFrame.new(5, 0, 0); standBtn.Text = "RIGHT ➡️"; standBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0); standBtn.TextColor3 = White; startStandLoop()
-            notify("STAND SYSTEM", "Position: RIGHT ➡️")
+            standMode = true; standLookTarget = false; standOffset = CFrame.new(5, 0, 0); standBtn.Text = "RIGHT ➡️"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 5 then
-            standMode = true; standLookTarget = true; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FF 👀"; standBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 80); standBtn.TextColor3 = White; startStandLoop()
-            notify("STAND SYSTEM", "Position: FACE TO FACE 👀")
+            standMode = true; standLookTarget = true; standOffset = CFrame.new(0, 0, -5); standBtn.Text = "FF 👀"; standBtn.BackgroundColor3 = DarkRed; standBtn.TextColor3 = White; startStandLoop()
         elseif standModeIdx == 0 then
-            standMode = false; standTarget = nil; standBtn.Text = "STAND: OFF 🛑"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
-            notify("STAND SYSTEM", "Status: DISABLED 🛑")
+            standMode = false; standTarget = nil; standBtn.Text = "STAND"; standBtn.BackgroundColor3 = White; standBtn.TextColor3 = Black; stopStandLoop()
         end
     end)
 
-    btn("🍆 BANG", T2, function(b)
+    btn("🧒 HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                    SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
+                if t and t.Character and t.Character:FindFirstChild("Head") then
+                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))
+                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
                 else
                     godModeAttach()
                 end
@@ -813,14 +782,15 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    btn("🧒 HEADSIT", T2, function(b)
+    -- ROW 6: 🍆 BANG | 🦒 BLOWJOP
+    btn("🍆 BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
+        toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("Head") then
-                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), 0))
-                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
+                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+                    SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
                 else
                     godModeAttach()
                 end
@@ -954,12 +924,14 @@ end
 -- ==========================================
 task.spawn(function()
     playS(LOAD_SOUND)
+    
     StarterGui:SetCore("SendNotification", {
         Title = "ENDLESS AURA",
         Text = "Loaded...",
         Icon = LOGO_IMAGE,
         Duration = 3
     })
+    
     task.spawn(function()
         pcall(function()
             local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
@@ -967,6 +939,7 @@ task.spawn(function()
             if func then func() end
         end)
     end)
+
     task.wait(0.1)
     Initialize()
 end)
