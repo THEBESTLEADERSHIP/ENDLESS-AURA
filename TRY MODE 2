@@ -1,4 +1,4 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.5 (NO KEY) 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
 -- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
 
@@ -19,7 +19,7 @@ local LOGO_IMAGE = "rbxassetid://129299711445020"
 local LOAD_SOUND = "129584950954499"
 if not _G.AdminLogs then _G.AdminLogs = {} end
 
-local voidYLevel = -99999999 -- Absolute Depth Limit Override
+local voidYLevel = -99999999
 local safePosition = Vector3.new(0, 50, 0)
 
 -- [ Custom Emote Logic Injection ]
@@ -36,7 +36,6 @@ local function toggleCustomEmote(shouldPlay)
 
     if shouldPlay then
         if animateScript then animateScript.Disabled = true end
-        
         for _, t in pairs(animator:GetPlayingAnimationTracks()) do
             t:Stop(0.1)
         end
@@ -319,7 +318,7 @@ local function stopChatSync()
 end
 
 -- ==========================================
--- STAND NINJA LOGIC - ANTI-VOID + ANTI-KILL
+-- STAND NINJA LOGIC
 -- ==========================================
 local standMode = false
 local standTarget = nil
@@ -380,7 +379,7 @@ local function stopStandLoop()
 end
 
 -- ==========================================
--- MAIN MENU INITIALIZATION
+-- MAIN PANEL INITIALIZE
 -- ==========================================
 local function Initialize()
     local entry = player.Name .. " (" .. player.UserId .. ")"
@@ -601,7 +600,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- STAND SYSTEM
     local standBtn = Instance.new("TextButton", T2)
     standBtn.Size = UDim2.new(0.47, 0, 0, 32)
     standBtn.Position = UDim2.new(0.05, 0, 0, 0)
@@ -788,7 +786,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         Main.Visible = not Main.Visible
     end)
     
-    -- CHAT SYNC LISTENER
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
@@ -800,13 +797,27 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 end
 
 -- ==========================================
--- INSTANT EXECUTION (NO KEY)
+-- INSTANT EXECUTION (NO KEY SYSTEM)
 -- ==========================================
-playS(LOAD_SOUND)
-StarterGui:SetCore("SendNotification", {
-    Title = "ENDLESS AURA",
-    Text = "Loaded Instantly...",
-    Icon = LOGO_IMAGE,
-    Duration = 4
-})
-Initialize()
+task.spawn(function()
+    playS(LOAD_SOUND)
+    
+    StarterGui:SetCore("SendNotification", {
+        Title = "ENDLESS AURA",
+        Text = "Executing...",
+        Icon = LOGO_IMAGE,
+        Duration = 3
+    })
+    
+    -- Load Endless Aura Tag along with script execution
+    task.spawn(function()
+        pcall(function()
+            local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
+            local func = loadstring(response)
+            if func then func() end
+        end)
+    end)
+
+    task.wait(0.1)
+    Initialize()
+end)
