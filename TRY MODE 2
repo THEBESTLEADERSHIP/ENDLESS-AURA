@@ -1,4 +1,4 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.6 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
 -- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
 
@@ -456,28 +456,23 @@ local function Initialize()
     it.Text = "SCRIPT NAME - ENDLESS AURA\n__________________________________________\nSCRIPT BY: NAMELESS 👑💀\nINSTAGRAM ID: ea_nameless\n\nFAMOUS FATHER: NAMELESS 💀\nTHE-LEADER OF [ENDLESS AURA]\nTHIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝\n__________________________________________\nOR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI"
     
     -- ==========================================
-    -- FIXED TROLL TAB (NO EXTRA LAYER BACKGROUND + GOL HEADSHOT)
+    -- FIXED TROLL TAB LAYOUT (TEXTBOX KE NICHE BAKI CHIZE)
     -- ==========================================
-    -- Bina kisi size change ke ek big gap generate kiya jo top par space banata hai
-    local gapSpacer = Instance.new("Frame", T2)
-    gapSpacer.Size = UDim2.new(1, 0, 0, 85)
-    gapSpacer.BackgroundTransparency = 1
+    T2.ScrollBarThickness = 0 -- Grid fix ke liye isko clean rakhte hain
 
-    -- Left: Viewport Box (Set completely transparent - NO Background)
+    -- Left Top Frame: Gol Headshot Viewport Frame
     local vpBox = Instance.new("Frame", T2)
-    vpBox.Size = UDim2.new(0, 65, 0, 65)
-    vpBox.Position = UDim2.new(0, 6, 0, 10)
-    vpBox.BackgroundTransparency = 1 -- NO BG AT ALL
+    vpBox.Size = UDim2.new(0, 60, 0, 60)
+    vpBox.Position = UDim2.new(0, 5, 0, 10)
+    vpBox.BackgroundTransparency = 1
     
-    -- Gol / Circle Shape setup via Scale-based Corner
     local vpRound = Instance.new("UICorner", vpBox)
-    vpRound.CornerRadius = UDim.new(1, 0) 
+    vpRound.CornerRadius = UDim.new(1, 0) -- Perfect Circle Setup
     
     local vpStroke = Instance.new("UIStroke", vpBox)
     vpStroke.Color = DarkRed
     vpStroke.Thickness = 1.5
 
-    -- Headshot Viewport Frame inside the circular clip
     local vp = Instance.new("ViewportFrame", vpBox)
     vp.Size = UDim2.new(1, 0, 1, 0)
     vp.BackgroundTransparency = 1
@@ -486,10 +481,10 @@ local function Initialize()
     vp.CurrentCamera = vpCam
     vpCam.Parent = vp
 
-    -- Details Placement (Side me bina kisi background frame ke text directly lagaya hai)
+    -- Details Position (Beside Headshot Box)
     local dName = Instance.new("TextLabel", T2)
-    dName.Size = UDim2.new(0, 110, 0, 18)
-    dName.Position = UDim2.new(0, 78, 0, 12)
+    dName.Size = UDim2.new(0, 120, 0, 16)
+    dName.Position = UDim2.new(0, 72, 0, 12)
     dName.BackgroundTransparency = 1
     dName.Text = "Target: None"
     dName.TextColor3 = White
@@ -498,8 +493,8 @@ local function Initialize()
     dName.TextXAlignment = Enum.TextXAlignment.Left
 
     local uName = Instance.new("TextLabel", T2)
-    uName.Size = UDim2.new(0, 110, 0, 15)
-    uName.Position = UDim2.new(0, 78, 0, 30)
+    uName.Size = UDim2.new(0, 120, 0, 14)
+    uName.Position = UDim2.new(0, 72, 0, 28)
     uName.BackgroundTransparency = 1
     uName.Text = "@Name"
     uName.TextColor3 = Color3.fromRGB(160, 160, 160)
@@ -508,8 +503,8 @@ local function Initialize()
     uName.TextXAlignment = Enum.TextXAlignment.Left
 
     local statusText = Instance.new("TextLabel", T2)
-    statusText.Size = UDim2.new(0, 110, 0, 15)
-    statusText.Position = UDim2.new(0, 78, 0, 48)
+    statusText.Size = UDim2.new(0, 120, 0, 14)
+    statusText.Position = UDim2.new(0, 72, 0, 44)
     statusText.BackgroundTransparency = 1
     statusText.Text = "🔴 Offline"
     statusText.TextColor3 = Color3.fromRGB(180, 50, 50)
@@ -517,10 +512,10 @@ local function Initialize()
     statusText.TextSize = 10
     statusText.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Right Side: TextBox Placement
+    -- Right Side: TARGET TEXTBOX (Stays perfectly on top right)
     local target = Instance.new("TextBox", T2)
     target.Size = UDim2.new(0, 95, 0, 32)
-    target.Position = UDim2.new(1, -105, 0, 26)
+    target.Position = UDim2.new(1, -105, 0, 24)
     target.PlaceholderText = "TARGET NAME..."
     target.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     target.TextColor3 = White
@@ -531,12 +526,21 @@ local function Initialize()
     tStroke.Color = DarkRed
     tStroke.Thickness = 1
 
-    -- Original Grid Layout structure for buttons (BINA SIZE BADLE AUTO WORK KAREGA BELOW TOP GAP)
-    local grid = Instance.new("UIGridLayout", T2)
-    grid.CellSize = UDim2.new(0.47, 0, 0, 32)
-    grid.CellPadding = UDim2.new(0.04, 0, 0.02, 0)
+    -- Separate Container for Buttons (TEXTBOX KE PERFECTLY NICHE WORK KAREGA)
+    local ButtonContainer = Instance.new("ScrollingFrame", T2)
+    ButtonContainer.Size = UDim2.new(1, 0, 1, -80)
+    ButtonContainer.Position = UDim2.new(0, 0, 0, 80) -- TextBox aur Headshot area ke thik niche se start hoga
+    ButtonContainer.BackgroundTransparency = 1
+    ButtonContainer.ScrollBarThickness = 2
+    ButtonContainer.CanvasSize = UDim2.new(0, 0, 3, 0)
+    ButtonContainer.ScrollBarImageColor3 = DarkRed
 
-    -- Viewport Engine Fix for Head Rendering
+    -- Grid Layout Applied ONLY inside the Button Container (Buttons sizes won't corrupt)
+    local grid = Instance.new("UIGridLayout", ButtonContainer)
+    grid.CellSize = UDim2.new(0.47, 0, 0, 32)
+    grid.CellPadding = UDim2.new(0.04, 0, 0.03, 0)
+
+    -- Viewport Engine Fix
     local function getT() 
         local n = target.Text:lower() 
         if n == "" then return nil end
@@ -548,12 +552,10 @@ local function Initialize()
     local function updateViewport(tPlayer)
         vp:ClearAllChildren()
         if tPlayer and tPlayer.Character and tPlayer.Character:FindFirstChild("Head") then
-            -- Create character dummy representation for viewport rendering
             tPlayer.Character.Archivable = true
             local charClone = tPlayer.Character:Clone()
             tPlayer.Character.Archivable = false
             
-            -- Remove unnecessary server objects that fail to display
             for _, v in pairs(charClone:GetChildren()) do
                 if v:IsA("LocalScript") or v:IsA("Script") or v:IsA("Tool") then
                     v:Destroy()
@@ -562,9 +564,7 @@ local function Initialize()
             
             charClone.Parent = vp
             local targetHead = charClone:FindFirstChild("Head")
-            
             if targetHead then
-                -- Camera exactly focus on headshot coordinates
                 vpCam.CFrame = CFrame.new(targetHead.Position + (targetHead.CFrame.LookVector * 2.5), targetHead.Position)
             end
             
@@ -590,10 +590,10 @@ local function Initialize()
         if currentT == plr then updateViewport(nil) end
     end)
 
-    -- All Buttons Kept at Exact Core Grid Configuration (Same Size)
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
+    -- Buttons inside the safe layout container
+    btn("🛑 STOP ALL", ButtonContainer, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
     
-    btn("👁️ VIEW", T2, function(b)
+    btn("👁️ VIEW", ButtonContainer, function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -611,7 +611,7 @@ local function Initialize()
         end)
     end)
 
-    btn("🔴 TARGET ESP", T2, function(b)
+    btn("🔴 TARGET ESP", ButtonContainer, function(b)
         _G.TargetESP = b:GetAttribute("T")
         task.spawn(function()
             local currentHighlight, currentBillboard
@@ -662,7 +662,7 @@ local function Initialize()
         end)
     end)
     
-    btn("👁️ TARGET LOOK", T2, function(b)
+    btn("👁️ TARGET LOOK", ButtonContainer, function(b)
         _G.TargetLook = b:GetAttribute("T")
         local lookConnection
         if _G.TargetLook then
@@ -687,14 +687,14 @@ local function Initialize()
         end
     end, false)
     
-    btn("🚀 GOTO", T2, function()
+    btn("🚀 GOTO", ButtonContainer, function()
         local t = getT()
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
             SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2))
         end
     end, true)
     
-    btn("🍆 BANG", T2, function(b)
+    btn("🍆 BANG", ButtonContainer, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
@@ -712,7 +712,7 @@ local function Initialize()
         end)
     end)
     
-    btn("🧒 HEADSIT", T2, function(b)
+    btn("🧒 HEADSIT", ButtonContainer, function(b)
         _G.Loop = b:GetAttribute("T")
         task.spawn(function()
             while _G.Loop do
@@ -730,13 +730,13 @@ local function Initialize()
         end)
     end)
     
-    btn("🦒 FRONT HEADSIT", T2, function(b)
+    btn("🦒 FRONT HEADSIT", ButtonContainer, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
             while _G.Loop do
                 local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("Head") then
+                if t wholesaler and t.Character and t.Character:FindFirstChild("Head") then
                     SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0))
                     if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
                 else
@@ -749,7 +749,7 @@ local function Initialize()
         end)
     end)
     
-    btn("COPY ANIM👤", T2, function(b)
+    btn("COPY ANIM👤", ButtonContainer, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             targetPlayer = getT()
@@ -768,7 +768,7 @@ local function Initialize()
         end
     end)
     
-    btn("COPY CHAT💬", T2, function(b)
+    btn("COPY CHAT💬", ButtonContainer, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             chatTargetPlayer = getT()
@@ -783,7 +783,7 @@ local function Initialize()
         end
     end)
     
-    local standBtn = Instance.new("TextButton", T2)
+    local standBtn = Instance.new("TextButton", ButtonContainer)
     standBtn.BackgroundColor3 = White
     standBtn.Text = "STAND: OFF 🛑"
     standBtn.TextColor3 = Black
