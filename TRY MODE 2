@@ -960,9 +960,9 @@ Verify.MouseButton1Click:Connect(function()
         playKeySuccess()
         if KF then KF:Destroy() end
         task.spawn(function()
-            SendPublicChat("")
+            SendPublicChat("hi")
             task.wait(5)
-            SendPublicChat("..")
+            SendPublicChat(".m.")
             playS(LOAD_SOUND)
             StarterGui:SetCore("SendNotification", {
                 Title = "ENDLESS AURA",
