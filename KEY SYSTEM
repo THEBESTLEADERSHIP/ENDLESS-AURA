@@ -1,0 +1,602 @@
+-- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7 👑 ]] --
+-- Engine: Loading → Key System with Full Verification Sequence
+
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+---------------------------------------------------------
+-- ⚙️ CONFIGURATION
+---------------------------------------------------------
+local LOGO_IMAGE = "rbxassetid://129299711445020"
+local PureBlack = Color3.fromRGB(0, 0, 0)
+local DarkChamber = Color3.fromRGB(8, 8, 8)
+local IntenseRed = Color3.fromRGB(255, 0, 0)
+local DarkRed = Color3.fromRGB(160, 0, 0)
+local NeonPinkRed = Color3.fromRGB(255, 65, 80)
+local White = Color3.fromRGB(255, 255, 255)
+local SoftGray = Color3.fromRGB(160, 160, 160)
+local BLUR_INTENSITY = 24
+local CORRECT_KEY = "GIVE ME AURA"
+local WRONG_SOUND_ID = "rbxassetid://72871145460159"
+local CLICK_SOUND = "rbxassetid://YOUR_CLICK_SOUND"   -- replace with your ID
+local LOAD_SOUND = "rbxassetid://YOUR_LOAD_SOUND"     -- replace with your ID
+local SHAKE_COOLDOWN = 0.6
+---------------------------------------------------------
+
+-- Clean previous UI and blur
+if CoreGui:FindFirstChild("Endless_FixedSystem") then
+    CoreGui.Endless_FixedSystem:Destroy()
+end
+for _, effect in ipairs(Lighting:GetChildren()) do
+    if effect:IsA("BlurEffect") then
+        effect:Destroy()
+    end
+end
+
+-- --- Sound players ---
+local function playSound(id)
+    local s = Instance.new("Sound")
+    s.SoundId = id
+    s.Volume = 1
+    s.Parent = CoreGui
+    s:Play()
+    s.Ended:Connect(function() s:Destroy() end)
+end
+
+local function playS(id) playSound(id) end
+
+-- --- Chat sender (legacy) ---
+local function SendPublicChat(message)
+    local chatService = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+    if chatService then
+        local sayMessage = chatService:FindFirstChild("SayMessageRequest")
+        if sayMessage then
+            sayMessage:FireServer(message, "All")
+        end
+    end
+end
+
+-- --- Success animation (placeholder) ---
+local function playKeySuccess()
+    -- you can add a visual effect here if desired
+end
+
+-- --- Full‑screen blur ---
+local blurEffect = Instance.new("BlurEffect")
+blurEffect.Parent = Lighting
+blurEffect.Size = 0
+
+local blurTweenIn = TweenService:Create(
+    blurEffect,
+    TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    {Size = BLUR_INTENSITY}
+)
+blurTweenIn:Play()
+
+-- --- UI ---
+local sg = Instance.new("ScreenGui", CoreGui)
+sg.Name = "Endless_FixedSystem"
+sg.ResetOnSpawn = false
+
+-- ==========================================
+-- MAIN FRAME (centered)
+-- ==========================================
+local MainFrame = Instance.new("Frame", sg)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Size = UDim2.new(0, 325, 0, 68)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.BackgroundColor3 = PureBlack
+MainFrame.BackgroundTransparency = 0.15
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+
+local UIScale = Instance.new("UIScale", MainFrame)
+UIScale.Scale = 0.7
+local popupTween = TweenService:Create(
+    UIScale,
+    TweenInfo.new(0.6, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
+    {Scale = 1}
+)
+popupTween:Play()
+
+local MainCorner = Instance.new("UICorner", MainFrame)
+MainCorner.CornerRadius = UDim.new(0, 8)
+
+local OuterStroke = Instance.new("UIStroke", MainFrame)
+OuterStroke.Thickness = 2
+OuterStroke.Color = DarkRed
+OuterStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local InnerBevel = Instance.new("Frame", MainFrame)
+InnerBevel.Size = UDim2.new(1, -4, 1, -4)
+InnerBevel.Position = UDim2.new(0, 2, 0, 2)
+InnerBevel.BackgroundTransparency = 1
+local BevelStroke = Instance.new("UIStroke", InnerBevel)
+BevelStroke.Thickness = 1
+BevelStroke.Color = Color3.fromRGB(45, 8, 8)
+
+local BevelCorner = Instance.new("UICorner", InnerBevel)
+BevelCorner.CornerRadius = UDim.new(0, 7)
+
+-- ==========================================
+-- LOADING UI ELEMENTS
+-- ==========================================
+local LogoFrame = Instance.new("ImageLabel", MainFrame)
+LogoFrame.Size = UDim2.new(0, 20, 0, 20)
+LogoFrame.Position = UDim2.new(0, 14, 0, 12)
+LogoFrame.BackgroundTransparency = 1
+LogoFrame.Image = LOGO_IMAGE
+
+local RotationConnection
+RotationConnection = RunService.RenderStepped:Connect(function(dt)
+    if LogoFrame and LogoFrame.Parent then
+        LogoFrame.Rotation = (LogoFrame.Rotation + (120 * dt)) % 360
+    else
+        RotationConnection:Disconnect()
+    end
+end)
+
+local HeaderLabel = Instance.new("TextLabel", MainFrame)
+HeaderLabel.Size = UDim2.new(1, -95, 0, 20)
+HeaderLabel.Position = UDim2.new(0, 40, 0, 11)
+HeaderLabel.BackgroundTransparency = 1
+HeaderLabel.Text = "Eɴᴅʟᴇss Aᴜʀᴀ Kᴇʏ Sʏsᴛᴇᴍ Lᴏᴀᴅɪɴɢ..."
+HeaderLabel.TextColor3 = White
+HeaderLabel.Font = Enum.Font.GothamBlack
+HeaderLabel.TextSize = 11
+HeaderLabel.TextXAlignment = Enum.TextXAlignment.Left
+HeaderLabel.TextTransparency = 0
+
+local blinkRunning = true
+task.spawn(function()
+    while blinkRunning and HeaderLabel and HeaderLabel.Parent do
+        local tOut = TweenService:Create(HeaderLabel, TweenInfo.new(0.35), {TextTransparency = 1})
+        tOut:Play()
+        tOut.Completed:Wait()
+        local tIn = TweenService:Create(HeaderLabel, TweenInfo.new(0.35), {TextTransparency = 0})
+        tIn:Play()
+        tIn.Completed:Wait()
+    end
+end)
+
+local MiniPercentLabel = Instance.new("TextLabel", MainFrame)
+MiniPercentLabel.Size = UDim2.new(0, 40, 0, 20)
+MiniPercentLabel.Position = UDim2.new(1, -54, 0, 11)
+MiniPercentLabel.BackgroundTransparency = 1
+MiniPercentLabel.Text = "0%"
+MiniPercentLabel.TextColor3 = SoftGray
+MiniPercentLabel.Font = Enum.Font.GothamBold
+MiniPercentLabel.TextSize = 11
+MiniPercentLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+local TrackRail = Instance.new("Frame", MainFrame)
+TrackRail.Size = UDim2.new(1, -28, 0, 5)
+TrackRail.Position = UDim2.new(0, 14, 0, 44)
+TrackRail.BackgroundColor3 = DarkChamber
+TrackRail.BorderSizePixel = 0
+
+local RailCorner = Instance.new("UICorner", TrackRail)
+RailCorner.CornerRadius = UDim.new(0, 4)
+
+local RailStroke = Instance.new("UIStroke", TrackRail)
+RailStroke.Thickness = 1
+RailStroke.Color = Color3.fromRGB(28, 4, 4)
+
+local BarActive = Instance.new("Frame", TrackRail)
+BarActive.Size = UDim2.new(0, 0, 1, 0)
+BarActive.BackgroundColor3 = DarkRed
+BarActive.BorderSizePixel = 0
+BarActive.ClipsDescendants = true
+
+local ActiveCorner = Instance.new("UICorner", BarActive)
+ActiveCorner.CornerRadius = UDim.new(0, 4)
+
+local SpecularLine = Instance.new("Frame", BarActive)
+SpecularLine.Size = UDim2.new(1, 0, 0, 3)
+SpecularLine.BackgroundColor3 = NeonPinkRed
+SpecularLine.BackgroundTransparency = 0.2
+SpecularLine.BorderSizePixel = 0
+local SpecCorner = Instance.new("UICorner", SpecularLine)
+SpecCorner.CornerRadius = UDim.new(0, 4)
+
+local ShineImage = Instance.new("ImageLabel", BarActive)
+ShineImage.Size = UDim2.new(2, 0, 1, 0)
+ShineImage.Position = UDim2.new(-1, 0, 0, 0)
+ShineImage.BackgroundTransparency = 1
+ShineImage.Image = "rbxassetid://4981440784"
+ShineImage.ImageColor3 = White
+ShineImage.ImageTransparency = 0.8
+
+local ShineTweenInfo = TweenInfo.new(1.4, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1)
+local ShineTween = TweenService:Create(ShineImage, ShineTweenInfo, {Position = UDim2.new(1, 0, 0, 0)})
+ShineTween:Play()
+
+-- ==========================================
+-- LOADING PROGRESS
+-- ==========================================
+task.spawn(function()
+    task.wait(0.3)
+    
+    local Target = 0
+    local Current = 0
+    local SpeedModifier = 4.2
+    local Start = tick()
+    
+    task.spawn(function()
+        while true do
+            local elapsed = tick() - Start
+            local alpha = math.clamp(elapsed / SpeedModifier, 0, 1)
+            Target = alpha * alpha * (3 - 2 * alpha) 
+            if alpha >= 1 then break end
+            task.wait()
+        end
+    end)
+    
+    local LoopConnection
+    LoopConnection = RunService.RenderStepped:Connect(function(dt)
+        local SmoothAlpha = 1 - math.exp(-12 * dt)
+        Current = Current + (Target - Current) * SmoothAlpha
+        
+        BarActive.Size = UDim2.new(Current, 0, 1, 0)
+        MiniPercentLabel.Text = math.floor(math.clamp(Current * 100, 0, 100)) .. "%"
+        
+        if Current >= 0.999 then
+            Current = 1
+            BarActive.Size = UDim2.new(1, 0, 1, 0)
+            MiniPercentLabel.Text = "100%"
+            MiniPercentLabel.TextColor3 = DarkRed
+            HeaderLabel.Text = "Lᴏᴀᴅᴇᴅ !!"
+            HeaderLabel.TextColor3 = DarkRed
+            LoopConnection:Disconnect()
+            
+            blinkRunning = false
+            task.wait(0.9)
+            startKeySystemTransition()
+        end
+    end)
+end)
+
+-- ==========================================
+-- SHAKE FUNCTION
+-- ==========================================
+local canShake = true
+
+local function shakeUI()
+    if not canShake then return end
+    canShake = false
+    
+    playS(WRONG_SOUND_ID)
+    
+    local originalPos = MainFrame.Position
+    local offset = 8
+    
+    local shake1 = TweenService:Create(MainFrame, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position = UDim2.new(0.5, offset, 0.5, 0)})
+    local shake2 = TweenService:Create(MainFrame, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position = UDim2.new(0.5, -offset, 0.5, 0)})
+    local shake3 = TweenService:Create(MainFrame, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position = UDim2.new(0.5, offset/2, 0.5, 0)})
+    local shake4 = TweenService:Create(MainFrame, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position = UDim2.new(0.5, -offset/2, 0.5, 0)})
+    local back = TweenService:Create(MainFrame, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {Position = originalPos})
+    
+    shake1:Play()
+    shake1.Completed:Connect(function()
+        shake2:Play()
+        shake2.Completed:Connect(function()
+            shake3:Play()
+            shake3.Completed:Connect(function()
+                shake4:Play()
+                shake4.Completed:Connect(function()
+                    back:Play()
+                    back.Completed:Connect(function()
+                        task.wait(SHAKE_COOLDOWN)
+                        canShake = true
+                    end)
+                end)
+            end)
+        end)
+    end)
+end
+
+-- ==========================================
+-- FADE OUT (with optional callback at halfway)
+-- ==========================================
+local function fadeOutAndDestroy(halfwayCallback, continueAfterCallback)
+    local duration = 1.0
+    local easeStyle = Enum.EasingStyle.Sine
+    local easeDir = Enum.EasingDirection.InOut
+
+    -- Blur
+    local blurTweenOut = TweenService:Create(
+        blurEffect,
+        TweenInfo.new(duration, easeStyle, easeDir),
+        {Size = 0}
+    )
+    blurTweenOut:Play()
+
+    -- UI transparency & scale
+    local fadeInfo = TweenInfo.new(duration, easeStyle, easeDir)
+    for _, item in pairs(sg:GetDescendants()) do
+        if item:IsA("Frame") and item.BackgroundTransparency < 1 then
+            TweenService:Create(item, fadeInfo, {BackgroundTransparency = 1}):Play()
+        elseif item:IsA("TextLabel") or item:IsA("TextBox") or item:IsA("TextButton") then
+            TweenService:Create(item, fadeInfo, {TextTransparency = 1}):Play()
+        elseif item:IsA("UIStroke") then
+            TweenService:Create(item, fadeInfo, {Transparency = 1}):Play()
+        elseif item:IsA("ImageLabel") then
+            TweenService:Create(item, fadeInfo, {ImageTransparency = 1}):Play()
+        end
+    end
+
+    local scaleDown = TweenService:Create(
+        UIScale,
+        TweenInfo.new(duration, easeStyle, easeDir),
+        {Scale = 0.03}
+    )
+    scaleDown:Play()
+
+    -- At halfway (0.5s), trigger callback if provided
+    if halfwayCallback then
+        task.wait(duration / 2)
+        halfwayCallback()
+        if continueAfterCallback then
+            -- Wait for the rest of the fade and then destroy
+            task.wait(duration / 2)
+        else
+            -- If we want to destroy after callback finishes, we need to wait for the rest
+            -- We'll assume we want to destroy after all actions complete
+            -- We'll handle that in the caller
+        end
+    else
+        task.wait(duration)
+    end
+
+    -- Destroy everything (if not already done)
+    blurEffect:Destroy()
+    sg:Destroy()
+end
+
+-- ==========================================
+-- CORRECT KEY HANDLER (with your sequence)
+-- ==========================================
+local function handleCorrectKey()
+    -- Start the fade-out, but at halfway we run the sequence
+    local callbackDone = false
+    local function halfwayActions()
+        -- Your verification sequence
+        playS(CLICK_SOUND)
+        playKeySuccess()
+        
+        -- if KF exists, destroy it (we don't have KF, skip)
+        
+        task.spawn(function()
+            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
+            task.wait(5)
+            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
+            playS(LOAD_SOUND)
+            
+            StarterGui:SetCore("SendNotification", {
+                Title = "ENDLESS AURA",
+                Text = "Loaded...",
+                Icon = LOGO_IMAGE,
+                Duration = 5
+            })
+            
+            task.spawn(function()
+                local success, err = pcall(function()
+                    local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
+                    local func = loadstring(response)
+                    if func then func() end
+                end)
+            end)
+
+            task.wait(0.2)
+            -- After all actions, destroy everything
+            blurEffect:Destroy()
+            sg:Destroy()
+        end)
+    end
+    
+    -- Start the fade and trigger halfway
+    fadeOutAndDestroy(halfwayActions, true) -- we'll handle destruction inside the actions
+end
+
+-- ==========================================
+-- TRANSITION TO KEY SYSTEM (NO POP)
+-- ==========================================
+function startKeySystemTransition()
+    -- Fade out loading elements
+    local fadeOutInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local loadingElements = {HeaderLabel, MiniPercentLabel, TrackRail, LogoFrame}
+    for _, element in ipairs(loadingElements) do
+        if element and element.Parent then
+            if element:IsA("TextLabel") then
+                TweenService:Create(element, fadeOutInfo, {TextTransparency = 1}):Play()
+            elseif element:IsA("ImageLabel") then
+                TweenService:Create(element, fadeOutInfo, {ImageTransparency = 1}):Play()
+            elseif element:IsA("Frame") then
+                TweenService:Create(element, fadeOutInfo, {BackgroundTransparency = 1}):Play()
+            end
+        end
+    end
+    if RotationConnection then RotationConnection:Disconnect() end
+    task.wait(0.45)
+    for _, element in ipairs(loadingElements) do
+        if element and element.Parent then element:Destroy() end
+    end
+
+    -- Resize frame (centered)
+    local newWidth = 380
+    local newHeight = 280
+    local sizeTween = TweenService:Create(
+        MainFrame,
+        TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {
+            Size = UDim2.new(0, newWidth, 0, newHeight)
+        }
+    )
+    sizeTween:Play()
+    sizeTween.Completed:Wait()
+
+    -- ---- Build Key System ----
+    local currentY = 12
+
+    -- Logo
+    local logoKey = Instance.new("ImageLabel", MainFrame)
+    logoKey.Size = UDim2.new(0, 45, 0, 45)
+    logoKey.Position = UDim2.new(0.5, -22.5, 0, currentY)
+    logoKey.BackgroundTransparency = 1
+    logoKey.Image = LOGO_IMAGE
+    logoKey.ImageTransparency = 1
+    TweenService:Create(logoKey, TweenInfo.new(0.4), {ImageTransparency = 0}):Play()
+    currentY = currentY + 50
+
+    -- Big title
+    local titleBig = Instance.new("TextLabel", MainFrame)
+    titleBig.Size = UDim2.new(1, -20, 0, 30)
+    titleBig.Position = UDim2.new(0.5, 0, 0, currentY)
+    titleBig.AnchorPoint = Vector2.new(0.5, 0)
+    titleBig.BackgroundTransparency = 1
+    titleBig.Text = "Eɴᴅʟᴇss Aᴜʀᴀ"
+    titleBig.TextColor3 = DarkRed
+    titleBig.Font = Enum.Font.GothamBold
+    titleBig.TextSize = 24
+    titleBig.TextXAlignment = Enum.TextXAlignment.Center
+    titleBig.TextTransparency = 1
+    TweenService:Create(titleBig, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+    currentY = currentY + 32
+
+    -- Text lines
+    local lines = {
+        {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White},
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White},
+        {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White},
+        {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White}
+    }
+    for _, line in ipairs(lines) do
+        local lbl = Instance.new("TextLabel", MainFrame)
+        lbl.Size = UDim2.new(1, -20, 0, 20)
+        lbl.Position = UDim2.new(0.5, 0, 0, currentY)
+        lbl.AnchorPoint = Vector2.new(0.5, 0)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = line.text
+        lbl.TextColor3 = line.color
+        lbl.Font = Enum.Font.GothamBold
+        lbl.TextSize = 14
+        lbl.TextXAlignment = Enum.TextXAlignment.Center
+        lbl.RichText = true
+        lbl.TextTransparency = 1
+        TweenService:Create(lbl, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+        currentY = currentY + 22
+    end
+
+    -- TextBox
+    local keyBox = Instance.new("TextBox", MainFrame)
+    keyBox.Size = UDim2.new(0.7, 0, 0, 34)
+    keyBox.Position = UDim2.new(0.5, -(0.7 * newWidth / 2), 0, currentY + 2)
+    keyBox.BackgroundColor3 = DarkChamber
+    keyBox.TextColor3 = White
+    keyBox.Font = Enum.Font.Gotham
+    keyBox.TextSize = 16
+    keyBox.PlaceholderText = "Eɴᴛᴇʀ Kᴇʏ 🔑"
+    keyBox.Text = ""
+    keyBox.ClearTextOnFocus = false
+    keyBox.TextTransparency = 1
+    local boxCorner = Instance.new("UICorner", keyBox)
+    boxCorner.CornerRadius = UDim.new(0, 6)
+    local boxStroke = Instance.new("UIStroke", keyBox)
+    boxStroke.Thickness = 1
+    boxStroke.Color = Color3.fromRGB(40, 40, 40)
+    TweenService:Create(keyBox, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+    currentY = currentY + 40
+
+    -- Verify button
+    local verifyBtn = Instance.new("TextButton", MainFrame)
+    verifyBtn.Size = UDim2.new(0.35, 0, 0, 34)
+    verifyBtn.Position = UDim2.new(0.5, -(0.35 * newWidth / 2), 0, currentY + 2)
+    verifyBtn.BackgroundColor3 = DarkRed
+    verifyBtn.TextColor3 = White
+    verifyBtn.Font = Enum.Font.GothamBold
+    verifyBtn.TextSize = 16
+    verifyBtn.Text = "VERIFY"
+    verifyBtn.TextTransparency = 1
+    local btnCorner = Instance.new("UICorner", verifyBtn)
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    TweenService:Create(verifyBtn, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+
+    verifyBtn.MouseEnter:Connect(function()
+        TweenService:Create(verifyBtn, TweenInfo.new(0.2), {BackgroundColor3 = NeonPinkRed}):Play()
+    end)
+    verifyBtn.MouseLeave:Connect(function()
+        TweenService:Create(verifyBtn, TweenInfo.new(0.2), {BackgroundColor3 = DarkRed}):Play()
+    end)
+
+    -- Error label
+    local errorLabel = Instance.new("TextLabel", MainFrame)
+    errorLabel.Size = UDim2.new(1, -20, 0, 22)
+    errorLabel.Position = UDim2.new(0.5, 0, 0, currentY + 40)
+    errorLabel.AnchorPoint = Vector2.new(0.5, 0)
+    errorLabel.BackgroundTransparency = 1
+    errorLabel.Text = ""
+    errorLabel.TextColor3 = IntenseRed
+    errorLabel.Font = Enum.Font.Gotham
+    errorLabel.TextSize = 13
+    errorLabel.TextXAlignment = Enum.TextXAlignment.Center
+    errorLabel.TextTransparency = 0
+
+    -- Close button (top‑right)
+    local closeBtn = Instance.new("TextButton", MainFrame)
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -10, 0, 10)
+    closeBtn.AnchorPoint = Vector2.new(1, 0)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    closeBtn.BackgroundTransparency = 0.5
+    closeBtn.Text = "💢"
+    closeBtn.TextColor3 = White
+    closeBtn.TextSize = 18
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextTransparency = 1
+    local closeCorner = Instance.new("UICorner", closeBtn)
+    closeCorner.CornerRadius = UDim.new(0, 4)
+    TweenService:Create(closeBtn, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+
+    closeBtn.MouseEnter:Connect(function()
+        TweenService:Create(closeBtn, TweenInfo.new(0.2), {BackgroundColor3 = DarkRed, BackgroundTransparency = 0.2}):Play()
+    end)
+    closeBtn.MouseLeave:Connect(function()
+        TweenService:Create(closeBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30,30,30), BackgroundTransparency = 0.5}):Play()
+    end)
+
+    closeBtn.MouseButton1Click:Connect(function()
+        -- Close without extra actions
+        fadeOutAndDestroy(nil, true) -- just destroy
+    end)
+
+    -- ---- Verify logic ----
+    verifyBtn.MouseButton1Click:Connect(function()
+        local key = keyBox.Text
+        if key == "" then
+            errorLabel.Text = "Key cannot be empty!"
+            task.wait(0.6)
+            errorLabel.Text = ""
+            return
+        end
+        if key == CORRECT_KEY then
+            handleCorrectKey()
+        else
+            errorLabel.Text = "Wrong key! Try again."
+            shakeUI()
+            task.wait(1.0)
+            errorLabel.Text = ""
+            keyBox.Text = ""
+        end
+    end)
+
+    -- Enter key support
+    keyBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            verifyBtn:TriggerClick()
+        end
+    end)
+end
