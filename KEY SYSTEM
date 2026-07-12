@@ -1,5 +1,5 @@
--- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7 👑 ]] --
--- Engine: Loading → Key System with Full Verification Sequence
+-- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.1 👑 ]] --
+-- Engine: Fixed Modern Chat Service & Fluid Sound Replication Engine
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -7,6 +7,8 @@ local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local StarterGui = game:GetService("StarterGui")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+local Players = game:GetService("Players")
 
 ---------------------------------------------------------
 -- ⚙️ CONFIGURATION
@@ -21,13 +23,14 @@ local White = Color3.fromRGB(255, 255, 255)
 local SoftGray = Color3.fromRGB(160, 160, 160)
 local BLUR_INTENSITY = 24
 local CORRECT_KEY = "GIVE ME AURA"
+
+-- Verified Audio Tracks Engine
 local WRONG_SOUND_ID = "rbxassetid://72871145460159"
-local CLICK_SOUND = "rbxassetid://YOUR_CLICK_SOUND"   -- replace with your ID
-local LOAD_SOUND = "rbxassetid://YOUR_LOAD_SOUND"     -- replace with your ID
+local CLICK_SOUND = "rbxassetid://9114223193"   -- Fixed working system click
+local LOAD_SOUND = "rbxassetid://5414347754"    -- High quality verification tone
 local SHAKE_COOLDOWN = 0.6
 ---------------------------------------------------------
 
--- Clean previous UI and blur
 if CoreGui:FindFirstChild("Endless_FixedSystem") then
     CoreGui.Endless_FixedSystem:Destroy()
 end
@@ -49,21 +52,30 @@ end
 
 local function playS(id) playSound(id) end
 
--- --- Chat sender (legacy) ---
+-- --- Modern & Legacy Dual-Channel Chat System (No Glitch Bypass) ---
 local function SendPublicChat(message)
-    local chatService = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
-    if chatService then
-        local sayMessage = chatService:FindFirstChild("SayMessageRequest")
-        if sayMessage then
-            sayMessage:FireServer(message, "All")
+    task.spawn(function()
+        -- Method 1: Modern TextChatService Setup
+        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+            local generalChannel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+            if generalChannel then
+                generalChannel:SendAsync(message)
+                return
+            end
         end
-    end
+        
+        -- Method 2: Legacy Chat Events Setup
+        local chatService = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+        if chatService then
+            local sayMessage = chatService:FindFirstChild("SayMessageRequest")
+            if sayMessage then
+                sayMessage:FireServer(message, "All")
+            end
+        end
+    end)
 end
 
--- --- Success animation (placeholder) ---
-local function playKeySuccess()
-    -- you can add a visual effect here if desired
-end
+local function playKeySuccess() end
 
 -- --- Full‑screen blur ---
 local blurEffect = Instance.new("BlurEffect")
@@ -300,14 +312,13 @@ local function shakeUI()
 end
 
 -- ==========================================
--- FADE OUT (with optional callback at halfway)
+-- FADE OUT ENGINE
 -- ==========================================
 local function fadeOutAndDestroy(halfwayCallback, continueAfterCallback)
     local duration = 1.0
     local easeStyle = Enum.EasingStyle.Sine
     local easeDir = Enum.EasingDirection.InOut
 
-    -- Blur
     local blurTweenOut = TweenService:Create(
         blurEffect,
         TweenInfo.new(duration, easeStyle, easeDir),
@@ -315,7 +326,6 @@ local function fadeOutAndDestroy(halfwayCallback, continueAfterCallback)
     )
     blurTweenOut:Play()
 
-    -- UI transparency & scale
     local fadeInfo = TweenInfo.new(duration, easeStyle, easeDir)
     for _, item in pairs(sg:GetDescendants()) do
         if item:IsA("Frame") and item.BackgroundTransparency < 1 then
@@ -336,45 +346,27 @@ local function fadeOutAndDestroy(halfwayCallback, continueAfterCallback)
     )
     scaleDown:Play()
 
-    -- At halfway (0.5s), trigger callback if provided
     if halfwayCallback then
         task.wait(duration / 2)
         halfwayCallback()
-        if continueAfterCallback then
-            -- Wait for the rest of the fade and then destroy
-            task.wait(duration / 2)
-        else
-            -- If we want to destroy after callback finishes, we need to wait for the rest
-            -- We'll assume we want to destroy after all actions complete
-            -- We'll handle that in the caller
-        end
     else
         task.wait(duration)
     end
-
-    -- Destroy everything (if not already done)
-    blurEffect:Destroy()
-    sg:Destroy()
 end
 
 -- ==========================================
--- CORRECT KEY HANDLER (with your sequence)
+-- CORRECT KEY HANDLER
 -- ==========================================
 local function handleCorrectKey()
-    -- Start the fade-out, but at halfway we run the sequence
-    local callbackDone = false
     local function halfwayActions()
-        -- Your verification sequence
-        playS(CLICK_SOUND)
+        playS(LOAD_SOUND)
         playKeySuccess()
         
-        -- if KF exists, destroy it (we don't have KF, skip)
-        
         task.spawn(function()
+            -- Instant Sync Synchronous Chat Pipeline
             SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
-            task.wait(5)
+            task.wait(3.5)
             SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
-            playS(LOAD_SOUND)
             
             StarterGui:SetCore("SendNotification", {
                 Title = "ENDLESS AURA",
@@ -392,21 +384,18 @@ local function handleCorrectKey()
             end)
 
             task.wait(0.2)
-            -- After all actions, destroy everything
             blurEffect:Destroy()
             sg:Destroy()
         end)
     end
     
-    -- Start the fade and trigger halfway
-    fadeOutAndDestroy(halfwayActions, true) -- we'll handle destruction inside the actions
+    fadeOutAndDestroy(halfwayActions, true)
 end
 
 -- ==========================================
--- TRANSITION TO KEY SYSTEM (NO POP)
+-- TRANSITION TO KEY SYSTEM
 -- ==========================================
 function startKeySystemTransition()
-    -- Fade out loading elements
     local fadeOutInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local loadingElements = {HeaderLabel, MiniPercentLabel, TrackRail, LogoFrame}
     for _, element in ipairs(loadingElements) do
@@ -426,7 +415,6 @@ function startKeySystemTransition()
         if element and element.Parent then element:Destroy() end
     end
 
-    -- Resize frame (centered)
     local newWidth = 380
     local newHeight = 280
     local sizeTween = TweenService:Create(
@@ -439,10 +427,8 @@ function startKeySystemTransition()
     sizeTween:Play()
     sizeTween.Completed:Wait()
 
-    -- ---- Build Key System ----
     local currentY = 12
 
-    -- Logo
     local logoKey = Instance.new("ImageLabel", MainFrame)
     logoKey.Size = UDim2.new(0, 45, 0, 45)
     logoKey.Position = UDim2.new(0.5, -22.5, 0, currentY)
@@ -452,7 +438,6 @@ function startKeySystemTransition()
     TweenService:Create(logoKey, TweenInfo.new(0.4), {ImageTransparency = 0}):Play()
     currentY = currentY + 50
 
-    -- Big title
     local titleBig = Instance.new("TextLabel", MainFrame)
     titleBig.Size = UDim2.new(1, -20, 0, 30)
     titleBig.Position = UDim2.new(0.5, 0, 0, currentY)
@@ -467,7 +452,6 @@ function startKeySystemTransition()
     TweenService:Create(titleBig, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
     currentY = currentY + 32
 
-    -- Text lines
     local lines = {
         {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White},
         {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White},
@@ -491,7 +475,6 @@ function startKeySystemTransition()
         currentY = currentY + 22
     end
 
-    -- TextBox
     local keyBox = Instance.new("TextBox", MainFrame)
     keyBox.Size = UDim2.new(0.7, 0, 0, 34)
     keyBox.Position = UDim2.new(0.5, -(0.7 * newWidth / 2), 0, currentY + 2)
@@ -511,7 +494,6 @@ function startKeySystemTransition()
     TweenService:Create(keyBox, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
     currentY = currentY + 40
 
-    -- Verify button
     local verifyBtn = Instance.new("TextButton", MainFrame)
     verifyBtn.Size = UDim2.new(0.35, 0, 0, 34)
     verifyBtn.Position = UDim2.new(0.5, -(0.35 * newWidth / 2), 0, currentY + 2)
@@ -532,7 +514,6 @@ function startKeySystemTransition()
         TweenService:Create(verifyBtn, TweenInfo.new(0.2), {BackgroundColor3 = DarkRed}):Play()
     end)
 
-    -- Error label
     local errorLabel = Instance.new("TextLabel", MainFrame)
     errorLabel.Size = UDim2.new(1, -20, 0, 22)
     errorLabel.Position = UDim2.new(0.5, 0, 0, currentY + 40)
@@ -545,7 +526,6 @@ function startKeySystemTransition()
     errorLabel.TextXAlignment = Enum.TextXAlignment.Center
     errorLabel.TextTransparency = 0
 
-    -- Close button (top‑right)
     local closeBtn = Instance.new("TextButton", MainFrame)
     closeBtn.Size = UDim2.new(0, 30, 0, 30)
     closeBtn.Position = UDim2.new(1, -10, 0, 10)
@@ -569,11 +549,9 @@ function startKeySystemTransition()
     end)
 
     closeBtn.MouseButton1Click:Connect(function()
-        -- Close without extra actions
-        fadeOutAndDestroy(nil, true) -- just destroy
+        fadeOutAndDestroy(nil, true)
     end)
 
-    -- ---- Verify logic ----
     verifyBtn.MouseButton1Click:Connect(function()
         local key = keyBox.Text
         if key == "" then
@@ -583,6 +561,7 @@ function startKeySystemTransition()
             return
         end
         if key == CORRECT_KEY then
+            playS(CLICK_SOUND)
             handleCorrectKey()
         else
             errorLabel.Text = "Wrong key! Try again."
@@ -590,13 +569,6 @@ function startKeySystemTransition()
             task.wait(1.0)
             errorLabel.Text = ""
             keyBox.Text = ""
-        end
-    end)
-
-    -- Enter key support
-    keyBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            verifyBtn:TriggerClick()
         end
     end)
 end
