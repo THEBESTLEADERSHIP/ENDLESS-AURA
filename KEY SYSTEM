@@ -1,4 +1,4 @@
--- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.1 👑 ]] --
+-- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.2 👑 ]] --
 -- Engine: Fixed Modern Chat Service & Fluid Sound Replication Engine
 
 local CoreGui = game:GetService("CoreGui")
@@ -26,8 +26,8 @@ local CORRECT_KEY = "GIVE ME AURA"
 
 -- Verified Audio Tracks Engine
 local WRONG_SOUND_ID = "rbxassetid://72871145460159"
-local CLICK_SOUND = "rbxassetid://9114223193"   -- Fixed working system click
-local LOAD_SOUND = "rbxassetid://5414347754"    -- High quality verification tone
+local CLICK_SOUND = "rbxassetid://9114223193"   
+local POST_FADE_SOUND = "rbxassetid://123071085988261" -- Played exactly after UI disappears
 local SHAKE_COOLDOWN = 0.6
 ---------------------------------------------------------
 
@@ -55,7 +55,6 @@ local function playS(id) playSound(id) end
 -- --- Modern & Legacy Dual-Channel Chat System (No Glitch Bypass) ---
 local function SendPublicChat(message)
     task.spawn(function()
-        -- Method 1: Modern TextChatService Setup
         if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
             local generalChannel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
             if generalChannel then
@@ -64,7 +63,6 @@ local function SendPublicChat(message)
             end
         end
         
-        -- Method 2: Legacy Chat Events Setup
         local chatService = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
         if chatService then
             local sayMessage = chatService:FindFirstChild("SayMessageRequest")
@@ -359,22 +357,21 @@ end
 -- ==========================================
 local function handleCorrectKey()
     local function halfwayActions()
-        playS(LOAD_SOUND)
         playKeySuccess()
         
         task.spawn(function()
-            -- Instant Sync Synchronous Chat Pipeline
             SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
             task.wait(3.5)
             SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
             
-            StarterGui:SetCore("SendNotification", {
-                Title = "ENDLESS AURA",
-                Text = "Loaded...",
-                Icon = LOGO_IMAGE,
-                Duration = 5
-            })
+            -- UI Destruction Trigger Line
+            blurEffect:Destroy()
+            sg:Destroy()
             
+            -- Plays custom tracking sound exact after UI fades completely away
+            task.wait(0.1)
+            playS(POST_FADE_SOUND)
+
             task.spawn(function()
                 local success, err = pcall(function()
                     local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
@@ -382,10 +379,6 @@ local function handleCorrectKey()
                     if func then func() end
                 end)
             end)
-
-            task.wait(0.2)
-            blurEffect:Destroy()
-            sg:Destroy()
         end)
     end
     
