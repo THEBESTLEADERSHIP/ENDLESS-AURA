@@ -1,5 +1,5 @@
 -- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.6 👑 ]] --
--- Engine: Instant Audio Trigger Pipeline + UI Spawn Audio Hook
+-- Engine: Instant Audio Trigger Pipeline + UI Creation Sound Hook
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -27,7 +27,7 @@ local WRONG_SOUND_ID = "rbxassetid://72871145460159" --
 local CLICK_SOUND = "rbxassetid://9114223193"
 local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Syncs directly with first chat
 local TICK_PROGRESS_SOUND = "rbxassetid://96362701378961" -- Sounds when progress updates
-local KEY_UI_SPAWN_SOUND = "rbxassetid://90966283851115" -- Sounds when Key System UI is created
+local UI_COMPLETE_SOUND = "rbxassetid://90966283851115" -- Plays right when UI finishes creating
 local SHAKE_COOLDOWN = 0.6 --
 ---------------------------------------------------------
 
@@ -384,12 +384,9 @@ local function handleCorrectKey()
 end
 
 -- ==========================================
--- TRANSITION TO KEY SYSTEM (WITH SPAWN SOUND)
+-- TRANSITION TO KEY SYSTEM
 -- ==========================================
 function startKeySystemTransition()
-    -- INSTANT TRIGGER: Play audio the exact moment the transition/creation starts
-    playS(KEY_UI_SPAWN_SOUND)
-
     local fadeOutInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local loadingElements = {HeaderLabel, MiniPercentLabel, TrackRail, LogoFrame}
     for _, element in ipairs(loadingElements) do
@@ -419,6 +416,12 @@ function startKeySystemTransition()
         }
     )
     sizeTween:Play()
+    
+    -- HOOK: Plays right when UI size transition completes (Creation stops)
+    sizeTween.Completed:Connect(function()
+        playS(UI_COMPLETE_SOUND)
+    end)
+    
     sizeTween.Completed:Wait()
 
     local currentY = 12
@@ -448,7 +451,7 @@ function startKeySystemTransition()
 
     local lines = {
         {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White}, --
-        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇ r <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
         {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White}, --
         {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White} --
     }
@@ -555,6 +558,7 @@ function startKeySystemTransition()
             return
         end
         if key == CORRECT_KEY then
+            -- INSTANT EXECUTION HOOK (Immediate audio play before animations)
             playS(LAUGHTER_LOAD_SOUND)
             handleCorrectKey()
         else
