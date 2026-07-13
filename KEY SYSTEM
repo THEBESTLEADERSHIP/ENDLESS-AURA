@@ -1,5 +1,5 @@
--- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.5 👑 ]] --
--- Engine: Instant Audio Trigger Pipeline + Dynamic Progress Sound Hook
+-- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.6 👑 ]] --
+-- Engine: Instant Audio Trigger Pipeline + UI Creation Sound Hook
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -27,6 +27,7 @@ local WRONG_SOUND_ID = "rbxassetid://72871145460159" --
 local CLICK_SOUND = "rbxassetid://9114223193"
 local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Syncs directly with first chat
 local TICK_PROGRESS_SOUND = "rbxassetid://96362701378961" -- Sounds when progress updates
+local UI_CREATION_SOUND = "rbxassetid://130536546518957" -- Plays WHILE key system UI is creating
 local SHAKE_COOLDOWN = 0.6 --
 ---------------------------------------------------------
 
@@ -46,9 +47,10 @@ local function playSound(id)
     s.Parent = CoreGui
     s:Play()
     s.Ended:Connect(function() s:Destroy() end)
+    return s
 end
 
-local function playS(id) playSound(id) end
+local function playS(id) return playSound(id) end
 
 local function SendPublicChat(message)
     task.spawn(function()
@@ -225,7 +227,7 @@ task.spawn(function()
     
     local Target = 0
     local Current = 0
-    local LastPlayedPercent = -1 -- Track numbers to prevent overlapping audio loops
+    local LastPlayedPercent = -1 
     local SpeedModifier = 4.2
     local Start = tick()
     
@@ -249,7 +251,6 @@ task.spawn(function()
         local DisplayPercent = math.floor(math.clamp(Current * 100, 0, 100))
         MiniPercentLabel.Text = DisplayPercent .. "%"
         
-        -- Trigger dynamic progress audio when percent integer changes
         if DisplayPercent ~= LastPlayedPercent and DisplayPercent <= 100 then
             LastPlayedPercent = DisplayPercent
             task.spawn(function()
@@ -384,7 +385,7 @@ local function handleCorrectKey()
 end
 
 -- ==========================================
--- TRANSITION TO KEY SYSTEM
+-- TRANSITION TO KEY SYSTEM (WITH CREATION AUDIO)
 -- ==========================================
 function startKeySystemTransition()
     local fadeOutInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -405,6 +406,9 @@ function startKeySystemTransition()
     for _, element in ipairs(loadingElements) do
         if element and element.Parent then element:Destroy() end
     end
+
+    -- TRIGGER HOOK: Creation sound plays exactly during transition frame setup
+    local creationSoundObject = playS(UI_CREATION_SOUND)
 
     local newWidth = 380
     local newHeight = 280
@@ -445,7 +449,7 @@ function startKeySystemTransition()
 
     local lines = {
         {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White}, --
-        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇr <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
         {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White}, --
         {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White} --
     }
@@ -530,7 +534,16 @@ function startKeySystemTransition()
     closeBtn.TextTransparency = 1
     local closeCorner = Instance.new("UICorner", closeBtn)
     closeCorner.CornerRadius = UDim.new(0, 4)
-    TweenService:Create(closeBtn, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
+    
+    -- When UI build finishes completely, smoothly stop/fade the creation sound if it's still playing
+    local buildFinishTween = TweenService:Create(closeBtn, TweenInfo.new(0.4), {TextTransparency = 0})
+    buildFinishTween:Play()
+    buildFinishTween.Completed:Connect(function()
+        if creationSoundObject and creationSoundObject.Parent then
+            TweenService:Create(creationSoundObject, TweenInfo.new(0.3), {Volume = 0}):Play()
+            task.delay(0.3, function() creationSoundObject:Destroy() end)
+        end
+    end)
 
     closeBtn.MouseEnter:Connect(function()
         TweenService:Create(closeBtn, TweenInfo.new(0.2), {BackgroundColor3 = DarkRed, BackgroundTransparency = 0.2}):Play()
@@ -552,7 +565,6 @@ function startKeySystemTransition()
             return
         end
         if key == CORRECT_KEY then
-            -- INSTANT EXECUTION HOOK (Immediate audio play before animations)
             playS(LAUGHTER_LOAD_SOUND)
             handleCorrectKey()
         else
