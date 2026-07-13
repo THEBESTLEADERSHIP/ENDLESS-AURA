@@ -1,4 +1,4 @@
--- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.3 👑 ]] --
+-- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.4 👑 ]] --
 -- Engine: Instant Audio Trigger Pipeline
 
 local CoreGui = game:GetService("CoreGui")
@@ -356,9 +356,10 @@ local function handleCorrectKey()
             
             task.spawn(function()
                 local success, err = pcall(function()
-                    local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG") --
-                    local func = loadstring(response) --
-                    if func then func() end --
+                    -- UPDATED LOADSTRING LINK
+                    local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/TRY%20MODE%202")
+                    local func = loadstring(response)
+                    if func then func() end
                 end)
             end)
 
@@ -433,7 +434,7 @@ function startKeySystemTransition()
 
     local lines = {
         {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White}, --
-        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇ r <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
         {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White}, --
         {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White} --
     }
