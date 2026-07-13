@@ -1,5 +1,5 @@
 -- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.6 👑 ]] --
--- Engine: Instant Audio Trigger Pipeline + UI Creation End Sound Hook
+-- Engine: Instant Audio Trigger Pipeline + Progress & Transition Sound Hook
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -27,7 +27,7 @@ local WRONG_SOUND_ID = "rbxassetid://72871145460159" --
 local CLICK_SOUND = "rbxassetid://9114223193"
 local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Syncs directly with first chat
 local TICK_PROGRESS_SOUND = "rbxassetid://96362701378961" -- Sounds when progress updates
-local REVERSED_FADEOUT_SOUND = "rbxassetid://1550396515" -- Plays instantly when UI creation stops
+local FADEOUT_TRANSITION_SOUND = "rbxassetid://5156930551" -- Triggers instantly at 100% / Loader fadeout
 local SHAKE_COOLDOWN = 0.6 --
 ---------------------------------------------------------
 
@@ -268,6 +268,9 @@ task.spawn(function()
             
             blinkRunning = false
             task.wait(0.9)
+            
+            -- FADEOUT SOUND HOOK (Triggers exactly when 100% finishes and loader goes away)
+            playS(FADEOUT_TRANSITION_SOUND)
             startKeySystemTransition()
         end
     end)
@@ -384,7 +387,7 @@ local function handleCorrectKey()
 end
 
 -- ==========================================
--- TRANSITION TO KEY SYSTEM (WITH END SOUND HOOK)
+-- TRANSITION TO KEY SYSTEM
 -- ==========================================
 function startKeySystemTransition()
     local fadeOutInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -416,12 +419,6 @@ function startKeySystemTransition()
         }
     )
     sizeTween:Play()
-    
-    -- HOOK: Trigger reversed sound the exact millisecond UI scaling stops creating
-    sizeTween.Completed:Connect(function()
-        playS(REVERSED_FADEOUT_SOUND)
-    end)
-    
     sizeTween.Completed:Wait()
 
     local currentY = 12
@@ -451,7 +448,7 @@ function startKeySystemTransition()
 
     local lines = {
         {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White}, --
-        {text = "Tʜɪs Sᴄʀɪᴘᴛ MᴀᴅE Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
         {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White}, --
         {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White} --
     }
