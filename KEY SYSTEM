@@ -1,5 +1,5 @@
 -- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.6 👑 ]] --
--- Engine: Instant Audio Trigger Pipeline + UI Creation Fadeout Hook
+-- Engine: Instant Audio Trigger Pipeline + UI Creation End Sound Hook
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -27,7 +27,7 @@ local WRONG_SOUND_ID = "rbxassetid://72871145460159" --
 local CLICK_SOUND = "rbxassetid://9114223193"
 local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Syncs directly with first chat
 local TICK_PROGRESS_SOUND = "rbxassetid://96362701378961" -- Sounds when progress updates
-local UI_FADEOUT_SOUND = "rbxassetid://5156930551" -- Sounds right when UI creation finishes
+local REVERSED_FADEOUT_SOUND = "rbxassetid://1550396515" -- Plays instantly when UI creation stops
 local SHAKE_COOLDOWN = 0.6 --
 ---------------------------------------------------------
 
@@ -147,7 +147,7 @@ local HeaderLabel = Instance.new("TextLabel", MainFrame)
 HeaderLabel.Size = UDim2.new(1, -95, 0, 20)
 HeaderLabel.Position = UDim2.new(0, 40, 0, 11)
 HeaderLabel.BackgroundTransparency = 1
-HeaderLabel.Text = "Eɴᴅʟᴇss Aᴜʀᴀ Kᴇʏ SʏsᴛᴇSystem L...ᴏᴀᴅɪɴɢ..."
+HeaderLabel.Text = "Eɴᴅʟᴇss Aᴜʀᴀ Kᴇʏ Sʏsᴛᴇᴍ Lᴏᴀᴅɪɴɢ..."
 HeaderLabel.TextColor3 = White
 HeaderLabel.Font = Enum.Font.GothamBlack
 HeaderLabel.TextSize = 11
@@ -384,7 +384,7 @@ local function handleCorrectKey()
 end
 
 -- ==========================================
--- TRANSITION TO KEY SYSTEM (FADEOUT SOUND HOOK)
+-- TRANSITION TO KEY SYSTEM (WITH END SOUND HOOK)
 -- ==========================================
 function startKeySystemTransition()
     local fadeOutInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -416,12 +416,13 @@ function startKeySystemTransition()
         }
     )
     sizeTween:Play()
-    sizeTween.Completed:Wait()
-
-    -- INSTANT TRIGGER: FADEOUT SOUND PLAYS RIGHT AS UI CREATION FINISHES
-    task.spawn(function()
-        playS(UI_FADEOUT_SOUND)
+    
+    -- HOOK: Trigger reversed sound the exact millisecond UI scaling stops creating
+    sizeTween.Completed:Connect(function()
+        playS(REVERSED_FADEOUT_SOUND)
     end)
+    
+    sizeTween.Completed:Wait()
 
     local currentY = 12
 
@@ -449,8 +450,8 @@ function startKeySystemTransition()
     currentY = currentY + 32
 
     local lines = {
-        {text = "Kᴇʏ SʏsᴛᴇSystem", color = White}, --
-        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇr <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
+        {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White}, --
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ MᴀᴅE Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
         {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White}, --
         {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White} --
     }
@@ -557,6 +558,7 @@ function startKeySystemTransition()
             return
         end
         if key == CORRECT_KEY then
+            -- INSTANT EXECUTION HOOK (Immediate audio play before animations)
             playS(LAUGHTER_LOAD_SOUND)
             handleCorrectKey()
         else
