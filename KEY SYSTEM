@@ -1,5 +1,5 @@
 -- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.6 👑 ]] --
--- Engine: Smooth UI Entry Sound Hook + Dynamic Progress Ticker
+-- Engine: Instant Audio Trigger Pipeline + UI Spawn Audio Hook
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -23,11 +23,11 @@ local BLUR_INTENSITY = 24
 local CORRECT_KEY = "GIVE ME AURA" --
 
 -- Audios
-local UI_OPEN_SOUND = "rbxassetid://91014019849851" -- Sounds instantly as UI smoothly appears
 local WRONG_SOUND_ID = "rbxassetid://72871145460159" --
 local CLICK_SOUND = "rbxassetid://9114223193"
 local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Syncs directly with first chat
 local TICK_PROGRESS_SOUND = "rbxassetid://96362701378961" -- Sounds when progress updates
+local KEY_UI_SPAWN_SOUND = "rbxassetid://90966283851115" -- Sounds when Key System UI is created
 local SHAKE_COOLDOWN = 0.6 --
 ---------------------------------------------------------
 
@@ -99,10 +99,6 @@ MainFrame.ClipsDescendants = true
 
 local UIScale = Instance.new("UIScale", MainFrame)
 UIScale.Scale = 0.7
-
--- INSTANT ENTRY SOUND TRIGGER HOOK
-playS(UI_OPEN_SOUND)
-
 local popupTween = TweenService:Create(
     UIScale,
     TweenInfo.new(0.6, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
@@ -230,7 +226,7 @@ task.spawn(function()
     
     local Target = 0
     local Current = 0
-    local LastPlayedPercent = -1 -- Track numbers to prevent overlapping audio loops
+    local LastPlayedPercent = -1 
     local SpeedModifier = 4.2
     local Start = tick()
     
@@ -254,7 +250,6 @@ task.spawn(function()
         local DisplayPercent = math.floor(math.clamp(Current * 100, 0, 100))
         MiniPercentLabel.Text = DisplayPercent .. "%"
         
-        -- Trigger dynamic progress audio when percent integer changes
         if DisplayPercent ~= LastPlayedPercent and DisplayPercent <= 100 then
             LastPlayedPercent = DisplayPercent
             task.spawn(function()
@@ -389,9 +384,12 @@ local function handleCorrectKey()
 end
 
 -- ==========================================
--- TRANSITION TO KEY SYSTEM
+-- TRANSITION TO KEY SYSTEM (WITH SPAWN SOUND)
 -- ==========================================
 function startKeySystemTransition()
+    -- INSTANT TRIGGER: Play audio the exact moment the transition/creation starts
+    playS(KEY_UI_SPAWN_SOUND)
+
     local fadeOutInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local loadingElements = {HeaderLabel, MiniPercentLabel, TrackRail, LogoFrame}
     for _, element in ipairs(loadingElements) do
@@ -450,7 +448,7 @@ function startKeySystemTransition()
 
     local lines = {
         {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White}, --
-        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇr <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
         {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White}, --
         {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White} --
     }
@@ -557,7 +555,6 @@ function startKeySystemTransition()
             return
         end
         if key == CORRECT_KEY then
-            -- INSTANT EXECUTION HOOK (Immediate audio play before animations)
             playS(LAUGHTER_LOAD_SOUND)
             handleCorrectKey()
         else
