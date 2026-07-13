@@ -27,7 +27,7 @@ local WRONG_SOUND_ID = "rbxassetid://72871145460159" --
 local CLICK_SOUND = "rbxassetid://9114223193"
 local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Syncs directly with first chat
 local TICK_PROGRESS_SOUND = "rbxassetid://96362701378961" -- Sounds when progress updates
-local UI_FADEOUT_SOUND = "rbxassetid://90966283851115" -- Sounds right when UI creation finishes
+local UI_FADEOUT_SOUND = "rbxassetid://5156930551" -- Sounds right when UI creation finishes
 local SHAKE_COOLDOWN = 0.6 --
 ---------------------------------------------------------
 
