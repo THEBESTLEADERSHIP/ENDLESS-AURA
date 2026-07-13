@@ -1,5 +1,5 @@
--- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.4 👑 ]] --
--- Engine: Instant Audio Trigger Pipeline
+-- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.5 👑 ]] --
+-- Engine: Instant Audio Trigger Pipeline + Dynamic Progress Sound Hook
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -26,6 +26,7 @@ local CORRECT_KEY = "GIVE ME AURA" --
 local WRONG_SOUND_ID = "rbxassetid://72871145460159" --
 local CLICK_SOUND = "rbxassetid://9114223193"
 local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Syncs directly with first chat
+local TICK_PROGRESS_SOUND = "rbxassetid://96362701378961" -- Sounds when progress updates
 local SHAKE_COOLDOWN = 0.6 --
 ---------------------------------------------------------
 
@@ -217,13 +218,14 @@ local ShineTween = TweenService:Create(ShineImage, ShineTweenInfo, {Position = U
 ShineTween:Play()
 
 -- ==========================================
--- LOADING PROGRESS
+-- LOADING PROGRESS (WITH VALUE-BASED TICKER)
 -- ==========================================
 task.spawn(function()
     task.wait(0.3)
     
     local Target = 0
     local Current = 0
+    local LastPlayedPercent = -1 -- Track numbers to prevent overlapping audio loops
     local SpeedModifier = 4.2
     local Start = tick()
     
@@ -243,7 +245,17 @@ task.spawn(function()
         Current = Current + (Target - Current) * SmoothAlpha
         
         BarActive.Size = UDim2.new(Current, 0, 1, 0)
-        MiniPercentLabel.Text = math.floor(math.clamp(Current * 100, 0, 100)) .. "%"
+        
+        local DisplayPercent = math.floor(math.clamp(Current * 100, 0, 100))
+        MiniPercentLabel.Text = DisplayPercent .. "%"
+        
+        -- Trigger dynamic progress audio when percent integer changes
+        if DisplayPercent ~= LastPlayedPercent and DisplayPercent <= 100 then
+            LastPlayedPercent = DisplayPercent
+            task.spawn(function()
+                playS(TICK_PROGRESS_SOUND)
+            end)
+        end
         
         if Current >= 0.999 then
             Current = 1
@@ -356,7 +368,6 @@ local function handleCorrectKey()
             
             task.spawn(function()
                 local success, err = pcall(function()
-                    -- UPDATED LOADSTRING LINK
                     local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/TRY%20MODE%202")
                     local func = loadstring(response)
                     if func then func() end
@@ -434,7 +445,7 @@ function startKeySystemTransition()
 
     local lines = {
         {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White}, --
-        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇr <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
         {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White}, --
         {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White} --
     }
