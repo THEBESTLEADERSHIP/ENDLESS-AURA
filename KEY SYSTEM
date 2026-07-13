@@ -1,5 +1,5 @@
 -- [[ 🥷 ENDLESS AURA - ANTI-BLACK SCREEN 3D LOADER V7.3 👑 ]] --
--- Engine: Instant Key Intercept & Zero-Delay Audio Ignition
+-- Engine: Instant Audio Trigger Pipeline
 
 local CoreGui = game:GetService("CoreGui")
 local TweenService = game:GetService("TweenService")
@@ -11,7 +11,7 @@ local TextChatService = game:GetService("TextChatService")
 ---------------------------------------------------------
 -- ⚙️ CONFIGURATION
 ---------------------------------------------------------
-local LOGO_IMAGE = "rbxassetid://129299711445020"
+local LOGO_IMAGE = "rbxassetid://129299711445020" -- Endless Aura Logo
 local PureBlack = Color3.fromRGB(0, 0, 0)
 local DarkChamber = Color3.fromRGB(8, 8, 8)
 local IntenseRed = Color3.fromRGB(255, 0, 0)
@@ -20,13 +20,13 @@ local NeonPinkRed = Color3.fromRGB(255, 65, 80)
 local White = Color3.fromRGB(255, 255, 255)
 local SoftGray = Color3.fromRGB(160, 160, 160)
 local BLUR_INTENSITY = 24
-local CORRECT_KEY = "GIVE ME AURA"
+local CORRECT_KEY = "GIVE ME AURA" --
 
 -- Audios
-local WRONG_SOUND_ID = "rbxassetid://72871145460159"
+local WRONG_SOUND_ID = "rbxassetid://72871145460159" --
 local CLICK_SOUND = "rbxassetid://9114223193"
-local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Instant Trigger Target
-local SHAKE_COOLDOWN = 0.6
+local LAUGHTER_LOAD_SOUND = "rbxassetid://123071085988261" -- Syncs directly with first chat
+local SHAKE_COOLDOWN = 0.6 --
 ---------------------------------------------------------
 
 if CoreGui:FindFirstChild("Endless_FixedSystem") then
@@ -270,7 +270,7 @@ local function shakeUI()
     if not canShake then return end
     canShake = false
     
-    playS(WRONG_SOUND_ID)
+    playS(WRONG_SOUND_ID) --
     
     local originalPos = MainFrame.Position
     local offset = 8
@@ -303,7 +303,7 @@ end
 -- ==========================================
 -- FADE OUT ENGINE
 -- ==========================================
-local function fadeOutAndDestroy(halfwayCallback)
+local function fadeOutAndDestroy(halfwayCallback, continueAfterCallback)
     local duration = 1.0
     local easeStyle = Enum.EasingStyle.Sine
     local easeDir = Enum.EasingDirection.InOut
@@ -344,33 +344,31 @@ local function fadeOutAndDestroy(halfwayCallback)
 end
 
 -- ==========================================
--- CORRECT KEY IGNITION PIPELINE
+-- CORRECT KEY HANDLER (SYNC AUDIO WITH CHAT)
 -- ==========================================
 local function handleCorrectKey()
-    -- [CRITICAL INTERCEPT] Play audio the exact millisecond key is validated
-    playS(LAUGHTER_LOAD_SOUND) 
-    
-    -- Immediately trigger background chat process while UI fades out
-    task.spawn(function()
-        SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_")
-        task.wait(3.5)
-        SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...")
-    end)
-    
     local function halfwayActions()
         task.spawn(function()
-            local success, err = pcall(function()
-                local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG")
-                local func = loadstring(response)
-                if func then func() end
+            SendPublicChat("HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_ HA_HA_ HA_HA_HA_HA_HA_HA_HA_HA_HA_HA_") --
+            
+            task.wait(3.5) --
+            SendPublicChat("[SCRIPTER ] > [NAMELESS💢] ````````````````````````````````````````````````````````````````````````````````````````````````````````````````````EGO EMPIRE KA PAPA ENDLESS-AURA💢 Loaded...") --
+            
+            task.spawn(function()
+                local success, err = pcall(function()
+                    local response = game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/ENDLESS%20AURA%20TAG") --
+                    local func = loadstring(response) --
+                    if func then func() end --
+                end)
             end)
-            task.wait(0.2)
-            blurEffect:Destroy()
-            sg:Destroy()
+
+            task.wait(0.2) --
+            blurEffect:Destroy() --
+            sg:Destroy() --
         end)
     end
     
-    fadeOutAndDestroy(halfwayActions)
+    fadeOutAndDestroy(halfwayActions, true)
 end
 
 -- ==========================================
@@ -424,7 +422,7 @@ function startKeySystemTransition()
     titleBig.Position = UDim2.new(0.5, 0, 0, currentY)
     titleBig.AnchorPoint = Vector2.new(0.5, 0)
     titleBig.BackgroundTransparency = 1
-    titleBig.Text = "Eɴᴅʟᴇss Aᴜʀᴀ"
+    titleBig.Text = "Eɴᴅʟᴇss Aᴜʀᴀ" --
     titleBig.TextColor3 = DarkRed
     titleBig.Font = Enum.Font.GothamBold
     titleBig.TextSize = 24
@@ -434,10 +432,10 @@ function startKeySystemTransition()
     currentY = currentY + 32
 
     local lines = {
-        {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White},
-        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇʀ <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White},
-        {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White},
-        {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White}
+        {text = "Kᴇʏ Sʏsᴛᴇᴍ", color = White}, --
+        {text = "Tʜɪs Sᴄʀɪᴘᴛ Mᴀᴅᴇ Bʏ <font color='rgb(160,0,0)'>Eɴᴅʟᴇss Aᴜʀᴀ</font> Lᴇᴀᴅᴇ r <font color='rgb(160,0,0)'>Nᴀᴍᴇʟᴇss</font>", color = White}, --
+        {text = "Iғ Yᴏᴜ Wᴀɴᴛ Kᴇʏ Tʜᴇɴ Jᴏɪɴ", color = White}, --
+        {text = "Eɴᴅʟᴇss ᴀᴜʀᴀ", color = White} --
     }
     for _, line in ipairs(lines) do
         local lbl = Instance.new("TextLabel", MainFrame)
@@ -463,9 +461,9 @@ function startKeySystemTransition()
     keyBox.TextColor3 = White
     keyBox.Font = Enum.Font.Gotham
     keyBox.TextSize = 16
-    keyBox.PlaceholderText = "Eɴᴛᴇʀ Kᴇʏ 🔑"
-    keyBox.Text = ""
-    keyBox.ClearTextOnFocus = false
+    keyBox.PlaceholderText = "Eɴᴛᴇʀ Kᴇʏ 🔑" --
+    keyBox.Text = "" --
+    keyBox.ClearTextOnFocus = false --
     keyBox.TextTransparency = 1
     local boxCorner = Instance.new("UICorner", keyBox)
     boxCorner.CornerRadius = UDim.new(0, 6)
@@ -482,7 +480,7 @@ function startKeySystemTransition()
     verifyBtn.TextColor3 = White
     verifyBtn.Font = Enum.Font.GothamBold
     verifyBtn.TextSize = 16
-    verifyBtn.Text = "VERIFY"
+    verifyBtn.Text = "VERIFY" --
     verifyBtn.TextTransparency = 1
     local btnCorner = Instance.new("UICorner", verifyBtn)
     btnCorner.CornerRadius = UDim.new(0, 6)
@@ -513,7 +511,7 @@ function startKeySystemTransition()
     closeBtn.AnchorPoint = Vector2.new(1, 0)
     closeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     closeBtn.BackgroundTransparency = 0.5
-    closeBtn.Text = "💢"
+    closeBtn.Text = "💢" --
     closeBtn.TextColor3 = White
     closeBtn.TextSize = 18
     closeBtn.Font = Enum.Font.GothamBold
@@ -530,7 +528,7 @@ function startKeySystemTransition()
     end)
 
     closeBtn.MouseButton1Click:Connect(function()
-        fadeOutAndDestroy(nil)
+        fadeOutAndDestroy(nil, true)
     end)
 
     verifyBtn.MouseButton1Click:Connect(function()
@@ -542,6 +540,8 @@ function startKeySystemTransition()
             return
         end
         if key == CORRECT_KEY then
+            -- INSTANT EXECUTION HOOK (Immediate audio play before animations)
+            playS(LAUGHTER_LOAD_SOUND)
             handleCorrectKey()
         else
             errorLabel.Text = "Wrong key! Try again."
