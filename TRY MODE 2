@@ -928,13 +928,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- ✈️AEROPLANE POSE Integrated Code Block (Added perfectly below SUCK👅)
+    -- 🐶DOG POSE Integrated Code Block (Added perfectly below SUCK👅)
     local PLANE_ANIM = "101770532783937"
     _G.PlaneLoop = false
     local planeConnection
     local planeAnimTrack
 
-    btn("✈️AEROPLANE POSE", T2, function(b)
+    btn("🐶DOG POSE", T2, function(b)
         _G.PlaneLoop = b:GetAttribute("T")
         if _G.PlaneLoop then
             local targetPlayerObj = getT()
