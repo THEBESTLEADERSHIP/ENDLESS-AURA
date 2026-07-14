@@ -527,7 +527,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS - ORDERED EXACTLY AS SPECIFIED)
     -- Row 1: [ TEXT BOX ] | 🛑 STOP ALL
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false end, true)
     
     -- Row 2: ⚡ TP | VIEW👀
     btn("⚡ TP", T2, function()
@@ -919,6 +919,64 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         else
             if dogyConnection then dogyConnection:Disconnect() end
             if dogyAnimTrack then dogyAnimTrack:Stop() end
+            local char = player.Character
+            if char then
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then hum.PlatformStand = false end
+            end
+        end
+    end)
+    
+    -- ✈️AEROPLANE POSE Integrated Code Block (Added perfectly below SUCK👅)
+    local PLANE_ANIM = "101770532783937"
+    _G.PlaneLoop = false
+    local planeConnection
+    local planeAnimTrack
+
+    btn("✈️AEROPLANE POSE", T2, function(b)
+        _G.PlaneLoop = b:GetAttribute("T")
+        if _G.PlaneLoop then
+            local targetPlayerObj = getT()
+            local bodyPart = targetPlayerObj and targetPlayerObj.Character and (targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart"))
+            local char = player.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            
+            if bodyPart and root then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+                
+                local anim = Instance.new("Animation") 
+                anim.AnimationId = "rbxassetid://" .. PLANE_ANIM
+                planeAnimTrack = hum:LoadAnimation(anim)
+                planeAnimTrack.Priority = Enum.AnimationPriority.Action4
+                planeAnimTrack.Looped = true
+                planeAnimTrack:Play()
+                
+                hum.PlatformStand = true
+                
+                planeConnection = RunService.RenderStepped:Connect(function()
+                    if not _G.PlaneLoop or not targetPlayerObj.Character or not bodyPart.Parent then 
+                        _G.PlaneLoop = false
+                        b:SetAttribute("T", false)
+                        b.BackgroundColor3 = White
+                        b.TextColor3 = Black
+                        if planeConnection then planeConnection:Disconnect() end
+                        return 
+                    end
+                    
+                    root.CFrame = bodyPart.CFrame * CFrame.new(0, 1.30, -1)
+                    root.AssemblyLinearVelocity = Vector3.zero
+                end)
+            else
+                _G.PlaneLoop = false
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+            end
+        else
+            if planeConnection then planeConnection:Disconnect() end
+            if planeAnimTrack then planeAnimTrack:Stop() end
             local char = player.Character
             if char then
                 if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
