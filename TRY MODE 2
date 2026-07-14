@@ -527,7 +527,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS - ORDERED EXACTLY AS SPECIFIED)
     -- Row 1: [ TEXT BOX ] | 🛑 STOP ALL
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false end, true)
     
     -- Row 2: ⚡ TP | VIEW👀
     btn("⚡ TP", T2, function()
@@ -928,7 +928,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- 🐶DOG POSE Integrated Code Block (Added perfectly below SUCK👅)[span_2](start_span)[span_2](end_span)
+    -- 🐶DOG POSE Integrated Code Block (Added perfectly below SUCK👅)[span_0](start_span)[span_0](end_span)
     local PLANE_ANIM = "101770532783937"
     _G.PlaneLoop = false
     local planeConnection
@@ -986,7 +986,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- ✈️AEROPLANE POSE Integrated Code Block (Added exactly below DOG POSE)[span_3](start_span)[span_3](end_span)
+    -- ✈️AEROPLANE POSE Integrated Code Block (Added exactly below DOG POSE)[span_1](start_span)[span_1](end_span)
     local AERO_ANIM = "112833317179264"
     local AERO_FREEZE = 1.792
     local AERO_HEIGHT = 1.30
@@ -1059,6 +1059,92 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
         end
     end)
+
+    -- 🦋BUTTERFLY POSE Integrated Code Block (Added perfectly below AEROPLANE POSE)
+    local BUTTERFLY_ANIM = "70396081158319"
+    local BUTTERFLY_FREEZE = 0.729
+    local BUTTERFLY_HEIGHT = 3.30
+    local BUTTERFLY_MIN = 2.25
+    local BUTTERFLY_MAX = 3.30
+    local BUTTERFLY_SPEED = 12
+
+    _G.ButterflyLoop = false
+    local butterflyConnection
+    local butterflyAnimTrack
+
+    btn("🦋BUTTERFLY POSE", T2, function(b)
+        _G.ButterflyLoop = b:GetAttribute("T")
+        if _G.ButterflyLoop then
+            local targetPlayerObj = getT()
+            local targetTorso = targetPlayerObj and targetPlayerObj.Character and (targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso"))
+            local char = player.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            
+            if targetTorso and root then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                
+                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+                hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+                hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+                
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+                
+                local anim = Instance.new("Animation")
+                anim.AnimationId = "rbxassetid://" .. BUTTERFLY_ANIM
+                butterflyAnimTrack = hum:LoadAnimation(anim)
+                butterflyAnimTrack.Priority = Enum.AnimationPriority.Action4
+                butterflyAnimTrack.Looped = true
+                butterflyAnimTrack:Play()
+                
+                butterflyAnimTrack.TimePosition = BUTTERFLY_FREEZE
+                butterflyAnimTrack:AdjustSpeed(0)
+                
+                local startTime = os.clock()
+                
+                butterflyConnection = RunService.RenderStepped:Connect(function()
+                    if not _G.ButterflyLoop or not targetPlayerObj.Character or not targetTorso.Parent then
+                        _G.ButterflyLoop = false
+                        b:SetAttribute("T", false)
+                        b.BackgroundColor3 = White
+                        b.TextColor3 = Black
+                        if butterflyConnection then butterflyConnection:Disconnect() end
+                        return
+                    end
+                    
+                    butterflyAnimTrack.TimePosition = BUTTERFLY_FREEZE
+                    if not butterflyAnimTrack.IsPlaying then butterflyAnimTrack:Play() butterflyAnimTrack:AdjustSpeed(0) end
+                    
+                    local timePassed = os.clock() - startTime
+                    local alpha = (math.sin(timePassed * BUTTERFLY_SPEED) + 1) / 2
+                    local dynamicDistance = BUTTERFLY_MIN + (alpha * (BUTTERFLY_MAX - BUTTERFLY_MIN))
+                    
+                    root.AssemblyLinearVelocity = Vector3.zero
+                    root.AssemblyAngularVelocity = Vector3.zero
+                    
+                    root.CFrame = targetTorso.CFrame * CFrame.new(0, BUTTERFLY_HEIGHT, -dynamicDistance) * CFrame.Angles(0, math.pi, 0)
+                    hum.Sit = true
+                end)
+            else
+                _G.ButterflyLoop = false
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+            end
+        else
+            if butterflyConnection then butterflyConnection:Disconnect() end
+            if butterflyAnimTrack then butterflyAnimTrack:Stop() end
+            local char = player.Character
+            if char then
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum.Sit = false
+                    hum.Jump = true
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                end
+            end
+        end
+    end)
     
     -- TAB 3: SHIELD
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end)
@@ -1098,7 +1184,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("AURA♀️", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/LmxNcQvt"))() end, true)
     btn("HIDE BUTTONS 🔘", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/DtJPutfe"))() end, true)
     btn("🥷 COPY NINJA", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/7QTTJFFa"))() end, true)
-    btn("🪓 SKY DESTROYER", T5, function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640"))() end, true)
+    btn("🪓 SKY DESTROYER", T5, function() loadscripts.net("https://rawscripts.net/raw/Universal-Script-sky-destroyer-V2-AXEZZ-110640") end, true)
     btn("🎭 EMOTE NAME", T5, function() pcall(function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-7yd7-I-Emote-Script-48024"))() end) end, true)
     btn("NAMELESS EMOTE👤", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)
     btn("🔄 REJOIN", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)
