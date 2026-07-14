@@ -527,7 +527,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS - ORDERED EXACTLY AS SPECIFIED)
     -- Row 1: [ TEXT BOX ] | 🛑 STOP ALL
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false) end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false end, true)
     
     -- Row 2: ⚡ TP | VIEW 🪟
     btn("⚡ TP", T2, function()
@@ -774,6 +774,85 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local char = player.Character
             if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
         end)
+    end)
+
+    -- Row 7: CHOCO🪳 (INTEGRATED FACE-TO-FACE ATTACH MATRIX)
+    local ANIM_ID = "85287774070688"    
+    local FREEZE_TIME = 0.829           
+    local BASE_DISTANCE = 1.2           
+    local SPEED = 25                    
+
+    _G.AttachLoop = false
+    local connection
+    local animTrack
+
+    btn("CHOCO🪳", T2, function(b)
+        _G.AttachLoop = b:GetAttribute("T")
+        if _G.AttachLoop then
+            local targetPlayerObj = getT()
+            local targetHead = targetPlayerObj and targetPlayerObj.Character and targetPlayerObj.Character:FindFirstChild("Head")
+            
+            if targetHead then
+                local char = player.Character
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                local root = char:FindFirstChild("HumanoidRootPart")
+                local myLowerTorso = char:FindFirstChild("LowerTorso") or root 
+                
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+                
+                local anim = Instance.new("Animation") 
+                anim.AnimationId = "rbxassetid://" .. ANIM_ID
+                animTrack = hum:LoadAnimation(anim)
+                animTrack.Priority = Enum.AnimationPriority.Action4
+                animTrack.Looped = true
+                animTrack:Play()
+                
+                animTrack.TimePosition = FREEZE_TIME
+                animTrack:AdjustSpeed(0)
+                
+                hum.PlatformStand = true
+                local startTime = os.clock()
+                
+                connection = RunService.RenderStepped:Connect(function()
+                    if not targetHead or not targetHead.Parent or not _G.AttachLoop then 
+                        _G.AttachLoop = false
+                        b:SetAttribute("T", false)
+                        b.BackgroundColor3 = White
+                        b.TextColor3 = Black
+                        if connection then connection:Disconnect() end
+                        return 
+                    end
+                    
+                    animTrack.TimePosition = FREEZE_TIME
+                    
+                    local timePassed = os.clock() - startTime
+                    local oscillation = math.sin(timePassed * (SPEED / 2)) * 0.8
+                    local currentDynamicDist = BASE_DISTANCE + oscillation
+                    
+                    local targetFaceCF = targetHead.CFrame
+                    local desiredLowerTorsoCF = targetFaceCF * CFrame.new(0, 0, -currentDynamicDist) * CFrame.Angles(0, math.pi, 0)
+                    
+                    local rootOffset = root.CFrame:ToObjectSpace(myLowerTorso.CFrame)
+                    root.CFrame = desiredLowerTorsoCF * rootOffset:Inverse()
+                    
+                    root.AssemblyLinearVelocity = Vector3.zero
+                end)
+            else
+                _G.AttachLoop = false
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+            end
+        else
+            if connection then connection:Disconnect() end
+            if animTrack then animTrack:Stop() end
+            local char = player.Character
+            if char then
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then hum.PlatformStand = false end
+            end
+        end
     end)
     
     -- TAB 3: SHIELD
