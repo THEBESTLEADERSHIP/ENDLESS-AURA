@@ -527,7 +527,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS - ORDERED EXACTLY AS SPECIFIED)
     -- Row 1: [ TEXT BOX ] | 🛑 STOP ALL
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false; _G.HugActive = false end, true)
     
     -- Row 2: ⚡ TP | VIEW👀
     btn("⚡ TP", T2, function()
@@ -928,7 +928,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- 🐶DOG POSE Integrated Code Block (Added perfectly below SUCK👅)[span_0](start_span)[span_0](end_span)
+    -- 🐶DOG POSE Integrated Code Block (Added perfectly below SUCK👅)
     local PLANE_ANIM = "101770532783937"
     _G.PlaneLoop = false
     local planeConnection
@@ -986,7 +986,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- ✈️AEROPLANE POSE Integrated Code Block (Added exactly below DOG POSE)[span_1](start_span)[span_1](end_span)
+    -- ✈️AEROPLANE POSE Integrated Code Block (Added exactly below DOG POSE)
     local AERO_ANIM = "112833317179264"
     local AERO_FREEZE = 1.792
     local AERO_HEIGHT = 1.30
@@ -1141,6 +1141,105 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                     hum.Sit = false
                     hum.Jump = true
                     hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                end
+            end
+        end
+    end)
+
+    -- 🤗HUG Integrated Code Block (Added perfectly below BUTTERFLY POSE)
+    local HUG_ANIM = "79920226991831"
+    local HUG_BACK_OFFSET = 1.5
+
+    _G.HugActive = false
+    local hugConnections = {}
+    local hugAnimTrack
+
+    local function toggleHugAntiCheatBypass(state)
+        pcall(function()
+            if state then
+                workspace.FallenPartsDestroyHeight = 0/0
+            else
+                workspace.FallenPartsDestroyHeight = -500
+            end
+        end)
+    end
+
+    btn("🤗HUG", T2, function(b)
+        _G.HugActive = b:GetAttribute("T")
+        if _G.HugActive then
+            local targetPlayerObj = getT()
+            local targetBody = targetPlayerObj and targetPlayerObj.Character and (
+                targetPlayerObj.Character:FindFirstChild("UpperTorso") or 
+                targetPlayerObj.Character:FindFirstChild("Torso") or 
+                targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
+            )
+            local char = player.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            
+            if targetBody and root then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+                
+                toggleHugAntiCheatBypass(true)
+                
+                local anim = Instance.new("Animation")
+                anim.AnimationId = "rbxassetid://" .. HUG_ANIM
+                hugAnimTrack = hum:LoadAnimation(anim)
+                hugAnimTrack.Priority = Enum.AnimationPriority.Action4
+                hugAnimTrack.Looped = true
+                hugAnimTrack:Play()
+                
+                hum.PlatformStand = true
+                
+                local function enforceStuck()
+                    if not targetBody or not targetBody.Parent or not _G.HugActive then
+                        _G.HugActive = false
+                        b:SetAttribute("T", false)
+                        b.BackgroundColor3 = White
+                        b.TextColor3 = Black
+                        
+                        toggleHugAntiCheatBypass(false)
+                        for _, conn in ipairs(hugConnections) do if conn then conn:Disconnect() end end
+                        hugConnections = {}
+                        
+                        if hugAnimTrack then hugAnimTrack:Stop() end
+                        if char then
+                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+                            if hum then 
+                                hum.PlatformStand = false 
+                                hum:ChangeState(Enum.HumanoidStateType.Running)
+                            end
+                        end
+                        return
+                    end
+                    
+                    root.AssemblyLinearVelocity = Vector3.zero
+                    root.AssemblyAngularVelocity = Vector3.zero
+                    root.CFrame = targetBody.CFrame * CFrame.new(0, 0, HUG_BACK_OFFSET)
+                end
+                
+                table.insert(hugConnections, RunService.PreSimulation:Connect(enforceStuck))
+                table.insert(hugConnections, RunService.PostSimulation:Connect(enforceStuck))
+                table.insert(hugConnections, RunService.RenderStepped:Connect(enforceStuck))
+            else
+                _G.HugActive = false
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+            end
+        else
+            toggleHugAntiCheatBypass(false)
+            for _, conn in ipairs(hugConnections) do if conn then conn:Disconnect() end end
+            hugConnections = {}
+            
+            if hugAnimTrack then hugAnimTrack:Stop() end
+            local char = player.Character
+            if char then
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then 
+                    hum.PlatformStand = false 
+                    hum:ChangeState(Enum.HumanoidStateType.Running)
                 end
             end
         end
