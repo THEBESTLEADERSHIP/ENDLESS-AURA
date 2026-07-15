@@ -527,7 +527,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS - ORDERED EXACTLY AS SPECIFIED)
     -- Row 1: [ TEXT BOX ] | 🛑 STOP ALL
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false; _G.HugActive = false end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false; _G.HugActive = false; _G.KissActive = false end, true)
     
     -- Row 2: ⚡ TP | VIEW👀
     btn("⚡ TP", T2, function()
@@ -928,7 +928,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- 🐶DOG POSE Integrated Code Block (Added perfectly below SUCK👅)
+    -- 🐶DOG POSE Integrated Code Block
     local PLANE_ANIM = "101770532783937"
     _G.PlaneLoop = false
     local planeConnection
@@ -965,6 +965,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         return 
                     end
                     
+                    root.CFrame = bodyPart.CFrame * UDim2.new(0, 1.30, -1) -- Fallback conversion safe check
                     root.CFrame = bodyPart.CFrame * CFrame.new(0, 1.30, -1)
                     root.AssemblyLinearVelocity = Vector3.zero
                 end)
@@ -986,7 +987,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- ✈️AEROPLANE POSE Integrated Code Block (Added exactly below DOG POSE)
+    -- ✈️AEROPLANE POSE Integrated Code Block
     local AERO_ANIM = "112833317179264"
     local AERO_FREEZE = 1.792
     local AERO_HEIGHT = 1.30
@@ -1060,7 +1061,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 🦋BUTTERFLY POSE Integrated Code Block (Added perfectly below AEROPLANE POSE)
+    -- 🦋BUTTERFLY POSE Integrated Code Block
     local BUTTERFLY_ANIM = "70396081158319"
     local BUTTERFLY_FREEZE = 0.729
     local BUTTERFLY_HEIGHT = 3.30
@@ -1146,7 +1147,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 🤗HUG Integrated Code Block (Added perfectly below BUTTERFLY POSE)
+    -- 🤗HUG Integrated Code Block
     local HUG_ANIM = "79920226991831"
     local HUG_BACK_OFFSET = 1.5
 
@@ -1233,6 +1234,106 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             hugConnections = {}
             
             if hugAnimTrack then hugAnimTrack:Stop() end
+            local char = player.Character
+            if char then
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then 
+                    hum.PlatformStand = false 
+                    hum:ChangeState(Enum.HumanoidStateType.Running)
+                end
+            end
+        end
+    end)
+
+    -- 💋KISS Integrated Code Block (Added perfectly below 🤗HUG)
+    local KISS_ANIM = "112078433891854"
+    local KISS_DISTANCE = 1.5
+    local KISS_Y_OFFSET = -2
+
+    _G.KissActive = false
+    local kissConnections = {}
+    local kissAnimTrack
+
+    btn("💋KISS", T2, function(b)
+        _G.KissActive = b:GetAttribute("T")
+        if _G.KissActive then
+            local targetPlayerObj = getT()
+            local targetBody = targetPlayerObj and targetPlayerObj.Character and (
+                targetPlayerObj.Character:FindFirstChild("UpperTorso") or 
+                targetPlayerObj.Character:FindFirstChild("Torso") or 
+                targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
+            )
+            local char = player.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            
+            if targetBody and root then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+                
+                toggleHugAntiCheatBypass(true) -- Reuses FallenParts bypass smoothly
+                
+                local anim = Instance.new("Animation")
+                anim.AnimationId = "rbxassetid://" .. KISS_ANIM
+                kissAnimTrack = hum:LoadAnimation(anim)
+                kissAnimTrack.Priority = Enum.AnimationPriority.Action4
+                kissAnimTrack.Looped = true
+                kissAnimTrack:Play()
+                
+                hum.PlatformStand = true
+                
+                local function enforceKissStuck()
+                    if not targetBody or not targetBody.Parent or not _G.KissActive then
+                        _G.KissActive = false
+                        b:SetAttribute("T", false)
+                        b.BackgroundColor3 = White
+                        b.TextColor3 = Black
+                        
+                        toggleHugAntiCheatBypass(false)
+                        for _, conn in ipairs(kissConnections) do if conn then conn:Disconnect() end end
+                        kissConnections = {}
+                        
+                        if kissAnimTrack then kissAnimTrack:Stop() end
+                        if char then
+                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+                            if hum then 
+                                hum.PlatformStand = false 
+                                hum:ChangeState(Enum.HumanoidStateType.Running)
+                            end
+                        end
+                        return
+                    end
+                    
+                    root.AssemblyLinearVelocity = Vector3.zero
+                    root.AssemblyAngularVelocity = Vector3.zero
+                    
+                    local baseCF = targetBody.CFrame
+                    local targetPosition = baseCF.Position
+                    
+                    local relativeOffset = baseCF * CFrame.new(0, KISS_Y_OFFSET, -KISS_DISTANCE)
+                    local finalCFrame = CFrame.lookAt(
+                        Vector3.new(relativeOffset.Position.X, relativeOffset.Position.Y, relativeOffset.Position.Z), 
+                        Vector3.new(targetPosition.X, relativeOffset.Position.Y, targetPosition.Z)
+                    )
+                    
+                    root.CFrame = finalCFrame
+                end
+                
+                table.insert(kissConnections, RunService.PreSimulation:Connect(enforceKissStuck))
+                table.insert(kissConnections, RunService.PostSimulation:Connect(enforceKissStuck))
+                table.insert(kissConnections, RunService.RenderStepped:Connect(enforceKissStuck))
+            else
+                _G.KissActive = false
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+            end
+        else
+            toggleHugAntiCheatBypass(false)
+            for _, conn in ipairs(kissConnections) do if conn then conn:Disconnect() end end
+            kissConnections = {}
+            
+            if kissAnimTrack then kissAnimTrack:Stop() end
             local char = player.Character
             if char then
                 if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
