@@ -1,1 +1,775 @@
--- Standalone Bang with adjustable distance (Z offset) -- Now uses target's UpperTorso/Torso for full orientation tracking. -- Fixes: when target lies down or flies, you follow them exactly. -- Welding, emote support, animations, and distance slider preserved. -- EGO EMPIRE Premium GUI local Players = game:GetService("Players") local RunService = game:GetService("RunService") local player = Players.LocalPlayer local TweenService = game:GetService("TweenService") local UIS = game:GetService("UserInputService") -- ============================================ -- PREMIUM GUI REDESIGN (EGO EMPIRE Style) -- ============================================ local screenGui = Instance.new("ScreenGui") screenGui.Name = "BangGUI" screenGui.ResetOnSpawn = false screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling screenGui.Parent = player:WaitForChild("PlayerGui") -- Main Frame - Glass Cyber Style (SMALLER SIZE) local mainFrame = Instance.new("Frame") mainFrame.Size = UDim2.new(0, 320, 0, 250) -- Reduced from 400x310 mainFrame.Position = UDim2.new(0.5, -160, 0.5, -125) mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15) mainFrame.BackgroundTransparency = 0.15 mainFrame.BorderSizePixel = 0 mainFrame.ClipsDescendants = true mainFrame.Parent = screenGui -- Glass blur effect local blur = Instance.new("BlurEffect", game:GetService("Lighting")) blur.Name = "BangBlur" blur.Size = 0 -- Corner radius local corner = Instance.new("UICorner", mainFrame) corner.CornerRadius = UDim.new(0, 10) -- Glowing Yellow/Gold Border (EGO EMPIRE Style) local border = Instance.new("Frame", mainFrame) border.Size = UDim2.new(1, 0, 1, 0) border.BackgroundTransparency = 1 border.BorderSizePixel = 0 border.Position = UDim2.new(0, 0, 0, 0) border.ZIndex = 0 local borderStroke = Instance.new("UIStroke", border) borderStroke.Color = Color3.fromRGB(255, 215, 0) borderStroke.Thickness = 2 borderStroke.Transparency = 0.1 -- Glow border (inner) local glowBorder = Instance.new("Frame", mainFrame) glowBorder.Size = UDim2.new(1, -4, 1, -4) glowBorder.Position = UDim2.new(0, 2, 0, 2) glowBorder.BackgroundTransparency = 1 glowBorder.BorderSizePixel = 0 glowBorder.ZIndex = 0 local glowStroke = Instance.new("UIStroke", glowBorder) glowStroke.Color = Color3.fromRGB(255, 215, 0) glowStroke.Thickness = 1 glowStroke.Transparency = 0.5 -- Title Bar (SMALLER) local titleBar = Instance.new("Frame", mainFrame) titleBar.Size = UDim2.new(1, 0, 0, 38) titleBar.Position = UDim2.new(0, 0, 0, 0) titleBar.BackgroundColor3 = Color3.fromRGB(255, 215, 0) titleBar.BackgroundTransparency = 0.85 titleBar.BorderSizePixel = 0 Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 10) -- Title text local title = Instance.new("TextLabel", mainFrame) title.Size = UDim2.new(1, -80, 0, 38) title.Position = UDim2.new(0, 8, 0, 0) title.BackgroundTransparency = 1 title.Text = "⚡ EGO EMPIRE [13_PARTH]" title.TextColor3 = Color3.fromRGB(255, 255, 255) title.Font = Enum.Font.GothamBold title.TextSize = 17 title.TextXAlignment = Enum.TextXAlignment.Left title.TextYAlignment = Enum.TextYAlignment.Center -- Subtitle (moved to version label, removed from title bar) local subtitle = Instance.new("TextLabel", mainFrame) subtitle.Size = UDim2.new(1, -80, 0, 14) subtitle.Position = UDim2.new(0, 8, 0, 22) subtitle.BackgroundTransparency = 1 subtitle.Text = "Bang System" subtitle.TextColor3 = Color3.fromRGB(255, 215, 0) subtitle.Font = Enum.Font.Gotham subtitle.TextSize = 10 subtitle.TextXAlignment = Enum.TextXAlignment.Left subtitle.TextYAlignment = Enum.TextYAlignment.Top subtitle.TextTransparency = 0.3 -- ============================================ -- MINIMIZE/MENU BUTTON -- ============================================ local minimizeBtn = Instance.new("TextButton", mainFrame) minimizeBtn.Size = UDim2.new(0, 28, 0, 28) minimizeBtn.Position = UDim2.new(1, -68, 0, 5) minimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) minimizeBtn.BackgroundTransparency = 0.2 minimizeBtn.Text = "─" minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255) minimizeBtn.Font = Enum.Font.GothamBold minimizeBtn.TextSize = 18 minimizeBtn.BorderSizePixel = 0 Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 5) -- Close Button (X) local closeBtn = Instance.new("TextButton", mainFrame) closeBtn.Size = UDim2.new(0, 28, 0, 28) closeBtn.Position = UDim2.new(1, -35, 0, 5) closeBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) closeBtn.BackgroundTransparency = 0.2 closeBtn.Text = "✕" closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255) closeBtn.Font = Enum.Font.GothamBold closeBtn.TextSize = 14 closeBtn.BorderSizePixel = 0 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5) -- ============================================ -- FLOATING MENU BUTTON (when minimized) -- ============================================ local floatingBtn = Instance.new("TextButton", screenGui) floatingBtn.Size = UDim2.new(0, 48, 0, 48) floatingBtn.Position = UDim2.new(0, 15, 0.5, -24) floatingBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) floatingBtn.BackgroundTransparency = 0.15 floatingBtn.Text = "⚡" floatingBtn.TextColor3 = Color3.fromRGB(255, 255, 255) floatingBtn.Font = Enum.Font.GothamBold floatingBtn.TextSize = 24 floatingBtn.BorderSizePixel = 0 floatingBtn.Visible = false Instance.new("UICorner", floatingBtn).CornerRadius = UDim.new(0, 10) -- Gold glow for floating button local floatGlow = Instance.new("Frame", floatingBtn) floatGlow.Size = UDim2.new(1, 8, 1, 8) floatGlow.Position = UDim2.new(0, -4, 0, -4) floatGlow.BackgroundTransparency = 1 floatGlow.BorderSizePixel = 0 local floatStroke = Instance.new("UIStroke", floatGlow) floatStroke.Color = Color3.fromRGB(255, 215, 0) floatStroke.Thickness = 2 floatStroke.Transparency = 0.3 -- Floating button draggable local isFloatDragging = false local floatDragStart = nil local floatStartPos = nil floatingBtn.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then isFloatDragging = true floatDragStart = input.Position floatStartPos = floatingBtn.Position end end) floatingBtn.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then isFloatDragging = false floatDragStart = nil floatStartPos = nil end end) UIS.InputChanged:Connect(function(input) if isFloatDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then if floatDragStart and floatStartPos then local delta = input.Position - floatDragStart floatingBtn.Position = UDim2.new(floatStartPos.X.Scale, floatStartPos.X.Offset + delta.X, floatStartPos.Y.Scale, floatStartPos.Y.Offset + delta.Y) end end end) -- ============================================ -- MINIMIZE FUNCTIONS -- ============================================ local isMinimized = false local function MinimizeGUI() isMinimized = true mainFrame.Visible = false floatingBtn.Visible = true -- Store position for restore end local function RestoreGUI() isMinimized = false mainFrame.Visible = true floatingBtn.Visible = false end minimizeBtn.MouseButton1Click:Connect(function() MinimizeGUI() end) floatingBtn.MouseButton1Click:Connect(function() RestoreGUI() end) closeBtn.MouseButton1Click:Connect(function() screenGui.Enabled = false if isOn then Stop() end end) -- Target Section (SMALLER) local targetLabel = Instance.new("TextLabel", mainFrame) targetLabel.Size = UDim2.new(0, 60, 0, 24) targetLabel.Position = UDim2.new(0, 12, 0, 46) targetLabel.BackgroundTransparency = 1 targetLabel.Text = "🎯 TARGET" targetLabel.TextColor3 = Color3.fromRGB(255, 255, 255) targetLabel.TextXAlignment = Enum.TextXAlignment.Left targetLabel.Font = Enum.Font.GothamBold targetLabel.TextSize = 11 targetLabel.TextTransparency = 0.4 local targetBox = Instance.new("TextBox", mainFrame) targetBox.Size = UDim2.new(0, 165, 0, 28) targetBox.Position = UDim2.new(0, 72, 0, 45) targetBox.BackgroundColor3 = Color3.fromRGB(20, 20, 30) targetBox.BackgroundTransparency = 0.4 targetBox.Text = "" targetBox.PlaceholderText = "Player name..." targetBox.TextColor3 = Color3.fromRGB(255, 255, 255) targetBox.Font = Enum.Font.Gotham targetBox.TextSize = 13 targetBox.ClearTextOnFocus = false targetBox.BorderSizePixel = 0 Instance.new("UICorner", targetBox).CornerRadius = UDim.new(0, 5) local targetBoxStroke = Instance.new("UIStroke", targetBox) targetBoxStroke.Color = Color3.fromRGB(255, 215, 0) targetBoxStroke.Thickness = 1 targetBoxStroke.Transparency = 0.5 -- ============================================ -- SEARCH SUGGESTION DROPDOWN (SMALLER) -- ============================================ local suggestionFrame = Instance.new("Frame", mainFrame) suggestionFrame.Size = UDim2.new(0, 165, 0, 100) suggestionFrame.Position = UDim2.new(0, 72, 0, 73) suggestionFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25) suggestionFrame.BackgroundTransparency = 0.15 suggestionFrame.BorderSizePixel = 0 suggestionFrame.Visible = false suggestionFrame.ZIndex = 2 Instance.new("UICorner", suggestionFrame).CornerRadius = UDim.new(0, 5) local suggestionStroke = Instance.new("UIStroke", suggestionFrame) suggestionStroke.Color = Color3.fromRGB(255, 215, 0) suggestionStroke.Thickness = 1 suggestionStroke.Transparency = 0.4 local suggestionList = Instance.new("ScrollingFrame", suggestionFrame) suggestionList.Size = UDim2.new(1, -6, 1, -6) suggestionList.Position = UDim2.new(0, 3, 0, 3) suggestionList.BackgroundTransparency = 1 suggestionList.BorderSizePixel = 0 suggestionList.ScrollBarThickness = 2 suggestionList.CanvasSize = UDim2.new(0, 0, 0, 0) local suggestionLayout = Instance.new("UIListLayout", suggestionList) suggestionLayout.SortOrder = Enum.SortOrder.LayoutOrder suggestionLayout.Padding = UDim.new(0, 2) local function updateSuggestions(input) local searchText = targetBox.Text:lower():gsub("%s+", "") if searchText == "" then suggestionFrame.Visible = false return end for _, child in ipairs(suggestionList:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end local matches = {} for _, p in ipairs(Players:GetPlayers()) do if p == player then continue end local name = p.Name:lower() local display = (p.DisplayName or ""):lower() if name:find(searchText) or display:find(searchText) then table.insert(matches, p) end end if #matches == 0 then suggestionFrame.Visible = false return end local maxShow = math.min(#matches, 5) suggestionFrame.Visible = true local canvasHeight = 0 for i = 1, maxShow do local p = matches[i] local btn = Instance.new("TextButton", suggestionList) btn.Size = UDim2.new(1, 0, 0, 24) btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45) btn.BackgroundTransparency = 0.3 btn.Text = p.Name btn.TextColor3 = Color3.fromRGB(255, 255, 255) btn.Font = Enum.Font.Gotham btn.TextSize = 12 btn.TextXAlignment = Enum.TextXAlignment.Left btn.TextTruncate = Enum.TextTruncate.AtEnd btn.BorderSizePixel = 0 btn.ZIndex = 3 Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 3) local btnStroke = Instance.new("UIStroke", btn) btnStroke.Color = Color3.fromRGB(255, 215, 0) btnStroke.Thickness = 0.5 btnStroke.Transparency = 0.6 btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) btn.BackgroundTransparency = 0.2 end) btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45) btn.BackgroundTransparency = 0.3 end) btn.MouseButton1Click:Connect(function() targetBox.Text = p.Name suggestionFrame.Visible = false end) canvasHeight = canvasHeight + 26 end suggestionList.CanvasSize = UDim2.new(0, 0, 0, canvasHeight) local newHeight = math.min(#matches * 26 + 6, 106) suggestionFrame.Size = UDim2.new(0, 165, 0, newHeight) end targetBox:GetPropertyChangedSignal("Text"):Connect(function() updateSuggestions() end) targetBox.Focused:Connect(function() if targetBox.Text ~= "" then updateSuggestions() end end) targetBox.FocusLost:Connect(function() task.delay(0.3, function() suggestionFrame.Visible = false end) end) -- Distance Section (SMALLER) local distLabel = Instance.new("TextLabel", mainFrame) distLabel.Size = UDim2.new(0, 60, 0, 24) distLabel.Position = UDim2.new(0, 12, 0, 82) distLabel.BackgroundTransparency = 1 distLabel.Text = "📏 DIST" distLabel.TextColor3 = Color3.fromRGB(255, 255, 255) distLabel.TextXAlignment = Enum.TextXAlignment.Left distLabel.Font = Enum.Font.GothamBold distLabel.TextSize = 11 distLabel.TextTransparency = 0.4 local distBox = Instance.new("TextBox", mainFrame) distBox.Size = UDim2.new(0, 65, 0, 28) distBox.Position = UDim2.new(0, 72, 0, 81) distBox.BackgroundColor3 = Color3.fromRGB(20, 20, 30) distBox.BackgroundTransparency = 0.4 distBox.Text = "1.1" distBox.PlaceholderText = "Z" distBox.TextColor3 = Color3.fromRGB(255, 255, 255) distBox.Font = Enum.Font.Gotham distBox.TextSize = 13 distBox.BorderSizePixel = 0 Instance.new("UICorner", distBox).CornerRadius = UDim.new(0, 5) local distBoxStroke = Instance.new("UIStroke", distBox) distBoxStroke.Color = Color3.fromRGB(255, 215, 0) distBoxStroke.Thickness = 1 distBoxStroke.Transparency = 0.5 local setDistBtn = Instance.new("TextButton", mainFrame) setDistBtn.Size = UDim2.new(0, 50, 0, 28) setDistBtn.Position = UDim2.new(0, 145, 0, 81) setDistBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) setDistBtn.BackgroundTransparency = 0.3 setDistBtn.Text = "SET" setDistBtn.TextColor3 = Color3.fromRGB(255, 255, 255) setDistBtn.Font = Enum.Font.GothamBold setDistBtn.TextSize = 12 setDistBtn.BorderSizePixel = 0 Instance.new("UICorner", setDistBtn).CornerRadius = UDim.new(0, 5) -- Separator Line local separator = Instance.new("Frame", mainFrame) separator.Size = UDim2.new(0.9, 0, 0, 1) separator.Position = UDim2.new(0.05, 0, 0, 120) separator.BackgroundColor3 = Color3.fromRGB(255, 215, 0) separator.BackgroundTransparency = 0.6 separator.BorderSizePixel = 0 -- BANG Buttons (SMALLER) local backBangBtn = Instance.new("TextButton", mainFrame) backBangBtn.Size = UDim2.new(0, 135, 0, 36) backBangBtn.Position = UDim2.new(0.5, -145, 0, 133) backBangBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) backBangBtn.BackgroundTransparency = 0.15 backBangBtn.Text = "🔙 BANG" backBangBtn.TextColor3 = Color3.fromRGB(255, 255, 255) backBangBtn.Font = Enum.Font.GothamBold backBangBtn.TextSize = 14 backBangBtn.BorderSizePixel = 0 Instance.new("UICorner", backBangBtn).CornerRadius = UDim.new(0, 6) local backBangStroke = Instance.new("UIStroke", backBangBtn) backBangStroke.Color = Color3.fromRGB(255, 215, 0) backBangStroke.Thickness = 1.5 backBangStroke.Transparency = 0.4 local frontBangBtn = Instance.new("TextButton", mainFrame) frontBangBtn.Size = UDim2.new(0, 135, 0, 36) frontBangBtn.Position = UDim2.new(0.5, 10, 0, 133) frontBangBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) frontBangBtn.BackgroundTransparency = 0.15 frontBangBtn.Text = "🔥 FRONT" frontBangBtn.TextColor3 = Color3.fromRGB(255, 255, 255) frontBangBtn.Font = Enum.Font.GothamBold frontBangBtn.TextSize = 14 frontBangBtn.BorderSizePixel = 0 Instance.new("UICorner", frontBangBtn).CornerRadius = UDim.new(0, 6) local frontBangStroke = Instance.new("UIStroke", frontBangBtn) frontBangStroke.Color = Color3.fromRGB(255, 215, 0) frontBangStroke.Thickness = 1.5 frontBangStroke.Transparency = 0.4 -- Status Label (SMALLER) local statusLabel = Instance.new("TextLabel", mainFrame) statusLabel.Size = UDim2.new(1, -30, 0, 20) statusLabel.Position = UDim2.new(0, 12, 0, 180) statusLabel.BackgroundTransparency = 1 statusLabel.Text = "● READY" statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100) statusLabel.Font = Enum.Font.Gotham statusLabel.TextSize = 11 statusLabel.TextXAlignment = Enum.TextXAlignment.Left statusLabel.TextTransparency = 0.5 -- Version (SMALLER) local versionLabel = Instance.new("TextLabel", mainFrame) versionLabel.Size = UDim2.new(1, -30, 0, 18) versionLabel.Position = UDim2.new(0, 12, 0, 204) versionLabel.BackgroundTransparency = 1 versionLabel.Text = "v2.0 • EGO EMPIRE" versionLabel.TextColor3 = Color3.fromRGB(255, 215, 0) versionLabel.Font = Enum.Font.Gotham versionLabel.TextSize = 9 versionLabel.TextXAlignment = Enum.TextXAlignment.Left versionLabel.TextTransparency = 0.6 -- ============================================ -- DRAGGING SYSTEM (Main Frame) -- ============================================ local dragging = false local dragStart = nil local startPos = nil local function updateDrag(input) if dragging and startPos then local delta = input.Position - dragStart mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end titleBar.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true dragStart = input.Position startPos = mainFrame.Position end end) titleBar.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false dragStart = nil startPos = nil end end) UIS.InputChanged:Connect(function(input) if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then updateDrag(input) end end) -- ============================================ -- ORIGINAL BANG LOGIC (100% UNCHANGED) -- ============================================ local PO = Vector3.new(0, 0, 1.1) local TP = nil local con = nil local savedpos = nil local character, humanoid, root = nil, nil, nil local isOn = false local db = false local bangMode = "back" local animTrack1 = nil local animTrack2 = nil local currentAnim = 1 local animLoop = nil local emotePaused = false local emoteConnection = nil local function getOrientationPart(character) if not character then return nil end return character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso") or character:FindFirstChild("HumanoidRootPart") end local function updateLocalCharacter(newChar) character = newChar humanoid = newChar:WaitForChild("Humanoid") root = newChar:WaitForChild("HumanoidRootPart") end if player.Character then updateLocalCharacter(player.Character) end local function GetTarget() local targetName = targetBox.Text:lower():gsub("%s+", "") if targetName == "" then return nil end for _, p in ipairs(Players:GetPlayers()) do if p == player then continue end local name = p.Name:lower() local display = (p.DisplayName or ""):lower() if name:find(targetName) or display:find(targetName) then return p end end return nil end local function setDistance() local newZ = tonumber(distBox.Text) if newZ then PO = Vector3.new(PO.X, PO.Y, newZ) distBox.Text = tostring(newZ) distBox.BackgroundColor3 = Color3.fromRGB(80,150,80) task.delay(0.5, function() if distBox.BackgroundColor3 == Color3.fromRGB(80,150,80) then distBox.BackgroundColor3 = Color3.fromRGB(20,20,30) end end) else distBox.BackgroundColor3 = Color3.fromRGB(200,50,50) task.delay(0.5, function() if distBox.BackgroundColor3 == Color3.fromRGB(200,50,50) then distBox.BackgroundColor3 = Color3.fromRGB(20,20,30) end end) end end setDistBtn.MouseButton1Click:Connect(setDistance) distBox.FocusLost:Connect(function(enterPressed) if enterPressed then setDistance() end end) local function PlayNextAnimation() if not humanoid or emotePaused then return end currentAnim = (currentAnim == 1) and 2 or 1 if currentAnim == 1 then if animTrack2 then animTrack2:Stop() end if not animTrack1 then local anim1 = Instance.new("Animation") anim1.AnimationId = "rbxassetid://215262147" animTrack1 = humanoid:LoadAnimation(anim1) animTrack1.Priority = Enum.AnimationPriority.Core end animTrack1:Play() else if animTrack1 then animTrack1:Stop() end if not animTrack2 then local anim2 = Instance.new("Animation") anim2.AnimationId = "rbxassetid://185299570" animTrack2 = humanoid:LoadAnimation(anim2) animTrack2.Priority = Enum.AnimationPriority.Core end animTrack2:Play() end end local function StartAnimationLoop() PlayNextAnimation() animLoop = task.delay(0.5, StartAnimationLoop) end local function StopAnimations() if animLoop then task.cancel(animLoop) end if animTrack1 then animTrack1:Stop() end if animTrack2 then animTrack2:Stop() end end local function onAnimationPlayed(animationTrack) if not isOn then return end if animationTrack == animTrack1 or animationTrack == animTrack2 then return end if emotePaused then return end emotePaused = true if animTrack1 then animTrack1:Stop() end if animTrack2 then animTrack2:Stop() end local conn conn = animationTrack.Stopped:Connect(function() if isOn and emotePaused then emotePaused = false if animLoop then task.cancel(animLoop) end StartAnimationLoop() end conn:Disconnect() end) end local function setupEmoteDetection() if emoteConnection then emoteConnection:Disconnect() end if humanoid then emoteConnection = humanoid.AnimationPlayed:Connect(onAnimationPlayed) end end -- ============================================ -- HEARTBEAT (100% IDENTICAL - DO NOT CHANGE) -- ============================================ local function Start() if db then return end if con then con:Disconnect() end con = nil TP = GetTarget() if not TP then backBangBtn.Text = "No target" frontBangBtn.Text = "No target" task.delay(2, function() if backBangBtn.Text == "No target" and not isOn then backBangBtn.Text = "🔙 BANG" frontBangBtn.Text = "🔥 FRONT" end end) return end savedpos = root.CFrame setupEmoteDetection() local tChar = TP.Character local tOrient = tChar and getOrientationPart(tChar) con = RunService.Heartbeat:Connect(function() if not root or not root.Parent or humanoid.Health <= 0 then pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end) if con then con:Disconnect() end return end if not tOrient or not tOrient:IsDescendantOf(workspace) then tChar = TP.Character if tChar then tOrient = getOrientationPart(tChar) else tOrient = nil end if not tOrient then return end end local offset if bangMode == "front" then local head = tChar and tChar:FindFirstChild("Head") if head then offset = head.CFrame * CFrame.new(0, -0.5, -1.2) * CFrame.Angles(0, math.pi, 0) else offset = tOrient.CFrame * CFrame.new(0, 0, -1.8) * CFrame.Angles(0, math.pi, 0) end else offset = tOrient.CFrame * CFrame.new(PO) end pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", tOrient) end) root.CFrame = offset root.Velocity = Vector3.new() root.AssemblyLinearVelocity = Vector3.new() root.AssemblyAngularVelocity = Vector3.new() root.RotVelocity = Vector3.new() end) StartAnimationLoop() TP.CharacterAdded:Connect(function(newChar) tChar = newChar tOrient = getOrientationPart(newChar) end) end local function Stop() if con then con:Disconnect() con = nil end StopAnimations() pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end) if savedpos and root and root.Parent then root.CFrame = savedpos root.Velocity = Vector3.new() root.AssemblyLinearVelocity = Vector3.new() root.AssemblyAngularVelocity = Vector3.new() root.RotVelocity = Vector3.new() end savedpos = nil emotePaused = false if emoteConnection then emoteConnection:Disconnect() end end -- ============================================ -- BUTTON FUNCTIONS (UNCHANGED) -- ============================================ backBangBtn.MouseButton1Click:Connect(function() if db then return end isOn = not isOn if isOn then bangMode = "back" backBangBtn.Text = "⏹ STOP" frontBangBtn.Text = "🔥 FRONT" statusLabel.Text = "● ACTIVE • BACK" statusLabel.TextColor3 = Color3.fromRGB(255, 215, 0) Start() else backBangBtn.Text = "🔙 BANG" frontBangBtn.Text = "🔥 FRONT" statusLabel.Text = "● READY" statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100) Stop() end end) frontBangBtn.MouseButton1Click:Connect(function() if db then return end isOn = not isOn if isOn then bangMode = "front" frontBangBtn.Text = "⏹ STOP" backBangBtn.Text = "🔙 BANG" statusLabel.Text = "● ACTIVE • FRONT" statusLabel.TextColor3 = Color3.fromRGB(255, 215, 0) Start() else frontBangBtn.Text = "🔥 FRONT" backBangBtn.Text = "🔙 BANG" statusLabel.Text = "● READY" statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100) Stop() end end) player.CharacterAdded:Connect(function(newChar) updateLocalCharacter(newChar) setupEmoteDetection() if isOn then db = true task.wait(0.5) db = false if isOn then Start() end end end) player.CharacterRemoving:Connect(function() pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end) if con then con:Disconnect() end StopAnimations() end) print("⚡ EGO EMPIRE Bang System loaded. Premium Gold theme active! Mini mode ready.")
+-- Standalone Bang with adjustable distance (Z offset)
+-- Now uses target's UpperTorso/Torso for full orientation tracking.
+-- Fixes: when target lies down or flies, you follow them exactly.
+-- Welding, emote support, animations, and distance slider preserved.
+-- ENDLESS AURA Premium GUI
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+
+-- ============================================
+-- PREMIUM GUI REDESIGN (TITAN Style)
+-- ============================================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "BangGUI"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Frame - Glass Cyber Style (SMALLER SIZE)
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 320, 0, 250)
+mainFrame.Position = UDim2.new(0.5, -160, 0.5, -125)
+mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+mainFrame.BackgroundTransparency = 0.15
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
+
+-- Glass blur effect
+local blur = Instance.new("BlurEffect", game:GetService("Lighting"))
+blur.Name = "BangBlur"
+blur.Size = 0
+
+-- Corner radius
+local corner = Instance.new("UICorner", mainFrame)
+corner.CornerRadius = UDim.new(0, 10)
+
+-- Glowing Yellow/Gold Border
+local border = Instance.new("Frame", mainFrame)
+border.Size = UDim2.new(1, 0, 1, 0)
+border.BackgroundTransparency = 1
+border.BorderSizePixel = 0
+border.Position = UDim2.new(0, 0, 0, 0)
+border.ZIndex = 0
+local borderStroke = Instance.new("UIStroke", border)
+borderStroke.Color = Color3.fromRGB(255, 215, 0)
+borderStroke.Thickness = 2
+borderStroke.Transparency = 0.1
+
+-- Glow border (inner)
+local glowBorder = Instance.new("Frame", mainFrame)
+glowBorder.Size = UDim2.new(1, -4, 1, -4)
+glowBorder.Position = UDim2.new(0, 2, 0, 2)
+glowBorder.BackgroundTransparency = 1
+glowBorder.BorderSizePixel = 0
+glowBorder.ZIndex = 0
+local glowStroke = Instance.new("UIStroke", glowBorder)
+glowStroke.Color = Color3.fromRGB(255, 215, 0)
+glowStroke.Thickness = 1
+glowStroke.Transparency = 0.5
+
+-- Title Bar (SMALLER)
+local titleBar = Instance.new("Frame", mainFrame)
+titleBar.Size = UDim2.new(1, 0, 0, 38)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+titleBar.BackgroundTransparency = 0.85
+titleBar.BorderSizePixel = 0
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 10)
+
+-- Title text
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, -80, 0, 38)
+title.Position = UDim2.new(0, 8, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "⚡ ENDLESS AURA [TITAN]"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 17
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextYAlignment = Enum.TextYAlignment.Center
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel", mainFrame)
+subtitle.Size = UDim2.new(1, -80, 0, 14)
+subtitle.Position = UDim2.new(0, 8, 0, 22)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "Bang System"
+subtitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextSize = 10
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.TextYAlignment = Enum.TextYAlignment.Top
+subtitle.TextTransparency = 0.3
+
+-- ============================================
+-- MINIMIZE/MENU BUTTON
+-- ============================================
+local minimizeBtn = Instance.new("TextButton", mainFrame)
+minimizeBtn.Size = UDim2.new(0, 28, 0, 28)
+minimizeBtn.Position = UDim2.new(1, -68, 0, 5)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+minimizeBtn.BackgroundTransparency = 0.2
+minimizeBtn.Text = "─"
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 18
+minimizeBtn.BorderSizePixel = 0
+Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 5)
+
+-- Close Button (X)
+local closeBtn = Instance.new("TextButton", mainFrame)
+closeBtn.Size = UDim2.new(0, 28, 0, 28)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+closeBtn.BackgroundTransparency = 0.2
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 14
+closeBtn.BorderSizePixel = 0
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
+
+-- ============================================
+-- FLOATING MENU BUTTON (when minimized)
+-- ============================================
+local floatingBtn = Instance.new("TextButton", screenGui)
+floatingBtn.Size = UDim2.new(0, 48, 0, 48)
+floatingBtn.Position = UDim2.new(0, 15, 0.5, -24)
+floatingBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+floatingBtn.BackgroundTransparency = 0.15
+floatingBtn.Text = "⚡"
+floatingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+floatingBtn.Font = Enum.Font.GothamBold
+floatingBtn.TextSize = 24
+floatingBtn.BorderSizePixel = 0
+floatingBtn.Visible = false
+Instance.new("UICorner", floatingBtn).CornerRadius = UDim.new(0, 10)
+
+-- Gold glow for floating button
+local floatGlow = Instance.new("Frame", floatingBtn)
+floatGlow.Size = UDim2.new(1, 8, 1, 8)
+floatGlow.Position = UDim2.new(0, -4, 0, -4)
+floatGlow.BackgroundTransparency = 1
+floatGlow.BorderSizePixel = 0
+local floatStroke = Instance.new("UIStroke", floatGlow)
+floatStroke.Color = Color3.fromRGB(255, 215, 0)
+floatStroke.Thickness = 2
+floatStroke.Transparency = 0.3
+
+-- Floating button draggable
+local isFloatDragging = false
+local floatDragStart = nil
+local floatStartPos = nil
+
+floatingBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isFloatDragging = true
+        floatDragStart = input.Position
+        floatStartPos = floatingBtn.Position
+    end
+end)
+
+floatingBtn.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isFloatDragging = false
+        floatDragStart = nil
+        floatStartPos = nil
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if isFloatDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if floatDragStart and floatStartPos then
+            local delta = input.Position - floatDragStart
+            floatingBtn.Position = UDim2.new(floatStartPos.X.Scale, floatStartPos.X.Offset + delta.X, floatStartPos.Y.Scale, floatStartPos.Y.Offset + delta.Y)
+        end
+    end
+end)
+
+-- ============================================
+-- MINIMIZE FUNCTIONS
+-- ============================================
+local isMinimized = false
+local isOn = false
+local function MinimizeGUI()
+    isMinimized = true
+    mainFrame.Visible = false
+    floatingBtn.Visible = true
+end
+
+local function RestoreGUI()
+    isMinimized = false
+    mainFrame.Visible = true
+    floatingBtn.Visible = false
+end
+
+minimizeBtn.MouseButton1Click:Connect(function() MinimizeGUI() end)
+floatingBtn.MouseButton1Click:Connect(function() RestoreGUI() end)
+closeBtn.MouseButton1Click:Connect(function()
+    screenGui.Enabled = false
+    if isOn then Stop() end
+end)
+
+-- Target Section (SMALLER)
+local targetLabel = Instance.new("TextLabel", mainFrame)
+targetLabel.Size = UDim2.new(0, 60, 0, 24)
+targetLabel.Position = UDim2.new(0, 12, 0, 46)
+targetLabel.BackgroundTransparency = 1
+targetLabel.Text = "🎯 TARGET"
+targetLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+targetLabel.TextXAlignment = Enum.TextXAlignment.Left
+targetLabel.Font = Enum.Font.GothamBold
+targetLabel.TextSize = 11
+targetLabel.TextTransparency = 0.4
+
+local targetBox = Instance.new("TextBox", mainFrame)
+targetBox.Size = UDim2.new(0, 165, 0, 28)
+targetBox.Position = UDim2.new(0, 72, 0, 45)
+targetBox.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+targetBox.BackgroundTransparency = 0.4
+targetBox.Text = ""
+targetBox.PlaceholderText = "Player name..."
+targetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+targetBox.Font = Enum.Font.Gotham
+targetBox.TextSize = 13
+targetBox.ClearTextOnFocus = false
+targetBox.BorderSizePixel = 0
+Instance.new("UICorner", targetBox).CornerRadius = UDim.new(0, 5)
+
+local targetBoxStroke = Instance.new("UIStroke", targetBox)
+targetBoxStroke.Color = Color3.fromRGB(255, 215, 0)
+targetBoxStroke.Thickness = 1
+targetBoxStroke.Transparency = 0.5
+
+-- ============================================
+-- SEARCH SUGGESTION DROPDOWN
+-- ============================================
+local suggestionFrame = Instance.new("Frame", mainFrame)
+suggestionFrame.Size = UDim2.new(0, 165, 0, 100)
+suggestionFrame.Position = UDim2.new(0, 72, 0, 73)
+suggestionFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+suggestionFrame.BackgroundTransparency = 0.15
+suggestionFrame.BorderSizePixel = 0
+suggestionFrame.Visible = false
+suggestionFrame.ZIndex = 2
+Instance.new("UICorner", suggestionFrame).CornerRadius = UDim.new(0, 5)
+
+local suggestionStroke = Instance.new("UIStroke", suggestionFrame)
+suggestionStroke.Color = Color3.fromRGB(255, 215, 0)
+suggestionStroke.Thickness = 1
+suggestionStroke.Transparency = 0.4
+
+local suggestionList = Instance.new("ScrollingFrame", suggestionFrame)
+suggestionList.Size = UDim2.new(1, -6, 1, -6)
+suggestionList.Position = UDim2.new(0, 3, 0, 3)
+suggestionList.BackgroundTransparency = 1
+suggestionList.BorderSizePixel = 0
+suggestionList.ScrollBarThickness = 2
+suggestionList.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local suggestionLayout = Instance.new("UIListLayout", suggestionList)
+suggestionLayout.SortOrder = Enum.SortOrder.LayoutOrder
+suggestionLayout.Padding = UDim.new(0, 2)
+
+local function updateSuggestions()
+    local searchText = targetBox.Text:lower():gsub("%s+", "")
+    if searchText == "" then
+        suggestionFrame.Visible = false
+        return
+    end
+
+    for _, child in ipairs(suggestionList:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+
+    local matches = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p == player then continue end
+        local name = p.Name:lower()
+        local display = (p.DisplayName or ""):lower()
+        if name:find(searchText) or display:find(searchText) then
+            table.insert(matches, p)
+        end
+    end
+
+    if #matches == 0 then
+        suggestionFrame.Visible = false
+        return
+    end
+
+    local maxShow = math.min(#matches, 5)
+    suggestionFrame.Visible = true
+    local canvasHeight = 0
+    
+    for i = 1, maxShow do
+        local p = matches[i]
+        local btn = Instance.new("TextButton", suggestionList)
+        btn.Size = UDim2.new(1, 0, 0, 24)
+        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+        btn.BackgroundTransparency = 0.3
+        btn.Text = p.Name
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 12
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.TextTruncate = Enum.TextTruncate.AtEnd
+        btn.BorderSizePixel = 0
+        btn.ZIndex = 3
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 3)
+        
+        local btnStroke = Instance.new("UIStroke", btn)
+        btnStroke.Color = Color3.fromRGB(255, 215, 0)
+        btnStroke.Thickness = 0.5
+        btnStroke.Transparency = 0.6
+        
+        btn.MouseEnter:Connect(function()
+            btn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+            btn.BackgroundTransparency = 0.2
+        end)
+        btn.MouseLeave:Connect(function()
+            btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+            btn.BackgroundTransparency = 0.3
+        end)
+        btn.MouseButton1Click:Connect(function()
+            targetBox.Text = p.Name
+            suggestionFrame.Visible = false
+        end)
+        canvasHeight = canvasHeight + 26
+    end
+    suggestionList.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
+    local newHeight = math.min(#matches * 26 + 6, 106)
+    suggestionFrame.Size = UDim2.new(0, 165, 0, newHeight)
+end
+
+targetBox:GetPropertyChangedSignal("Text"):Connect(function() updateSuggestions() end)
+targetBox.Focused:Connect(function() if targetBox.Text ~= "" then updateSuggestions() end end)
+targetBox.FocusLost:Connect(function()
+    task.delay(0.3, function()
+        suggestionFrame.Visible = false
+    end)
+end)
+
+-- Distance Section (SMALLER)
+local distLabel = Instance.new("TextLabel", mainFrame)
+distLabel.Size = UDim2.new(0, 60, 0, 24)
+distLabel.Position = UDim2.new(0, 12, 0, 82)
+distLabel.BackgroundTransparency = 1
+distLabel.Text = "📏 DIST"
+distLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+distLabel.TextXAlignment = Enum.TextXAlignment.Left
+distLabel.Font = Enum.Font.GothamBold
+distLabel.TextSize = 11
+distLabel.TextTransparency = 0.4
+
+local distBox = Instance.new("TextBox", mainFrame)
+distBox.Size = UDim2.new(0, 65, 0, 28)
+distBox.Position = UDim2.new(0, 72, 0, 81)
+distBox.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+distBox.BackgroundTransparency = 0.4
+distBox.Text = "1.1"
+distBox.PlaceholderText = "Z"
+distBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+distBox.Font = Enum.Font.Gotham
+distBox.TextSize = 13
+distBox.BorderSizePixel = 0
+Instance.new("UICorner", distBox).CornerRadius = UDim.new(0, 5)
+
+local distBoxStroke = Instance.new("UIStroke", distBox)
+distBoxStroke.Color = Color3.fromRGB(255, 215, 0)
+distBoxStroke.Thickness = 1
+distBoxStroke.Transparency = 0.5
+
+local setDistBtn = Instance.new("TextButton", mainFrame)
+setDistBtn.Size = UDim2.new(0, 50, 0, 28)
+setDistBtn.Position = UDim2.new(0, 145, 0, 81)
+setDistBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+setDistBtn.BackgroundTransparency = 0.3
+setDistBtn.Text = "SET"
+setDistBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+setDistBtn.Font = Enum.Font.GothamBold
+setDistBtn.TextSize = 12
+setDistBtn.BorderSizePixel = 0
+Instance.new("UICorner", setDistBtn).CornerRadius = UDim.new(0, 5)
+
+-- Separator Line
+local separator = Instance.new("Frame", mainFrame)
+separator.Size = UDim2.new(0.9, 0, 0, 1)
+separator.Position = UDim2.new(0.05, 0, 0, 120)
+separator.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+separator.BackgroundTransparency = 0.6
+separator.BorderSizePixel = 0
+
+-- BANG Buttons (SMALLER)
+local backBangBtn = Instance.new("TextButton", mainFrame)
+backBangBtn.Size = UDim2.new(0, 135, 0, 36)
+backBangBtn.Position = UDim2.new(0.5, -145, 0, 133)
+backBangBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+backBangBtn.BackgroundTransparency = 0.15
+backBangBtn.Text = "🔙 BANG"
+backBangBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+backBangBtn.Font = Enum.Font.GothamBold
+backBangBtn.TextSize = 14
+backBangBtn.BorderSizePixel = 0
+Instance.new("UICorner", backBangBtn).CornerRadius = UDim.new(0, 6)
+
+local backBangStroke = Instance.new("UIStroke", backBangBtn)
+backBangStroke.Color = Color3.fromRGB(255, 215, 0)
+backBangStroke.Thickness = 1.5
+backBangStroke.Transparency = 0.4
+
+local frontBangBtn = Instance.new("TextButton", mainFrame)
+frontBangBtn.Size = UDim2.new(0, 135, 0, 36)
+frontBangBtn.Position = UDim2.new(0.5, 10, 0, 133)
+frontBangBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+frontBangBtn.BackgroundTransparency = 0.15
+frontBangBtn.Text = "🔥 FRONT"
+frontBangBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+frontBangBtn.Font = Enum.Font.GothamBold
+frontBangBtn.TextSize = 14
+frontBangBtn.BorderSizePixel = 0
+Instance.new("UICorner", frontBangBtn).CornerRadius = UDim.new(0, 6)
+
+local frontBangStroke = Instance.new("UIStroke", frontBangBtn)
+frontBangStroke.Color = Color3.fromRGB(255, 215, 0)
+frontBangStroke.Thickness = 1.5
+frontBangStroke.Transparency = 0.4
+
+-- Status Label
+local statusLabel = Instance.new("TextLabel", mainFrame)
+statusLabel.Size = UDim2.new(1, -30, 0, 20)
+statusLabel.Position = UDim2.new(0, 12, 0, 180)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "● READY"
+statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 11
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.TextTransparency = 0.5
+
+-- Version
+local versionLabel = Instance.new("TextLabel", mainFrame)
+versionLabel.Size = UDim2.new(1, -30, 0, 18)
+versionLabel.Position = UDim2.new(0, 12, 0, 204)
+versionLabel.BackgroundTransparency = 1
+versionLabel.Text = "v2.0 • ENDLESS AURA"
+versionLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+versionLabel.Font = Enum.Font.Gotham
+versionLabel.TextSize = 9
+versionLabel.TextXAlignment = Enum.TextXAlignment.Left
+versionLabel.TextTransparency = 0.6
+
+-- ============================================
+-- DRAGGING SYSTEM (Main Frame)
+-- ============================================
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+local function updateDrag(input)
+    if dragging and startPos then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+
+titleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+        dragStart = nil
+        startPos = nil
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        updateDrag(input)
+    end
+end)
+
+-- ============================================
+-- BANG LOGIC
+-- ============================================
+local PO = Vector3.new(0, 0, 1.1)
+local TP = nil
+local con = nil
+local savedpos = nil
+local character, humanoid, root = nil, nil, nil
+local db = false
+local bangMode = "back"
+local animTrack1 = nil
+local animTrack2 = nil
+local currentAnim = 1
+local animLoop = nil
+local emotePaused = false
+local emoteConnection = nil
+
+local function getOrientationPart(char)
+    if not char then return nil end
+    return char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
+end
+
+local function updateLocalCharacter(newChar)
+    character = newChar
+    humanoid = newChar:WaitForChild("Humanoid")
+    root = newChar:WaitForChild("HumanoidRootPart")
+end
+
+if player.Character then updateLocalCharacter(player.Character) end
+
+local function GetTarget()
+    local targetName = targetBox.Text:lower():gsub("%s+", "")
+    if targetName == "" then return nil end
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p == player then continue end
+        local name = p.Name:lower()
+        local display = (p.DisplayName or ""):lower()
+        if name:find(targetName) or display:find(targetName) then
+            return p
+        end
+    end
+    return nil
+end
+
+local function setDistance()
+    local newZ = tonumber(distBox.Text)
+    if newZ then
+        PO = Vector3.new(PO.X, PO.Y, newZ)
+        distBox.Text = tostring(newZ)
+        distBox.BackgroundColor3 = Color3.fromRGB(80,150,80)
+        task.delay(0.5, function()
+            if distBox.BackgroundColor3 == Color3.fromRGB(80,150,80) then
+                distBox.BackgroundColor3 = Color3.fromRGB(20,20,30)
+            end
+        end)
+    else
+        distBox.BackgroundColor3 = Color3.fromRGB(200,50,50)
+        task.delay(0.5, function()
+            if distBox.BackgroundColor3 == Color3.fromRGB(200,50,50) then
+                distBox.BackgroundColor3 = Color3.fromRGB(20,20,30)
+            end
+        end)
+    end
+end
+
+setDistBtn.MouseButton1Click:Connect(setDistance)
+distBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then setDistance() end
+end)
+
+local function PlayNextAnimation()
+    if not humanoid or emotePaused then return end
+    currentAnim = (currentAnim == 1) and 2 or 1
+    if currentAnim == 1 then
+        if animTrack2 then animTrack2:Stop() end
+        if not animTrack1 then
+            local anim1 = Instance.new("Animation")
+            anim1.AnimationId = "rbxassetid://215262147"
+            animTrack1 = humanoid:LoadAnimation(anim1)
+            animTrack1.Priority = Enum.AnimationPriority.Core
+        end
+        animTrack1:Play()
+    else
+        if animTrack1 then animTrack1:Stop() end
+        if not animTrack2 then
+            local anim2 = Instance.new("Animation")
+            anim2.AnimationId = "rbxassetid://185299570"
+            animTrack2 = humanoid:LoadAnimation(anim2)
+            animTrack2.Priority = Enum.AnimationPriority.Core
+        end
+        animTrack2:Play()
+    end
+end
+
+local function StartAnimationLoop()
+    PlayNextAnimation()
+    animLoop = task.delay(0.5, StartAnimationLoop)
+end
+
+local function StopAnimations()
+    if animLoop then task.cancel(animLoop) animLoop = nil end
+    if animTrack1 then animTrack1:Stop() end
+    if animTrack2 then animTrack2:Stop() end
+end
+
+local function onAnimationPlayed(animationTrack)
+    if not isOn then return end
+    if animationTrack == animTrack1 or animationTrack == animTrack2 then return end
+    if emotePaused then return end
+    emotePaused = true
+    if animTrack1 then animTrack1:Stop() end
+    if animTrack2 then animTrack2:Stop() end
+    local conn
+    conn = animationTrack.Stopped:Connect(function()
+        if isOn and emotePaused then
+            emotePaused = false
+            if animLoop then task.cancel(animLoop) end
+            StartAnimationLoop()
+        end
+        conn:Disconnect()
+    end)
+end
+
+local function setupEmoteDetection()
+    if emoteConnection then emoteConnection:Disconnect() end
+    if humanoid then
+        emoteConnection = humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+    end
+end
+
+local function Stop()
+    if con then con:Disconnect() con = nil end
+    StopAnimations()
+    pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end)
+    if savedpos and root and root.Parent then
+        root.CFrame = savedpos
+        root.Velocity = Vector3.new()
+        root.AssemblyLinearVelocity = Vector3.new()
+        root.AssemblyAngularVelocity = Vector3.new()
+        root.RotVelocity = Vector3.new()
+    end
+    savedpos = nil
+    emotePaused = false
+    if emoteConnection then emoteConnection:Disconnect() emoteConnection = nil end
+end
+
+local function Start()
+    if db then return end
+    if con then con:Disconnect() con = nil end
+    
+    TP = GetTarget()
+    if not TP or not TP.Character then 
+        isOn = false -- FIX: Reset toggle state if target missing
+        backBangBtn.Text = "No target"
+        frontBangBtn.Text = "No target"
+        statusLabel.Text = "● NO TARGET FOUND"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        task.delay(2, function()
+            if not isOn then
+                backBangBtn.Text = "🔙 BANG"
+                frontBangBtn.Text = "🔥 FRONT"
+                statusLabel.Text = "● READY"
+                statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            end
+        end)
+        return
+    end
+
+    savedpos = root.CFrame
+    setupEmoteDetection()
+    local tChar = TP.Character
+    local tOrient = tChar and getOrientationPart(tChar)
+    
+    con = RunService.Heartbeat:Connect(function()
+        if not root or not root.Parent or humanoid.Health <= 0 then
+            pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end)
+            if con then con:Disconnect() con = nil end
+            return
+        end
+        
+        if not TP or not Players:FindFirstChild(TP.Name) then -- Safe check if player leaves
+            Stop()
+            backBangBtn.Text = "🔙 BANG"
+            frontBangBtn.Text = "🔥 FRONT"
+            statusLabel.Text = "● TARGET LEFT"
+            statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            return
+        end
+
+        if not tOrient or not tOrient:IsDescendantOf(workspace) then
+            tChar = TP.Character
+            if tChar then tOrient = getOrientationPart(tChar) else tOrient = nil end
+            if not tOrient then return end
+        end
+
+        local offset
+        if bangMode == "front" then
+            local head = tChar and tChar:FindFirstChild("Head")
+            if head then
+                offset = head.CFrame * CFrame.new(0, -0.5, -1.2) * CFrame.Angles(0, math.pi, 0)
+            else
+                offset = tOrient.CFrame * CFrame.new(0, 0, -1.8) * CFrame.Angles(0, math.pi, 0)
+            end
+        else
+            offset = tOrient.CFrame * CFrame.new(PO)
+        end
+
+        pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", tOrient) end)
+        root.CFrame = offset
+        root.Velocity = Vector3.new()
+        root.AssemblyLinearVelocity = Vector3.new()
+        root.AssemblyAngularVelocity = Vector3.new()
+        root.RotVelocity = Vector3.new()
+    end)
+    
+    StartAnimationLoop()
+    
+    TP.CharacterAdded:Connect(function(newChar)
+        tChar = newChar
+        tOrient = getOrientationPart(newChar)
+    end)
+end
+
+-- ============================================
+-- BUTTON CONNECTIONS
+-- ============================================
+backBangBtn.MouseButton1Click:Connect(function()
+    if db then return end
+    isOn = not isOn
+    if isOn then
+        bangMode = "back"
+        backBangBtn.Text = "⏹ STOP"
+        frontBangBtn.Text = "🔥 FRONT"
+        statusLabel.Text = "● ACTIVE • BACK"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+        Start()
+    else
+        backBangBtn.Text = "🔙 BANG"
+        frontBangBtn.Text = "🔥 FRONT"
+        statusLabel.Text = "● READY"
+        statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        Stop()
+    end
+end)
+
+frontBangBtn.MouseButton1Click:Connect(function()
+    if db then return end
+    isOn = not isOn
+    if isOn then
+        bangMode = "front"
+        frontBangBtn.Text = "⏹ STOP"
+        backBangBtn.Text = "🔙 BANG"
+        statusLabel.Text = "● ACTIVE • FRONT"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+        Start()
+    else
+        frontBangBtn.Text = "🔥 FRONT"
+        backBangBtn.Text = "🔙 BANG"
+        statusLabel.Text = "● READY"
+        statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        Stop()
+    end
+end)
+
+player.CharacterAdded:Connect(function(newChar)
+    updateLocalCharacter(newChar)
+    setupEmoteDetection()
+    if isOn then
+        db = true
+        task.wait(0.5)
+        db = false
+        if isOn then Start() end
+    end
+end)
+
+player.CharacterRemoving:Connect(function()
+    pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end)
+    if con then con:Disconnect() con = nil end
+    StopAnimations()
+end)
+
+print("⚡ ENDLESS AURA Bang System loaded. Premium Gold theme active! Mini mode ready.")
