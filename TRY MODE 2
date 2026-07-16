@@ -527,7 +527,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
     -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS - ORDERED EXACTLY AS SPECIFIED)
     -- Row 1: [ TEXT BOX ] | 🛑 STOP ALL
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false; _G.HugActive = false; _G.KissActive = false; _G.ThankYouActive = false; _G.SorryActive = false end, true)
+    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false; _G.HugActive = false; _G.KissActive = false; _G.ThankYouActive = false end, true)
     
     -- Row 2: ⚡ TP | VIEW👀
     btn("⚡ TP", T2, function()
@@ -965,7 +965,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         return 
                     end
                     
-                    root.CFrame = bodyPart.CFrame * UDim2.new(0, 1.30, -1) -- Fallback conversion safe check
                     root.CFrame = bodyPart.CFrame * CFrame.new(0, 1.30, -1)
                     root.AssemblyLinearVelocity = Vector3.zero
                 end)
@@ -1346,7 +1345,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 😊THANK YOU Integrated Code Block (Perfectly placed below 💋KISS)
+    -- 😊THANK YOU Integrated Code Block
     local THANK_ANIM = "116243979368109"
     local THANK_DISTANCE = 6
 
@@ -1431,100 +1430,135 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 😭SORRY Integrated Code Block (Perfectly placed below 😊THANK YOU)
-    local SORRY_ANIM = "70869637765981"
-    local SORRY_DISTANCE = 7
-
-    _G.SorryActive = false
-    local sorryConnections = {}
-    local sorryAnimTrack
-
+    -- ==========================================
+    -- NEW: 😭SORRY & 🌹ROSE BUTTONS
+    -- ==========================================
+    -- Dummy "😭SORRY" button (shows notification)
     btn("😭SORRY", T2, function(b)
-        _G.SorryActive = b:GetAttribute("T")
-        if _G.SorryActive then
+        notify("😭 Sorry", "Just a dummy button", 1)
+    end)
+
+    -- Rose attach logic (uses main target TextBox)
+    local roseConnection = nil
+    local roseAnimTrack = nil
+
+    btn("🌹ROSE", T2, function(b)
+        local isActive = b:GetAttribute("T")
+        if isActive then
+            -- Validate target
             local targetPlayerObj = getT()
-            local targetBody = targetPlayerObj and targetPlayerObj.Character and (
-                targetPlayerObj.Character:FindFirstChild("UpperTorso") or 
-                targetPlayerObj.Character:FindFirstChild("Torso") or 
-                targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
-            )
-            local char = player.Character
-            local root = char and char:FindFirstChild("HumanoidRootPart")
-            
-            if targetBody and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                toggleHugAntiCheatBypass(true)
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://" .. SORRY_ANIM
-                sorryAnimTrack = hum:LoadAnimation(anim)
-                sorryAnimTrack.Priority = Enum.AnimationPriority.Action4
-                sorryAnimTrack.Looped = true
-                sorryAnimTrack:Play()
-                
-                hum.PlatformStand = true
-                
-                local function enforceSorrySync()
-                    if not targetBody or not targetBody.Parent or not _G.SorryActive then
-                        _G.SorryActive = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        
-                        toggleHugAntiCheatBypass(false)
-                        for _, conn in ipairs(sorryConnections) do if conn then conn:Disconnect() end end
-                        sorryConnections = {}
-                        
-                        if sorryAnimTrack then sorryAnimTrack:Stop() end
-                        if char then
-                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                            if hum then 
-                                hum.PlatformStand = false 
-                                hum:ChangeState(Enum.HumanoidStateType.Running)
-                            end
-                        end
-                        return
-                    end
-                    
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    root.AssemblyAngularVelocity = Vector3.zero
-                    
-                    -- Face-to-Face 7 Studs front attachment tracking matrix
-                    local offset = targetBody.CFrame * CFrame.new(0, 0, -SORRY_DISTANCE) * CFrame.Angles(0, math.pi, 0)
-                    
-                    pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", targetBody) end)
-                    root.CFrame = offset
-                end
-                
-                table.insert(sorryConnections, RunService.PreSimulation:Connect(enforceSorrySync))
-                table.insert(sorryConnections, RunService.PostSimulation:Connect(enforceSorrySync))
-                table.insert(sorryConnections, RunService.RenderStepped:Connect(enforceSorrySync))
-            else
-                _G.SorryActive = false
+            if not targetPlayerObj then
                 b:SetAttribute("T", false)
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                notify("⛔ ACCESS DENIED", "First Select Target🎯...", 2)
+                return
             end
+
+            local char = player.Character
+            if not char then
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                notify("❌ ERROR", "Character not found", 2)
+                return
+            end
+
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if not hum or not root then
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                notify("❌ ERROR", "Missing Humanoid or RootPart", 2)
+                return
+            end
+
+            -- Get target's body part
+            local tChar = targetPlayerObj.Character
+            if not tChar then
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                notify("❌ ERROR", "Target has no character", 2)
+                return
+            end
+
+            local bodyPart = tChar:FindFirstChild("UpperTorso") or tChar:FindFirstChild("Torso") or tChar:FindFirstChild("HumanoidRootPart")
+            if not bodyPart then
+                b:SetAttribute("T", false)
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                notify("❌ ERROR", "Target body part not found", 2)
+                return
+            end
+
+            -- Disable animate script
+            if char:FindFirstChild("Animate") then
+                char.Animate.Disabled = true
+            end
+
+            -- Load rose animation
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://89740248756697"
+            roseAnimTrack = hum:LoadAnimation(anim)
+            roseAnimTrack.Priority = Enum.AnimationPriority.Action4
+            roseAnimTrack.Looped = false
+            roseAnimTrack:Play()
+            roseAnimTrack.TimePosition = 0
+            roseAnimTrack:AdjustSpeed(1)
+
+            hum.PlatformStand = true
+
+            -- Attachment loop
+            if roseConnection then roseConnection:Disconnect() end
+            roseConnection = RunService.RenderStepped:Connect(function()
+                -- Check if target still exists and is valid
+                if not targetPlayerObj.Character or not bodyPart.Parent or not char.Parent or hum.Health <= 0 then
+                    -- Stop everything
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    if roseConnection then roseConnection:Disconnect(); roseConnection = nil end
+                    if roseAnimTrack then roseAnimTrack:Stop(); roseAnimTrack = nil end
+                    if char and char:FindFirstChild("Animate") then char.Animate.Disabled = false end
+                    if hum then hum.PlatformStand = false; hum:ChangeState(Enum.HumanoidStateType.Running) end
+                    return
+                end
+
+                -- Freeze animation at specific time (1.850s)
+                if roseAnimTrack and roseAnimTrack.TimePosition >= 1.850 then
+                    roseAnimTrack.TimePosition = 1.850
+                    roseAnimTrack:AdjustSpeed(0)
+                end
+
+                -- Position player 5 studs in front, 1 stud up
+                local offset = bodyPart.CFrame * CFrame.new(0, 1.0, -5.0) * CFrame.Angles(0, math.pi, 0)
+                root.CFrame = offset
+                root.Velocity = Vector3.zero
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+            end)
+
+            notify("🌹 ROSE", "Attached to target", 2)
         else
-            toggleHugAntiCheatBypass(false)
-            for _, conn in ipairs(sorryConnections) do if conn then conn:Disconnect() end end
-            sorryConnections = {}
-            
-            if sorryAnimTrack then sorryAnimTrack:Stop() end
+            -- Stop Rose
+            if roseConnection then roseConnection:Disconnect(); roseConnection = nil end
+            if roseAnimTrack then roseAnimTrack:Stop(); roseAnimTrack = nil end
+
             local char = player.Character
             if char then
                 if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
                 local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then 
-                    hum.PlatformStand = false 
+                if hum then
+                    hum.PlatformStand = false
                     hum:ChangeState(Enum.HumanoidStateType.Running)
                 end
             end
+            notify("🌹 ROSE", "Stopped", 1)
         end
     end)
-    
+
     -- TAB 3: SHIELD
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end)
     btn("ANTI VOID V1🛡️", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, false)
