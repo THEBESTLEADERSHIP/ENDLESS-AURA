@@ -529,7 +529,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     -- Row 1: [ TEXT BOX ] | 🛑 STOP ALL
     btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false; _G.HugActive = false; _G.KissActive = false; _G.ThankYouActive = false; _G.SorryActive = false; _G.RoseAttachLoop = false end, true)
     
-    -- Row 2: ⚡ TP | VIEW👀
+    -- Row 2: ⚡ TP | 👀VIEW
     btn("⚡ TP", T2, function()
         local t = getT()
         if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
@@ -537,7 +537,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, true)
 
-    btn("VIEW👀", T2, function(b)
+    btn("👀VIEW", T2, function(b)
         _G.StrongView = b:GetAttribute("T")
         task.spawn(function()
             while _G.StrongView do
@@ -632,8 +632,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end, false)
     
-    -- Row 4: COPY ANIM👤 | COPY CHAT💬
-    btn("COPY ANIM👤", T2, function(b)
+    -- Row 4: 👤COPY ANIM | 💬COPY CHAT
+    btn("👤COPY ANIM", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             targetPlayer = getT()
@@ -652,7 +652,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    btn("COPY CHAT💬", T2, function(b)
+    btn("💬COPY CHAT", T2, function(b)
         local isActive = b:GetAttribute("T")
         if isActive then
             chatTargetPlayer = getT()
@@ -669,12 +669,12 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- Row 5: STAND | 🧒 HEADSIT
+    -- Row 5: STAND | 🧒HEADSIT
     local standBtn = Instance.new("TextButton", T2)
     standBtn.Size = UDim2.new(0.47, 0, 0, 32)
     standBtn.Position = UDim2.new(0.05, 0, 0, 0)
     standBtn.BackgroundColor3 = White
-    standBtn.Text = "STAND: OFF 🛑"
+    standBtn.Text = "🛑STAND: OFF"
     standBtn.TextColor3 = Black
     standBtn.Font = Enum.Font.GothamBold
     standBtn.TextSize = 8.5
@@ -699,7 +699,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             if not standTarget then
                 standBtn.Text = "NOT FOUND!"
                 task.wait(0.5)
-                standBtn.Text = "STAND: OFF 🛑"
+                standBtn.Text = "🛑STAND: OFF"
                 return
             end
         end        
@@ -720,7 +720,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    btn("🧒 HEADSIT", T2, function(b)
+    btn("🧒HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         task.spawn(function()
             while _G.Loop do
@@ -738,8 +738,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
 
-    -- Row 6: 🍆 BANG | BLOWJOB🥵
-    btn("🍆 BANG", T2, function(b)
+    -- Row 6: 🍆BANG | 🥵BLOWJOB
+    btn("🍆BANG", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
@@ -757,7 +757,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
     
-    btn("BLOWJOB🥵", T2, function(b)
+    btn("🥵BLOWJOB", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         toggleCustomEmote(_G.Loop)
         task.spawn(function()
@@ -776,7 +776,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
 
-    -- Row 7: CHOCO🦗 | SUCK👅 (INTEGRATED ATTACH SYSTEMS)
+    -- Row 7: 🦗CHOCO | 👅SUCK (INTEGRATED ATTACH SYSTEMS)
     local ANIM_ID = "85287774070688"    
     local FREEZE_TIME = 0.829           
     local BASE_DISTANCE = 1.2           
@@ -786,7 +786,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local connection
     local animTrack
 
-    btn("CHOCO🦗", T2, function(b)
+    btn("🦗CHOCO", T2, function(b)
         _G.AttachLoop = b:GetAttribute("T")
         if _G.AttachLoop then
             local targetPlayerObj = getT()
@@ -855,7 +855,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- DOGY SUCK👅 Integrated Code Block
+    -- DOGY 👅SUCK Integrated Code Block
     local DOGY_ANIM = "13694096724"
     local DOGY_TIME_POS = 3.4
     local DOGY_SPEED = 25
@@ -867,7 +867,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     local dogyConnection
     local dogyAnimTrack
 
-    btn("SUCK👅", T2, function(b)
+    btn("👅SUCK", T2, function(b)
         _G.DogyLoop = b:GetAttribute("T")
         if _G.DogyLoop then
             local targetPlayerObj = getT()
@@ -1526,12 +1526,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
 
     -- ==========================================
-    -- 🌹 ROSE - 5 Studs Distance, 1 Stud Up & Frame Freeze Logic
-    -- Normal Speed Animation from 0
+    -- 🌹 ROSE - 5 Studs Distance, 1 Stud Up
+    -- 0 se start hoke 1.850s pe freeze
     -- ==========================================
     _G.RoseAttachLoop = false
     local roseConnection
     local roseAnimTrack
+    local roseFreezeReached = false
 
     btn("🌹ROSE", T2, function(b)
         _G.RoseAttachLoop = b:GetAttribute("T")
@@ -1552,15 +1553,16 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 toggleHugAntiCheatBypass(true)
                 
                 local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://89740248756697" -- Rose Emote Asset ID
+                anim.AnimationId = "rbxassetid://89740248756697"
                 roseAnimTrack = hum:LoadAnimation(anim)
                 roseAnimTrack.Priority = Enum.AnimationPriority.Action4
                 roseAnimTrack.Looped = true
                 roseAnimTrack:Play()
                 
-                -- Start from 0 with normal speed, let it play naturally
+                -- 0 se start normal speed
                 roseAnimTrack.TimePosition = 0
-                roseAnimTrack:AdjustSpeed(1) -- Normal speed
+                roseAnimTrack:AdjustSpeed(1)
+                roseFreezeReached = false
                 
                 hum.PlatformStand = true
                 
@@ -1568,7 +1570,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                     if not targetBody or not targetBody.Parent or not _G.RoseAttachLoop then
                         _G.RoseAttachLoop = false
                         b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White                        b.TextColor3 = Black
+                        b.BackgroundColor3 = White
+                        b.TextColor3 = Black
                         
                         toggleHugAntiCheatBypass(false)
                         if roseConnection then roseConnection:Disconnect() end
@@ -1585,13 +1588,21 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         return
                     end
                     
-                    -- Keep animation playing at normal speed, don't freeze
-                    -- Just ensure it keeps playing
-                    if not roseAnimTrack.IsPlaying then 
-                        roseAnimTrack:Play()
+                    -- 1.850s pe freeze
+                    if roseAnimTrack.TimePosition >= 1.850 and not roseFreezeReached then
+                        roseFreezeReached = true
+                        roseAnimTrack.TimePosition = 1.850
+                        roseAnimTrack:AdjustSpeed(0)
                     end
                     
-                    -- 5 Studs Distance, 1 Stud Up offset
+                    if roseFreezeReached then
+                        roseAnimTrack.TimePosition = 1.850
+                        if not roseAnimTrack.IsPlaying then
+                            roseAnimTrack:Play()
+                            roseAnimTrack:AdjustSpeed(0)
+                        end
+                    end
+                    
                     local offset = targetBody.CFrame * CFrame.new(0, 1.0, -5.0) * CFrame.Angles(0, math.pi, 0)
                     
                     root.AssemblyLinearVelocity = Vector3.zero
