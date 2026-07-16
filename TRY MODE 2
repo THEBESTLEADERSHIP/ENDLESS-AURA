@@ -1527,6 +1527,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
 
     -- ==========================================
     -- 🌹 ROSE - 5 Studs Distance, 1 Stud Up & Frame Freeze Logic
+    -- Normal Speed Animation from 0
     -- ==========================================
     _G.RoseAttachLoop = false
     local roseConnection
@@ -1557,9 +1558,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 roseAnimTrack.Looped = true
                 roseAnimTrack:Play()
                 
-                -- Freeze frame at 1.850s
-                roseAnimTrack.TimePosition = 1.850
-                roseAnimTrack:AdjustSpeed(0)
+                -- Start from 0 with normal speed, let it play naturally
+                roseAnimTrack.TimePosition = 0
+                roseAnimTrack:AdjustSpeed(1) -- Normal speed
                 
                 hum.PlatformStand = true
                 
@@ -1567,8 +1568,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                     if not targetBody or not targetBody.Parent or not _G.RoseAttachLoop then
                         _G.RoseAttachLoop = false
                         b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
+                        b.BackgroundColor3 = White                        b.TextColor3 = Black
                         
                         toggleHugAntiCheatBypass(false)
                         if roseConnection then roseConnection:Disconnect() end
@@ -1585,11 +1585,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         return
                     end
                     
-                    -- Freeze position maintenance
-                    roseAnimTrack.TimePosition = 1.850
+                    -- Keep animation playing at normal speed, don't freeze
+                    -- Just ensure it keeps playing
                     if not roseAnimTrack.IsPlaying then 
-                        roseAnimTrack:Play() 
-                        roseAnimTrack:AdjustSpeed(0)
+                        roseAnimTrack:Play()
                     end
                     
                     -- 5 Studs Distance, 1 Stud Up offset
