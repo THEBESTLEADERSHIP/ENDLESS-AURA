@@ -546,8 +546,8 @@ toggleButton.MouseButton1Click:Connect(function()
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            -- PURE 0.1s SHIFTING INTERVAL
-            if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
+            -- PURE 0.0001s SHIFTING INTERVAL - EXTREME FAST ATTACH SPEED
+            if tick() - lastTargetSwitchTime >= 0.0001 or not selectedPlayer then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
                 if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end
@@ -569,7 +569,7 @@ toggleButton.MouseButton1Click:Connect(function()
 
             local currentModeToRun = targetMode
             if targetMode == "Auto Switch" then
-                if tick() - lastSwitchTime >= 1.0 then
+                if tick() - lastSwitchTime >= 0.5 then  -- Faster mode switching
                     lastSwitchTime = tick()
                     currentAutoSubMode = (currentAutoSubMode == "Normal") and "Face Bang" or "Normal"
                 end
@@ -579,13 +579,12 @@ toggleButton.MouseButton1Click:Connect(function()
             myHumanoid.PlatformStand = true 
             
             -- CONDITIONAL STROKE OSCILLATION ENGINE
-            -- Only uses dynamic sine wave range if ATTACH_DIST value is set greater than 0
             local dynamicOffset = 0
             local sineWave = 0
             local tiltAngle = 0
             
             if attachDistance > 0 then
-                local timeFactor = tick() * speedMultiplier
+                local timeFactor = tick() * speedMultiplier * 5  -- 5x faster oscillation
                 sineWave = math.sin(timeFactor)
                 dynamicOffset = math.abs(sineWave) * forwardBackRange
                 tiltAngle = -sineWave * 0.15
@@ -604,11 +603,12 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- TITAN PHYSICALLY BOUND/GLUED METHOD
+            -- TITAN PHYSICALLY BOUND/GLUED METHOD - EXTREME FAST ATTACH
             pcall(function() sethiddenproperty(myHRP, "PhysicsRepRootPart", tOrient) end)
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
-            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300 
+            -- Ultra fast velocity for instant attachment
+            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 3000
             
             if platform and platform.Parent then
                 platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
