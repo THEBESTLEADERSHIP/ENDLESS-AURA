@@ -1431,133 +1431,91 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
 
     -- ==========================================
-    -- NEW: 😭SORRY & 🌹ROSE BUTTONS
+    --  NEW BUTTONS: 😭SORRY and 🌹ROSE
+    --  (placed right after 😊THANK YOU)
     -- ==========================================
-    -- Dummy "😭SORRY" button (shows notification)
     btn("😭SORRY", T2, function(b)
-        notify("😭 Sorry", "Just a dummy button", 1)
-    end)
+        notify("😭", "Sorry! This feature is under construction.", 2)
+    end, true)
 
-    -- Rose attach logic (uses main target TextBox)
-    local roseConnection = nil
-    local roseAnimTrack = nil
+    -- 🌹ROSE - 5 Studs Distance, 1 Stud Up & Frame Freeze Logic
+    local ROSE_ANIM = "89740248756697"
+    local ROSE_FREEZE = 1.850
+    local ROSE_DIST = 5.0
+    local ROSE_HEIGHT = 1.0
+
+    _G.RoseLoop = false
+    local roseConnection
+    local roseAnimTrack
 
     btn("🌹ROSE", T2, function(b)
-        local isActive = b:GetAttribute("T")
-        if isActive then
-            -- Validate target
+        _G.RoseLoop = b:GetAttribute("T")
+        if _G.RoseLoop then
             local targetPlayerObj = getT()
-            if not targetPlayerObj then
-                b:SetAttribute("T", false)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                notify("⛔ ACCESS DENIED", "First Select Target🎯...", 2)
-                return
-            end
-
+            local bodyPart = targetPlayerObj and targetPlayerObj.Character and (targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart"))
             local char = player.Character
-            if not char then
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            
+            if bodyPart and root then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+                
+                local anim = Instance.new("Animation")
+                anim.AnimationId = "rbxassetid://" .. ROSE_ANIM
+                roseAnimTrack = hum:LoadAnimation(anim)
+                roseAnimTrack.Priority = Enum.AnimationPriority.Action4
+                roseAnimTrack.Looped = false
+                roseAnimTrack:Play()
+                roseAnimTrack.TimePosition = 0
+                roseAnimTrack:AdjustSpeed(1)
+                
+                hum.PlatformStand = true
+                
+                roseConnection = RunService.RenderStepped:Connect(function()
+                    if not _G.RoseLoop or not targetPlayerObj.Character or not bodyPart.Parent or not root.Parent then
+                        _G.RoseLoop = false
+                        b:SetAttribute("T", false)
+                        b.BackgroundColor3 = White
+                        b.TextColor3 = Black
+                        if roseConnection then roseConnection:Disconnect() end
+                        if roseAnimTrack then roseAnimTrack:Stop() end
+                        local charLocal = player.Character
+                        if charLocal then
+                            if charLocal:FindFirstChild("Animate") then charLocal.Animate.Disabled = false end
+                            local humLocal = charLocal:FindFirstChildOfClass("Humanoid")
+                            if humLocal then humLocal.PlatformStand = false end
+                        end
+                        return
+                    end
+                    
+                    if roseAnimTrack.TimePosition >= ROSE_FREEZE then
+                        roseAnimTrack.TimePosition = ROSE_FREEZE
+                        roseAnimTrack:AdjustSpeed(0)
+                    end
+                    
+                    root.CFrame = bodyPart.CFrame * CFrame.new(0, ROSE_HEIGHT, -ROSE_DIST) * CFrame.Angles(0, math.pi, 0)
+                    root.AssemblyLinearVelocity = Vector3.zero
+                    root.AssemblyAngularVelocity = Vector3.zero
+                end)
+            else
+                _G.RoseLoop = false
                 b:SetAttribute("T", false)
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
-                notify("❌ ERROR", "Character not found", 2)
-                return
+                notify("❌", "Target or body part not found!", 2)
             end
-
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            local root = char:FindFirstChild("HumanoidRootPart")
-            if not hum or not root then
-                b:SetAttribute("T", false)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                notify("❌ ERROR", "Missing Humanoid or RootPart", 2)
-                return
-            end
-
-            -- Get target's body part
-            local tChar = targetPlayerObj.Character
-            if not tChar then
-                b:SetAttribute("T", false)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                notify("❌ ERROR", "Target has no character", 2)
-                return
-            end
-
-            local bodyPart = tChar:FindFirstChild("UpperTorso") or tChar:FindFirstChild("Torso") or tChar:FindFirstChild("HumanoidRootPart")
-            if not bodyPart then
-                b:SetAttribute("T", false)
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                notify("❌ ERROR", "Target body part not found", 2)
-                return
-            end
-
-            -- Disable animate script
-            if char:FindFirstChild("Animate") then
-                char.Animate.Disabled = true
-            end
-
-            -- Load rose animation
-            local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://89740248756697"
-            roseAnimTrack = hum:LoadAnimation(anim)
-            roseAnimTrack.Priority = Enum.AnimationPriority.Action4
-            roseAnimTrack.Looped = false
-            roseAnimTrack:Play()
-            roseAnimTrack.TimePosition = 0
-            roseAnimTrack:AdjustSpeed(1)
-
-            hum.PlatformStand = true
-
-            -- Attachment loop
-            if roseConnection then roseConnection:Disconnect() end
-            roseConnection = RunService.RenderStepped:Connect(function()
-                -- Check if target still exists and is valid
-                if not targetPlayerObj.Character or not bodyPart.Parent or not char.Parent or hum.Health <= 0 then
-                    -- Stop everything
-                    b:SetAttribute("T", false)
-                    b.BackgroundColor3 = White
-                    b.TextColor3 = Black
-                    if roseConnection then roseConnection:Disconnect(); roseConnection = nil end
-                    if roseAnimTrack then roseAnimTrack:Stop(); roseAnimTrack = nil end
-                    if char and char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                    if hum then hum.PlatformStand = false; hum:ChangeState(Enum.HumanoidStateType.Running) end
-                    return
-                end
-
-                -- Freeze animation at specific time (1.850s)
-                if roseAnimTrack and roseAnimTrack.TimePosition >= 1.850 then
-                    roseAnimTrack.TimePosition = 1.850
-                    roseAnimTrack:AdjustSpeed(0)
-                end
-
-                -- Position player 5 studs in front, 1 stud up
-                local offset = bodyPart.CFrame * CFrame.new(0, 1.0, -5.0) * CFrame.Angles(0, math.pi, 0)
-                root.CFrame = offset
-                root.Velocity = Vector3.zero
-                root.AssemblyLinearVelocity = Vector3.zero
-                root.AssemblyAngularVelocity = Vector3.zero
-            end)
-
-            notify("🌹 ROSE", "Attached to target", 2)
         else
-            -- Stop Rose
-            if roseConnection then roseConnection:Disconnect(); roseConnection = nil end
-            if roseAnimTrack then roseAnimTrack:Stop(); roseAnimTrack = nil end
-
+            if roseConnection then roseConnection:Disconnect() end
+            if roseAnimTrack then roseAnimTrack:Stop() end
             local char = player.Character
             if char then
                 if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
                 local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum.PlatformStand = false
-                    hum:ChangeState(Enum.HumanoidStateType.Running)
-                end
+                if hum then hum.PlatformStand = false end
             end
-            notify("🌹 ROSE", "Stopped", 1)
         end
     end)
+    -- ==========================================
 
     -- TAB 3: SHIELD
     btn("🛡️ ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end)
