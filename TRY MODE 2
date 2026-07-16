@@ -389,6 +389,157 @@ local function stopStandLoop()
 end
 
 -- ==========================================
+-- TITAN ATTACHMENT SYSTEM - Premium Framework
+-- ==========================================
+local TitanAttachConnection = nil
+local TitanAnimTrack = nil
+local TitanBackConnection = nil
+local TitanFrontConnection = nil
+local TitanBackAnimTrack = nil
+local TitanFrontAnimTrack = nil
+local TitanEmotePaused = false
+local TitanEmoteConnection = nil
+local TitanAnimLoop = nil
+local TitanAnimCounter = 1
+
+-- Helper: Get orientation part (UpperTorso > Torso > HumanoidRootPart)
+local function getOrientationPart(char)
+    if not char then return nil end
+    return char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
+end
+
+-- Helper: Cleanup Titan attachments
+local function cleanupTitanAttachments()
+    if TitanAttachConnection then
+        TitanAttachConnection:Disconnect()
+        TitanAttachConnection = nil
+    end
+    if TitanAnimTrack then
+        TitanAnimTrack:Stop()
+        TitanAnimTrack = nil
+    end
+    if TitanBackConnection then
+        TitanBackConnection:Disconnect()
+        TitanBackConnection = nil
+    end
+    if TitanFrontConnection then
+        TitanFrontConnection:Disconnect()
+        TitanFrontConnection = nil
+    end
+    if TitanBackAnimTrack then
+        TitanBackAnimTrack:Stop()
+        TitanBackAnimTrack = nil
+    end
+    if TitanFrontAnimTrack then
+        TitanFrontAnimTrack:Stop()
+        TitanFrontAnimTrack = nil
+    end
+    if TitanAnimLoop then
+        task.cancel(TitanAnimLoop)
+        TitanAnimLoop = nil
+    end
+    if TitanEmoteConnection then
+        TitanEmoteConnection:Disconnect()
+        TitanEmoteConnection = nil
+    end
+    TitanEmotePaused = false
+    
+    local char = player.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.PlatformStand = false
+            pcall(function() sethiddenproperty(hum, "PhysicsRepRootPart", nil) end)
+        end
+        if char:FindFirstChild("Animate") then
+            char.Animate.Disabled = false
+        end
+    end
+end
+
+-- Titan Animation Loop
+local function playTitanNextAnimation(humanoid)
+    if not humanoid or TitanEmotePaused then return end
+    TitanAnimCounter = (TitanAnimCounter == 1) and 2 or 1
+    
+    if TitanAnimCounter == 1 then
+        if TitanAnimTrack then TitanAnimTrack:Stop() end
+        if not TitanAnimTrack then
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://215262147"
+            TitanAnimTrack = humanoid:LoadAnimation(anim)
+            TitanAnimTrack.Priority = Enum.AnimationPriority.Core
+        end
+        TitanAnimTrack:Play()
+    else
+        if TitanBackAnimTrack then TitanBackAnimTrack:Stop() end
+        if not TitanBackAnimTrack then
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://185299570"
+            TitanBackAnimTrack = humanoid:LoadAnimation(anim)
+            TitanBackAnimTrack.Priority = Enum.AnimationPriority.Core
+        end
+        TitanBackAnimTrack:Play()
+    end
+end
+
+local function startTitanAnimLoop(humanoid)
+    playTitanNextAnimation(humanoid)
+    TitanAnimLoop = task.delay(0.5, function()
+        startTitanAnimLoop(humanoid)
+    end)
+end
+
+local function stopTitanAnimLoop()
+    if TitanAnimLoop then
+        task.cancel(TitanAnimLoop)
+        TitanAnimLoop = nil
+    end
+    if TitanAnimTrack then
+        TitanAnimTrack:Stop()
+        TitanAnimTrack = nil
+    end
+    if TitanBackAnimTrack then
+        TitanBackAnimTrack:Stop()
+        TitanBackAnimTrack = nil
+    end
+end
+
+local function onTitanAnimationPlayed(animationTrack)
+    if not _G.TitanAttachActive and not _G.TitanBangActive and not _G.TitanBackBangActive then return end
+    if animationTrack == TitanAnimTrack or animationTrack == TitanBackAnimTrack then return end
+    if TitanEmotePaused then return end
+    
+    TitanEmotePaused = true
+    if TitanAnimTrack then TitanAnimTrack:Stop() end
+    if TitanBackAnimTrack then TitanBackAnimTrack:Stop() end
+    
+    local conn
+    conn = animationTrack.Stopped:Connect(function()
+        if (_G.TitanAttachActive or _G.TitanBangActive or _G.TitanBackBangActive) and TitanEmotePaused then
+            TitanEmotePaused = false
+            local char = player.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                if TitanAnimLoop then task.cancel(TitanAnimLoop) end
+                startTitanAnimLoop(hum)
+            end
+        end
+        conn:Disconnect()
+    end)
+end
+
+local function setupTitanEmoteDetection(humanoid)
+    if TitanEmoteConnection then
+        TitanEmoteConnection:Disconnect()
+        TitanEmoteConnection = nil
+    end
+    if humanoid then
+        TitanEmoteConnection = humanoid.AnimationPlayed:Connect(onTitanAnimationPlayed)
+    end
+end
+
+-- ==========================================
 -- MAIN PANEL INITIALIZE
 -- ==========================================
 local function Initialize()
@@ -482,7 +633,7 @@ local function Initialize()
 
     Players.PlayerAdded:Connect(function(joiningPlayer)
         if trackedTargetName ~= "" and joiningPlayer.Name:lower():find(trackedTargetName:lower()) then
-            lastTrackedUserId = joiningPlayer.UserId -- Re-sync UserId
+            lastTrackedUserId = joiningPlayer.UserId
             notify("🎯 TARGET TRACKER", "Target '" .. joiningPlayer.Name .. "' joined back the server! 🟢", 5)
         end
     end)
@@ -525,9 +676,60 @@ THIS SCRIPT ONLY FOR ENDLESS AURA MEMBERS 👑💝
 __________________________________________
 OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     
-    -- TAB 2: TROLL (BUTTONS WITH SECURITY INTERLOCKS - ORDERED EXACTLY AS SPECIFIED)
+    -- ==========================================
+    -- TAB 2: TROLL WITH TITAN ATTACHMENT SYSTEM
+    -- ==========================================
     -- Row 1: [ TEXT BOX ] | 🛑 STOP ALL
-    btn("🛑 STOP ALL", T2, function() _G.Loop = false; _G.Fly = false; player.Character.Humanoid.Sit = false; _G.InfJump = false; _G.StrongView = false; _G.TargetESP = false; _G.TargetLook = false; workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChild("Humanoid"); stopCopyLoop(); stopChatSync(); stopStandLoop(); toggleCustomEmote(false); _G.AttachLoop = false; _G.DogyLoop = false; _G.PlaneLoop = false; _G.AeroplaneLoop = false; _G.ButterflyLoop = false; _G.HugActive = false; _G.KissActive = false; _G.ThankYouActive = false; _G.SorryActive = false; _G.RoseAttachLoop = false; _G.OrbitAttachLoop = false end, true)
+    btn("🛑 STOP ALL", T2, function() 
+        _G.Loop = false
+        _G.Fly = false
+        if player.Character and player.Character:FindFirstChild("Humanoid") then 
+            player.Character.Humanoid.Sit = false 
+        end
+        _G.InfJump = false
+        _G.StrongView = false
+        _G.TargetESP = false
+        _G.TargetLook = false
+        if workspace.CurrentCamera and player.Character and player.Character:FindFirstChild("Humanoid") then
+            workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
+        end
+        stopCopyLoop()
+        stopChatSync()
+        stopStandLoop()
+        toggleCustomEmote(false)
+        
+        -- Stop all TITAN attachment loops
+        _G.TitanAttachActive = false
+        _G.TitanBangActive = false
+        _G.TitanBackBangActive = false
+        
+        -- Cleanup any active Titan connections
+        cleanupTitanAttachments()
+        
+        _G.DogyLoop = false
+        _G.PlaneLoop = false
+        _G.AeroplaneLoop = false
+        _G.ButterflyLoop = false
+        _G.HugActive = false
+        _G.KissActive = false
+        _G.ThankYouActive = false
+        _G.SorryActive = false
+        _G.RoseAttachLoop = false
+        _G.OrbitAttachLoop = false
+        
+        -- Reset platform stand
+        local char = player.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.PlatformStand = false
+                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+            end
+            if char:FindFirstChild("Animate") then
+                char.Animate.Disabled = false
+            end
+        end
+    end, true)
     
     -- Row 2: ⚡ TP | 👀VIEW
     btn("⚡ TP", T2, function()
@@ -688,7 +890,6 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     standBtn.MouseButton1Click:Connect(function()
         playS(CLICK_SOUND)
         
-        -- Target validation lock for Stand Button
         if target.Text == "" or not getT() then
             notify("⛔ ACCESS DENIED", "First Select Target🎯...", 2)
             return
@@ -738,114 +939,293 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end)
     end)
 
-    -- Row 6: 🍆BANG | 🥵BLOWJOB
-    btn("🍆BANG", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
-        task.spawn(function()
-            while _G.Loop do
-                local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-                    SafeMoveTo(t.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.1 + math.sin(tick()*20)*0.55))
-                else
-                    godModeAttach()
-                end
-                RunService.RenderStepped:Wait()
-            end
-            local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
-        end)
-    end)
+    -- ==========================================
+    -- TITAN ATTACHMENT FUNCTIONS - Row 6+
+    -- ==========================================
     
-    btn("🥵BLOWJOB", T2, function(b)
-        _G.Loop = b:GetAttribute("T")
-        toggleCustomEmote(_G.Loop)
-        task.spawn(function()
-            while _G.Loop do
-                local t = getT()
-                if t and t.Character and t.Character:FindFirstChild("Head") then
-                    SafeMoveTo(t.Character.Head.CFrame * CFrame.new(0, 0.45 + (math.sin(tick()*10)*0.05), -0.5) * CFrame.Angles(0, math.pi, 0))
-                    if player.Character:FindFirstChild("Humanoid") then player.Character.Humanoid.Sit = true end
-                else
-                    godModeAttach()
-                end
-                RunService.RenderStepped:Wait()
+    -- 🍆 BANG - TITAN PREMIUM (BACK)
+    btn("🍆BANG", T2, function(b)
+        local isActive = b:GetAttribute("T")
+        _G.TitanBackBangActive = isActive
+        
+        if isActive then
+            local targetPlayerObj = getT()
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.TitanBackBangActive = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                notify("⚠️ ERROR", "Target not found!", 2)
+                return
             end
+            
             local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then char.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true) end
-        end)
+            if not char then
+                b:SetAttribute("T", false)
+                _G.TitanBackBangActive = false
+                return
+            end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if not hum or not root then
+                b:SetAttribute("T", false)
+                _G.TitanBackBangActive = false
+                return
+            end
+            
+            -- Disable animate script
+            if char:FindFirstChild("Animate") then
+                char.Animate.Disabled = true
+            end
+            
+            -- Setup emote detection
+            setupTitanEmoteDetection(hum)
+            
+            -- Start animation loop
+            if TitanAnimLoop then task.cancel(TitanAnimLoop) end
+            startTitanAnimLoop(hum)
+            
+            -- Store target reference
+            local tChar = targetPlayerObj.Character
+            local tOrient = getOrientationPart(tChar)
+            
+            -- Connection for Back Bang (PO = Vector3.new(0, 0, 1.1))
+            TitanBackConnection = RunService.Heartbeat:Connect(function()
+                if not _G.TitanBackBangActive or not targetPlayerObj or not targetPlayerObj.Character then
+                    _G.TitanBackBangActive = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    cleanupTitanAttachments()
+                    return
+                end
+                
+                if not root or not root.Parent or hum.Health <= 0 then
+                    return
+                end
+                
+                tChar = targetPlayerObj.Character
+                tOrient = getOrientationPart(tChar)
+                if not tOrient then return end
+                
+                local offset = tOrient.CFrame * CFrame.new(0, 0, 1.1)
+                
+                pcall(function() 
+                    sethiddenproperty(root, "PhysicsRepRootPart", tOrient) 
+                end)
+                
+                root.CFrame = offset
+                root.Velocity = Vector3.new()
+                root.AssemblyLinearVelocity = Vector3.new()
+                root.AssemblyAngularVelocity = Vector3.new()
+                root.RotVelocity = Vector3.new()
+                hum.PlatformStand = true
+            end)
+            
+        else
+            cleanupTitanAttachments()
+            local char = player.Character
+            if char then
+                if char:FindFirstChild("Animate") then
+                    char.Animate.Disabled = false
+                end
+            end
+        end
     end)
 
-    -- Row 7: 🦗CHOCO | 👅SUCK (INTEGRATED ATTACH SYSTEMS)
+    -- 🥵 BLOWJOB - TITAN PREMIUM (FRONT FACE)
+    btn("🥵BLOWJOB", T2, function(b)
+        local isActive = b:GetAttribute("T")
+        _G.TitanBangActive = isActive
+        
+        if isActive then
+            local targetPlayerObj = getT()
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.TitanBangActive = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                notify("⚠️ ERROR", "Target not found!", 2)
+                return
+            end
+            
+            local char = player.Character
+            if not char then
+                b:SetAttribute("T", false)
+                _G.TitanBangActive = false
+                return
+            end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if not hum or not root then
+                b:SetAttribute("T", false)
+                _G.TitanBangActive = false
+                return
+            end
+            
+            if char:FindFirstChild("Animate") then
+                char.Animate.Disabled = true
+            end
+            
+            setupTitanEmoteDetection(hum)
+            
+            if TitanAnimLoop then task.cancel(TitanAnimLoop) end
+            startTitanAnimLoop(hum)
+            
+            local tChar = targetPlayerObj.Character
+            local tOrient = getOrientationPart(tChar)
+            
+            TitanFrontConnection = RunService.Heartbeat:Connect(function()
+                if not _G.TitanBangActive or not targetPlayerObj or not targetPlayerObj.Character then
+                    _G.TitanBangActive = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    cleanupTitanAttachments()
+                    return
+                end
+                
+                if not root or not root.Parent or hum.Health <= 0 then
+                    return
+                end
+                
+                tChar = targetPlayerObj.Character
+                if not tChar then return end
+                
+                local head = tChar:FindFirstChild("Head")
+                if head then
+                    local offset = head.CFrame * CFrame.new(0, -0.5, -1.2) * CFrame.Angles(0, math.pi, 0)
+                    pcall(function() 
+                        sethiddenproperty(root, "PhysicsRepRootPart", head) 
+                    end)
+                    root.CFrame = offset
+                else
+                    tOrient = getOrientationPart(tChar)
+                    if tOrient then
+                        local offset = tOrient.CFrame * CFrame.new(0, 0, -1.8) * CFrame.Angles(0, math.pi, 0)
+                        pcall(function() 
+                            sethiddenproperty(root, "PhysicsRepRootPart", tOrient) 
+                        end)
+                        root.CFrame = offset
+                    end
+                end
+                
+                root.Velocity = Vector3.new()
+                root.AssemblyLinearVelocity = Vector3.new()
+                root.AssemblyAngularVelocity = Vector3.new()
+                root.RotVelocity = Vector3.new()
+                hum.PlatformStand = true
+            end)
+            
+        else
+            cleanupTitanAttachments()
+            local char = player.Character
+            if char then
+                if char:FindFirstChild("Animate") then
+                    char.Animate.Disabled = false
+                end
+            end
+        end
+    end)
+
+    -- 🦗CHOCO - TITAN PREMIUM
     local ANIM_ID = "85287774070688"    
     local FREEZE_TIME = 0.829           
     local BASE_DISTANCE = 1.2           
     local SPEED = 25                    
 
     _G.AttachLoop = false
-    local connection
-    local animTrack
+    local attachConnection
+    local attachAnimTrack
 
     btn("🦗CHOCO", T2, function(b)
         _G.AttachLoop = b:GetAttribute("T")
         if _G.AttachLoop then
             local targetPlayerObj = getT()
-            local targetHead = targetPlayerObj and targetPlayerObj.Character and targetPlayerObj.Character:FindFirstChild("Head")
-            
-            if targetHead then
-                local char = player.Character
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                local root = char:FindFirstChild("HumanoidRootPart")
-                local myLowerTorso = char:FindFirstChild("LowerTorso") or root 
-                
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                local anim = Instance.new("Animation") 
-                anim.AnimationId = "rbxassetid://" .. ANIM_ID
-                animTrack = hum:LoadAnimation(anim)
-                animTrack.Priority = Enum.AnimationPriority.Action4
-                animTrack.Looped = true
-                animTrack:Play()
-                
-                animTrack.TimePosition = FREEZE_TIME
-                animTrack:AdjustSpeed(0)
-                
-                hum.PlatformStand = true
-                local startTime = os.clock()
-                
-                connection = RunService.RenderStepped:Connect(function()
-                    if not targetHead or not targetHead.Parent or not _G.AttachLoop then 
-                        _G.AttachLoop = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        if connection then connection:Disconnect() end
-                        return 
-                    end
-                    
-                    animTrack.TimePosition = FREEZE_TIME
-                    
-                    local timePassed = os.clock() - startTime
-                    local oscillation = math.sin(timePassed * (SPEED / 2)) * 0.8
-                    local currentDynamicDist = BASE_DISTANCE + oscillation
-                    
-                    local targetFaceCF = targetHead.CFrame
-                    local desiredLowerTorsoCF = targetFaceCF * CFrame.new(0, 0, -currentDynamicDist) * CFrame.Angles(0, math.pi, 0)
-                    
-                    local rootOffset = root.CFrame:ToObjectSpace(myLowerTorso.CFrame)
-                    root.CFrame = desiredLowerTorsoCF * rootOffset:Inverse()
-                    
-                    root.AssemblyLinearVelocity = Vector3.zero
-                end)
-            else
-                _G.AttachLoop = false
+            if not targetPlayerObj or not targetPlayerObj.Character then
                 b:SetAttribute("T", false)
+                _G.AttachLoop = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local targetHead = targetPlayerObj.Character:FindFirstChild("Head")
+            if not targetHead then
+                b:SetAttribute("T", false)
+                _G.AttachLoop = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                notify("⚠️ ERROR", "Target has no Head!", 2)
+                return
+            end
+            
+            local char = player.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            local myLowerTorso = char and (char:FindFirstChild("LowerTorso") or root)
+            
+            if not char or not hum or not root then
+                b:SetAttribute("T", false)
+                _G.AttachLoop = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            if char:FindFirstChild("Animate") then
+                char.Animate.Disabled = true
+            end
+            
+            local anim = Instance.new("Animation") 
+            anim.AnimationId = "rbxassetid://" .. ANIM_ID
+            attachAnimTrack = hum:LoadAnimation(anim)
+            attachAnimTrack.Priority = Enum.AnimationPriority.Action4
+            attachAnimTrack.Looped = true
+            attachAnimTrack:Play()
+            
+            attachAnimTrack.TimePosition = FREEZE_TIME
+            attachAnimTrack:AdjustSpeed(0)
+            
+            hum.PlatformStand = true
+            local startTime = os.clock()
+            
+            attachConnection = RunService.RenderStepped:Connect(function()
+                if not targetHead or not targetHead.Parent or not _G.AttachLoop then 
+                    _G.AttachLoop = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    if attachConnection then attachConnection:Disconnect() end
+                    if attachAnimTrack then attachAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then h.PlatformStand = false end
+                    end
+                    return 
+                end
+                
+                attachAnimTrack.TimePosition = FREEZE_TIME
+                
+                local timePassed = os.clock() - startTime
+                local oscillation = math.sin(timePassed * (SPEED / 2)) * 0.8
+                local currentDynamicDist = BASE_DISTANCE + oscillation
+                
+                local targetFaceCF = targetHead.CFrame
+                local desiredLowerTorsoCF = targetFaceCF * CFrame.new(0, 0, -currentDynamicDist) * CFrame.Angles(0, math.pi, 0)
+                
+                local rootOffset = root.CFrame:ToObjectSpace(myLowerTorso.CFrame)
+                root.CFrame = desiredLowerTorsoCF * rootOffset:Inverse()
+                
+                root.AssemblyLinearVelocity = Vector3.zero
+            end)
         else
-            if connection then connection:Disconnect() end
-            if animTrack then animTrack:Stop() end
+            if attachConnection then attachConnection:Disconnect() end
+            if attachAnimTrack then attachAnimTrack:Stop() end
             local char = player.Character
             if char then
                 if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
@@ -855,7 +1235,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- SUCK Integrated Code Block
+    -- 👅SUCK - TITAN PREMIUM
     local DOGY_ANIM = "13694096724"
     local DOGY_TIME_POS = 3.4
     local DOGY_SPEED = 25
@@ -871,51 +1251,67 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.DogyLoop = b:GetAttribute("T")
         if _G.DogyLoop then
             local targetPlayerObj = getT()
-            local upperTorso = targetPlayerObj and targetPlayerObj.Character and (targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso"))
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.DogyLoop = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local upperTorso = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if upperTorso and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://" .. DOGY_ANIM
-                dogyAnimTrack = hum:LoadAnimation(anim)
-                dogyAnimTrack:Play()
-                dogyAnimTrack.TimePosition = DOGY_TIME_POS
-                dogyAnimTrack:AdjustSpeed(0)
-                
-                local startTime = tick()
-                
-                dogyConnection = RunService.RenderStepped:Connect(function()
-                    if not _G.DogyLoop or not targetPlayerObj.Character or not upperTorso.Parent then
-                        _G.DogyLoop = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        if dogyConnection then dogyConnection:Disconnect() end
-                        return
-                    end
-                    
-                    local timePassed = tick() - startTime
-                    local oscillation = math.sin(timePassed * (DOGY_SPEED / 2)) * 0.4
-                    local currentDist = DOGY_BASE_DIST + oscillation
-                    
-                    local targetCF = upperTorso.CFrame
-                    local pos = targetCF.Position + (targetCF.LookVector * currentDist) + Vector3.new(0, DOGY_HEIGHT, 0)
-                    local lookAtCF = CFrame.lookAt(pos, targetCF.Position) * CFrame.Angles(math.rad(DOGY_TILT), 0, 0)
-                    
-                    root.CFrame = lookAtCF
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    hum.PlatformStand = true
-                end)
-            else
-                _G.DogyLoop = false
+            if not upperTorso or not root then
                 b:SetAttribute("T", false)
+                _G.DogyLoop = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. DOGY_ANIM
+            dogyAnimTrack = hum:LoadAnimation(anim)
+            dogyAnimTrack:Play()
+            dogyAnimTrack.TimePosition = DOGY_TIME_POS
+            dogyAnimTrack:AdjustSpeed(0)
+            
+            local startTime = tick()
+            
+            dogyConnection = RunService.RenderStepped:Connect(function()
+                if not _G.DogyLoop or not targetPlayerObj.Character or not upperTorso.Parent then
+                    _G.DogyLoop = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    if dogyConnection then dogyConnection:Disconnect() end
+                    if dogyAnimTrack then dogyAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then h.PlatformStand = false end
+                    end
+                    return
+                end
+                
+                local timePassed = tick() - startTime
+                local oscillation = math.sin(timePassed * (DOGY_SPEED / 2)) * 0.4
+                local currentDist = DOGY_BASE_DIST + oscillation
+                
+                local targetCF = upperTorso.CFrame
+                local pos = targetCF.Position + (targetCF.LookVector * currentDist) + Vector3.new(0, DOGY_HEIGHT, 0)
+                local lookAtCF = CFrame.lookAt(pos, targetCF.Position) * CFrame.Angles(math.rad(DOGY_TILT), 0, 0)
+                
+                root.CFrame = lookAtCF
+                root.AssemblyLinearVelocity = Vector3.zero
+                hum.PlatformStand = true
+            end)
         else
             if dogyConnection then dogyConnection:Disconnect() end
             if dogyAnimTrack then dogyAnimTrack:Stop() end
@@ -928,7 +1324,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- 🐶DOG POSE Integrated Code Block
+    -- 🐶DOG POSE
     local PLANE_ANIM = "101770532783937"
     _G.PlaneLoop = false
     local planeConnection
@@ -938,43 +1334,58 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.PlaneLoop = b:GetAttribute("T")
         if _G.PlaneLoop then
             local targetPlayerObj = getT()
-            local bodyPart = targetPlayerObj and targetPlayerObj.Character and (targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart"))
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.PlaneLoop = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local bodyPart = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if bodyPart and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                local anim = Instance.new("Animation") 
-                anim.AnimationId = "rbxassetid://" .. PLANE_ANIM
-                planeAnimTrack = hum:LoadAnimation(anim)
-                planeAnimTrack.Priority = Enum.AnimationPriority.Action4
-                planeAnimTrack.Looped = true
-                planeAnimTrack:Play()
-                
-                hum.PlatformStand = true
-                
-                planeConnection = RunService.RenderStepped:Connect(function()
-                    if not _G.PlaneLoop or not targetPlayerObj.Character or not bodyPart.Parent then 
-                        _G.PlaneLoop = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        if planeConnection then planeConnection:Disconnect() end
-                        return 
-                    end
-                    
-                    root.CFrame = bodyPart.CFrame * UDim2.new(0, 1.30, -1) -- Fallback conversion safe check
-                    root.CFrame = bodyPart.CFrame * CFrame.new(0, 1.30, -1)
-                    root.AssemblyLinearVelocity = Vector3.zero
-                end)
-            else
-                _G.PlaneLoop = false
+            if not bodyPart or not root then
                 b:SetAttribute("T", false)
+                _G.PlaneLoop = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            local anim = Instance.new("Animation") 
+            anim.AnimationId = "rbxassetid://" .. PLANE_ANIM
+            planeAnimTrack = hum:LoadAnimation(anim)
+            planeAnimTrack.Priority = Enum.AnimationPriority.Action4
+            planeAnimTrack.Looped = true
+            planeAnimTrack:Play()
+            
+            hum.PlatformStand = true
+            
+            planeConnection = RunService.RenderStepped:Connect(function()
+                if not _G.PlaneLoop or not targetPlayerObj.Character or not bodyPart.Parent then 
+                    _G.PlaneLoop = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    if planeConnection then planeConnection:Disconnect() end
+                    if planeAnimTrack then planeAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then h.PlatformStand = false end
+                    end
+                    return 
+                end
+                
+                root.CFrame = bodyPart.CFrame * CFrame.new(0, 1.30, -1)
+                root.AssemblyLinearVelocity = Vector3.zero
+            end)
         else
             if planeConnection then planeConnection:Disconnect() end
             if planeAnimTrack then planeAnimTrack:Stop() end
@@ -987,7 +1398,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- ✈️AEROPLANE POSE Integrated Code Block
+    -- ✈️AEROPLANE POSE
     local AERO_ANIM = "112833317179264"
     local AERO_FREEZE = 1.792
     local AERO_HEIGHT = 1.30
@@ -1002,53 +1413,69 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.AeroplaneLoop = b:GetAttribute("T")
         if _G.AeroplaneLoop then
             local targetPlayerObj = getT()
-            local bodyPart = targetPlayerObj and targetPlayerObj.Character and (targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart"))
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.AeroplaneLoop = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local bodyPart = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if bodyPart and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                local anim = Instance.new("Animation") 
-                anim.AnimationId = "rbxassetid://" .. AERO_ANIM
-                aeroAnimTrack = hum:LoadAnimation(anim)
-                aeroAnimTrack.Priority = Enum.AnimationPriority.Action4
-                aeroAnimTrack.Looped = true
-                aeroAnimTrack:Play()
-                
-                aeroAnimTrack.TimePosition = AERO_FREEZE
-                aeroAnimTrack:AdjustSpeed(0)
-                
-                hum.PlatformStand = true
-                local startTime = os.clock()
-                
-                aeroConnection = RunService.RenderStepped:Connect(function()
-                    if not _G.AeroplaneLoop or not targetPlayerObj.Character or not bodyPart.Parent then 
-                        _G.AeroplaneLoop = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        if aeroConnection then aeroConnection:Disconnect() end
-                        return 
-                    end
-                    
-                    aeroAnimTrack.TimePosition = AERO_FREEZE
-                    if not aeroAnimTrack.IsPlaying then aeroAnimTrack:Play() aeroAnimTrack:AdjustSpeed(0) end
-                    
-                    local timePassed = os.clock() - startTime
-                    local oscillation = math.sin(timePassed * (AERO_SPEED / 2)) * 0.9
-                    local currentDynamicDist = AERO_DIST + oscillation
-                    
-                    root.CFrame = bodyPart.CFrame * CFrame.new(0, AERO_HEIGHT, -currentDynamicDist)
-                    root.AssemblyLinearVelocity = Vector3.zero
-                end)
-            else
-                _G.AeroplaneLoop = false
+            if not bodyPart or not root then
                 b:SetAttribute("T", false)
+                _G.AeroplaneLoop = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            local anim = Instance.new("Animation") 
+            anim.AnimationId = "rbxassetid://" .. AERO_ANIM
+            aeroAnimTrack = hum:LoadAnimation(anim)
+            aeroAnimTrack.Priority = Enum.AnimationPriority.Action4
+            aeroAnimTrack.Looped = true
+            aeroAnimTrack:Play()
+            
+            aeroAnimTrack.TimePosition = AERO_FREEZE
+            aeroAnimTrack:AdjustSpeed(0)
+            
+            hum.PlatformStand = true
+            local startTime = os.clock()
+            
+            aeroConnection = RunService.RenderStepped:Connect(function()
+                if not _G.AeroplaneLoop or not targetPlayerObj.Character or not bodyPart.Parent then 
+                    _G.AeroplaneLoop = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    if aeroConnection then aeroConnection:Disconnect() end
+                    if aeroAnimTrack then aeroAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then h.PlatformStand = false end
+                    end
+                    return 
+                end
+                
+                aeroAnimTrack.TimePosition = AERO_FREEZE
+                if not aeroAnimTrack.IsPlaying then aeroAnimTrack:Play() aeroAnimTrack:AdjustSpeed(0) end
+                
+                local timePassed = os.clock() - startTime
+                local oscillation = math.sin(timePassed * (AERO_SPEED / 2)) * 0.9
+                local currentDynamicDist = AERO_DIST + oscillation
+                
+                root.CFrame = bodyPart.CFrame * CFrame.new(0, AERO_HEIGHT, -currentDynamicDist)
+                root.AssemblyLinearVelocity = Vector3.zero
+            end)
         else
             if aeroConnection then aeroConnection:Disconnect() end
             if aeroAnimTrack then aeroAnimTrack:Stop() end
@@ -1061,7 +1488,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 🦋BUTTERFLY POSE Integrated Code Block
+    -- 🦋BUTTERFLY POSE
     local BUTTERFLY_ANIM = "70396081158319"
     local BUTTERFLY_FREEZE = 0.729
     local BUTTERFLY_HEIGHT = 3.30
@@ -1077,60 +1504,80 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.ButterflyLoop = b:GetAttribute("T")
         if _G.ButterflyLoop then
             local targetPlayerObj = getT()
-            local targetTorso = targetPlayerObj and targetPlayerObj.Character and (targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso"))
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.ButterflyLoop = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local targetTorso = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if targetTorso and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                
-                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-                hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-                hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-                
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://" .. BUTTERFLY_ANIM
-                butterflyAnimTrack = hum:LoadAnimation(anim)
-                butterflyAnimTrack.Priority = Enum.AnimationPriority.Action4
-                butterflyAnimTrack.Looped = true
-                butterflyAnimTrack:Play()
-                
-                butterflyAnimTrack.TimePosition = BUTTERFLY_FREEZE
-                butterflyAnimTrack:AdjustSpeed(0)
-                
-                local startTime = os.clock()
-                
-                butterflyConnection = RunService.RenderStepped:Connect(function()
-                    if not _G.ButterflyLoop or not targetPlayerObj.Character or not targetTorso.Parent then
-                        _G.ButterflyLoop = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        if butterflyConnection then butterflyConnection:Disconnect() end
-                        return
-                    end
-                    
-                    butterflyAnimTrack.TimePosition = BUTTERFLY_FREEZE
-                    if not butterflyAnimTrack.IsPlaying then butterflyAnimTrack:Play() butterflyAnimTrack:AdjustSpeed(0) end
-                    
-                    local timePassed = os.clock() - startTime
-                    local alpha = (math.sin(timePassed * BUTTERFLY_SPEED) + 1) / 2
-                    local dynamicDistance = BUTTERFLY_MIN + (alpha * (BUTTERFLY_MAX - BUTTERFLY_MIN))
-                    
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    root.AssemblyAngularVelocity = Vector3.zero
-                    
-                    root.CFrame = targetTorso.CFrame * CFrame.new(0, BUTTERFLY_HEIGHT, -dynamicDistance) * CFrame.Angles(0, math.pi, 0)
-                    hum.Sit = true
-                end)
-            else
-                _G.ButterflyLoop = false
+            if not targetTorso or not root then
                 b:SetAttribute("T", false)
+                _G.ButterflyLoop = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            
+            hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. BUTTERFLY_ANIM
+            butterflyAnimTrack = hum:LoadAnimation(anim)
+            butterflyAnimTrack.Priority = Enum.AnimationPriority.Action4
+            butterflyAnimTrack.Looped = true
+            butterflyAnimTrack:Play()
+            
+            butterflyAnimTrack.TimePosition = BUTTERFLY_FREEZE
+            butterflyAnimTrack:AdjustSpeed(0)
+            
+            local startTime = os.clock()
+            
+            butterflyConnection = RunService.RenderStepped:Connect(function()
+                if not _G.ButterflyLoop or not targetPlayerObj.Character or not targetTorso.Parent then
+                    _G.ButterflyLoop = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    if butterflyConnection then butterflyConnection:Disconnect() end
+                    if butterflyAnimTrack then butterflyAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then
+                            h.Sit = false
+                            h.Jump = true
+                            h:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                        end
+                    end
+                    return
+                end
+                
+                butterflyAnimTrack.TimePosition = BUTTERFLY_FREEZE
+                if not butterflyAnimTrack.IsPlaying then butterflyAnimTrack:Play() butterflyAnimTrack:AdjustSpeed(0) end
+                
+                local timePassed = os.clock() - startTime
+                local alpha = (math.sin(timePassed * BUTTERFLY_SPEED) + 1) / 2
+                local dynamicDistance = BUTTERFLY_MIN + (alpha * (BUTTERFLY_MAX - BUTTERFLY_MIN))
+                
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+                
+                root.CFrame = targetTorso.CFrame * CFrame.new(0, BUTTERFLY_HEIGHT, -dynamicDistance) * CFrame.Angles(0, math.pi, 0)
+                hum.Sit = true
+            end)
         else
             if butterflyConnection then butterflyConnection:Disconnect() end
             if butterflyAnimTrack then butterflyAnimTrack:Stop() end
@@ -1147,7 +1594,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 🤗HUG Integrated Code Block
+    -- 🤗HUG
     local HUG_ANIM = "79920226991831"
     local HUG_BACK_OFFSET = 1.5
 
@@ -1169,65 +1616,72 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.HugActive = b:GetAttribute("T")
         if _G.HugActive then
             local targetPlayerObj = getT()
-            local targetBody = targetPlayerObj and targetPlayerObj.Character and (
-                targetPlayerObj.Character:FindFirstChild("UpperTorso") or 
-                targetPlayerObj.Character:FindFirstChild("Torso") or 
-                targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
-            )
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.HugActive = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local targetBody = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if targetBody and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                toggleHugAntiCheatBypass(true)
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://" .. HUG_ANIM
-                hugAnimTrack = hum:LoadAnimation(anim)
-                hugAnimTrack.Priority = Enum.AnimationPriority.Action4
-                hugAnimTrack.Looped = true
-                hugAnimTrack:Play()
-                
-                hum.PlatformStand = true
-                
-                local function enforceStuck()
-                    if not targetBody or not targetBody.Parent or not _G.HugActive then
-                        _G.HugActive = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        
-                        toggleHugAntiCheatBypass(false)
-                        for _, conn in ipairs(hugConnections) do if conn then conn:Disconnect() end end
-                        hugConnections = {}
-                        
-                        if hugAnimTrack then hugAnimTrack:Stop() end
-                        if char then
-                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                            if hum then 
-                                hum.PlatformStand = false 
-                                hum:ChangeState(Enum.HumanoidStateType.Running)
-                            end
-                        end
-                        return
-                    end
-                    
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    root.AssemblyAngularVelocity = Vector3.zero
-                    root.CFrame = targetBody.CFrame * CFrame.new(0, 0, HUG_BACK_OFFSET)
-                end
-                
-                table.insert(hugConnections, RunService.PreSimulation:Connect(enforceStuck))
-                table.insert(hugConnections, RunService.PostSimulation:Connect(enforceStuck))
-                table.insert(hugConnections, RunService.RenderStepped:Connect(enforceStuck))
-            else
-                _G.HugActive = false
+            if not targetBody or not root then
                 b:SetAttribute("T", false)
+                _G.HugActive = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            toggleHugAntiCheatBypass(true)
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. HUG_ANIM
+            hugAnimTrack = hum:LoadAnimation(anim)
+            hugAnimTrack.Priority = Enum.AnimationPriority.Action4
+            hugAnimTrack.Looped = true
+            hugAnimTrack:Play()
+            
+            hum.PlatformStand = true
+            
+            local function enforceStuck()
+                if not targetBody or not targetBody.Parent or not _G.HugActive then
+                    _G.HugActive = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    
+                    toggleHugAntiCheatBypass(false)
+                    for _, conn in ipairs(hugConnections) do if conn then conn:Disconnect() end end
+                    hugConnections = {}
+                    
+                    if hugAnimTrack then hugAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then 
+                            h.PlatformStand = false 
+                            h:ChangeState(Enum.HumanoidStateType.Running)
+                        end
+                    end
+                    return
+                end
+                
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+                root.CFrame = targetBody.CFrame * CFrame.new(0, 0, HUG_BACK_OFFSET)
+            end
+            
+            table.insert(hugConnections, RunService.PreSimulation:Connect(enforceStuck))
+            table.insert(hugConnections, RunService.PostSimulation:Connect(enforceStuck))
+            table.insert(hugConnections, RunService.RenderStepped:Connect(enforceStuck))
         else
             toggleHugAntiCheatBypass(false)
             for _, conn in ipairs(hugConnections) do if conn then conn:Disconnect() end end
@@ -1246,7 +1700,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 💋KISS Integrated Code Block
+    -- 💋KISS
     local KISS_ANIM = "112078433891854"
     local KISS_DISTANCE = 1.5
     local KISS_Y_OFFSET = -2
@@ -1259,75 +1713,82 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.KissActive = b:GetAttribute("T")
         if _G.KissActive then
             local targetPlayerObj = getT()
-            local targetBody = targetPlayerObj and targetPlayerObj.Character and (
-                targetPlayerObj.Character:FindFirstChild("UpperTorso") or 
-                targetPlayerObj.Character:FindFirstChild("Torso") or 
-                targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
-            )
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.KissActive = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local targetBody = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if targetBody and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                toggleHugAntiCheatBypass(true) 
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://" .. KISS_ANIM
-                kissAnimTrack = hum:LoadAnimation(anim)
-                kissAnimTrack.Priority = Enum.AnimationPriority.Action4
-                kissAnimTrack.Looped = true
-                kissAnimTrack:Play()
-                
-                hum.PlatformStand = true
-                
-                local function enforceKissStuck()
-                    if not targetBody or not targetBody.Parent or not _G.KissActive then
-                        _G.KissActive = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        
-                        toggleHugAntiCheatBypass(false)
-                        for _, conn in ipairs(kissConnections) do if conn then conn:Disconnect() end end
-                        kissConnections = {}
-                        
-                        if kissAnimTrack then kissAnimTrack:Stop() end
-                        if char then
-                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                            if hum then 
-                                hum.PlatformStand = false 
-                                hum:ChangeState(Enum.HumanoidStateType.Running)
-                            end
-                        end
-                        return
-                    end
-                    
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    root.AssemblyAngularVelocity = Vector3.zero
-                    
-                    local baseCF = targetBody.CFrame
-                    local targetPosition = baseCF.Position
-                    
-                    local relativeOffset = baseCF * CFrame.new(0, KISS_Y_OFFSET, -KISS_DISTANCE)
-                    local finalCFrame = CFrame.lookAt(
-                        Vector3.new(relativeOffset.Position.X, relativeOffset.Position.Y, relativeOffset.Position.Z), 
-                        Vector3.new(targetPosition.X, relativeOffset.Position.Y, targetPosition.Z)
-                    )
-                    
-                    root.CFrame = finalCFrame
-                end
-                
-                table.insert(kissConnections, RunService.PreSimulation:Connect(enforceKissStuck))
-                table.insert(kissConnections, RunService.PostSimulation:Connect(enforceKissStuck))
-                table.insert(kissConnections, RunService.RenderStepped:Connect(enforceKissStuck))
-            else
-                _G.KissActive = false
+            if not targetBody or not root then
                 b:SetAttribute("T", false)
+                _G.KissActive = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            toggleHugAntiCheatBypass(true) 
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. KISS_ANIM
+            kissAnimTrack = hum:LoadAnimation(anim)
+            kissAnimTrack.Priority = Enum.AnimationPriority.Action4
+            kissAnimTrack.Looped = true
+            kissAnimTrack:Play()
+            
+            hum.PlatformStand = true
+            
+            local function enforceKissStuck()
+                if not targetBody or not targetBody.Parent or not _G.KissActive then
+                    _G.KissActive = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    
+                    toggleHugAntiCheatBypass(false)
+                    for _, conn in ipairs(kissConnections) do if conn then conn:Disconnect() end end
+                    kissConnections = {}
+                    
+                    if kissAnimTrack then kissAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then 
+                            h.PlatformStand = false 
+                            h:ChangeState(Enum.HumanoidStateType.Running)
+                        end
+                    end
+                    return
+                end
+                
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+                
+                local baseCF = targetBody.CFrame
+                local targetPosition = baseCF.Position
+                
+                local relativeOffset = baseCF * CFrame.new(0, KISS_Y_OFFSET, -KISS_DISTANCE)
+                local finalCFrame = CFrame.lookAt(
+                    Vector3.new(relativeOffset.Position.X, relativeOffset.Position.Y, relativeOffset.Position.Z), 
+                    Vector3.new(targetPosition.X, relativeOffset.Position.Y, targetPosition.Z)
+                )
+                
+                root.CFrame = finalCFrame
+            end
+            
+            table.insert(kissConnections, RunService.PreSimulation:Connect(enforceKissStuck))
+            table.insert(kissConnections, RunService.PostSimulation:Connect(enforceKissStuck))
+            table.insert(kissConnections, RunService.RenderStepped:Connect(enforceKissStuck))
         else
             toggleHugAntiCheatBypass(false)
             for _, conn in ipairs(kissConnections) do if conn then conn:Disconnect() end end
@@ -1346,7 +1807,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 😊THANK YOU Integrated Code Block (Perfectly placed below 💋KISS)
+    -- 😊THANK YOU
     local THANK_ANIM = "116243979368109"
     local THANK_DISTANCE = 6
 
@@ -1358,61 +1819,72 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.ThankYouActive = b:GetAttribute("T")
         if _G.ThankYouActive then
             local targetPlayerObj = getT()
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.ThankYouActive = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if targetPlayerObj and targetPlayerObj.Character and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                toggleHugAntiCheatBypass(true)
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://" .. THANK_ANIM
-                thankAnimTrack = hum:LoadAnimation(anim)
-                thankAnimTrack.Priority = Enum.AnimationPriority.Action4
-                thankAnimTrack.Looped = true
-                thankAnimTrack:Play()
-                
-                hum.PlatformStand = true
-                
-                local function enforceThankSync()
-                    if not targetPlayerObj.Character or not targetPlayerObj.Character:FindFirstChild("HumanoidRootPart") or not _G.ThankYouActive then
-                        _G.ThankYouActive = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        
-                        toggleHugAntiCheatBypass(false)
-                        for _, conn in ipairs(thankConnections) do if conn then conn:Disconnect() end end
-                        thankConnections = {}
-                        
-                        if thankAnimTrack then thankAnimTrack:Stop() end
-                        if char then
-                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                            if hum then 
-                                hum.PlatformStand = false 
-                                hum:ChangeState(Enum.HumanoidStateType.Running)
-                            end
-                        end
-                        return
-                    end
-                    
-                    local targetPivot = targetPlayerObj.Character:GetPivot()
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    
-                    root.CFrame = targetPivot * CFrame.new(0, 0, -THANK_DISTANCE) * CFrame.Angles(0, math.rad(180), 0)
-                end
-                
-                table.insert(thankConnections, RunService.PreSimulation:Connect(enforceThankSync))
-                table.insert(thankConnections, RunService.PostSimulation:Connect(enforceThankSync))
-                table.insert(thankConnections, RunService.RenderStepped:Connect(enforceThankSync))
-            else
-                _G.ThankYouActive = false
+            if not root then
                 b:SetAttribute("T", false)
+                _G.ThankYouActive = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            toggleHugAntiCheatBypass(true)
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. THANK_ANIM
+            thankAnimTrack = hum:LoadAnimation(anim)
+            thankAnimTrack.Priority = Enum.AnimationPriority.Action4
+            thankAnimTrack.Looped = true
+            thankAnimTrack:Play()
+            
+            hum.PlatformStand = true
+            
+            local function enforceThankSync()
+                if not targetPlayerObj.Character or not targetPlayerObj.Character:FindFirstChild("HumanoidRootPart") or not _G.ThankYouActive then
+                    _G.ThankYouActive = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    
+                    toggleHugAntiCheatBypass(false)
+                    for _, conn in ipairs(thankConnections) do if conn then conn:Disconnect() end end
+                    thankConnections = {}
+                    
+                    if thankAnimTrack then thankAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then 
+                            h.PlatformStand = false 
+                            h:ChangeState(Enum.HumanoidStateType.Running)
+                        end
+                    end
+                    return
+                end
+                
+                local targetPivot = targetPlayerObj.Character:GetPivot()
+                root.AssemblyLinearVelocity = Vector3.zero
+                
+                root.CFrame = targetPivot * CFrame.new(0, 0, -THANK_DISTANCE) * CFrame.Angles(0, math.rad(180), 0)
+            end
+            
+            table.insert(thankConnections, RunService.PreSimulation:Connect(enforceThankSync))
+            table.insert(thankConnections, RunService.PostSimulation:Connect(enforceThankSync))
+            table.insert(thankConnections, RunService.RenderStepped:Connect(enforceThankSync))
         else
             toggleHugAntiCheatBypass(false)
             for _, conn in ipairs(thankConnections) do if conn then conn:Disconnect() end end
@@ -1431,7 +1903,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 😭SORRY Integrated Code Block (Perfectly placed below 😊THANK YOU)
+    -- 😭SORRY
     local SORRY_ANIM = "70869637765981"
     local SORRY_DISTANCE = 7
 
@@ -1443,70 +1915,76 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.SorryActive = b:GetAttribute("T")
         if _G.SorryActive then
             local targetPlayerObj = getT()
-            local targetBody = targetPlayerObj and targetPlayerObj.Character and (
-                targetPlayerObj.Character:FindFirstChild("UpperTorso") or 
-                targetPlayerObj.Character:FindFirstChild("Torso") or 
-                targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
-            )
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.SorryActive = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local targetBody = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if targetBody and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                toggleHugAntiCheatBypass(true)
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://" .. SORRY_ANIM
-                sorryAnimTrack = hum:LoadAnimation(anim)
-                sorryAnimTrack.Priority = Enum.AnimationPriority.Action4
-                sorryAnimTrack.Looped = true
-                sorryAnimTrack:Play()
-                
-                hum.PlatformStand = true
-                
-                local function enforceSorrySync()
-                    if not targetBody or not targetBody.Parent or not _G.SorryActive then
-                        _G.SorryActive = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        
-                        toggleHugAntiCheatBypass(false)
-                        for _, conn in ipairs(sorryConnections) do if conn then conn:Disconnect() end end
-                        sorryConnections = {}
-                        
-                        if sorryAnimTrack then sorryAnimTrack:Stop() end
-                        if char then
-                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                            if hum then 
-                                hum.PlatformStand = false 
-                                hum:ChangeState(Enum.HumanoidStateType.Running)
-                            end
-                        end
-                        return
-                    end
-                    
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    root.AssemblyAngularVelocity = Vector3.zero
-                    
-                    -- Face-to-Face 7 Studs front attachment tracking matrix
-                    local offset = targetBody.CFrame * CFrame.new(0, 0, -SORRY_DISTANCE) * CFrame.Angles(0, math.pi, 0)
-                    
-                    pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", targetBody) end)
-                    root.CFrame = offset
-                end
-                
-                table.insert(sorryConnections, RunService.PreSimulation:Connect(enforceSorrySync))
-                table.insert(sorryConnections, RunService.PostSimulation:Connect(enforceSorrySync))
-                table.insert(sorryConnections, RunService.RenderStepped:Connect(enforceSorrySync))
-            else
-                _G.SorryActive = false
+            if not targetBody or not root then
                 b:SetAttribute("T", false)
+                _G.SorryActive = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            toggleHugAntiCheatBypass(true)
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. SORRY_ANIM
+            sorryAnimTrack = hum:LoadAnimation(anim)
+            sorryAnimTrack.Priority = Enum.AnimationPriority.Action4
+            sorryAnimTrack.Looped = true
+            sorryAnimTrack:Play()
+            
+            hum.PlatformStand = true
+            
+            local function enforceSorrySync()
+                if not targetBody or not targetBody.Parent or not _G.SorryActive then
+                    _G.SorryActive = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    
+                    toggleHugAntiCheatBypass(false)
+                    for _, conn in ipairs(sorryConnections) do if conn then conn:Disconnect() end end
+                    sorryConnections = {}
+                    
+                    if sorryAnimTrack then sorryAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then 
+                            h.PlatformStand = false 
+                            h:ChangeState(Enum.HumanoidStateType.Running)
+                        end
+                    end
+                    return
+                end
+                
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+                
+                local offset = targetBody.CFrame * CFrame.new(0, 0, -SORRY_DISTANCE) * CFrame.Angles(0, math.pi, 0)
+                
+                pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", targetBody) end)
+                root.CFrame = offset
+            end
+            
+            table.insert(sorryConnections, RunService.PreSimulation:Connect(enforceSorrySync))
+            table.insert(sorryConnections, RunService.PostSimulation:Connect(enforceSorrySync))
+            table.insert(sorryConnections, RunService.RenderStepped:Connect(enforceSorrySync))
         else
             toggleHugAntiCheatBypass(false)
             for _, conn in ipairs(sorryConnections) do if conn then conn:Disconnect() end end
@@ -1525,10 +2003,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- ==========================================
-    -- 🌹 ROSE - 5 Studs Distance, 1 Stud Up
-    -- 0 se start hoke 1.850s pe freeze
-    -- ==========================================
+    -- 🌹ROSE
     _G.RoseAttachLoop = false
     local roseConnection
     local roseAnimTrack
@@ -1538,85 +2013,90 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.RoseAttachLoop = b:GetAttribute("T")
         if _G.RoseAttachLoop then
             local targetPlayerObj = getT()
-            local targetBody = targetPlayerObj and targetPlayerObj.Character and (
-                targetPlayerObj.Character:FindFirstChild("UpperTorso") or 
-                targetPlayerObj.Character:FindFirstChild("Torso") or 
-                targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
-            )
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.RoseAttachLoop = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local targetBody = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if targetBody and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                toggleHugAntiCheatBypass(true)
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://89740248756697"
-                roseAnimTrack = hum:LoadAnimation(anim)
-                roseAnimTrack.Priority = Enum.AnimationPriority.Action4
-                roseAnimTrack.Looped = true
-                roseAnimTrack:Play()
-                
-                -- 0 se start normal speed
-                roseAnimTrack.TimePosition = 0
-                roseAnimTrack:AdjustSpeed(1)
-                roseFreezeReached = false
-                
-                hum.PlatformStand = true
-                
-                local function enforceRoseSync()
-                    if not targetBody or not targetBody.Parent or not _G.RoseAttachLoop then
-                        _G.RoseAttachLoop = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        
-                        toggleHugAntiCheatBypass(false)
-                        if roseConnection then roseConnection:Disconnect() end
-                        roseConnection = nil
-                        
-                        if roseAnimTrack then roseAnimTrack:Stop() end
-                        if char then
-                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                            if hum then 
-                                hum.PlatformStand = false 
-                                hum:ChangeState(Enum.HumanoidStateType.Running)
-                            end
-                        end
-                        return
-                    end
-                    
-                    -- 1.850s pe freeze
-                    if roseAnimTrack.TimePosition >= 1.850 and not roseFreezeReached then
-                        roseFreezeReached = true
-                        roseAnimTrack.TimePosition = 1.850
-                        roseAnimTrack:AdjustSpeed(0)
-                    end
-                    
-                    if roseFreezeReached then
-                        roseAnimTrack.TimePosition = 1.850
-                        if not roseAnimTrack.IsPlaying then
-                            roseAnimTrack:Play()
-                            roseAnimTrack:AdjustSpeed(0)
-                        end
-                    end
-                    
-                    local offset = targetBody.CFrame * CFrame.new(0, 1.0, -5.0) * CFrame.Angles(0, math.pi, 0)
-                    
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    root.AssemblyAngularVelocity = Vector3.zero
-                    root.CFrame = offset
-                end
-                
-                roseConnection = RunService.RenderStepped:Connect(enforceRoseSync)
-            else
-                _G.RoseAttachLoop = false
+            if not targetBody or not root then
                 b:SetAttribute("T", false)
+                _G.RoseAttachLoop = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            toggleHugAntiCheatBypass(true)
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://89740248756697"
+            roseAnimTrack = hum:LoadAnimation(anim)
+            roseAnimTrack.Priority = Enum.AnimationPriority.Action4
+            roseAnimTrack.Looped = true
+            roseAnimTrack:Play()
+            
+            roseAnimTrack.TimePosition = 0
+            roseAnimTrack:AdjustSpeed(1)
+            roseFreezeReached = false
+            
+            hum.PlatformStand = true
+            
+            local function enforceRoseSync()
+                if not targetBody or not targetBody.Parent or not _G.RoseAttachLoop then
+                    _G.RoseAttachLoop = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    
+                    toggleHugAntiCheatBypass(false)
+                    if roseConnection then roseConnection:Disconnect() end
+                    roseConnection = nil
+                    
+                    if roseAnimTrack then roseAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then 
+                            h.PlatformStand = false 
+                            h:ChangeState(Enum.HumanoidStateType.Running)
+                        end
+                    end
+                    return
+                end
+                
+                if roseAnimTrack.TimePosition >= 1.850 and not roseFreezeReached then
+                    roseFreezeReached = true
+                    roseAnimTrack.TimePosition = 1.850
+                    roseAnimTrack:AdjustSpeed(0)
+                end
+                
+                if roseFreezeReached then
+                    roseAnimTrack.TimePosition = 1.850
+                    if not roseAnimTrack.IsPlaying then
+                        roseAnimTrack:Play()
+                        roseAnimTrack:AdjustSpeed(0)
+                    end
+                end
+                
+                local offset = targetBody.CFrame * CFrame.new(0, 1.0, -5.0) * CFrame.Angles(0, math.pi, 0)
+                
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+                root.CFrame = offset
+            end
+            
+            roseConnection = RunService.RenderStepped:Connect(enforceRoseSync)
         else
             toggleHugAntiCheatBypass(false)
             if roseConnection then roseConnection:Disconnect() end
@@ -1635,9 +2115,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- ==========================================
-    -- 🪐 ORBIT [TITAN] - 8 Studs Distance, Speed 1.50
-    -- ==========================================
+    -- 🪐ORBIT [TITAN]
     _G.OrbitAttachLoop = false
     local orbitConnection
     local orbitAnimTrack
@@ -1646,80 +2124,85 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         _G.OrbitAttachLoop = b:GetAttribute("T")
         if _G.OrbitAttachLoop then
             local targetPlayerObj = getT()
-            local targetBody = targetPlayerObj and targetPlayerObj.Character and (
-                targetPlayerObj.Character:FindFirstChild("UpperTorso") or 
-                targetPlayerObj.Character:FindFirstChild("Torso") or 
-                targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
-            )
+            if not targetPlayerObj or not targetPlayerObj.Character then
+                b:SetAttribute("T", false)
+                _G.OrbitAttachLoop = false
+                b.BackgroundColor3 = White
+                b.TextColor3 = Black
+                return
+            end
+            
+            local targetBody = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
             local char = player.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             
-            if targetBody and root then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-                
-                toggleHugAntiCheatBypass(true)
-                
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://133126721618325"
-                orbitAnimTrack = hum:LoadAnimation(anim)
-                orbitAnimTrack.Priority = Enum.AnimationPriority.Action4
-                orbitAnimTrack.Looped = true
-                orbitAnimTrack:Play()
-                
-                hum.PlatformStand = true
-                local angle = 0
-                
-                local function enforceOrbitSync()
-                    if not targetBody or not targetBody.Parent or not _G.OrbitAttachLoop then
-                        _G.OrbitAttachLoop = false
-                        b:SetAttribute("T", false)
-                        b.BackgroundColor3 = White
-                        b.TextColor3 = Black
-                        
-                        toggleHugAntiCheatBypass(false)
-                        if orbitConnection then orbitConnection:Disconnect() end
-                        orbitConnection = nil
-                        pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end)
-                        
-                        if orbitAnimTrack then orbitAnimTrack:Stop() end
-                        if char then
-                            if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                            if hum then 
-                                hum.PlatformStand = false 
-                                hum:ChangeState(Enum.HumanoidStateType.Running)
-                            end
-                        end
-                        return
-                    end
-                    
-                    -- Speed 1.50 Orbit Calculation
-                    local delta = RunService.Heartbeat:Wait()
-                    angle = angle + (delta * 1.50)
-                    
-                    local offsetX = math.sin(angle) * 8.0
-                    local offsetZ = math.cos(angle) * 8.0
-                    
-                    local relativePos = Vector3.new(offsetX, 0, offsetZ)
-                    local targetCFrame = targetBody.CFrame * CFrame.new(relativePos)
-                    
-                    -- Face target
-                    local finalCFrame = CFrame.lookAt(targetCFrame.Position, targetBody.Position)
-                    
-                    pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", targetBody) end)
-                    
-                    root.AssemblyLinearVelocity = Vector3.zero
-                    root.AssemblyAngularVelocity = Vector3.zero
-                    root.CFrame = finalCFrame
-                end
-                
-                orbitConnection = RunService.Heartbeat:Connect(enforceOrbitSync)
-            else
-                _G.OrbitAttachLoop = false
+            if not targetBody or not root then
                 b:SetAttribute("T", false)
+                _G.OrbitAttachLoop = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
+                return
             end
+            
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
+            
+            toggleHugAntiCheatBypass(true)
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://133126721618325"
+            orbitAnimTrack = hum:LoadAnimation(anim)
+            orbitAnimTrack.Priority = Enum.AnimationPriority.Action4
+            orbitAnimTrack.Looped = true
+            orbitAnimTrack:Play()
+            
+            hum.PlatformStand = true
+            local angle = 0
+            
+            local function enforceOrbitSync()
+                if not targetBody or not targetBody.Parent or not _G.OrbitAttachLoop then
+                    _G.OrbitAttachLoop = false
+                    b:SetAttribute("T", false)
+                    b.BackgroundColor3 = White
+                    b.TextColor3 = Black
+                    
+                    toggleHugAntiCheatBypass(false)
+                    if orbitConnection then orbitConnection:Disconnect() end
+                    orbitConnection = nil
+                    pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end)
+                    
+                    if orbitAnimTrack then orbitAnimTrack:Stop() end
+                    local ch = player.Character
+                    if ch then
+                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
+                        local h = ch:FindFirstChildOfClass("Humanoid")
+                        if h then 
+                            h.PlatformStand = false 
+                            h:ChangeState(Enum.HumanoidStateType.Running)
+                        end
+                    end
+                    return
+                end
+                
+                local delta = RunService.Heartbeat:Wait()
+                angle = angle + (delta * 1.50)
+                
+                local offsetX = math.sin(angle) * 8.0
+                local offsetZ = math.cos(angle) * 8.0
+                
+                local relativePos = Vector3.new(offsetX, 0, offsetZ)
+                local targetCFrame = targetBody.CFrame * CFrame.new(relativePos)
+                
+                local finalCFrame = CFrame.lookAt(targetCFrame.Position, targetBody.Position)
+                
+                pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", targetBody) end)
+                
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+                root.CFrame = finalCFrame
+            end
+            
+            orbitConnection = RunService.Heartbeat:Connect(enforceOrbitSync)
         else
             toggleHugAntiCheatBypass(false)
             if orbitConnection then orbitConnection:Disconnect() end
