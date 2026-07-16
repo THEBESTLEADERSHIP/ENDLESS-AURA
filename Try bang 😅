@@ -4,70 +4,9 @@ local userInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local starterGui = game:GetService("StarterGui")
 
--- ANIMATION & AUDIO CONFIGURATION
+-- ANIMATION CONFIGURATION
 local bangAnimId = "rbxassetid://5918726674"
 local activeTrack = nil
-local soundMuted = false 
-local animMuted = false 
-
--- SOUND SYSTEM INITIALIZATION
-local sound1 = Instance.new("Sound")
-sound1.SoundId = "rbxassetid://95656642853883"
-sound1.Volume = 2
-
-local sound2 = Instance.new("Sound")
-sound2.SoundId = "rbxassetid://78435052000321" 
-sound2.Volume = 2
-
-local sound3 = Instance.new("Sound")
-sound3.SoundId = "rbxassetid://136178701391977"
-sound3.Volume = 2
-sound3.Looped = true
-
-local leaveSound = Instance.new("Sound")
-leaveSound.SoundId = "rbxassetid://96880277560628" 
-leaveSound.Volume = 2
-
-local lastSoundTime = 0
-local soundGap = 7 
-
-local function stopAllSounds()
-    sound1:Stop()
-    sound2:Stop()
-    sound3:Stop()
-end
-
-local function handleAudioForMode(currentMode)
-    if soundMuted then 
-        stopAllSounds()
-        return 
-    end
-    
-    if tick() - lastSoundTime >= soundGap then
-        if currentMode == "Normal" then
-            if sound2.IsPlaying then sound2:Stop() end
-            if sound3.IsPlaying then sound3:Stop() end
-            if not sound1.IsPlaying then
-                sound1:Play()
-                lastSoundTime = tick()
-            end
-        elseif currentMode == "Face Bang" then
-            if sound1.IsPlaying then sound1:Stop() end
-            if sound3.IsPlaying then sound3:Stop() end
-            if not sound2.IsPlaying then
-                sound2:Play()
-                lastSoundTime = tick()
-            end
-        elseif currentMode == "Auto Switch" then
-            if sound1.IsPlaying then sound1:Stop() end
-            if sound2.IsPlaying then sound2:Stop() end
-            if not sound3.IsPlaying then
-                sound3:Play()
-                lastSoundTime = tick()
-            end
-        end
-    end
-end
 
 local function getHumanoid()
     return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
@@ -77,11 +16,12 @@ end
 -- // RE-EXECUTION CLEAN WIPE & RESTART SYSTEM // --
 -- ====================================================================
 if _G.EndlessAuraStorage then
-    if _G.EndlessAuraStorage.ActiveConnection then
-        _G.EndlessAuraStorage.ActiveConnection:Disconnect()
-    end
+    -- Purani saari cheezein ban aur gayab karne ka protocol[span_4](start_span)[span_4](end_span)
     if _G.EndlessAuraStorage.CurrentGui then
         _G.EndlessAuraStorage.CurrentGui:Destroy()
+    end
+    if _G.EndlessAuraStorage.ActiveConnection then
+        _G.EndlessAuraStorage.ActiveConnection:Disconnect()
     end
     if _G.EndlessAuraStorage.PlatformPart then
         _G.EndlessAuraStorage.PlatformPart:Destroy()
@@ -89,6 +29,7 @@ if _G.EndlessAuraStorage then
     if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() end
     if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() end
     
+    -- Animation ko complete stop karna[span_5](start_span)[span_5](end_span)
     pcall(function()
         local myChar = player.Character
         if myChar then
@@ -107,12 +48,11 @@ if _G.EndlessAuraStorage then
         end
     end)
     
-    stopAllSounds()
-    leaveSound:Destroy()
     _G.EndlessAuraStorage = nil
-    task.wait(0.1)
+    task.wait(0.1) -- Fresh restart delay[span_6](start_span)[span_6](end_span)
 end
 
+-- Initialize clean memory storage[span_7](start_span)[span_7](end_span)
 _G.EndlessAuraStorage = {
     CurrentGui = nil,
     ActiveConnection = nil,
@@ -121,7 +61,7 @@ _G.EndlessAuraStorage = {
     BG = nil
 }
 
--- CONFIGURATIONS
+-- CONFIGURATIONS[span_8](start_span)[span_8](end_span)
 local speedMultiplier = 17.4   
 local forwardBackRange = 1.1   
 local fixedUpOffset = 1.8      
@@ -137,14 +77,7 @@ local selectedPlayer = nil
 local currentAutoSubMode = "Normal"
 local lastSwitchTime = 0
 
-pcall(function()
-    sound1.Parent = game.CoreGui
-    sound2.Parent = game.CoreGui
-    sound3.Parent = game.CoreGui
-    leaveSound.Parent = game.CoreGui
-end)
-
--- Anti-Die System
+-- Anti-Die System[span_9](start_span)[span_9](end_span)
 task.spawn(function()
     while task.wait(0.5) do
         if not _G.EndlessAuraStorage then break end 
@@ -199,7 +132,7 @@ brandingImg.BackgroundTransparency = 1
 brandingImg.Parent = nameBoxFrame
 
 local nameText = Instance.new("TextLabel")
-nameText.Size = UDim2.new(1, -95, 1, 0)
+nameText.Size = UDim2.new(1, -45, 1, 0) -- Adjusted width since buttons are removed[span_10](start_span)[span_10](end_span)
 nameText.Position = UDim2.new(0, 38, 0, 0)
 nameText.Text = "ENDLESS AURA BANG PANEL💀💢"
 nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -208,58 +141,6 @@ nameText.TextSize = 10.5
 nameText.TextXAlignment = Enum.TextXAlignment.Left
 nameText.BackgroundTransparency = 1
 nameText.Parent = nameBoxFrame
-
-local soundToggleBtn = Instance.new("TextButton")
-soundToggleBtn.Size = UDim2.new(0, 24, 0, 24)
-soundToggleBtn.Position = UDim2.new(1, -52, 0, 6)
-soundToggleBtn.BackgroundTransparency = 1 
-soundToggleBtn.BorderSizePixel = 0
-soundToggleBtn.Text = "🔊"
-soundToggleBtn.TextSize = 14
-soundToggleBtn.TextColor3 = Color3.new(1, 1, 1)
-soundToggleBtn.Parent = nameBoxFrame
-
-soundToggleBtn.MouseButton1Click:Connect(function()
-    soundMuted = not soundMuted
-    if soundMuted then
-        soundToggleBtn.Text = "🔕"
-        stopAllSounds()
-    else
-        soundToggleBtn.Text = "🔊"
-        if isAttached then lastSoundTime = 0 end 
-    end
-end)
-
-local animToggleBtn = Instance.new("TextButton")
-animToggleBtn.Size = UDim2.new(0, 24, 0, 24)
-animToggleBtn.Position = UDim2.new(1, -26, 0, 6)
-animToggleBtn.BackgroundTransparency = 1 
-animToggleBtn.BorderSizePixel = 0
-animToggleBtn.Text = "👤"
-animToggleBtn.TextSize = 14
-animToggleBtn.TextColor3 = Color3.new(1, 1, 1)
-animToggleBtn.Parent = nameBoxFrame
-
-animToggleBtn.MouseButton1Click:Connect(function()
-    animMuted = not animMuted
-    if animMuted then
-        animToggleBtn.Text = "❌" 
-        if activeTrack then activeTrack:Stop() activeTrack = nil end
-    else
-        animToggleBtn.Text = "👤"
-        if isAttached and not activeTrack then
-            local hum = getHumanoid()
-            if hum then
-                local anim = Instance.new("Animation")
-                anim.AnimationId = bangAnimId
-                activeTrack = hum:LoadAnimation(anim)
-                activeTrack.Looped = true
-                activeTrack:Play()
-                activeTrack:AdjustSpeed(speedMultiplier / 5)
-            end
-        end
-    end
-end)
 
 local toggleGuiBtn = Instance.new("TextButton")
 toggleGuiBtn.Size = UDim2.new(0, 70, 0, 30)
@@ -282,7 +163,7 @@ toggleGuiBtn.MouseButton1Click:Connect(function()
     toggleGuiBtn.BorderColor3 = mainFrame.Visible and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(0, 255, 150)
 end)
 
--- Draggable Engine
+-- Draggable Engine[span_11](start_span)[span_11](end_span)
 local dragging, dragStart, startPos
 nameBoxFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -301,7 +182,7 @@ userInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 end)
 
--- SEARCH BOX
+-- SEARCH BOX[span_12](start_span)[span_12](end_span)
 local textBox = Instance.new("TextBox") 
 textBox.Size = UDim2.new(1, -16, 0, 26) 
 textBox.Position = UDim2.new(0, 8, 0, 50) 
@@ -315,7 +196,7 @@ textBox.Font = Enum.Font.Code
 textBox.BorderColor3 = Color3.fromRGB(150, 0, 30) 
 textBox.Parent = mainFrame 
 
--- SCROLL LIST
+-- SCROLL LIST[span_13](start_span)[span_13](end_span)
 local scrollingFrame = Instance.new("ScrollingFrame") 
 scrollingFrame.Size = UDim2.new(1, -16, 0, 65) 
 scrollingFrame.Position = UDim2.new(0, 8, 0, 82) 
@@ -327,7 +208,9 @@ scrollingFrame.Parent = mainFrame
 local uiList = Instance.new("UIListLayout", scrollingFrame)
 uiList.Padding = UDim.new(0, 2)
 
--- SIDE-BY-SIDE BUTTONS
+-- ====================================================================
+-- // SIDE-BY-SIDE SMALL BUTTONS SETUP // --
+-- ====================================================================
 local clearBtn = Instance.new("TextButton")
 clearBtn.Size = UDim2.new(0.5, -12, 0, 22) 
 clearBtn.Position = UDim2.new(0, 8, 0, 154) 
@@ -350,7 +233,7 @@ selectAllBtn.Font = Enum.Font.Code
 selectAllBtn.TextSize = 11
 selectAllBtn.Parent = mainFrame
 
--- TARGET MODE BUTTON 
+-- TARGET MODE BUTTON[span_14](start_span)[span_14](end_span)
 local modeBtn = Instance.new("TextButton")
 modeBtn.Size = UDim2.new(1, -16, 0, 24)
 modeBtn.Position = UDim2.new(0, 8, 0, 182)
@@ -377,10 +260,9 @@ modeBtn.MouseButton1Click:Connect(function()
         modeBtn.Text = "MODE // SYSTEM_NORMAL"
         modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     end
-    if isAttached then lastSoundTime = 0 end 
 end)
 
--- SLIDER GENERATOR
+-- SLIDER GENERATOR[span_15](start_span)[span_15](end_span)
 local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callback)
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -16, 0, 14)
@@ -522,6 +404,9 @@ textBox:GetPropertyChangedSignal("Text"):Connect(function()
 end) 
 updateList() 
 
+-- ====================================================================
+-- // 0.0s ZERO DELAY TARGET LEAVE TRACKER // --
+-- ====================================================================
 local function emergencyTargetShift()
     lastTargetSwitchTime = 0 
     currentTargetIndex = 1
@@ -544,8 +429,6 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
             })
         end)
         
-        leaveSound:Play()
-        
         if #selectedPlayers == 0 and isAttached then
             isAttached = false
             if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end
@@ -553,7 +436,6 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
             if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
             if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
             if activeTrack then activeTrack:Stop() activeTrack = nil end
-            stopAllSounds()
             toggleButton.Text = "[ FUCK ON ]"
             toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30)
         end
@@ -561,7 +443,7 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
 end)
 
 -- ====================================================================
--- // MAXIMUM STUCK-FREE PHYSICS SYNCHRONIZER ENGINE (GLUED & NO DELAY) // --
+-- // MAXIMUM STUCK-FREE PHYSICS SYNCHRONIZER ENGINE // --
 -- ====================================================================
 toggleButton.MouseButton1Click:Connect(function() 
     if isAttached then 
@@ -572,7 +454,6 @@ toggleButton.MouseButton1Click:Connect(function()
         if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
         
         if activeTrack then activeTrack:Stop() activeTrack = nil end
-        stopAllSounds()
         
         toggleButton.Text = "[ FUCK ON ]" 
         toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
@@ -590,7 +471,6 @@ toggleButton.MouseButton1Click:Connect(function()
         toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
         lastSwitchTime = tick()
         lastTargetSwitchTime = tick()
-        lastSoundTime = 0 
         currentTargetIndex = 1
         selectedPlayer = selectedPlayers[currentTargetIndex]
         currentAutoSubMode = "Normal"
@@ -599,29 +479,26 @@ toggleButton.MouseButton1Click:Connect(function()
         local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
         if not myHRP then return end
 
-        if not animMuted then
-            local hum = getHumanoid()
-            if hum then
-                local anim = Instance.new("Animation")
-                anim.AnimationId = bangAnimId
-                activeTrack = hum:LoadAnimation(anim)
-                activeTrack.Looped = true
-                activeTrack:Play()
-                activeTrack:AdjustSpeed(speedMultiplier / 5)
-            end
+        local hum = getHumanoid()
+        if hum then
+            local anim = Instance.new("Animation")
+            anim.AnimationId = bangAnimId
+            activeTrack = hum:LoadAnimation(anim)
+            activeTrack.Looped = true
+            activeTrack:Play()
+            activeTrack:AdjustSpeed(speedMultiplier / 5)
         end
 
-        -- Increased velocity forces for instant movement synchronization
         local bv = Instance.new("BodyVelocity")
-        bv.MaxForce = Vector3.new(1e18, 1e18, 1e18)
+        bv.MaxForce = Vector3.new(1e15, 1e15, 1e15)
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.Parent = myHRP
         _G.EndlessAuraStorage.BV = bv
 
         local bg = Instance.new("BodyGyro")
-        bg.MaxTorque = Vector3.new(1e18, 1e18, 1e18)
-        bg.P = 1e9
-        bg.D = 50
+        bg.MaxTorque = Vector3.new(1e15, 1e15, 1e15)
+        bg.P = 1e8
+        bg.D = 100
         bg.CFrame = myHRP.CFrame
         bg.Parent = myHRP
         _G.EndlessAuraStorage.BG = bg
@@ -634,10 +511,10 @@ toggleButton.MouseButton1Click:Connect(function()
         platform.Parent = game.Workspace
         _G.EndlessAuraStorage.PlatformPart = platform
 
-        -- Switched to RenderStepped for absolute zero frame delay attachment
-        _G.EndlessAuraStorage.ActiveConnection = runService.RenderStepped:Connect(function() 
+        _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
+            -- PURE 0.1s SHIFTING INTERVAL
             if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
@@ -664,8 +541,6 @@ toggleButton.MouseButton1Click:Connect(function()
                 end
                 currentModeToRun = currentAutoSubMode
             end
-            
-            handleAudioForMode(targetMode)
 
             if targetHRP.Position.Y < -60 or targetHRP.Position.Y < (game.Workspace.FallenPartsDestroyHeight + 15) then
                 bv.Velocity = Vector3.new(0,0,0)
@@ -695,10 +570,10 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- HARD GLUE LOCK MECHANISM
+            -- GLUED TO TARGET ENGINE
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
-            bv.Velocity = targetHRP.AssemblyLinearVelocity -- Inherit target velocity instantly
+            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300 
             
             if platform and platform.Parent then
                 platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
