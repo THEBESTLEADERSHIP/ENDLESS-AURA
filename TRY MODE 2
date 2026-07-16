@@ -1,6 +1,7 @@
--- [[ 🥷 ENDLESS STAND NINJA - V39.5 👑 ]] --
+-- [[ 🥷 ENDLESS STAND NINJA - V39.5 TITAN 👑 ]] --
 -- 🔥 SCRIPT BY: NAMELESS 😎
 -- 🎯 ANTI-VOID + ANTI-KILL + PERFECT STAND (VOID ATTACH BYPASS)
+-- 🎯 TITAN ATTACHMENT SYSTEM WITH CUSTOM ANIMATIONS
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -391,6 +392,19 @@ end
 -- ==========================================
 -- TITAN ATTACHMENT SYSTEM - Premium Framework
 -- ==========================================
+-- Animation ID Constants
+local TITAN_BACK_ANIM = "91969343990570"      -- BANG (Target Back)
+local TITAN_FRONT_ANIM = "79952107676081"     -- BLOWJOB (Target Face)
+local TITAN_CHOCO_ANIM = "85287774070688"     -- CHOCO
+local TITAN_SUCK_ANIM = "13694096724"         -- SUCK
+local TITAN_DOG_ANIM = "101770532783937"      -- DOG POSE
+local TITAN_AERO_ANIM = "112833317179264"     -- AEROPLANE POSE
+local TITAN_BUTTERFLY_ANIM = "70396081158319" -- BUTTERFLY POSE
+local TITAN_HUG_ANIM = "79920226991831"       -- HUG
+local TITAN_KISS_ANIM = "112078433891854"     -- KISS
+local TITAN_THANK_ANIM = "116243979368109"    -- THANK YOU
+local TITAN_ROSE_ANIM = "89740248756697"      -- ROSE
+
 local TitanAttachConnection = nil
 local TitanAnimTrack = nil
 local TitanBackConnection = nil
@@ -798,8 +812,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                         stroke.Thickness = 3
                         stroke.Color = Color3.fromRGB(0, 0, 0)
                         
-                        currentBillboard.Parent = head
-                    end
+                        currentBillboard.Parent = head                    end
                 else
                     cleanup()
                 end
@@ -921,6 +934,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
+    -- ==========================================
+    -- 🪑 HEADSIT - TITAN ATTACHMENT
+    -- ==========================================
     btn("🪑HEADSIT", T2, function(b)
         _G.Loop = b:GetAttribute("T")
         task.spawn(function()
@@ -940,10 +956,8 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     end)
 
     -- ==========================================
-    -- TITAN ATTACHMENT FUNCTIONS - Row 6+
+    -- 🍆 BANG [Target Back] - ANIM ID: 91969343990570
     -- ==========================================
-    
-    -- 🍆 BANG - TITAN PREMIUM (BACK)
     btn("🍆BANG", T2, function(b)
         local isActive = b:GetAttribute("T")
         _G.TitanBackBangActive = isActive
@@ -974,29 +988,28 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 return
             end
             
-            -- Disable animate script
             if char:FindFirstChild("Animate") then
                 char.Animate.Disabled = true
             end
             
-            -- Setup emote detection
-            setupTitanEmoteDetection(hum)
+            -- Load BANG Animation
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. TITAN_BACK_ANIM
+            local animTrack = hum:LoadAnimation(anim)
+            animTrack.Priority = Enum.AnimationPriority.Action4
+            animTrack.Looped = true
+            animTrack:Play()
             
-            -- Start animation loop
-            if TitanAnimLoop then task.cancel(TitanAnimLoop) end
-            startTitanAnimLoop(hum)
-            
-            -- Store target reference
             local tChar = targetPlayerObj.Character
             local tOrient = getOrientationPart(tChar)
             
-            -- Connection for Back Bang (PO = Vector3.new(0, 0, 1.1))
             TitanBackConnection = RunService.Heartbeat:Connect(function()
                 if not _G.TitanBackBangActive or not targetPlayerObj or not targetPlayerObj.Character then
                     _G.TitanBackBangActive = false
                     b:SetAttribute("T", false)
                     b.BackgroundColor3 = White
                     b.TextColor3 = Black
+                    animTrack:Stop()
                     cleanupTitanAttachments()
                     return
                 end
@@ -1034,7 +1047,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 🥵 BLOWJOB - TITAN PREMIUM (FRONT FACE)
+    -- ==========================================
+    -- 🥵 BLOWJOB [Target Face] - ANIM ID: 79952107676081
+    -- ==========================================
     btn("🥵BLOWJOB", T2, function(b)
         local isActive = b:GetAttribute("T")
         _G.TitanBangActive = isActive
@@ -1069,10 +1084,13 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 char.Animate.Disabled = true
             end
             
-            setupTitanEmoteDetection(hum)
-            
-            if TitanAnimLoop then task.cancel(TitanAnimLoop) end
-            startTitanAnimLoop(hum)
+            -- Load BLOWJOB Animation
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. TITAN_FRONT_ANIM
+            local animTrack = hum:LoadAnimation(anim)
+            animTrack.Priority = Enum.AnimationPriority.Action4
+            animTrack.Looped = true
+            animTrack:Play()
             
             local tChar = targetPlayerObj.Character
             local tOrient = getOrientationPart(tChar)
@@ -1083,6 +1101,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                     b:SetAttribute("T", false)
                     b.BackgroundColor3 = White
                     b.TextColor3 = Black
+                    animTrack:Stop()
                     cleanupTitanAttachments()
                     return
                 end
@@ -1130,12 +1149,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 🦗CHOCO - TITAN PREMIUM
-    local ANIM_ID = "85287774070688"    
-    local FREEZE_TIME = 0.829           
-    local BASE_DISTANCE = 1.2           
-    local SPEED = 25                    
-
+    -- ==========================================
+    -- 🦗 CHOCO - ANIM ID: 85287774070688
+    -- ==========================================
     _G.AttachLoop = false
     local attachConnection
     local attachAnimTrack
@@ -1179,18 +1195,23 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 char.Animate.Disabled = true
             end
             
-            local anim = Instance.new("Animation") 
-            anim.AnimationId = "rbxassetid://" .. ANIM_ID
+            -- Load CHOCO Animation
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. TITAN_CHOCO_ANIM
             attachAnimTrack = hum:LoadAnimation(anim)
             attachAnimTrack.Priority = Enum.AnimationPriority.Action4
             attachAnimTrack.Looped = true
             attachAnimTrack:Play()
             
+            -- Freeze at specific position
+            local FREEZE_TIME = 0.829
             attachAnimTrack.TimePosition = FREEZE_TIME
             attachAnimTrack:AdjustSpeed(0)
             
             hum.PlatformStand = true
             local startTime = os.clock()
+            local BASE_DISTANCE = 1.2
+            local SPEED = 25
             
             attachConnection = RunService.RenderStepped:Connect(function()
                 if not targetHead or not targetHead.Parent or not _G.AttachLoop then 
@@ -1235,14 +1256,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 👅SUCK - TITAN PREMIUM
-    local DOGY_ANIM = "13694096724"
-    local DOGY_TIME_POS = 3.4
-    local DOGY_SPEED = 25
-    local DOGY_BASE_DIST = 4
-    local DOGY_TILT = 30
-    local DOGY_HEIGHT = 0.3
-
+    -- ==========================================
+    -- 👅 SUCK - ANIM ID: 13694096724
+    -- ==========================================
     _G.DogyLoop = false
     local dogyConnection
     local dogyAnimTrack
@@ -1274,14 +1290,22 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local hum = char:FindFirstChildOfClass("Humanoid")
             if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
             
+            -- Load SUCK Animation
             local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://" .. DOGY_ANIM
+            anim.AnimationId = "rbxassetid://" .. TITAN_SUCK_ANIM
             dogyAnimTrack = hum:LoadAnimation(anim)
             dogyAnimTrack:Play()
+            
+            -- Freeze at specific position
+            local DOGY_TIME_POS = 3.4
             dogyAnimTrack.TimePosition = DOGY_TIME_POS
             dogyAnimTrack:AdjustSpeed(0)
             
             local startTime = tick()
+            local DOGY_BASE_DIST = 4
+            local DOGY_SPEED = 25
+            local DOGY_TILT = 30
+            local DOGY_HEIGHT = 0.3
             
             dogyConnection = RunService.RenderStepped:Connect(function()
                 if not _G.DogyLoop or not targetPlayerObj.Character or not upperTorso.Parent then
@@ -1324,8 +1348,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
     
-    -- 🐶DOG POSE
-    local PLANE_ANIM = "101770532783937"
+    -- ==========================================
+    -- 🐶 DOG POSE - ANIM ID: 101770532783937
+    -- ==========================================
     _G.PlaneLoop = false
     local planeConnection
     local planeAnimTrack
@@ -1357,8 +1382,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local hum = char:FindFirstChildOfClass("Humanoid")
             if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
             
-            local anim = Instance.new("Animation") 
-            anim.AnimationId = "rbxassetid://" .. PLANE_ANIM
+            -- Load DOG POSE Animation
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. TITAN_DOG_ANIM
             planeAnimTrack = hum:LoadAnimation(anim)
             planeAnimTrack.Priority = Enum.AnimationPriority.Action4
             planeAnimTrack.Looped = true
@@ -1398,13 +1424,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- ✈️AEROPLANE POSE
-    local AERO_ANIM = "112833317179264"
-    local AERO_FREEZE = 1.792
-    local AERO_HEIGHT = 1.30
-    local AERO_DIST = 2.0
-    local AERO_SPEED = 25
-
+    -- ==========================================
+    -- ✈️ AEROPLANE POSE - ANIM ID: 112833317179264
+    -- ==========================================
     _G.AeroplaneLoop = false
     local aeroConnection
     local aeroAnimTrack
@@ -1436,18 +1458,24 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             local hum = char:FindFirstChildOfClass("Humanoid")
             if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
             
-            local anim = Instance.new("Animation") 
-            anim.AnimationId = "rbxassetid://" .. AERO_ANIM
+            -- Load AEROPLANE Animation
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://" .. TITAN_AERO_ANIM
             aeroAnimTrack = hum:LoadAnimation(anim)
             aeroAnimTrack.Priority = Enum.AnimationPriority.Action4
             aeroAnimTrack.Looped = true
             aeroAnimTrack:Play()
             
+            -- Freeze at specific position
+            local AERO_FREEZE = 1.792
             aeroAnimTrack.TimePosition = AERO_FREEZE
             aeroAnimTrack:AdjustSpeed(0)
             
             hum.PlatformStand = true
             local startTime = os.clock()
+            local AERO_HEIGHT = 1.30
+            local AERO_DIST = 2.0
+            local AERO_SPEED = 25
             
             aeroConnection = RunService.RenderStepped:Connect(function()
                 if not _G.AeroplaneLoop or not targetPlayerObj.Character or not bodyPart.Parent then 
@@ -1488,14 +1516,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 🦋BUTTERFLY POSE
-    local BUTTERFLY_ANIM = "70396081158319"
-    local BUTTERFLY_FREEZE = 0.729
-    local BUTTERFLY_HEIGHT = 3.30
-    local BUTTERFLY_MIN = 2.25
-    local BUTTERFLY_MAX = 3.30
-    local BUTTERFLY_SPEED = 12
-
+    -- ==========================================
+    -- 🦋 BUTTERFLY POSE - ANIM ID: 70396081158319
+    -- ==========================================
     _G.ButterflyLoop = false
     local butterflyConnection
     local butterflyAnimTrack
@@ -1532,17 +1555,24 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             
             if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
             
+            -- Load BUTTERFLY Animation
             local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://" .. BUTTERFLY_ANIM
+            anim.AnimationId = "rbxassetid://" .. TITAN_BUTTERFLY_ANIM
             butterflyAnimTrack = hum:LoadAnimation(anim)
             butterflyAnimTrack.Priority = Enum.AnimationPriority.Action4
             butterflyAnimTrack.Looped = true
             butterflyAnimTrack:Play()
             
+            -- Freeze at specific position
+            local BUTTERFLY_FREEZE = 0.729
             butterflyAnimTrack.TimePosition = BUTTERFLY_FREEZE
             butterflyAnimTrack:AdjustSpeed(0)
             
             local startTime = os.clock()
+            local BUTTERFLY_HEIGHT = 3.30
+            local BUTTERFLY_MIN = 2.25
+            local BUTTERFLY_MAX = 3.30
+            local BUTTERFLY_SPEED = 12
             
             butterflyConnection = RunService.RenderStepped:Connect(function()
                 if not _G.ButterflyLoop or not targetPlayerObj.Character or not targetTorso.Parent then
@@ -1594,10 +1624,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 🤗HUG
-    local HUG_ANIM = "79920226991831"
-    local HUG_BACK_OFFSET = 1.5
-
+    -- ==========================================
+    -- 🤗 HUG - ANIM ID: 79920226991831
+    -- ==========================================
     _G.HugActive = false
     local hugConnections = {}
     local hugAnimTrack
@@ -1633,22 +1662,24 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                 _G.HugActive = false
                 b.BackgroundColor3 = White
                 b.TextColor3 = Black
-                return
-            end
+                return            end
             
             local hum = char:FindFirstChildOfClass("Humanoid")
             if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
             
             toggleHugAntiCheatBypass(true)
             
+            -- Load HUG Animation
             local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://" .. HUG_ANIM
+            anim.AnimationId = "rbxassetid://" .. TITAN_HUG_ANIM
             hugAnimTrack = hum:LoadAnimation(anim)
             hugAnimTrack.Priority = Enum.AnimationPriority.Action4
             hugAnimTrack.Looped = true
             hugAnimTrack:Play()
             
             hum.PlatformStand = true
+            
+            local HUG_BACK_OFFSET = 1.5
             
             local function enforceStuck()
                 if not targetBody or not targetBody.Parent or not _G.HugActive then
@@ -1700,11 +1731,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 💋KISS
-    local KISS_ANIM = "112078433891854"
-    local KISS_DISTANCE = 1.5
-    local KISS_Y_OFFSET = -2
-
+    -- ==========================================
+    -- 💋 KISS - ANIM ID: 112078433891854
+    -- ==========================================
     _G.KissActive = false
     local kissConnections = {}
     local kissAnimTrack
@@ -1738,14 +1767,18 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             
             toggleHugAntiCheatBypass(true) 
             
+            -- Load KISS Animation
             local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://" .. KISS_ANIM
+            anim.AnimationId = "rbxassetid://" .. TITAN_KISS_ANIM
             kissAnimTrack = hum:LoadAnimation(anim)
             kissAnimTrack.Priority = Enum.AnimationPriority.Action4
             kissAnimTrack.Looped = true
             kissAnimTrack:Play()
             
             hum.PlatformStand = true
+            
+            local KISS_DISTANCE = 1.5
+            local KISS_Y_OFFSET = -2
             
             local function enforceKissStuck()
                 if not targetBody or not targetBody.Parent or not _G.KissActive then
@@ -1807,10 +1840,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 😊THANK YOU
-    local THANK_ANIM = "116243979368109"
-    local THANK_DISTANCE = 6
-
+    -- ==========================================
+    -- 😊 THANK YOU - ANIM ID: 116243979368109
+    -- ==========================================
     _G.ThankYouActive = false
     local thankConnections = {}
     local thankAnimTrack
@@ -1843,14 +1875,17 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             
             toggleHugAntiCheatBypass(true)
             
+            -- Load THANK YOU Animation
             local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://" .. THANK_ANIM
+            anim.AnimationId = "rbxassetid://" .. TITAN_THANK_ANIM
             thankAnimTrack = hum:LoadAnimation(anim)
             thankAnimTrack.Priority = Enum.AnimationPriority.Action4
             thankAnimTrack.Looped = true
             thankAnimTrack:Play()
             
             hum.PlatformStand = true
+            
+            local THANK_DISTANCE = 6
             
             local function enforceThankSync()
                 if not targetPlayerObj.Character or not targetPlayerObj.Character:FindFirstChild("HumanoidRootPart") or not _G.ThankYouActive then
@@ -1903,107 +1938,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         end
     end)
 
-    -- 😭SORRY
-    local SORRY_ANIM = "70869637765981"
-    local SORRY_DISTANCE = 7
-
-    _G.SorryActive = false
-    local sorryConnections = {}
-    local sorryAnimTrack
-
-    btn("😭SORRY", T2, function(b)
-        _G.SorryActive = b:GetAttribute("T")
-        if _G.SorryActive then
-            local targetPlayerObj = getT()
-            if not targetPlayerObj or not targetPlayerObj.Character then
-                b:SetAttribute("T", false)
-                _G.SorryActive = false
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                return
-            end
-            
-            local targetBody = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
-            local char = player.Character
-            local root = char and char:FindFirstChild("HumanoidRootPart")
-            
-            if not targetBody or not root then
-                b:SetAttribute("T", false)
-                _G.SorryActive = false
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                return
-            end
-            
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-            
-            toggleHugAntiCheatBypass(true)
-            
-            local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://" .. SORRY_ANIM
-            sorryAnimTrack = hum:LoadAnimation(anim)
-            sorryAnimTrack.Priority = Enum.AnimationPriority.Action4
-            sorryAnimTrack.Looped = true
-            sorryAnimTrack:Play()
-            
-            hum.PlatformStand = true
-            
-            local function enforceSorrySync()
-                if not targetBody or not targetBody.Parent or not _G.SorryActive then
-                    _G.SorryActive = false
-                    b:SetAttribute("T", false)
-                    b.BackgroundColor3 = White
-                    b.TextColor3 = Black
-                    
-                    toggleHugAntiCheatBypass(false)
-                    for _, conn in ipairs(sorryConnections) do if conn then conn:Disconnect() end end
-                    sorryConnections = {}
-                    
-                    if sorryAnimTrack then sorryAnimTrack:Stop() end
-                    local ch = player.Character
-                    if ch then
-                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
-                        local h = ch:FindFirstChildOfClass("Humanoid")
-                        if h then 
-                            h.PlatformStand = false 
-                            h:ChangeState(Enum.HumanoidStateType.Running)
-                        end
-                    end
-                    return
-                end
-                
-                root.AssemblyLinearVelocity = Vector3.zero
-                root.AssemblyAngularVelocity = Vector3.zero
-                
-                local offset = targetBody.CFrame * CFrame.new(0, 0, -SORRY_DISTANCE) * CFrame.Angles(0, math.pi, 0)
-                
-                pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", targetBody) end)
-                root.CFrame = offset
-            end
-            
-            table.insert(sorryConnections, RunService.PreSimulation:Connect(enforceSorrySync))
-            table.insert(sorryConnections, RunService.PostSimulation:Connect(enforceSorrySync))
-            table.insert(sorryConnections, RunService.RenderStepped:Connect(enforceSorrySync))
-        else
-            toggleHugAntiCheatBypass(false)
-            for _, conn in ipairs(sorryConnections) do if conn then conn:Disconnect() end end
-            sorryConnections = {}
-            
-            if sorryAnimTrack then sorryAnimTrack:Stop() end
-            local char = player.Character
-            if char then
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then 
-                    hum.PlatformStand = false 
-                    hum:ChangeState(Enum.HumanoidStateType.Running)
-                end
-            end
-        end
-    end)
-
-    -- 🌹ROSE
+    -- ==========================================
+    -- 🌹 ROSE - ANIM ID: 89740248756697
+    -- ==========================================
     _G.RoseAttachLoop = false
     local roseConnection
     local roseAnimTrack
@@ -2038,13 +1975,15 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             
             toggleHugAntiCheatBypass(true)
             
+            -- Load ROSE Animation
             local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://89740248756697"
+            anim.AnimationId = "rbxassetid://" .. TITAN_ROSE_ANIM
             roseAnimTrack = hum:LoadAnimation(anim)
             roseAnimTrack.Priority = Enum.AnimationPriority.Action4
             roseAnimTrack.Looped = true
             roseAnimTrack:Play()
             
+            -- Start from 0 and freeze at 1.85
             roseAnimTrack.TimePosition = 0
             roseAnimTrack:AdjustSpeed(1)
             roseFreezeReached = false
@@ -2075,6 +2014,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                     return
                 end
                 
+                -- Freeze at 1.850 seconds
                 if roseAnimTrack.TimePosition >= 1.850 and not roseFreezeReached then
                     roseFreezeReached = true
                     roseAnimTrack.TimePosition = 1.850
@@ -2089,6 +2029,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
                     end
                 end
                 
+                -- Position: 5 studs distance, 1 stud up
                 local offset = targetBody.CFrame * CFrame.new(0, 1.0, -5.0) * CFrame.Angles(0, math.pi, 0)
                 
                 root.AssemblyLinearVelocity = Vector3.zero
@@ -2114,116 +2055,10 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
             end
         end
     end)
-
-    -- 🪐ORBIT [TITAN]
-    _G.OrbitAttachLoop = false
-    local orbitConnection
-    local orbitAnimTrack
-
-    btn("🪐ORBIT", T2, function(b)
-        _G.OrbitAttachLoop = b:GetAttribute("T")
-        if _G.OrbitAttachLoop then
-            local targetPlayerObj = getT()
-            if not targetPlayerObj or not targetPlayerObj.Character then
-                b:SetAttribute("T", false)
-                _G.OrbitAttachLoop = false
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                return
-            end
-            
-            local targetBody = targetPlayerObj.Character:FindFirstChild("UpperTorso") or targetPlayerObj.Character:FindFirstChild("Torso") or targetPlayerObj.Character:FindFirstChild("HumanoidRootPart")
-            local char = player.Character
-            local root = char and char:FindFirstChild("HumanoidRootPart")
-            
-            if not targetBody or not root then
-                b:SetAttribute("T", false)
-                _G.OrbitAttachLoop = false
-                b.BackgroundColor3 = White
-                b.TextColor3 = Black
-                return
-            end
-            
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if char:FindFirstChild("Animate") then char.Animate.Disabled = true end
-            
-            toggleHugAntiCheatBypass(true)
-            
-            local anim = Instance.new("Animation")
-            anim.AnimationId = "rbxassetid://133126721618325"
-            orbitAnimTrack = hum:LoadAnimation(anim)
-            orbitAnimTrack.Priority = Enum.AnimationPriority.Action4
-            orbitAnimTrack.Looped = true
-            orbitAnimTrack:Play()
-            
-            hum.PlatformStand = true
-            local angle = 0
-            
-            local function enforceOrbitSync()
-                if not targetBody or not targetBody.Parent or not _G.OrbitAttachLoop then
-                    _G.OrbitAttachLoop = false
-                    b:SetAttribute("T", false)
-                    b.BackgroundColor3 = White
-                    b.TextColor3 = Black
-                    
-                    toggleHugAntiCheatBypass(false)
-                    if orbitConnection then orbitConnection:Disconnect() end
-                    orbitConnection = nil
-                    pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end)
-                    
-                    if orbitAnimTrack then orbitAnimTrack:Stop() end
-                    local ch = player.Character
-                    if ch then
-                        if ch:FindFirstChild("Animate") then ch.Animate.Disabled = false end
-                        local h = ch:FindFirstChildOfClass("Humanoid")
-                        if h then 
-                            h.PlatformStand = false 
-                            h:ChangeState(Enum.HumanoidStateType.Running)
-                        end
-                    end
-                    return
-                end
-                
-                local delta = RunService.Heartbeat:Wait()
-                angle = angle + (delta * 1.50)
-                
-                local offsetX = math.sin(angle) * 8.0
-                local offsetZ = math.cos(angle) * 8.0
-                
-                local relativePos = Vector3.new(offsetX, 0, offsetZ)
-                local targetCFrame = targetBody.CFrame * CFrame.new(relativePos)
-                
-                local finalCFrame = CFrame.lookAt(targetCFrame.Position, targetBody.Position)
-                
-                pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", targetBody) end)
-                
-                root.AssemblyLinearVelocity = Vector3.zero
-                root.AssemblyAngularVelocity = Vector3.zero
-                root.CFrame = finalCFrame
-            end
-            
-            orbitConnection = RunService.Heartbeat:Connect(enforceOrbitSync)
-        else
-            toggleHugAntiCheatBypass(false)
-            if orbitConnection then orbitConnection:Disconnect() end
-            orbitConnection = nil
-            
-            if orbitAnimTrack then orbitAnimTrack:Stop() end
-            local char = player.Character
-            if char then
-                local root = char:FindFirstChild("HumanoidRootPart")
-                pcall(function() sethiddenproperty(root, "PhysicsRepRootPart", nil) end)
-                if char:FindFirstChild("Animate") then char.Animate.Disabled = false end
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then 
-                    hum.PlatformStand = false 
-                    hum:ChangeState(Enum.HumanoidStateType.Running)
-                end
-            end
-        end
-    end)
     
+    -- ==========================================
     -- TAB 3: SHIELD
+    -- ==========================================
     btn("🛡️ANTI VOID", T3, function(b) task.spawn(function() while b:GetAttribute("T") do if not _G.Loop and not standMode then local hrp = player.Character:FindFirstChild("HumanoidRootPart") if hrp and hrp.Position.Y < voidYLevel then hrp.CFrame = CFrame.new(safePosition) end end task.wait(0.01) end end) end)
     btn("🛡️ANTI VOID V1", T3, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/ANTI%20VOID%20V1"))() end, false)
     btn("🛡️ANTI BANG", T3, function() loadstring(game:HttpGet("https://pastebin.com/raw/d4r8JDXz"))() end, true)
@@ -2231,7 +2066,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("🛡️ANTI AFK", T3, function() game:GetService("VirtualUser"):ClickButton2(Vector2.new()) end, true)
     btn("🛡️ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
     
+    -- ==========================================
     -- TAB 4: SPAM
+    -- ==========================================
     btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet(""))() end, true)
     btn("💢NAMELESS SPAMMER", T4, function() loadstring(game:HttpGet(""))() end, true)
     btn("🌟BHUMIKA SPAMMER", T4, function() loadstring(game:HttpGet(""))() end, true)
@@ -2243,7 +2080,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("😂JHA2 EMPIRE", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/m3wpKv3d"))() end, true)
     btn("🤣RAND EMPIRE", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/RANDI%20SPAMMER"))() end, true)
 
+    -- ==========================================
     -- TAB 5: OTHER
+    -- ==========================================
     btn("💀💢BANG PANEL", T5, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA-TAG/refs/heads/main/BANG%20PANEL%F0%9F%92%80%F0%9F%92%A2"))() end, true)
     btn("💀🛡️ANTIBANG PANEL ", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/BM0uamrz"))() end, true)
     btn("⚡SPEED", T5, function(b) player.Character.Humanoid.WalkSpeed = b:GetAttribute("T") and 300 or 16 end)
@@ -2259,6 +2098,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("👤NAMELESS EMOTE", T5, function() loadstring(game:HttpGet("https://pastebin.com/raw/VV3ggiki"))() end, true)
     btn("🔄REJOIN", T5, function() TeleportService:Teleport(game.PlaceId, player) end, true)
     
+    -- ==========================================
+    -- PHONK TAB
+    -- ==========================================
     local currentPlaying = nil
     local function phonkBtn(name, id)
         local b = Instance.new("TextButton", T_Phonk)
@@ -2287,6 +2129,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     phonkBtn("5", "135674024616225"); phonkBtn("6", "137152491110539"); phonkBtn("7", "139606677237480"); phonkBtn("8", "139825057894568")
     phonkBtn("9", "140292910030604"); phonkBtn("10", "137466127206691"); phonkBtn("11", "139638751795258")
     
+    -- ==========================================
+    -- ADMIN TAB (MASTER ONLY)
+    -- ==========================================
     local LogL = Instance.new("TextLabel", T_Adm); LogL.Size = UDim2.new(1,0,1,0); LogL.BackgroundTransparency = 1; LogL.TextColor3 = Green; LogL.TextSize = 8.5; LogL.Font = Enum.Font.Code; LogL.TextXAlignment = "Left"; LogL.TextYAlignment = "Top"
     RunService.Heartbeat:Connect(function()
         local t = "[ MASTER ADMIN ACCESS ]\n--- ACTIVE USERS ---\n"
@@ -2294,6 +2139,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         LogL.Text = t
     end)
     
+    -- ==========================================
+    -- FLOATING LOGO
+    -- ==========================================
     local Logo = Instance.new("ImageButton", sg); Logo.Size = UDim2.new(0, 50, 0, 50); Logo.Position = UDim2.new(0, 10, 0.5, -25)
     Logo.BackgroundTransparency = 1
     Logo.Image = LOGO_IMAGE; makeDraggable(Logo)
@@ -2303,6 +2151,9 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
         Main.Visible = not Main.Visible
     end)
     
+    -- ==========================================
+    -- CHAT SYNC
+    -- ==========================================
     TextChatService.MessageReceived:Connect(function(msg)
         if chatSyncActive and chatTargetPlayer and msg.TextSource and msg.TextSource.UserId == chatTargetPlayer.UserId then
             local channel = TextChatService:FindFirstChild("TextChannels") and TextChatService.TextChannels:FindFirstChild("RBXGeneral")
