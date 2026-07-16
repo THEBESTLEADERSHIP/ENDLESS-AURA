@@ -4,11 +4,11 @@ local userInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local starterGui = game:GetService("StarterGui")
 
--- DYNAMIC ANIMATION IDs[span_0](start_span)[span_0](end_span)
-local normalBangAnimId = "rbxassetid://126177622345379"
+-- ANIMATION CONFIGURATION
+local bangAnimId = "rbxassetid://126177622345379"
 local faceBangAnimId = "rbxassetid://91969343990570"
 local activeTrack = nil
-local animLockConnection = nil
+local animConnection = nil
 
 local function getHumanoid()
     return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
@@ -24,6 +24,9 @@ if _G.EndlessAuraStorage then
     if _G.EndlessAuraStorage.ActiveConnection then
         _G.EndlessAuraStorage.ActiveConnection:Disconnect()
     end
+    if _G.EndlessAuraStorage.AnimForceConnection then
+        _G.EndlessAuraStorage.AnimForceConnection:Disconnect()
+    end
     if _G.EndlessAuraStorage.PlatformPart then
         _G.EndlessAuraStorage.PlatformPart:Destroy()
     end
@@ -31,15 +34,12 @@ if _G.EndlessAuraStorage then
     if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() end
     
     pcall(function()
-        if animLockConnection then animLockConnection:Disconnect() animLockConnection = nil end
         local myChar = player.Character
         if myChar then
             local hum = myChar:FindFirstChildOfClass("Humanoid")
             if hum then
                 for _, track in pairs(hum:GetPlayingAnimationTracks()) do
-                    if track.Animation.AnimationId == normalBangAnimId or track.Animation.AnimationId == faceBangAnimId then
-                        track:Stop()
-                    end
+                    track:Stop()
                 end
                 hum.PlatformStand = false
             end
@@ -53,15 +53,17 @@ if _G.EndlessAuraStorage then
     task.wait(0.1)
 end
 
+-- Initialize clean memory storage
 _G.EndlessAuraStorage = {
     CurrentGui = nil,
     ActiveConnection = nil,
+    AnimForceConnection = nil,
     PlatformPart = nil,
     BV = nil,
     BG = nil
 }
 
--- CONFIGURATIONS[span_1](start_span)[span_1](end_span)
+-- CONFIGURATIONS
 local speedMultiplier = 17.4   
 local forwardBackRange = 1.1   
 local fixedUpOffset = 1.8      
@@ -77,34 +79,7 @@ local selectedPlayer = nil
 local currentAutoSubMode = "Normal"
 local lastSwitchTime = 0
 
--- UNBREAKABLE FORCE-PLAY ANIMATION SYSTEM
-local function forcePlayAnimation(animId)
-    pcall(function()
-        local hum = getHumanoid()
-        if not hum then return end
-        
-        -- Purane tracks clear karna
-        if activeTrack then 
-            activeTrack:Stop() 
-            activeTrack = nil 
-        end
-        for _, track in pairs(hum:GetPlayingAnimationTracks()) do
-            if track.Animation.AnimationId == normalBangAnimId or track.Animation.AnimationId == faceBangAnimId then
-                track:Stop()
-            end
-        end
-
-        local anim = Instance.new("Animation")
-        anim.AnimationId = animId
-        activeTrack = hum:LoadAnimation(anim)
-        activeTrack.Priority = Enum.AnimationPriority.Action4 -- Highest Priority Limit!
-        activeTrack.Looped = true
-        activeTrack:Play()
-        activeTrack:AdjustSpeed(speedMultiplier / 5)
-    end)
-end
-
--- Anti-Die / Auto-Respawn Recovery System[span_2](start_span)[span_2](end_span)
+-- Anti-Die & Auto-Recovery System
 task.spawn(function()
     while task.wait(0.3) do
         if not _G.EndlessAuraStorage then break end 
@@ -159,7 +134,7 @@ brandingImg.BackgroundTransparency = 1
 brandingImg.Parent = nameBoxFrame
 
 local nameText = Instance.new("TextLabel")
-nameText.Size = UDim2.new(1, -45, 1, 0)[span_3](start_span)[span_3](end_span)
+nameText.Size = UDim2.new(1, -45, 1, 0) 
 nameText.Position = UDim2.new(0, 38, 0, 0)
 nameText.Text = "ENDLESS AURA BANG PANEL💀💢"
 nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -190,7 +165,7 @@ toggleGuiBtn.MouseButton1Click:Connect(function()
     toggleGuiBtn.BorderColor3 = mainFrame.Visible and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(0, 255, 150)
 end)
 
--- Draggable Engine[span_4](start_span)[span_4](end_span)
+-- Draggable Engine
 local dragging, dragStart, startPos
 nameBoxFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -209,7 +184,7 @@ userInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 end)
 
--- SEARCH BOX[span_5](start_span)[span_5](end_span)
+-- SEARCH BOX
 local textBox = Instance.new("TextBox") 
 textBox.Size = UDim2.new(1, -16, 0, 26) 
 textBox.Position = UDim2.new(0, 8, 0, 50) 
@@ -223,7 +198,7 @@ textBox.Font = Enum.Font.Code
 textBox.BorderColor3 = Color3.fromRGB(150, 0, 30) 
 textBox.Parent = mainFrame 
 
--- SCROLL LIST[span_6](start_span)[span_6](end_span)
+-- SCROLL LIST
 local scrollingFrame = Instance.new("ScrollingFrame") 
 scrollingFrame.Size = UDim2.new(1, -16, 0, 65) 
 scrollingFrame.Position = UDim2.new(0, 8, 0, 82) 
@@ -235,7 +210,9 @@ scrollingFrame.Parent = mainFrame
 local uiList = Instance.new("UIListLayout", scrollingFrame)
 uiList.Padding = UDim.new(0, 2)
 
--- BUTTONS SETUP
+-- ====================================================================
+-- // SIDE-BY-SIDE SMALL BUTTONS SETUP // --
+-- ====================================================================
 local clearBtn = Instance.new("TextButton")
 clearBtn.Size = UDim2.new(0.5, -12, 0, 22) 
 clearBtn.Position = UDim2.new(0, 8, 0, 154) 
@@ -258,7 +235,7 @@ selectAllBtn.Font = Enum.Font.Code
 selectAllBtn.TextSize = 11
 selectAllBtn.Parent = mainFrame
 
--- TARGET MODE BUTTON[span_7](start_span)[span_7](end_span)
+-- TARGET MODE BUTTON
 local modeBtn = Instance.new("TextButton")
 modeBtn.Size = UDim2.new(1, -16, 0, 24)
 modeBtn.Position = UDim2.new(0, 8, 0, 182)
@@ -285,14 +262,9 @@ modeBtn.MouseButton1Click:Connect(function()
         modeBtn.Text = "MODE // SYSTEM_NORMAL"
         modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     end
-    -- Target active hone par mode change instantly override karega
-    if isAttached then
-        local targetAnim = (targetMode == "Face Bang") and faceBangAnimId or normalBangAnimId
-        forcePlayAnimation(targetAnim)
-    end
 end)
 
--- SLIDER GENERATOR[span_8](start_span)[span_8](end_span)
+-- SLIDER GENERATOR
 local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callback)
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -16, 0, 14)
@@ -434,9 +406,7 @@ textBox:GetPropertyChangedSignal("Text"):Connect(function()
 end) 
 updateList() 
 
--- ====================================================================
--- // 0.0s ZERO DELAY TARGET LEAVE TRACKER // --
--- ====================================================================
+-- 0.0s ZERO DELAY TARGET LEAVE TRACKER
 local function emergencyTargetShift()
     lastTargetSwitchTime = 0 
     currentTargetIndex = 1
@@ -462,48 +432,14 @@ Players.PlayerRemoving:Connect(function(leftPlayer)
         if #selectedPlayers == 0 and isAttached then
             isAttached = false
             if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end
+            if _G.EndlessAuraStorage.AnimForceConnection then _G.EndlessAuraStorage.AnimForceConnection:Disconnect() _G.EndlessAuraStorage.AnimForceConnection = nil end
             if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end
             if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
             if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
-            if animLockConnection then animLockConnection:Disconnect() animLockConnection = nil end
             if activeTrack then activeTrack:Stop() activeTrack = nil end
             toggleButton.Text = "[ FUCK ON ]"
             toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30)
         end
-    end
-end)
-
--- UNBREAKABLE AUTO-RESPAWN RECOVERY SYSTEM
-player.CharacterAdded:Connect(function(newCharacter)
-    task.wait(0.3) -- Character setup backup delay
-    if isAttached and #selectedPlayers > 0 then
-        -- Agar active system respawn hone par break ho, to ye physically aur animation-wise dubara forced apply kar dega
-        pcall(function()
-            local myHRP = newCharacter:WaitForChild("HumanoidRootPart", 5)
-            if not myHRP then return end
-            
-            -- Re-setup physics constraints
-            if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() end
-            if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() end
-            
-            local bv = Instance.new("BodyVelocity")
-            bv.MaxForce = Vector3.new(1e15, 1e15, 1e15)
-            bv.Velocity = Vector3.new(0, 0, 0)
-            bv.Parent = myHRP
-            _G.EndlessAuraStorage.BV = bv
-
-            local bg = Instance.new("BodyGyro")
-            bg.MaxTorque = Vector3.new(1e15, 1e15, 1e15)
-            bg.P = 1e8
-            bg.D = 100
-            bg.CFrame = myHRP.CFrame
-            bg.Parent = myHRP
-            _G.EndlessAuraStorage.BG = bg
-            
-            -- Force start active animation
-            local desiredAnim = (targetMode == "Face Bang" or (targetMode == "Auto Switch" and currentAutoSubMode == "Face Bang")) and faceBangAnimId or normalBangAnimId
-            forcePlayAnimation(desiredAnim)
-        end)
     end
 end)
 
@@ -514,22 +450,30 @@ toggleButton.MouseButton1Click:Connect(function()
     if isAttached then 
         isAttached = false 
         if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end 
+        if _G.EndlessAuraStorage.AnimForceConnection then _G.EndlessAuraStorage.AnimForceConnection:Disconnect() _G.EndlessAuraStorage.AnimForceConnection = nil end
         if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end 
         if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
         if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
-        if animLockConnection then animLockConnection:Disconnect() animLockConnection = nil end
-        if activeTrack then activeTrack:Stop() activeTrack = nil end
-        
-        toggleButton.Text = "[ FUCK ON ]" 
-        toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
         
         pcall(function()
             local char = player.Character
-            local torso = char:FindFirstChild("Torso") or char:FindFirstChild("LowerTorso")
-            local rootJoint = torso and (torso:FindFirstChild("RootJoint") or char.HumanoidRootPart:FindFirstChild("RootJoint"))
-            if rootJoint then rootJoint.C0 = CFrame.new() end
-            if char:FindFirstChild("Humanoid") then char.Humanoid.PlatformStand = false end
+            if char then
+                local hum = char:FindFirstChild("Humanoid")
+                if hum then
+                    for _, track in pairs(hum:GetPlayingAnimationTracks()) do
+                        track:Stop()
+                    end
+                    hum.PlatformStand = false
+                end
+                local torso = char:FindFirstChild("Torso") or char:FindFirstChild("LowerTorso")
+                local rootJoint = torso and (torso:FindFirstChild("RootJoint") or char.HumanoidRootPart:FindFirstChild("RootJoint"))
+                if rootJoint then rootJoint.C0 = CFrame.new() end
+            end
         end)
+        activeTrack = nil
+        
+        toggleButton.Text = "[ FUCK ON ]" 
+        toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
     elseif #selectedPlayers > 0 then 
         isAttached = true 
         toggleButton.Text = "[ FUCK OFF ]" 
@@ -543,24 +487,6 @@ toggleButton.MouseButton1Click:Connect(function()
         local myChar = player.Character
         local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
         if not myHRP then return end
-
-        local initialAnim = (targetMode == "Face Bang") and faceBangAnimId or normalBangAnimId
-        forcePlayAnimation(initialAnim)
-
-        -- STAGE 4 LOCK: Stepped loop jo animation override hone hi nahi dega
-        if animLockConnection then animLockConnection:Disconnect() end
-        animLockConnection = runService.Stepped:Connect(function()
-            if not isAttached then return end
-            pcall(function()
-                local hum = getHumanoid()
-                if hum then
-                    local expectedAnimId = (targetMode == "Face Bang" or (targetMode == "Auto Switch" and currentAutoSubMode == "Face Bang")) and faceBangAnimId or normalBangAnimId
-                    if not activeTrack or not activeTrack.IsPlaying or activeTrack.Animation.AnimationId ~= expectedAnimId then
-                        forcePlayAnimation(expectedAnimId)
-                    end
-                end
-            end)
-        end)
 
         local bv = Instance.new("BodyVelocity")
         bv.MaxForce = Vector3.new(1e15, 1e15, 1e15)
@@ -584,9 +510,55 @@ toggleButton.MouseButton1Click:Connect(function()
         platform.Parent = game.Workspace
         _G.EndlessAuraStorage.PlatformPart = platform
 
+        -- FORCE ANIMATION LOCK LOOPER (ALL OTHER ANIMS AUTO OFF & LOCKED)
+        local currentExpectedId = bangAnimId
+        _G.EndlessAuraStorage.AnimForceConnection = runService.Stepped:Connect(function()
+            if not isAttached then return end
+            pcall(function()
+                local char = player.Character
+                local hum = char and char:FindFirstChildOfClass("Humanoid")
+                if hum and hum.Health > 0 then
+                    local targetAnimToUse = currentExpectedId
+                    local currentModeToRun = targetMode
+                    if targetMode == "Auto Switch" then
+                        currentModeToRun = currentAutoSubMode
+                    end
+
+                    if currentModeToRun == "Face Bang" then
+                        targetAnimToUse = faceBangAnimId
+                    else
+                        targetAnimToUse = bangAnimId
+                    end
+
+                    -- Sabhi random aur unwanted animations ko forcefully kill karna
+                    for _, track in pairs(hum:GetPlayingAnimationTracks()) do
+                        if track.Animation.AnimationId ~= targetAnimToUse then
+                            track:Stop()
+                        end
+                    end
+
+                    -- Target animation check aur dynamic force play engine
+                    if not activeTrack or activeTrack.Animation.AnimationId ~= targetAnimToUse or not activeTrack.IsPlaying then
+                        if activeTrack then pcall(function() activeTrack:Stop() end) end
+                        local newAnim = Instance.new("Animation")
+                        newAnim.AnimationId = targetAnimToUse
+                        activeTrack = hum:LoadAnimation(newAnim)
+                        activeTrack.Priority = Enum.AnimationPriority.Action4
+                        activeTrack.Looped = true
+                        activeTrack:Play()
+                    end
+                    
+                    if activeTrack then
+                        activeTrack:AdjustSpeed(speedMultiplier / 5)
+                    end
+                end
+            end)
+        end)
+
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
+            -- PURE 0.1s SHIFTING INTERVAL
             if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
@@ -599,21 +571,8 @@ toggleButton.MouseButton1Click:Connect(function()
             local myChar = player.Character
             local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart") 
             local myHumanoid = myChar and myChar:FindFirstChild("Humanoid")
+            if not myHRP or not myHumanoid or not bv or not bg then return end
             
-            -- If you respawned, variables might dynamically link back[span_9](start_span)[span_9](end_span)
-            if not myHRP or not myHumanoid then return end
-            
-            -- Re-attach Body Movers dynamically if lost during respawn[span_10](start_span)[span_10](end_span)
-            if not myHRP:FindFirstChildOfClass("BodyVelocity") and _G.EndlessAuraStorage.BV then
-                _G.EndlessAuraStorage.BV.Parent = myHRP
-            end
-            if not myHRP:FindFirstChildOfClass("BodyGyro") and _G.EndlessAuraStorage.BG then
-                _G.EndlessAuraStorage.BG.Parent = myHRP
-            end
-            
-            local activeBV = myHRP:FindFirstChildOfClass("BodyVelocity") or bv
-            local activeBG = myHRP:FindFirstChildOfClass("BodyGyro") or bg
-
             local targetHRP = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
             local targetHead = selectedPlayer.Character:FindFirstChild("Head") 
             if not targetHRP then return end
@@ -628,7 +587,7 @@ toggleButton.MouseButton1Click:Connect(function()
             end
 
             if targetHRP.Position.Y < -60 or targetHRP.Position.Y < (game.Workspace.FallenPartsDestroyHeight + 15) then
-                activeBV.Velocity = Vector3.new(0,0,0)
+                bv.Velocity = Vector3.new(0,0,0)
                 if platform and platform.Parent then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
                 return 
             end
@@ -655,9 +614,10 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
+            -- GLUED TO TARGET ENGINE
             myHRP.CFrame = targetCFrame
-            activeBG.CFrame = targetCFrame
-            activeBV.Velocity = (targetCFrame.Position - myHRP.Position) * 300 
+            bg.CFrame = targetCFrame
+            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300 
             
             if platform and platform.Parent then
                 platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
