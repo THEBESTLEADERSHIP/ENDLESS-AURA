@@ -27,6 +27,9 @@ if _G.EndlessAuraStorage then
     if _G.EndlessAuraStorage.AnimForceConnection then
         _G.EndlessAuraStorage.AnimForceConnection:Disconnect()
     end
+    if _G.EndlessAuraStorage.VoidProtectionConnection then
+        _G.EndlessAuraStorage.VoidProtectionConnection:Disconnect()
+    end
     if _G.EndlessAuraStorage.PlatformPart then
         _G.EndlessAuraStorage.PlatformPart:Destroy()
     end
@@ -58,6 +61,7 @@ _G.EndlessAuraStorage = {
     CurrentGui = nil,
     ActiveConnection = nil,
     AnimForceConnection = nil,
+    VoidProtectionConnection = nil,
     PlatformPart = nil,
     BV = nil,
     BG = nil
@@ -79,30 +83,41 @@ local selectedPlayer = nil
 local currentAutoSubMode = "Normal"
 local lastSwitchTime = 0
 
--- Helper to get reliable orientation part (TITAN Core Logic Integration)
+-- Helper to get reliable orientation part
 local function getOrientationPart(char)
     if not char then return nil end
     return char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
 end
 
--- Anti-Die & Auto-Recovery System
-task.spawn(function()
-    while task.wait(0.3) do
-        if not _G.EndlessAuraStorage then break end 
-        pcall(function()
-            if game.Workspace.FallenPartsDestroyHeight ~= -500000 then
-                game.Workspace.FallenPartsDestroyHeight = -500000
+-- ====================================================================
+-- // ANTI-CHEAT BYPASS & VOID GUARD (NO-FALL SYSTEM) // --
+-- ====================================================================
+-- Jaise hi pair zameen se niche jayenge, instantly check aur teleportation block run hoga.
+_G.EndlessAuraStorage.VoidProtectionConnection = runService.Heartbeat:Connect(function()
+    pcall(function()
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        
+        if hrp and hum then
+            -- Fall detection bypass limit (Instant protection before falling deep)
+            local currentFloorDepth = -80 -- Custom zameen check limit
+            if hrp.Position.Y < currentFloorDepth then
+                hrp.Velocity = Vector3.new(0, 0, 0)
+                -- Teleportation back above ground smoothly to bypass Anti-Cheats
+                hrp.CFrame = CFrame.new(hrp.Position.X, 15, hrp.Position.Z)
+                
+                -- Temporary platform spawn in case of total void fall map
+                if _G.EndlessAuraStorage.PlatformPart then
+                    _G.EndlessAuraStorage.PlatformPart.CFrame = hrp.CFrame * CFrame.new(0, -3.5, 0)
+                end
             end
-            if player.Character and player.Character:FindFirstChild("Humanoid") then
-                player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-                player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
-            end
-        end)
-    end
+        end
+    end)
 end)
 
 -- ====================================================================
--- // PANEL GUI DESIGN (PRESERVED EXACTLY) // --
+-- // PANEL GUI DESIGN // --
 -- ====================================================================
 local screenGui = Instance.new("ScreenGui") 
 screenGui.Name = "DeltaGlassRoboticUI" 
@@ -119,7 +134,6 @@ mainFrame.BorderSizePixel = 2
 mainFrame.BorderColor3 = Color3.fromRGB(255, 0, 50) 
 mainFrame.BorderMode = Enum.BorderMode.Inset 
 mainFrame.ClipsDescendants = true 
-mainFrame.Visible = true 
 mainFrame.Parent = screenGui 
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 4)
 
@@ -142,7 +156,7 @@ brandingImg.Parent = nameBoxFrame
 local nameText = Instance.new("TextLabel")
 nameText.Size = UDim2.new(1, -45, 1, 0) 
 nameText.Position = UDim2.new(0, 38, 0, 0)
-nameText.Text = "ENDLESS AURA BANG PANELðŸ’€ðŸ’¢"
+nameText.Text = "ENDLESS AURA BANG PANEL"
 nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
 nameText.Font = Enum.Font.Code 
 nameText.TextSize = 10.5
@@ -255,11 +269,11 @@ modeBtn.Parent = mainFrame
 modeBtn.MouseButton1Click:Connect(function()
     if targetMode == "Normal" then
         targetMode = "Face Bang"
-        modeBtn.Text = "MODE // CORE_FACE_BANG ðŸŽ¯"
+        modeBtn.Text = "MODE // CORE_FACE_BANG"
         modeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
     elseif targetMode == "Face Bang" then
         targetMode = "Auto Switch"
-        modeBtn.Text = "MODE // AUTO_SWITCH LOOP ðŸ”„"
+        modeBtn.Text = "MODE // AUTO_SWITCH LOOP"
         modeBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
     else
         targetMode = "Normal"
@@ -410,7 +424,7 @@ textBox:GetPropertyChangedSignal("Text"):Connect(function()
 end) 
 updateList() 
 
--- 0.0s ZERO DELAY TARGET LEAVE TRACKER
+-- EMERGENCY TARGET SHIFT 
 local function emergencyTargetShift()
     lastTargetSwitchTime = 0 
     currentTargetIndex = 1
@@ -514,7 +528,7 @@ toggleButton.MouseButton1Click:Connect(function()
         platform.Parent = game.Workspace
         _G.EndlessAuraStorage.PlatformPart = platform
 
-        -- FORCE ANIMATION LOCK LOOPER (ALL OTHER ANIMS AUTO OFF & LOCKED)
+        -- FORCE ANIMATION LOCK LOOPER
         local currentExpectedId = bangAnimId
         _G.EndlessAuraStorage.AnimForceConnection = runService.Stepped:Connect(function()
             if not isAttached then return end
@@ -534,14 +548,12 @@ toggleButton.MouseButton1Click:Connect(function()
                         targetAnimToUse = bangAnimId
                     end
 
-                    -- Sabhi random aur unwanted animations ko forcefully kill karna
                     for _, track in pairs(hum:GetPlayingAnimationTracks()) do
                         if track.Animation.AnimationId ~= targetAnimToUse then
                             track:Stop()
                         end
                     end
 
-                    -- Target animation check aur dynamic force play engine
                     if not activeTrack or activeTrack.Animation.AnimationId ~= targetAnimToUse or not activeTrack.IsPlaying then
                         if activeTrack then pcall(function() activeTrack:Stop() end) end
                         local newAnim = Instance.new("Animation")
@@ -562,7 +574,7 @@ toggleButton.MouseButton1Click:Connect(function()
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            -- PURE 0.1s SHIFTING INTERVAL
+            -- PURE MULTI-TARGET MAXIMUM SCAN SPEED (0.1 SECONDS SHIFTING DETECTOR)
             if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
@@ -577,11 +589,23 @@ toggleButton.MouseButton1Click:Connect(function()
             local myHumanoid = myChar and myChar:FindFirstChild("Humanoid")
             if not myHRP or not myHumanoid or not bv or not bg then return end
             
-            -- ENDLESS AURA TITAN ALIGNMENT AND ORIENTATION ENGINE
             local targetHRP = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
             local tOrient = getOrientationPart(selectedPlayer.Character)
             local targetHead = selectedPlayer.Character:FindFirstChild("Head") 
             if not targetHRP or not tOrient then return end
+
+            -- ====================================================================
+            -- // TARGET VOID DETECTION & AUTO INSTANT RE-ATTACH // --
+            -- ====================================================================
+            -- Agar target void (depth limit -80) me jata hai, toh uspar physical attach pause ho jayega taaki aap niche na jao.
+            -- Jese hi target wapas upar aayega, instantly auto-reattach loop use target bana legi.
+            if targetHRP.Position.Y < -80 then
+                -- Standby Mode: Target ko safe platform par dynamic pause karke rakhna
+                myHRP.CFrame = myHRP.CFrame
+                bv.Velocity = Vector3.new(0, 0, 0)
+                if platform then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
+                return 
+            end
 
             local currentModeToRun = targetMode
             if targetMode == "Auto Switch" then
@@ -592,16 +616,8 @@ toggleButton.MouseButton1Click:Connect(function()
                 currentModeToRun = currentAutoSubMode
             end
 
-            if targetHRP.Position.Y < -60 or targetHRP.Position.Y < (game.Workspace.FallenPartsDestroyHeight + 15) then
-                bv.Velocity = Vector3.new(0,0,0)
-                if platform and platform.Parent then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
-                return 
-            end
-
             myHumanoid.PlatformStand = true 
             
-            -- CONDITIONAL STROKE OSCILLATION ENGINE
-            -- Only uses dynamic sine wave range if ATTACH_DIST value is set greater than 0
             local dynamicOffset = 0
             local sineWave = 0
             local tiltAngle = 0
@@ -626,7 +642,7 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- TITAN PHYSICALLY BOUND/GLUED METHOD
+            -- ANTI-CHEAT BYPASS: Simulation network routing aur local physics override
             pcall(function() sethiddenproperty(myHRP, "PhysicsRepRootPart", tOrient) end)
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
