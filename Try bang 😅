@@ -6,7 +6,7 @@ local starterGui = game:GetService("StarterGui")
 
 -- UPDATED ANIMATION CONFIGURATION (SHADOW ATTACH ENGINE INTEGRATION)
 local bangAnimId = "rbxassetid://137182335630609"
-local faceBangAnimId = "79952107676081" -- Dono mode me aapka attachment wala new animation set kiya gaya hai
+local faceBangAnimId = "rbxassetid://137182335630609" -- Dono mode me aapka attachment wala new animation set kiya gaya hai
 local activeTrack = nil
 local animConnection = nil
 
