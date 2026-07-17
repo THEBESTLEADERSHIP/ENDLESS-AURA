@@ -85,6 +85,22 @@ local function getOrientationPart(char)
     return char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
 end
 
+-- Anti-Die & Auto-Recovery System
+task.spawn(function()
+    while task.wait(0.3) do
+        if not _G.EndlessAuraStorage then break end 
+        pcall(function()
+            if game.Workspace.FallenPartsDestroyHeight ~= -500000 then
+                game.Workspace.FallenPartsDestroyHeight = -500000
+            end
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+                player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
+            end
+        end)
+    end
+end)
+
 -- ====================================================================
 -- // PANEL GUI DESIGN (PRESERVED EXACTLY) // --
 -- ====================================================================
@@ -126,7 +142,7 @@ brandingImg.Parent = nameBoxFrame
 local nameText = Instance.new("TextLabel")
 nameText.Size = UDim2.new(1, -45, 1, 0) 
 nameText.Position = UDim2.new(0, 38, 0, 0)
-nameText.Text = "ENDLESS AURA BANG PANEL"
+nameText.Text = "ENDLESS AURA BANG PANELðŸ’€ðŸ’¢"
 nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
 nameText.Font = Enum.Font.Code 
 nameText.TextSize = 10.5
@@ -239,11 +255,11 @@ modeBtn.Parent = mainFrame
 modeBtn.MouseButton1Click:Connect(function()
     if targetMode == "Normal" then
         targetMode = "Face Bang"
-        modeBtn.Text = "MODE // CORE_FACE_BANG"
+        modeBtn.Text = "MODE // CORE_FACE_BANG ðŸŽ¯"
         modeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
     elseif targetMode == "Face Bang" then
         targetMode = "Auto Switch"
-        modeBtn.Text = "MODE // AUTO_SWITCH LOOP"
+        modeBtn.Text = "MODE // AUTO_SWITCH LOOP ðŸ”„"
         modeBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
     else
         targetMode = "Normal"
@@ -546,8 +562,8 @@ toggleButton.MouseButton1Click:Connect(function()
         _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
             if not isAttached or #selectedPlayers == 0 then return end 
             
-            -- PURE 0.0001s SHIFTING INTERVAL - EXTREME FAST ATTACH SPEED
-            if tick() - lastTargetSwitchTime >= 0.0001 or not selectedPlayer then
+            -- PURE 0.1s SHIFTING INTERVAL
+            if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
                 lastTargetSwitchTime = tick()
                 currentTargetIndex = currentTargetIndex + 1
                 if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end
@@ -569,22 +585,29 @@ toggleButton.MouseButton1Click:Connect(function()
 
             local currentModeToRun = targetMode
             if targetMode == "Auto Switch" then
-                if tick() - lastSwitchTime >= 0.5 then  -- Faster mode switching
+                if tick() - lastSwitchTime >= 1.0 then
                     lastSwitchTime = tick()
                     currentAutoSubMode = (currentAutoSubMode == "Normal") and "Face Bang" or "Normal"
                 end
                 currentModeToRun = currentAutoSubMode
             end
 
+            if targetHRP.Position.Y < -60 or targetHRP.Position.Y < (game.Workspace.FallenPartsDestroyHeight + 15) then
+                bv.Velocity = Vector3.new(0,0,0)
+                if platform and platform.Parent then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
+                return 
+            end
+
             myHumanoid.PlatformStand = true 
             
             -- CONDITIONAL STROKE OSCILLATION ENGINE
+            -- Only uses dynamic sine wave range if ATTACH_DIST value is set greater than 0
             local dynamicOffset = 0
             local sineWave = 0
             local tiltAngle = 0
             
             if attachDistance > 0 then
-                local timeFactor = tick() * speedMultiplier * 5  -- 5x faster oscillation
+                local timeFactor = tick() * speedMultiplier
                 sineWave = math.sin(timeFactor)
                 dynamicOffset = math.abs(sineWave) * forwardBackRange
                 tiltAngle = -sineWave * 0.15
@@ -603,12 +626,11 @@ toggleButton.MouseButton1Click:Connect(function()
                     * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
             end
             
-            -- TITAN PHYSICALLY BOUND/GLUED METHOD - EXTREME FAST ATTACH
+            -- TITAN PHYSICALLY BOUND/GLUED METHOD
             pcall(function() sethiddenproperty(myHRP, "PhysicsRepRootPart", tOrient) end)
             myHRP.CFrame = targetCFrame
             bg.CFrame = targetCFrame
-            -- Ultra fast velocity for instant attachment
-            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 3000
+            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300 
             
             if platform and platform.Parent then
                 platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
