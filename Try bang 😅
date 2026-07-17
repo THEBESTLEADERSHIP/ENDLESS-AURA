@@ -4,459 +4,444 @@ local userInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local starterGui = game:GetService("StarterGui")
 
--- ANIMATION CONFIGURATION
-local bangAnimId = "rbxassetid://126177622345379"
-local faceBangAnimId = "rbxassetid://91969343990570"
+-- UPDATED ANIMATION CONFIGURATION (SHADOW ATTACH ENGINE INTEGRATION)
+local bangAnimId = "rbxassetid://137182335630609"
+local faceBangAnimId = "79952107676081" -- Dono mode me aapka attachment wala new animation set kiya gaya hai
 local activeTrack = nil
 local animConnection = nil
 
 local function getHumanoid()
-    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    return player.Character and player.Character:FindFirstChildOfClass("Humanoid")[span_0](start_span)[span_0](end_span)
 end
 
 -- ====================================================================
 -- // RE-EXECUTION CLEAN WIPE & RESTART SYSTEM // --
 -- ====================================================================
-if _G.EndlessAuraStorage then
-    if _G.EndlessAuraStorage.CurrentGui then
-        _G.EndlessAuraStorage.CurrentGui:Destroy()
+if _G.EndlessAuraStorage then[span_1](start_span)[span_1](end_span)
+    if _G.EndlessAuraStorage.CurrentGui then[span_2](start_span)[span_2](end_span)
+        _G.EndlessAuraStorage.CurrentGui:Destroy()[span_3](start_span)[span_3](end_span)
     end
-    if _G.EndlessAuraStorage.ActiveConnection then
-        _G.EndlessAuraStorage.ActiveConnection:Disconnect()
+    if _G.EndlessAuraStorage.ActiveConnection then[span_4](start_span)[span_4](end_span)
+        _G.EndlessAuraStorage.ActiveConnection:Disconnect()[span_5](start_span)[span_5](end_span)
     end
-    if _G.EndlessAuraStorage.AnimForceConnection then
-        _G.EndlessAuraStorage.AnimForceConnection:Disconnect()
+    if _G.EndlessAuraStorage.PreSimConnection then
+        _G.EndlessAuraStorage.PreSimConnection:Disconnect()
     end
-    if _G.EndlessAuraStorage.VoidProtectionConnection then
-        _G.EndlessAuraStorage.VoidProtectionConnection:Disconnect()
+    if _G.EndlessAuraStorage.AnimForceConnection then[span_6](start_span)[span_6](end_span)
+        _G.EndlessAuraStorage.AnimForceConnection:Disconnect()[span_7](start_span)[span_7](end_span)
     end
-    if _G.EndlessAuraStorage.PlatformPart then
-        _G.EndlessAuraStorage.PlatformPart:Destroy()
+    if _G.EndlessAuraStorage.PlatformPart then[span_8](start_span)[span_8](end_span)
+        _G.EndlessAuraStorage.PlatformPart:Destroy()[span_9](start_span)[span_9](end_span)
     end
-    if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() end
-    if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() end
+    if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() end[span_10](start_span)[span_10](end_span)
+    if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() end[span_11](start_span)[span_11](end_span)
     
     pcall(function()
-        local myChar = player.Character
-        if myChar then
-            local hum = myChar:FindFirstChildOfClass("Humanoid")
-            if hum then
-                for _, track in pairs(hum:GetPlayingAnimationTracks()) do
-                    track:Stop()
+        local myChar = player.Character[span_12](start_span)[span_12](end_span)
+        if myChar then[span_13](start_span)[span_13](end_span)
+            local hum = myChar:FindFirstChildOfClass("Humanoid")[span_14](start_span)[span_14](end_span)
+            if hum then[span_15](start_span)[span_15](end_span)
+                for _, track in pairs(hum:GetPlayingAnimationTracks()) do[span_16](start_span)[span_16](end_span)
+                    track:Stop()[span_17](start_span)[span_17](end_span)
                 end
-                hum.PlatformStand = false
+                hum.PlatformStand = false[span_18](start_span)[span_18](end_span)
+                hum:ChangeState(Enum.HumanoidStateType.Running)
             end
-            local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")
-            local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myChar.HumanoidRootPart:FindFirstChild("RootJoint"))
-            if rootJoint then rootJoint.C0 = CFrame.new() end
+            local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")[span_19](start_span)[span_19](end_span)
+            local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myChar.HumanoidRootPart:FindFirstChild("RootJoint"))[span_20](start_span)[span_20](end_span)
+            if rootJoint then rootJoint.C0 = CFrame.new() end[span_21](start_span)[span_21](end_span)
+            
+            local root = myChar:FindFirstChild("HumanoidRootPart")
+            if sethiddenproperty and root then
+                sethiddenproperty(root, "NetworkIsSleeping", false)
+            end
         end
     end)
     
-    _G.EndlessAuraStorage = nil
-    task.wait(0.1)
+    _G.EndlessAuraStorage = nil[span_22](start_span)[span_22](end_span)
+    task.wait(0.1)[span_23](start_span)[span_23](end_span)
 end
 
 -- Initialize clean memory storage
-_G.EndlessAuraStorage = {
-    CurrentGui = nil,
-    ActiveConnection = nil,
-    AnimForceConnection = nil,
-    VoidProtectionConnection = nil,
-    PlatformPart = nil,
-    BV = nil,
-    BG = nil
+_G.EndlessAuraStorage = {[span_24](start_span)[span_24](end_span)
+    CurrentGui = nil,[span_25](start_span)[span_25](end_span)
+    ActiveConnection = nil,[span_26](start_span)[span_26](end_span)
+    PreSimConnection = nil,
+    AnimForceConnection = nil,[span_27](start_span)[span_27](end_span)
+    PlatformPart = nil,[span_28](start_span)[span_28](end_span)
+    BV = nil,[span_29](start_span)[span_29](end_span)
+    BG = nil[span_30](start_span)[span_30](end_span)
 }
 
 -- CONFIGURATIONS
-local speedMultiplier = 17.4   
-local forwardBackRange = 1.1   
-local fixedUpOffset = 1.8      
-local attachDistance = 0.4     
+local speedMultiplier = 17.4[span_31](start_span)[span_31](end_span)
+local forwardBackRange = 1.1[span_32](start_span)[span_32](end_span)
+local fixedUpOffset = 1.8[span_33](start_span)[span_33](end_span)
+local attachDistance = 0.4[span_34](start_span)[span_34](end_span)
 
-local targetMode = "Normal" 
-local isAttached = false
-local selectedPlayers = {} 
-local currentTargetIndex = 1
-local lastTargetSwitchTime = 0
-local selectedPlayer = nil 
+local targetMode = "Normal[span_35](start_span)"[span_35](end_span)
+local isAttached = false[span_36](start_span)[span_36](end_span)
+local selectedPlayers = {}[span_37](start_span)[span_37](end_span)
+local currentTargetIndex = 1[span_38](start_span)[span_38](end_span)
+local lastTargetSwitchTime = 0[span_39](start_span)[span_39](end_span)
+local selectedPlayer = nil[span_40](start_span)[span_40](end_span)
 
-local currentAutoSubMode = "Normal"
-local lastSwitchTime = 0
+local currentAutoSubMode = "Normal[span_41](start_span)"[span_41](end_span)
+local lastSwitchTime = 0[span_42](start_span)[span_42](end_span)
 
 -- Helper to get reliable orientation part
 local function getOrientationPart(char)
-    if not char then return nil end
-    return char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
+    if not char then return nil end[span_43](start_span)[span_43](end_span)
+    return char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")[span_44](start_span)[span_44](end_span)
 end
-
--- ====================================================================
--- // ANTI-CHEAT BYPASS & VOID GUARD (NO-FALL SYSTEM) // --
--- ====================================================================
--- Jaise hi pair zameen se niche jayenge, instantly check aur teleportation block run hoga.
-_G.EndlessAuraStorage.VoidProtectionConnection = runService.Heartbeat:Connect(function()
-    pcall(function()
-        local char = player.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        
-        if hrp and hum then
-            -- Fall detection bypass limit (Instant protection before falling deep)
-            local currentFloorDepth = -80 -- Custom zameen check limit
-            if hrp.Position.Y < currentFloorDepth then
-                hrp.Velocity = Vector3.new(0, 0, 0)
-                -- Teleportation back above ground smoothly to bypass Anti-Cheats
-                hrp.CFrame = CFrame.new(hrp.Position.X, 15, hrp.Position.Z)
-                
-                -- Temporary platform spawn in case of total void fall map
-                if _G.EndlessAuraStorage.PlatformPart then
-                    _G.EndlessAuraStorage.PlatformPart.CFrame = hrp.CFrame * CFrame.new(0, -3.5, 0)
-                end
-            end
-        end
-    end)
-end)
 
 -- ====================================================================
 -- // PANEL GUI DESIGN // --
 -- ====================================================================
-local screenGui = Instance.new("ScreenGui") 
-screenGui.Name = "DeltaGlassRoboticUI" 
-screenGui.ResetOnSpawn = false 
-screenGui.Parent = game.CoreGui 
-_G.EndlessAuraStorage.CurrentGui = screenGui 
+local screenGui = Instance.new("ScreenGui")[span_45](start_span)[span_45](end_span)
+screenGui.Name = "DeltaGlassRoboticUI[span_46](start_span)"[span_46](end_span)
+screenGui.ResetOnSpawn = false[span_47](start_span)[span_47](end_span)
+screenGui.Parent = game.CoreGui[span_48](start_span)[span_48](end_span)
+_G.EndlessAuraStorage.CurrentGui = screenGui[span_49](start_span)[span_49](end_span)
 
-local mainFrame = Instance.new("Frame") 
-mainFrame.Size = UDim2.new(0, 250, 0, 360) 
-mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180) 
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
-mainFrame.BackgroundTransparency = 0.45 
-mainFrame.BorderSizePixel = 2 
-mainFrame.BorderColor3 = Color3.fromRGB(255, 0, 50) 
-mainFrame.BorderMode = Enum.BorderMode.Inset 
-mainFrame.ClipsDescendants = true 
-mainFrame.Parent = screenGui 
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 4)
+local mainFrame = Instance.new("Frame")[span_50](start_span)[span_50](end_span)
+mainFrame.Size = UDim2.new(0, 250, 0, 360)[span_51](start_span)[span_51](end_span)
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -180)[span_52](start_span)[span_52](end_span)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)[span_53](start_span)[span_53](end_span)
+mainFrame.BackgroundTransparency = 0.45[span_54](start_span)[span_54](end_span)
+mainFrame.BorderSizePixel = 2[span_55](start_span)[span_55](end_span)
+mainFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)[span_56](start_span)[span_56](end_span)
+mainFrame.BorderMode = Enum.BorderMode.Inset[span_57](start_span)[span_57](end_span)
+mainFrame.ClipsDescendants = true[span_58](start_span)[span_58](end_span)
+mainFrame.Parent = screenGui[span_59](start_span)[span_59](end_span)
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 4)[span_60](start_span)[span_60](end_span)
 
-local nameBoxFrame = Instance.new("Frame")
-nameBoxFrame.Size = UDim2.new(1, -12, 0, 36) 
-nameBoxFrame.Position = UDim2.new(0, 6, 0, 6)
-nameBoxFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 5)
-nameBoxFrame.BackgroundTransparency = 0.3
-nameBoxFrame.BorderSizePixel = 1
-nameBoxFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)
-nameBoxFrame.Parent = mainFrame
+local nameBoxFrame = Instance.new("Frame")[span_61](start_span)[span_61](end_span)
+nameBoxFrame.Size = UDim2.new(1, -12, 0, 36)[span_62](start_span)[span_62](end_span)
+nameBoxFrame.Position = UDim2.new(0, 6, 0, 6)[span_63](start_span)[span_63](end_span)
+nameBoxFrame.BackgroundColor3 = Color3.fromRGB(15, 0, 5)[span_64](start_span)[span_64](end_span)
+nameBoxFrame.BackgroundTransparency = 0.3[span_65](start_span)[span_65](end_span)
+nameBoxFrame.BorderSizePixel = 1[span_66](start_span)[span_66](end_span)
+nameBoxFrame.BorderColor3 = Color3.fromRGB(255, 0, 50)[span_67](start_span)[span_67](end_span)
+nameBoxFrame.Parent = mainFrame[span_68](start_span)[span_68](end_span)
 
-local brandingImg = Instance.new("ImageLabel")
-brandingImg.Size = UDim2.new(0, 26, 0, 26)
-brandingImg.Position = UDim2.new(0, 6, 0, 5)
-brandingImg.Image = "rbxassetid://129299711445020"
-brandingImg.BackgroundTransparency = 1
-brandingImg.Parent = nameBoxFrame
+local brandingImg = Instance.new("ImageLabel")[span_69](start_span)[span_69](end_span)
+brandingImg.Size = UDim2.new(0, 26, 0, 26)[span_70](start_span)[span_70](end_span)
+brandingImg.Position = UDim2.new(0, 6, 0, 5)[span_71](start_span)[span_71](end_span)
+brandingImg.Image = "rbxassetid://129299711445020[span_72](start_span)"[span_72](end_span)
+brandingImg.BackgroundTransparency = 1[span_73](start_span)[span_73](end_span)
+brandingImg.Parent = nameBoxFrame[span_74](start_span)[span_74](end_span)
 
-local nameText = Instance.new("TextLabel")
-nameText.Size = UDim2.new(1, -45, 1, 0) 
-nameText.Position = UDim2.new(0, 38, 0, 0)
-nameText.Text = "ENDLESS AURA BANG PANEL"
-nameText.TextColor3 = Color3.fromRGB(255, 255, 255)
-nameText.Font = Enum.Font.Code 
-nameText.TextSize = 10.5
-nameText.TextXAlignment = Enum.TextXAlignment.Left
-nameText.BackgroundTransparency = 1
-nameText.Parent = nameBoxFrame
+local nameText = Instance.new("TextLabel")[span_75](start_span)[span_75](end_span)
+nameText.Size = UDim2.new(1, -45, 1, 0)[span_76](start_span)[span_76](end_span)
+nameText.Position = UDim2.new(0, 38, 0, 0)[span_77](start_span)[span_77](end_span)
+nameText.Text = "ENDLESS AURA BANG PANEL[span_78](start_span)"[span_78](end_span)
+nameText.TextColor3 = Color3.fromRGB(255, 255, 255)[span_79](start_span)[span_79](end_span)
+nameText.Font = Enum.Font.Code[span_80](start_span)[span_80](end_span)
+nameText.TextSize = 10.5[span_81](start_span)[span_81](end_span)
+nameText.TextXAlignment = Enum.TextXAlignment.Left[span_82](start_span)[span_82](end_span)
+nameText.BackgroundTransparency = 1[span_83](start_span)[span_83](end_span)
+nameText.Parent = nameBoxFrame[span_84](start_span)[span_84](end_span)
 
-local toggleGuiBtn = Instance.new("TextButton")
-toggleGuiBtn.Size = UDim2.new(0, 70, 0, 30)
-toggleGuiBtn.Position = UDim2.new(0, 15, 1, -45) 
-toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
-toggleGuiBtn.BackgroundTransparency = 0.3
+local toggleGuiBtn = Instance.new("TextButton")[span_85](start_span)[span_85](end_span)
+toggleGuiBtn.Size = UDim2.new(0, 70, 0, 30)[span_86](start_span)[span_86](end_span)
+toggleGuiBtn.Position = UDim2.new(0, 15, 1, -45)[span_87](start_span)[span_87](end_span)
+toggleGuiBtn.BackgroundColor3 = Color3.fromRGB(5, 5, 5)[span_88](start_span)[span_88](end_span)
+toggleGuiBtn.BackgroundTransparency = 0.3[span_89](start_span)[span_89](end_span)
 toggleGuiBtn.BorderSizePixel = 2
-toggleGuiBtn.BorderColor3 = Color3.fromRGB(255, 0, 50)
-toggleGuiBtn.Text = "[ CLOSE ]"
-toggleGuiBtn.TextColor3 = Color3.fromRGB(255, 0, 50)
-toggleGuiBtn.Font = Enum.Font.Code
-toggleGuiBtn.TextSize = 12
-toggleGuiBtn.Parent = screenGui
-Instance.new("UICorner", toggleGuiBtn).CornerRadius = UDim.new(0, 4)
+toggleGuiBtn.BorderColor3 = Color3.fromRGB(255, 0, 50)[span_90](start_span)[span_90](end_span)
+toggleGuiBtn.Text = "[ CLOSE ][span_91](start_span)"[span_91](end_span)
+toggleGuiBtn.TextColor3 = Color3.fromRGB(255, 0, 50)[span_92](start_span)[span_92](end_span)
+toggleGuiBtn.Font = Enum.Font.Code[span_93](start_span)[span_93](end_span)
+toggleGuiBtn.TextSize = 12[span_94](start_span)[span_94](end_span)
+toggleGuiBtn.Parent = screenGui[span_95](start_span)[span_95](end_span)
+Instance.new("UICorner", toggleGuiBtn).CornerRadius = UDim.new(0, 4)[span_96](start_span)[span_96](end_span)
 
-toggleGuiBtn.MouseButton1Click:Connect(function()
-    mainFrame.Visible = not mainFrame.Visible
-    toggleGuiBtn.Text = mainFrame.Visible and "[ CLOSE ]" or "[ OPEN ]"
-    toggleGuiBtn.TextColor3 = mainFrame.Visible and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(0, 255, 150)
-    toggleGuiBtn.BorderColor3 = mainFrame.Visible and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(0, 255, 150)
-end)
+toggleGuiBtn.MouseButton1Click:Connect(function()[span_97](start_span)[span_97](end_span)
+    mainFrame.Visible = not mainFrame.Visible[span_98](start_span)[span_98](end_span)
+    toggleGuiBtn.Text = mainFrame.Visible and "[ CLOSE ]" or "[ OPEN ][span_99](start_span)"[span_99](end_span)
+    toggleGuiBtn.TextColor3 = mainFrame.Visible and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(0, 255, 150)[span_100](start_span)[span_100](end_span)
+    toggleGuiBtn.BorderColor3 = mainFrame.Visible and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(0, 255, 150)[span_101](start_span)[span_101](end_span)
+end)[span_102](start_span)[span_102](end_span)
 
 -- Draggable Engine
-local dragging, dragStart, startPos
-nameBoxFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = mainFrame.Position
-    end
-end)
-userInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-userInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
-end)
+local dragging, dragStart, startPos[span_103](start_span)[span_103](end_span)
+nameBoxFrame.InputBegan:Connect(function(input)[span_104](start_span)[span_104](end_span)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then[span_105](start_span)[span_105](end_span)
+        dragging = true[span_106](start_span)[span_106](end_span)
+        dragStart = input.Position[span_107](start_span)[span_107](end_span)
+        startPos = mainFrame.Position[span_108](start_span)[span_108](end_span)
+    end[span_109](start_span)[span_109](end_span)
+end)[span_110](start_span)[span_110](end_span)
+userInputService.InputChanged:Connect(function(input)[span_111](start_span)[span_111](end_span)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then[span_112](start_span)[span_112](end_span)
+        local delta = input.Position - dragStart[span_113](start_span)[span_113](end_span)
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)[span_114](start_span)[span_114](end_span)
+    end[span_115](start_span)[span_115](end_span)
+end)[span_116](start_span)[span_116](end_span)
+userInputService.InputEnded:Connect(function(input)[span_117](start_span)[span_117](end_span)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end[span_118](start_span)[span_118](end_span)
+end)[span_119](start_span)[span_119](end_span)
 
 -- SEARCH BOX
-local textBox = Instance.new("TextBox") 
-textBox.Size = UDim2.new(1, -16, 0, 26) 
-textBox.Position = UDim2.new(0, 8, 0, 50) 
-textBox.PlaceholderText = "> SEARCH MULTI TARGETS..." 
-textBox.Text = "" 
-textBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10) 
-textBox.BackgroundTransparency = 0.4
-textBox.TextColor3 = Color3.fromRGB(255, 255, 255) 
-textBox.TextSize = 11
-textBox.Font = Enum.Font.Code
-textBox.BorderColor3 = Color3.fromRGB(150, 0, 30) 
-textBox.Parent = mainFrame 
+local textBox = Instance.new("TextBox")[span_120](start_span)[span_120](end_span)
+textBox.Size = UDim2.new(1, -16, 0, 26)[span_121](start_span)[span_121](end_span)
+textBox.Position = UDim2.new(0, 8, 0, 50)[span_122](start_span)[span_122](end_span)
+textBox.PlaceholderText = "> SEARCH MULTI TARGETS...[span_123](start_span)"[span_123](end_span)
+textBox.Text = "[span_124](start_span)"[span_124](end_span)
+textBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10)[span_125](start_span)[span_125](end_span)
+textBox.BackgroundTransparency = 0.4[span_126](start_span)[span_126](end_span)
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255)[span_127](start_span)[span_127](end_span)
+textBox.TextSize = 11[span_128](start_span)[span_128](end_span)
+textBox.Font = Enum.Font.Code[span_129](start_span)[span_129](end_span)
+textBox.BorderColor3 = Color3.fromRGB(150, 0, 30)[span_130](start_span)[span_130](end_span)
+textBox.Parent = mainFrame[span_131](start_span)[span_131](end_span)
 
 -- SCROLL LIST
-local scrollingFrame = Instance.new("ScrollingFrame") 
-scrollingFrame.Size = UDim2.new(1, -16, 0, 65) 
-scrollingFrame.Position = UDim2.new(0, 8, 0, 82) 
-scrollingFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5) 
-scrollingFrame.BackgroundTransparency = 0.4
-scrollingFrame.ScrollBarThickness = 3 
-scrollingFrame.BorderColor3 = Color3.fromRGB(100, 0, 20) 
-scrollingFrame.Parent = mainFrame 
-local uiList = Instance.new("UIListLayout", scrollingFrame)
-uiList.Padding = UDim.new(0, 2)
+local scrollingFrame = Instance.new("ScrollingFrame")[span_132](start_span)[span_132](end_span)
+scrollingFrame.Size = UDim2.new(1, -16, 0, 65)[span_133](start_span)[span_133](end_span)
+scrollingFrame.Position = UDim2.new(0, 8, 0, 82)[span_134](start_span)[span_134](end_span)
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 5)[span_135](start_span)[span_135](end_span)
+scrollingFrame.BackgroundTransparency = 0.4[span_136](start_span)[span_136](end_span)
+scrollingFrame.ScrollBarThickness = 3[span_137](start_span)[span_137](end_span)
+scrollingFrame.BorderColor3 = Color3.fromRGB(100, 0, 20)[span_138](start_span)[span_138](end_span)
+scrollingFrame.Parent = mainFrame[span_139](start_span)[span_139](end_span)
+local uiList = Instance.new("UIListLayout", scrollingFrame)[span_140](start_span)[span_140](end_span)
+uiList.Padding = UDim.new(0, 2)[span_141](start_span)[span_141](end_span)
 
 -- SIDE-BY-SIDE SMALL BUTTONS SETUP
-local clearBtn = Instance.new("TextButton")
-clearBtn.Size = UDim2.new(0.5, -12, 0, 22) 
-clearBtn.Position = UDim2.new(0, 8, 0, 154) 
-clearBtn.Text = "[ CLEAR ]"
-clearBtn.BackgroundColor3 = Color3.fromRGB(25, 5, 10)
-clearBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-clearBtn.BorderColor3 = Color3.fromRGB(200, 0, 50)
-clearBtn.Font = Enum.Font.Code
-clearBtn.TextSize = 11
-clearBtn.Parent = mainFrame
+local clearBtn = Instance.new("TextButton")[span_142](start_span)[span_142](end_span)
+clearBtn.Size = UDim2.new(0.5, -12, 0, 22)[span_143](start_span)[span_143](end_span)
+clearBtn.Position = UDim2.new(0, 8, 0, 154)[span_144](start_span)[span_144](end_span)
+clearBtn.Text = "[ CLEAR ][span_145](start_span)"[span_145](end_span)
+clearBtn.BackgroundColor3 = Color3.fromRGB(25, 5, 10)[span_146](start_span)[span_146](end_span)
+clearBtn.TextColor3 = Color3.fromRGB(255, 50, 50)[span_147](start_span)[span_147](end_span)
+clearBtn.BorderColor3 = Color3.fromRGB(200, 0, 50)[span_148](start_span)[span_148](end_span)
+clearBtn.Font = Enum.Font.Code[span_149](start_span)[span_149](end_span)
+clearBtn.TextSize = 11[span_150](start_span)[span_150](end_span)
+clearBtn.Parent = mainFrame[span_151](start_span)[span_151](end_span)
 
-local selectAllBtn = Instance.new("TextButton")
-selectAllBtn.Size = UDim2.new(0.5, -12, 0, 22) 
-selectAllBtn.Position = UDim2.new(0.5, 4, 0, 154) 
-selectAllBtn.Text = "[ SELECT ALL ]"
-selectAllBtn.BackgroundColor3 = Color3.fromRGB(5, 20, 10)
-selectAllBtn.TextColor3 = Color3.fromRGB(50, 255, 150)
-selectAllBtn.BorderColor3 = Color3.fromRGB(0, 200, 100)
-selectAllBtn.Font = Enum.Font.Code
-selectAllBtn.TextSize = 11
-selectAllBtn.Parent = mainFrame
+local selectAllBtn = Instance.new("TextButton")[span_152](start_span)[span_152](end_span)
+selectAllBtn.Size = UDim2.new(0.5, -12, 0, 22)[span_153](start_span)[span_153](end_span)
+selectAllBtn.Position = UDim2.new(0.5, 4, 0, 154)[span_154](start_span)[span_154](end_span)
+selectAllBtn.Text = "[ SELECT ALL ][span_155](start_span)"[span_155](end_span)
+selectAllBtn.BackgroundColor3 = Color3.fromRGB(5, 20, 10)[span_156](start_span)[span_156](end_span)
+selectAllBtn.TextColor3 = Color3.fromRGB(50, 255, 150)[span_157](start_span)[span_157](end_span)
+selectAllBtn.BorderColor3 = Color3.fromRGB(0, 200, 100)[span_158](start_span)[span_158](end_span)
+selectAllBtn.Font = Enum.Font.Code[span_159](start_span)[span_159](end_span)
+selectAllBtn.TextSize = 11[span_160](start_span)[span_160](end_span)
+selectAllBtn.Parent = mainFrame[span_161](start_span)[span_161](end_span)
 
 -- TARGET MODE BUTTON
-local modeBtn = Instance.new("TextButton")
-modeBtn.Size = UDim2.new(1, -16, 0, 24)
-modeBtn.Position = UDim2.new(0, 8, 0, 182)
-modeBtn.Text = "MODE // SYSTEM_NORMAL"
-modeBtn.BackgroundColor3 = Color3.fromRGB(15, 5, 5)
-modeBtn.BackgroundTransparency = 0.3
-modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-modeBtn.Font = Enum.Font.Code
-modeBtn.TextSize = 11
-modeBtn.BorderColor3 = Color3.fromRGB(180, 0, 40)
-modeBtn.Parent = mainFrame
+local modeBtn = Instance.new("TextButton")[span_162](start_span)[span_162](end_span)
+modeBtn.Size = UDim2.new(1, -16, 0, 24)[span_163](start_span)[span_163](end_span)
+modeBtn.Position = UDim2.new(0, 8, 0, 182)[span_164](start_span)[span_164](end_span)
+modeBtn.Text = "MODE // SYSTEM_NORMAL[span_165](start_span)"[span_165](end_span)
+modeBtn.BackgroundColor3 = Color3.fromRGB(15, 5, 5)[span_166](start_span)[span_166](end_span)
+modeBtn.BackgroundTransparency = 0.3[span_167](start_span)[span_167](end_span)
+modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)[span_168](start_span)[span_168](end_span)
+modeBtn.Font = Enum.Font.Code[span_169](start_span)[span_169](end_span)
+modeBtn.TextSize = 11[span_170](start_span)[span_170](end_span)
+modeBtn.BorderColor3 = Color3.fromRGB(180, 0, 40)[span_171](start_span)[span_171](end_span)
+modeBtn.Parent = mainFrame[span_172](start_span)[span_172](end_span)
 
-modeBtn.MouseButton1Click:Connect(function()
-    if targetMode == "Normal" then
-        targetMode = "Face Bang"
-        modeBtn.Text = "MODE // CORE_FACE_BANG"
-        modeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-    elseif targetMode == "Face Bang" then
-        targetMode = "Auto Switch"
-        modeBtn.Text = "MODE // AUTO_SWITCH LOOP"
-        modeBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+modeBtn.MouseButton1Click:Connect(function()[span_173](start_span)[span_173](end_span)
+    if targetMode == "Normal" then[span_174](start_span)[span_174](end_span)
+        targetMode = "Face Bang[span_175](start_span)"[span_175](end_span)
+        modeBtn.Text = "MODE // CORE_FACE_BANG[span_176](start_span)"[span_176](end_span)
+        modeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)[span_177](start_span)[span_177](end_span)
+    elseif targetMode == "Face Bang" then[span_178](start_span)[span_178](end_span)
+        targetMode = "Auto Switch[span_179](start_span)"[span_179](end_span)
+        modeBtn.Text = "MODE // AUTO_SWITCH LOOP[span_180](start_span)"[span_180](end_span)
+        modeBtn.TextColor3 = Color3.fromRGB(0, 200, 255)[span_181](start_span)[span_181](end_span)
     else
-        targetMode = "Normal"
-        modeBtn.Text = "MODE // SYSTEM_NORMAL"
-        modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        targetMode = "Normal[span_182](start_span)"[span_182](end_span)
+        modeBtn.Text = "MODE // SYSTEM_NORMAL[span_183](start_span)"[span_183](end_span)
+        modeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)[span_184](start_span)[span_184](end_span)
     end
-end)
+end)[span_185](start_span)[span_185](end_span)
 
 -- SLIDER GENERATOR
-local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callback)
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -16, 0, 14)
-    label.Position = UDim2.new(0, 8, 0, minY)
-    label.Text = "SYS_" .. labelText .. ":: " .. tostring(defaultVal)
-    label.TextColor3 = Color3.fromRGB(180, 180, 180)
-    label.Font = Enum.Font.Code
-    label.TextSize = 9.5
-    label.BackgroundTransparency = 1
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = mainFrame
+local function createSlider(minY, labelText, minVal, maxVal, defaultVal, callback)[span_186](start_span)[span_186](end_span)
+    local label = Instance.new("TextLabel")[span_187](start_span)[span_187](end_span)
+    label.Size = UDim2.new(1, -16, 0, 14)[span_188](start_span)[span_188](end_span)
+    label.Position = UDim2.new(0, 8, 0, minY)[span_189](start_span)[span_189](end_span)
+    label.Text = "SYS_" .. labelText .. ":: " .. tostring(defaultVal)[span_190](start_span)[span_190](end_span)
+    label.TextColor3 = Color3.fromRGB(180, 180, 180)[span_191](start_span)[span_191](end_span)
+    label.Font = Enum.Font.Code[span_192](start_span)[span_192](end_span)
+    label.TextSize = 9.5[span_193](start_span)[span_193](end_span)
+    label.BackgroundTransparency = 1[span_194](start_span)[span_194](end_span)
+    label.TextXAlignment = Enum.TextXAlignment.Left[span_195](start_span)[span_195](end_span)
+    label.Parent = mainFrame[span_196](start_span)[span_196](end_span)
 
-    local track = Instance.new("TextButton") 
-    track.Size = UDim2.new(1, -16, 0, 4)
-    track.Position = UDim2.new(0, 8, 0, minY + 14)
-    track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    track.Text = ""
-    track.AutoButtonColor = false
-    track.BorderSizePixel = 0
-    track.Parent = mainFrame
+    local track = Instance.new("TextButton")[span_197](start_span)[span_197](end_span)
+    track.Size = UDim2.new(1, -16, 0, 4)[span_198](start_span)[span_198](end_span)
+    track.Position = UDim2.new(0, 8, 0, minY + 14)[span_199](start_span)[span_199](end_span)
+    track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)[span_200](start_span)[span_200](end_span)
+    track.Text = "[span_201](start_span)"[span_201](end_span)
+    track.AutoButtonColor = false[span_202](start_span)[span_202](end_span)
+    track.BorderSizePixel = 0[span_203](start_span)[span_203](end_span)
+    track.Parent = mainFrame[span_204](start_span)[span_204](end_span)
 
-    local fill = Instance.new("Frame")
-    fill.Size = UDim2.new((defaultVal - minVal)/(maxVal - minVal), 0, 1, 0)
-    fill.BackgroundColor3 = Color3.fromRGB(255, 0, 50)
-    fill.BorderSizePixel = 0
-    fill.Parent = track
+    local fill = Instance.new("Frame")[span_205](start_span)[span_205](end_span)
+    fill.Size = UDim2.new((defaultVal - minVal)/(maxVal - minVal), 0, 1, 0)[span_206](start_span)[span_206](end_span)
+    fill.BackgroundColor3 = Color3.fromRGB(255, 0, 50)[span_207](start_span)[span_207](end_span)
+    fill.BorderSizePixel = 0[span_208](start_span)[span_208](end_span)
+    fill.Parent = track[span_209](start_span)[span_209](end_span)
 
-    local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 8, 0, 10)
-    knob.Position = UDim2.new((defaultVal - minVal)/(maxVal - minVal), -4, 0.5, -5)
-    knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    knob.Parent = track
+    local knob = Instance.new("Frame")[span_210](start_span)[span_210](end_span)
+    knob.Size = UDim2.new(0, 8, 0, 10)[span_211](start_span)[span_211](end_span)
+    knob.Position = UDim2.new((defaultVal - minVal)/(maxVal - minVal), -4, 0.5, -5)[span_212](start_span)[span_212](end_span)
+    knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)[span_213](start_span)[span_213](end_span)
+    knob.Parent = track[span_214](start_span)[span_214](end_span)
 
-    local function updateSliderPosition(inputPositionX)
-        local relativeX = math.clamp((inputPositionX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-        knob.Position = UDim2.new(relativeX, -4, 0.5, -5)
-        fill.Size = UDim2.new(relativeX, 0, 1, 0)
+    local function updateSliderPosition(inputPositionX)[span_215](start_span)[span_215](end_span)
+        local relativeX = math.clamp((inputPositionX - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)[span_216](start_span)[span_216](end_span)
+        knob.Position = UDim2.new(relativeX, -4, 0.5, -5)[span_217](start_span)[span_217](end_span)
+        fill.Size = UDim2.new(relativeX, 0, 1, 0)[span_218](start_span)[span_218](end_span)
         
-        local currentVal = math.floor((minVal + (relativeX * (maxVal - minVal))) * 10) / 10
-        label.Text = "SYS_" .. labelText .. ":: " .. tostring(currentVal)
-        callback(currentVal)
+        local currentVal = math.floor((minVal + (relativeX * (maxVal - minVal))) * 10) / 10[span_219](start_span)[span_219](end_span)
+        label.Text = "SYS_" .. labelText .. ":: " .. tostring(currentVal)[span_220](start_span)[span_220](end_span)
+        callback(currentVal)[span_221](start_span)[span_221](end_span)
     end
 
-    local sliderDragging = false
-    track.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            sliderDragging = true
-            updateSliderPosition(input.Position.X) 
-        end
-    end)
-    userInputService.InputChanged:Connect(function(input)
-        if sliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            updateSliderPosition(input.Position.X)
-        end
-    end)
-    userInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then sliderDragging = false end
-    end)
+    local sliderDragging = false[span_222](start_span)[span_222](end_span)
+    track.InputBegan:Connect(function(input)[span_223](start_span)[span_223](end_span)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then[span_224](start_span)[span_224](end_span)
+            sliderDragging = true[span_225](start_span)[span_225](end_span)
+            updateSliderPosition(input.Position.X)[span_226](start_span)[span_226](end_span)
+        end[span_227](start_span)[span_227](end_span)
+    end)[span_228](start_span)[span_228](end_span)
+    userInputService.InputChanged:Connect(function(input)[span_229](start_span)[span_229](end_span)
+        if sliderDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then[span_230](start_span)[span_230](end_span)
+            updateSliderPosition(input.Position.X)[span_231](start_span)[span_231](end_span)
+        end[span_232](start_span)[span_232](end_span)
+    end)[span_233](start_span)[span_233](end_span)
+    userInputService.InputEnded:Connect(function(input)[span_234](start_span)[span_234](end_span)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then sliderDragging = false end[span_235](start_span)[span_235](end_span)
+    end)[span_236](start_span)[span_236](end_span)
 end
 
-createSlider(212, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v) 
-    speedMultiplier = v 
-    if activeTrack then activeTrack:AdjustSpeed(v / 5) end
+createSlider(212, "EMOTE_SPEED", 1, 40, speedMultiplier, function(v)[span_237](start_span)[span_237](end_span)
+    speedMultiplier = v[span_238](start_span)[span_238](end_span)
+    if activeTrack then activeTrack:AdjustSpeed(v / 5) end[span_239](start_span)[span_239](end_span)
 end)
-createSlider(242, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)
-createSlider(272, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)
-createSlider(302, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)
+createSlider(242, "STROKE_RANGE", 0, 5, forwardBackRange, function(v) forwardBackRange = v end)[span_240](start_span)[span_240](end_span)
+createSlider(272, "HEIGHT_OFFSET", -10, 10, fixedUpOffset, function(v) fixedUpOffset = v end)[span_241](start_span)[span_241](end_span)
+createSlider(302, "ATTACH_DIST", 0, 15, attachDistance, function(v) attachDistance = v end)[span_242](start_span)[span_242](end_span)
 
-local toggleButton = Instance.new("TextButton") 
-toggleButton.Size = UDim2.new(1, -16, 0, 26) 
-toggleButton.Position = UDim2.new(0, 8, 1, -32) 
-toggleButton.Text = "[ FUCK ON ]" 
-toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
-toggleButton.BackgroundTransparency = 0.2
-toggleButton.TextColor3 = Color3.new(1, 1, 1) 
-toggleButton.Font = Enum.Font.Code
-toggleButton.TextSize = 12
-toggleButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.Parent = mainFrame 
+local toggleButton = Instance.new("TextButton")[span_243](start_span)[span_243](end_span)
+toggleButton.Size = UDim2.new(1, -16, 0, 26)[span_244](start_span)[span_244](end_span)
+toggleButton.Position = UDim2.new(0, 8, 1, -32)[span_245](start_span)[span_245](end_span)
+toggleButton.Text = "[ FUCK ON ][span_246](start_span)"[span_246](end_span)
+toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30)[span_247](start_span)[span_247](end_span)
+toggleButton.BackgroundTransparency = 0.2[span_248](start_span)[span_248](end_span)
+toggleButton.TextColor3 = Color3.new(1, 1, 1)[span_249](start_span)[span_249](end_span)
+toggleButton.Font = Enum.Font.Code[span_250](start_span)[span_250](end_span)
+toggleButton.TextSize = 12[span_251](start_span)[span_251](end_span)
+toggleButton.BorderColor3 = Color3.fromRGB(255, 255, 255)[span_252](start_span)[span_252](end_span)
+toggleButton.Parent = mainFrame[span_253](start_span)[span_253](end_span)
 
-local function updateList() 
-    for _, child in pairs(scrollingFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end 
-    for _, p in pairs(Players:GetPlayers()) do 
-        if p ~= player and (string.find(p.Name:lower(), textBox.Text:lower()) or string.find(p.DisplayName:lower(), textBox.Text:lower())) then 
-            local btn = Instance.new("TextButton") 
-            btn.Size = UDim2.new(1, 0, 0, 22) 
-            btn.Text = " > " .. p.DisplayName .. " (@" .. p.Name .. ")"
-            btn.BackgroundColor3 = table.find(selectedPlayers, p) and Color3.fromRGB(0, 100, 50) or Color3.fromRGB(15, 15, 15) 
-            btn.BackgroundTransparency = 0.5
-            btn.TextColor3 = table.find(selectedPlayers, p) and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(200, 200, 200) 
-            btn.TextSize = 11
-            btn.Font = Enum.Font.RobotoMono
-            btn.TextXAlignment = Enum.TextXAlignment.Left 
-            btn.BorderColor3 = Color3.fromRGB(40, 0, 10)
-            btn.Parent = scrollingFrame 
+local function updateList()[span_254](start_span)[span_254](end_span)
+    for _, child in pairs(scrollingFrame:GetChildren()) do if child:IsA("TextButton") then child:Destroy() end end[span_255](start_span)[span_255](end_span)
+    for _, p in pairs(Players:GetPlayers()) do[span_256](start_span)[span_256](end_span)
+        if p ~= player and (string.find(p.Name:lower(), textBox.Text:lower()) or string.find(p.DisplayName:lower(), textBox.Text:lower())) then[span_257](start_span)[span_257](end_span)
+            local btn = Instance.new("TextButton")[span_258](start_span)[span_258](end_span)
+            btn.Size = UDim2.new(1, 0, 0, 22)[span_259](start_span)[span_259](end_span)
+            btn.Text = " > " .. p.DisplayName .. " (@" .. p.Name .. ")[span_260](start_span)"[span_260](end_span)
+            btn.BackgroundColor3 = table.find(selectedPlayers, p) and Color3.fromRGB(0, 100, 50) or Color3.fromRGB(15, 15, 15)[span_261](start_span)[span_261](end_span)
+            btn.BackgroundTransparency = 0.5[span_262](start_span)[span_262](end_span)
+            btn.TextColor3 = table.find(selectedPlayers, p) and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(200, 200, 200)[span_263](start_span)[span_263](end_span)
+            btn.TextSize = 11[span_264](start_span)[span_264](end_span)
+            btn.Font = Enum.Font.RobotoMono[span_265](start_span)[span_265](end_span)
+            btn.TextXAlignment = Enum.TextXAlignment.Left[span_266](start_span)[span_266](end_span)
+            btn.BorderColor3 = Color3.fromRGB(40, 0, 10)[span_267](start_span)[span_267](end_span)
+            btn.Parent = scrollingFrame[span_268](start_span)[span_268](end_span)
             
-            btn.MouseButton1Click:Connect(function() 
-                local index = table.find(selectedPlayers, p)
-                if index then
-                    table.remove(selectedPlayers, index)
-                    btn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-                    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+            btn.MouseButton1Click:Connect(function()[span_269](start_span)[span_269](end_span)
+                local index = table.find(selectedPlayers, p)[span_270](start_span)[span_270](end_span)
+                if index then[span_271](start_span)[span_271](end_span)
+                    table.remove(selectedPlayers, index)[span_272](start_span)[span_272](end_span)
+                    btn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)[span_273](start_span)[span_273](end_span)
+                    btn.TextColor3 = Color3.fromRGB(200, 200, 200)[span_274](start_span)[span_274](end_span)
                 else
-                    table.insert(selectedPlayers, p)
-                    btn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
-                    btn.TextColor3 = Color3.fromRGB(0, 255, 150)
+                    table.insert(selectedPlayers, p)[span_275](start_span)[span_275](end_span)
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)[span_276](start_span)[span_276](end_span)
+                    btn.TextColor3 = Color3.fromRGB(0, 255, 150)[span_277](start_span)[span_277](end_span)
                 end
                 
-                if #selectedPlayers > 0 then
-                    textBox.Text = "Targets Selected: " .. tostring(#selectedPlayers)
+                if #selectedPlayers > 0 then[span_278](start_span)[span_278](end_span)
+                    textBox.Text = "Targets Selected: " .. tostring(#selectedPlayers)[span_279](start_span)[span_279](end_span)
                 else
-                    textBox.Text = ""
+                    textBox.Text = "[span_280](start_span)"[span_280](end_span)
                 end
-            end) 
+            end)[span_281](start_span)[span_281](end_span)
         end 
     end 
 end 
 
-clearBtn.MouseButton1Click:Connect(function()
-    selectedPlayers = {}
-    textBox.Text = ""
-    updateList()
-    if isAttached then toggleButton:Click() end
-end)
+clearBtn.MouseButton1Click:Connect(function()[span_282](start_span)[span_282](end_span)
+    selectedPlayers = {}[span_283](start_span)[span_283](end_span)
+    textBox.Text = "[span_284](start_span)"[span_284](end_span)
+    updateList()[span_285](start_span)[span_285](end_span)
+    if isAttached then toggleButton:Click() end[span_286](start_span)[span_286](end_span)
+end)[span_287](start_span)[span_287](end_span)
 
-selectAllBtn.MouseButton1Click:Connect(function()
-    selectedPlayers = {}
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player then
-            table.insert(selectedPlayers, p)
+selectAllBtn.MouseButton1Click:Connect(function()[span_288](start_span)[span_288](end_span)
+    selectedPlayers = {}[span_289](start_span)[span_289](end_span)
+    for _, p in pairs(Players:GetPlayers()) do[span_290](start_span)[span_290](end_span)
+        if p ~= player then[span_291](start_span)[span_291](end_span)
+            table.insert(selectedPlayers, p)[span_292](start_span)[span_292](end_span)
         end
     end
-    textBox.Text = "Targets Selected: " .. tostring(#selectedPlayers)
-    updateList()
-end)
+    textBox.Text = "Targets Selected: " .. tostring(#selectedPlayers)[span_293](start_span)[span_293](end_span)
+    updateList()[span_294](start_span)[span_294](end_span)
+end)[span_295](start_span)[span_295](end_span)
 
-textBox:GetPropertyChangedSignal("Text"):Connect(function()
-    if not string.find(textBox.Text, "Targets Selected:") then updateList() end
+textBox:GetPropertyChangedSignal("Text"):Connect(function()[span_296](start_span)[span_296](end_span)
+    if not string.find(textBox.Text, "Targets Selected:") then updateList() end[span_297](start_span)[span_297](end_span)
 end) 
-updateList() 
+updateList()[span_298](start_span)[span_298](end_span)
 
 -- EMERGENCY TARGET SHIFT 
-local function emergencyTargetShift()
-    lastTargetSwitchTime = 0 
-    currentTargetIndex = 1
-    if #selectedPlayers > 0 then
-        selectedPlayer = selectedPlayers[1]
+local function emergencyTargetShift()[span_299](start_span)[span_299](end_span)
+    lastTargetSwitchTime = 0[span_300](start_span)[span_300](end_span)
+    currentTargetIndex = 1[span_301](start_span)[span_301](end_span)
+    if #selectedPlayers > 0 then[span_302](start_span)[span_302](end_span)
+        selectedPlayer = selectedPlayers[1][span_303](start_span)[span_303](end_span)
     end
 end
 
-Players.PlayerRemoving:Connect(function(leftPlayer)
-    local targetIdx = table.find(selectedPlayers, leftPlayer)
-    if targetIdx then
-        table.remove(selectedPlayers, targetIdx)
-        emergencyTargetShift() 
+Players.PlayerRemoving:Connect(function(leftPlayer)[span_304](start_span)[span_304](end_span)
+    local targetIdx = table.find(selectedPlayers, leftPlayer)[span_305](start_span)[span_305](end_span)
+    if targetIdx then[span_306](start_span)[span_306](end_span)
+        table.remove(selectedPlayers, targetIdx)[span_307](start_span)[span_307](end_span)
+        emergencyTargetShift()[span_308](start_span)[span_308](end_span)
         
-        pcall(function()
-            starterGui:SetCore("SendNotification", {
-                Title = "Target Leave",
-                Text = leftPlayer.DisplayName .. " left.",
-                Duration = 4
+        pcall(function()[span_309](start_span)[span_309](end_span)
+            starterGui:SetCore("SendNotification", {[span_310](start_span)[span_310](end_span)
+                Title = "Target Leave",[span_311](start_span)[span_311](end_span)
+                Text = leftPlayer.DisplayName .. " left.",[span_312](start_span)[span_312](end_span)
+                Duration = 4[span_313](start_span)[span_313](end_span)
             })
         end)
         
-        if #selectedPlayers == 0 and isAttached then
-            isAttached = false
-            if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end
-            if _G.EndlessAuraStorage.AnimForceConnection then _G.EndlessAuraStorage.AnimForceConnection:Disconnect() _G.EndlessAuraStorage.AnimForceConnection = nil end
-            if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end
-            if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
-            if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
-            if activeTrack then activeTrack:Stop() activeTrack = nil end
-            toggleButton.Text = "[ FUCK ON ]"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30)
+        if #selectedPlayers == 0 and isAttached then[span_314](start_span)[span_314](end_span)
+            isAttached = false[span_315](start_span)[span_315](end_span)
+            if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end[span_316](start_span)[span_316](end_span)
+            if _G.EndlessAuraStorage.PreSimConnection then _G.EndlessAuraStorage.PreSimConnection:Disconnect() _G.EndlessAuraStorage.PreSimConnection = nil end
+            if _G.EndlessAuraStorage.AnimForceConnection then _G.EndlessAuraStorage.AnimForceConnection:Disconnect() _G.EndlessAuraStorage.AnimForceConnection = nil end[span_317](start_span)[span_317](end_span)
+            if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end[span_318](start_span)[span_318](end_span)
+            if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end[span_319](start_span)[span_319](end_span)
+            if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end[span_320](start_span)[span_320](end_span)
+            if activeTrack then activeTrack:Stop() activeTrack = nil end[span_321](start_span)[span_321](end_span)
+            
+            pcall(function()
+                game.Workspace.FallenPartsDestroyHeight = -500
+            end)
+            
+            toggleButton.Text = "[ FUCK ON ][span_322](start_span)"[span_322](end_span)
+            toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30)[span_323](start_span)[span_323](end_span)
         end
     end
 end)
@@ -464,209 +449,223 @@ end)
 -- ====================================================================
 -- // MAXIMUM STUCK-FREE PHYSICS SYNCHRONIZER ENGINE // --
 -- ====================================================================
-toggleButton.MouseButton1Click:Connect(function() 
+toggleButton.MouseButton1Click:Connect(function()[span_324](start_span)[span_324](end_span)
     if isAttached then 
-        isAttached = false 
-        if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end 
-        if _G.EndlessAuraStorage.AnimForceConnection then _G.EndlessAuraStorage.AnimForceConnection:Disconnect() _G.EndlessAuraStorage.AnimForceConnection = nil end
-        if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end 
-        if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end
-        if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end
+        isAttached = false[span_325](start_span)[span_325](end_span)
+        if _G.EndlessAuraStorage.ActiveConnection then _G.EndlessAuraStorage.ActiveConnection:Disconnect() _G.EndlessAuraStorage.ActiveConnection = nil end[span_326](start_span)[span_326](end_span)
+        if _G.EndlessAuraStorage.PreSimConnection then _G.EndlessAuraStorage.PreSimConnection:Disconnect() _G.EndlessAuraStorage.PreSimConnection = nil end
+        if _G.EndlessAuraStorage.AnimForceConnection then _G.EndlessAuraStorage.AnimForceConnection:Disconnect() _G.EndlessAuraStorage.AnimForceConnection = nil end[span_327](start_span)[span_327](end_span)
+        if _G.EndlessAuraStorage.PlatformPart then _G.EndlessAuraStorage.PlatformPart:Destroy() _G.EndlessAuraStorage.PlatformPart = nil end[span_328](start_span)[span_328](end_span)
+        if _G.EndlessAuraStorage.BV then _G.EndlessAuraStorage.BV:Destroy() _G.EndlessAuraStorage.BV = nil end[span_329](start_span)[span_329](end_span)
+        if _G.EndlessAuraStorage.BG then _G.EndlessAuraStorage.BG:Destroy() _G.EndlessAuraStorage.BG = nil end[span_330](start_span)[span_330](end_span)
         
-        pcall(function()
-            local char = player.Character
-            if char then
-                local hum = char:FindFirstChild("Humanoid")
-                if hum then
-                    for _, track in pairs(hum:GetPlayingAnimationTracks()) do
-                        track:Stop()
+        pcall(function()[span_331](start_span)[span_331](end_span)
+            local char = player.Character[span_332](start_span)[span_332](end_span)
+            if char then[span_333](start_span)[span_333](end_span)
+                local hum = char:FindFirstChild("Humanoid")[span_334](start_span)[span_334](end_span)
+                if hum then[span_335](start_span)[span_335](end_span)
+                    for _, track in pairs(hum:GetPlayingAnimationTracks()) do[span_336](start_span)[span_336](end_span)
+                        track:Stop()[span_337](start_span)[span_337](end_span)
                     end
-                    hum.PlatformStand = false
+                    hum.PlatformStand = false[span_338](start_span)[span_338](end_span)
+                    hum:ChangeState(Enum.HumanoidStateType.Running)
                 end
-                local torso = char:FindFirstChild("Torso") or char:FindFirstChild("LowerTorso")
-                local rootJoint = torso and (torso:FindFirstChild("RootJoint") or char.HumanoidRootPart:FindFirstChild("RootJoint"))
-                if rootJoint then rootJoint.C0 = CFrame.new() end
+                local torso = char:FindFirstChild("Torso") or char:FindFirstChild("LowerTorso")[span_339](start_span)[span_339](end_span)
+                local rootJoint = torso and (torso:FindFirstChild("RootJoint") or char.HumanoidRootPart:FindFirstChild("RootJoint"))[span_340](start_span)[span_340](end_span)
+                if rootJoint then rootJoint.C0 = CFrame.new() end[span_341](start_span)[span_341](end_span)
+            end
+            
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if sethiddenproperty and root then
+                sethiddenproperty(root, "NetworkIsSleeping", false)
             end
         end)
-        activeTrack = nil
+        activeTrack = nil[span_342](start_span)[span_342](end_span)
         
-        toggleButton.Text = "[ FUCK ON ]" 
-        toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30) 
-    elseif #selectedPlayers > 0 then 
-        isAttached = true 
-        toggleButton.Text = "[ FUCK OFF ]" 
-        toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) 
-        lastSwitchTime = tick()
-        lastTargetSwitchTime = tick()
-        currentTargetIndex = 1
-        selectedPlayer = selectedPlayers[currentTargetIndex]
-        currentAutoSubMode = "Normal"
+        pcall(function()
+            game.Workspace.FallenPartsDestroyHeight = -500
+        end)
         
-        local myChar = player.Character
-        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
-        if not myHRP then return end
+        toggleButton.Text = "[ FUCK ON ][span_343](start_span)"[span_343](end_span)
+        toggleButton.BackgroundColor3 = Color3.fromRGB(180, 0, 30)[span_344](start_span)[span_344](end_span)
+    elseif #selectedPlayers > 0 then[span_345](start_span)[span_345](end_span)
+        isAttached = true[span_346](start_span)[span_346](end_span)
+        toggleButton.Text = "[ FUCK OFF ][span_347](start_span)"[span_347](end_span)
+        toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)[span_348](start_span)[span_348](end_span)
+        lastSwitchTime = tick()[span_349](start_span)[span_349](end_span)
+        lastTargetSwitchTime = tick()[span_350](start_span)[span_350](end_span)
+        currentTargetIndex = 1[span_351](start_span)[span_351](end_span)
+        selectedPlayer = selectedPlayers[currentTargetIndex][span_352](start_span)[span_352](end_span)
+        currentAutoSubMode = "Normal[span_353](start_span)"[span_353](end_span)
+        
+        local myChar = player.Character[span_354](start_span)[span_354](end_span)
+        local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")[span_355](start_span)[span_355](end_span)
+        if not myHRP then return end[span_356](start_span)[span_356](end_span)
 
-        local bv = Instance.new("BodyVelocity")
-        bv.MaxForce = Vector3.new(1e15, 1e15, 1e15)
-        bv.Velocity = Vector3.new(0, 0, 0)
-        bv.Parent = myHRP
-        _G.EndlessAuraStorage.BV = bv
+        local bv = Instance.new("BodyVelocity")[span_357](start_span)[span_357](end_span)
+        bv.MaxForce = Vector3.new(1e15, 1e15, 1e15)[span_358](start_span)[span_358](end_span)
+        bv.Velocity = Vector3.new(0, 0, 0)[span_359](start_span)[span_359](end_span)
+        bv.Parent = myHRP[span_360](start_span)[span_360](end_span)
+        _G.EndlessAuraStorage.BV = bv[span_361](start_span)[span_361](end_span)
 
-        local bg = Instance.new("BodyGyro")
-        bg.MaxTorque = Vector3.new(1e15, 1e15, 1e15)
-        bg.P = 1e8
-        bg.D = 100
-        bg.CFrame = myHRP.CFrame
-        bg.Parent = myHRP
-        _G.EndlessAuraStorage.BG = bg
+        local bg = Instance.new("BodyGyro")[span_362](start_span)[span_362](end_span)
+        bg.MaxTorque = Vector3.new(1e15, 1e15, 1e15)[span_363](start_span)[span_363](end_span)
+        bg.P = 1e8[span_364](start_span)[span_364](end_span)
+        bg.D = 100[span_365](start_span)[span_365](end_span)
+        bg.CFrame = myHRP.CFrame[span_366](start_span)[span_366](end_span)
+        bg.Parent = myHRP[span_367](start_span)[span_367](end_span)
+        _G.EndlessAuraStorage.BG = bg[span_368](start_span)[span_368](end_span)
 
-        local platform = Instance.new("Part")
-        platform.Size = Vector3.new(10, 1, 10) 
-        platform.Transparency = 1 
-        platform.Anchored = true
-        platform.CanCollide = true
-        platform.Parent = game.Workspace
-        _G.EndlessAuraStorage.PlatformPart = platform
+        local platform = Instance.new("Part")[span_369](start_span)[span_369](end_span)
+        platform.Size = Vector3.new(10, 1, 10)[span_370](start_span)[span_370](end_span)
+        platform.Transparency = 1[span_371](start_span)[span_371](end_span)
+        platform.Anchored = true[span_372](start_span)[span_372](end_span)
+        platform.CanCollide = true[span_373](start_span)[span_373](end_span)
+        platform.Parent = game.Workspace[span_374](start_span)[span_374](end_span)
+        _G.EndlessAuraStorage.PlatformPart = platform[span_375](start_span)[span_375](end_span)
 
-        -- FORCE ANIMATION LOCK LOOPER
-        local currentExpectedId = bangAnimId
-        _G.EndlessAuraStorage.AnimForceConnection = runService.Stepped:Connect(function()
-            if not isAttached then return end
-            pcall(function()
-                local char = player.Character
-                local hum = char and char:FindFirstChildOfClass("Humanoid")
+        -- FORCE ANIMATION LOCK LOOPER (ATTACHMENT SYSTEM SYNC)
+        _G.EndlessAuraStorage.AnimForceConnection = runService.Stepped:Connect(function()[span_376](start_span)[span_376](end_span)
+            if not isAttached then return end[span_377](start_span)[span_377](end_span)
+            pcall(function()[span_378](start_span)[span_378](end_span)
+                local char = player.Character[span_379](start_span)[span_379](end_span)
+                local hum = char and char:FindFirstChildOfClass("Humanoid")[span_380](start_span)[span_380](end_span)
                 if hum and hum.Health > 0 then
-                    local targetAnimToUse = currentExpectedId
-                    local currentModeToRun = targetMode
-                    if targetMode == "Auto Switch" then
-                        currentModeToRun = currentAutoSubMode
-                    end
+                    local targetAnimToUse = bangAnimId
 
-                    if currentModeToRun == "Face Bang" then
-                        targetAnimToUse = faceBangAnimId
-                    else
-                        targetAnimToUse = bangAnimId
-                    end
-
-                    for _, track in pairs(hum:GetPlayingAnimationTracks()) do
-                        if track.Animation.AnimationId ~= targetAnimToUse then
-                            track:Stop()
+                    for _, track in pairs(hum:GetPlayingAnimationTracks()) do[span_381](start_span)[span_381](end_span)
+                        if track.Animation.AnimationId ~= targetAnimToUse then[span_382](start_span)[span_382](end_span)
+                            track:Stop()[span_383](start_span)[span_383](end_span)
                         end
                     end
 
-                    if not activeTrack or activeTrack.Animation.AnimationId ~= targetAnimToUse or not activeTrack.IsPlaying then
-                        if activeTrack then pcall(function() activeTrack:Stop() end) end
-                        local newAnim = Instance.new("Animation")
-                        newAnim.AnimationId = targetAnimToUse
-                        activeTrack = hum:LoadAnimation(newAnim)
-                        activeTrack.Priority = Enum.AnimationPriority.Action4
-                        activeTrack.Looped = true
-                        activeTrack:Play()
+                    if not activeTrack or activeTrack.Animation.AnimationId ~= targetAnimToUse or not activeTrack.IsPlaying then[span_384](start_span)[span_384](end_span)
+                        if activeTrack then pcall(function() activeTrack:Stop() end) end[span_385](start_span)[span_385](end_span)
+                        local newAnim = Instance.new("Animation")[span_386](start_span)[span_386](end_span)
+                        newAnim.AnimationId = targetAnimToUse[span_387](start_span)[span_387](end_span)
+                        activeTrack = hum:LoadAnimation(newAnim)[span_388](start_span)[span_388](end_span)
+                        activeTrack.Priority = Enum.AnimationPriority.Action4[span_389](start_span)[span_389](end_span)
+                        activeTrack.Looped = true[span_390](start_span)[span_390](end_span)
+                        activeTrack:Play()[span_391](start_span)[span_391](end_span)
                     end
                     
-                    if activeTrack then
-                        activeTrack:AdjustSpeed(speedMultiplier / 5)
+                    if activeTrack then[span_392](start_span)[span_392](end_span)
+                        activeTrack:AdjustSpeed(speedMultiplier / 5)[span_393](start_span)[span_393](end_span)
                     end
                 end
             end)
         end)
 
-        _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
-            if not isAttached or #selectedPlayers == 0 then return end 
-            
-            -- PURE MULTI-TARGET MAXIMUM SCAN SPEED (0.1 SECONDS SHIFTING DETECTOR)
-            if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then
-                lastTargetSwitchTime = tick()
-                currentTargetIndex = currentTargetIndex + 1
-                if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end
-                selectedPlayer = selectedPlayers[currentTargetIndex]
-            end
-
-            if not selectedPlayer or not selectedPlayer.Character then return end
-
+        -- SHADOW ATTACH ENGINE: POSITION & VELOCITY INJECTOR (PRESIMULATION)
+        _G.EndlessAuraStorage.PreSimConnection = runService.PreSimulation:Connect(function()
+            if not isAttached or not selectedPlayer or not selectedPlayer.Character then return end
             local myChar = player.Character
-            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart") 
-            local myHumanoid = myChar and myChar:FindFirstChild("Humanoid")
-            if not myHRP or not myHumanoid or not bv or not bg then return end
-            
-            local targetHRP = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
-            local tOrient = getOrientationPart(selectedPlayer.Character)
-            local targetHead = selectedPlayer.Character:FindFirstChild("Head") 
-            if not targetHRP or not tOrient then return end
+            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")
+            if not myHRP then return end
 
-            -- ====================================================================
-            -- // TARGET VOID DETECTION & AUTO INSTANT RE-ATTACH // --
-            -- ====================================================================
-            -- Agar target void (depth limit -80) me jata hai, toh uspar physical attach pause ho jayega taaki aap niche na jao.
-            -- Jese hi target wapas upar aayega, instantly auto-reattach loop use target bana legi.
-            if targetHRP.Position.Y < -80 then
-                -- Standby Mode: Target ko safe platform par dynamic pause karke rakhna
-                myHRP.CFrame = myHRP.CFrame
-                bv.Velocity = Vector3.new(0, 0, 0)
-                if platform then platform.CFrame = myHRP.CFrame * CFrame.new(0, -3.1, 0) end
-                return 
-            end
-
-            local currentModeToRun = targetMode
-            if targetMode == "Auto Switch" then
-                if tick() - lastSwitchTime >= 1.0 then
-                    lastSwitchTime = tick()
-                    currentAutoSubMode = (currentAutoSubMode == "Normal") and "Face Bang" or "Normal"
-                end
-                currentModeToRun = currentAutoSubMode
-            end
-
-            myHumanoid.PlatformStand = true 
-            
-            local dynamicOffset = 0
-            local sineWave = 0
-            local tiltAngle = 0
-            
-            if attachDistance > 0 then
-                local timeFactor = tick() * speedMultiplier
-                sineWave = math.sin(timeFactor)
-                dynamicOffset = math.abs(sineWave) * forwardBackRange
-                tiltAngle = -sineWave * 0.15
-            end
-
-            local targetCFrame
-            if currentModeToRun == "Face Bang" then
-                local basePartForRotation = targetHead or tOrient
-                targetCFrame = basePartForRotation.CFrame 
-                    * CFrame.new(0, fixedUpOffset, -attachDistance - dynamicOffset - 0.2) 
-                    * CFrame.Angles(0, math.pi, 0)
-                    + basePartForRotation.CFrame.LookVector * (sineWave * 0.7)
-            else
-                targetCFrame = tOrient.CFrame 
-                    * CFrame.new(0, 0, attachDistance + dynamicOffset + 0.8 + (attachDistance > 0 and sineWave or 0)) 
-                    * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)
-            end
-            
-            -- ANTI-CHEAT BYPASS: Simulation network routing aur local physics override
-            pcall(function() sethiddenproperty(myHRP, "PhysicsRepRootPart", tOrient) end)
-            myHRP.CFrame = targetCFrame
-            bg.CFrame = targetCFrame
-            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300 
-            
-            if platform and platform.Parent then
-                platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)
-            end
-            
             pcall(function()
-                local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")
-                local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myHRP:FindFirstChild("RootJoint"))
-                if rootJoint and attachDistance > 0 then
-                    local hipThrustAngle = math.rad(sineWave * (forwardBackRange * 15))
-                    local jointOffsetZ = -math.abs(sineWave) * (forwardBackRange * 0.2)
-                    rootJoint.C0 = CFrame.new(0, 0, jointOffsetZ) * CFrame.Angles((currentModeToRun == "Face Bang" and hipThrustAngle or -hipThrustAngle), 0, 0)
-                elseif rootJoint then
-                    rootJoint.C0 = CFrame.new()
+                if sethiddenproperty then
+                    sethiddenproperty(myHRP, "NetworkIsSleeping", true)
+                end
+                myHRP.Velocity = Vector3.new(0, 0.03, 0)
+                myHRP.AssemblyLinearVelocity = Vector3.new(0, 0.03, 0)
+                myHRP.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+            end)
+        end)
+
+        -- MAIN CORE EXECUTION & MULTI-TARGET NaN ENGINE
+        _G.EndlessAuraStorage.ActiveConnection = runService.Heartbeat:Connect(function() 
+            if not isAttached or #selectedPlayers == 0 then return end[span_394](start_span)[span_394](end_span)
+            
+            -- SHADOW ATTACH STRICT ANTIVOID 99x LOOPER 
+            -- (When multi-targeting, forces strict NaN bound handling dynamically)
+            for i = 1, 99 do
+                pcall(function()
+                    settings().Physics.AllowSleep = false
+                    workspace.FallenPartsDestroyHeight = 0/0
+                end)
+            end
+
+            -- TARGET LOOP SHIFTER (0.1s MAXIMUM TRANSITION SPEED)
+            if tick() - lastTargetSwitchTime >= 0.1 or not selectedPlayer then[span_395](start_span)[span_395](end_span)
+                lastTargetSwitchTime = tick()[span_396](start_span)[span_396](end_span)
+                currentTargetIndex = currentTargetIndex + 1[span_397](start_span)[span_397](end_span)
+                if currentTargetIndex > #selectedPlayers then currentTargetIndex = 1 end[span_398](start_span)[span_398](end_span)
+                selectedPlayer = selectedPlayers[currentTargetIndex][span_399](start_span)[span_399](end_span)
+            end
+
+            if not selectedPlayer or not selectedPlayer.Character then return end[span_400](start_span)[span_400](end_span)
+
+            local myChar = player.Character[span_401](start_span)[span_401](end_span)
+            local myHRP = myChar and myChar:FindFirstChild("HumanoidRootPart")[span_402](start_span)[span_402](end_span)
+            local myHumanoid = myChar and myChar:FindFirstChild("Humanoid")[span_403](start_span)[span_403](end_span)
+            if not myHRP or not myHumanoid or not bv or not bg then return end[span_404](start_span)[span_404](end_span)
+            
+            local targetHRP = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")[span_405](start_span)[span_405](end_span)
+            local tOrient = getOrientationPart(selectedPlayer.Character)[span_406](start_span)[span_406](end_span)
+            local targetHead = selectedPlayer.Character:FindFirstChild("Head")[span_407](start_span)[span_407](end_span)
+            if not targetHRP or not tOrient then return end[span_408](start_span)[span_408](end_span)
+
+            local currentModeToRun = targetMode[span_409](start_span)[span_409](end_span)
+            if targetMode == "Auto Switch" then[span_410](start_span)[span_410](end_span)
+                if tick() - lastSwitchTime >= 1.0 then[span_411](start_span)[span_411](end_span)
+                    lastSwitchTime = tick()[span_412](start_span)[span_412](end_span)
+                    currentAutoSubMode = (currentAutoSubMode == "Normal") and "Face Bang" or "Normal[span_413](start_span)"[span_413](end_span)
+                end
+                currentModeToRun = currentAutoSubMode[span_414](start_span)[span_414](end_span)
+            end
+
+            myHumanoid.PlatformStand = true[span_415](start_span)[span_415](end_span)
+            
+            local dynamicOffset = 0[span_416](start_span)[span_416](end_span)
+            local sineWave = 0[span_417](start_span)[span_417](end_span)
+            local tiltAngle = 0[span_418](start_span)[span_418](end_span)
+            
+            if attachDistance > 0 then[span_419](start_span)[span_419](end_span)
+                local timeFactor = tick() * speedMultiplier[span_420](start_span)[span_420](end_span)
+                sineWave = math.sin(timeFactor)[span_421](start_span)[span_421](end_span)
+                dynamicOffset = math.abs(sineWave) * forwardBackRange[span_422](start_span)[span_422](end_span)
+                tiltAngle = -sineWave * 0.15[span_423](start_span)[span_423](end_span)
+            end
+
+            -- POSITION CALCULATION USING SHADOW ATTACH OFFSET RULES
+            local targetCFrame[span_424](start_span)[span_424](end_span)
+            if currentModeToRun == "Face Bang" then[span_425](start_span)[span_425](end_span)
+                local basePartForRotation = targetHead or tOrient[span_426](start_span)[span_426](end_span)
+                targetCFrame = basePartForRotation.CFrame[span_427](start_span)[span_427](end_span)
+                    * CFrame.new(0, fixedUpOffset, -attachDistance - dynamicOffset - 0.2)[span_428](start_span)[span_428](end_span)
+                    * CFrame.Angles(0, math.pi, 0)[span_429](start_span)[span_429](end_span)
+                    + basePartForRotation.CFrame.LookVector * (sineWave * 0.7)[span_430](start_span)[span_430](end_span)
+            else
+                targetCFrame = tOrient.CFrame[span_431](start_span)[span_431](end_span)
+                    * CFrame.new(0, 0, attachDistance + dynamicOffset + 1.0 + (attachDistance > 0 and sineWave or 0))[span_432](start_span)[span_432](end_span)
+                    * CFrame.Angles(tiltAngle + math.rad(sineWave * 15), 0, 0)[span_433](start_span)[span_433](end_span)
+            end
+            
+            pcall(function() sethiddenproperty(myHRP, "PhysicsRepRootPart", tOrient) end)[span_434](start_span)[span_434](end_span)
+            myHRP.CFrame = targetCFrame[span_435](start_span)[span_435](end_span)
+            bg.CFrame = targetCFrame[span_436](start_span)[span_436](end_span)
+            bv.Velocity = (targetCFrame.Position - myHRP.Position) * 300[span_437](start_span)[span_437](end_span)
+            
+            if platform and platform.Parent then[span_438](start_span)[span_438](end_span)
+                platform.CFrame = targetCFrame * CFrame.new(0, -3.1, 0)[span_439](start_span)[span_439](end_span)
+            end
+            
+            pcall(function()[span_440](start_span)[span_440](end_span)
+                local torso = myChar:FindFirstChild("Torso") or myChar:FindFirstChild("LowerTorso")[span_441](start_span)[span_441](end_span)
+                local rootJoint = torso and (torso:FindFirstChild("RootJoint") or myHRP:FindFirstChild("RootJoint"))[span_442](start_span)[span_442](end_span)
+                if rootJoint and attachDistance > 0 then[span_443](start_span)[span_443](end_span)
+                    local hipThrustAngle = math.rad(sineWave * (forwardBackRange * 15))[span_444](start_span)[span_444](end_span)
+                    local jointOffsetZ = -math.abs(sineWave) * (forwardBackRange * 0.2)[span_445](start_span)[span_445](end_span)
+                    rootJoint.C0 = CFrame.new(0, 0, jointOffsetZ) * CFrame.Angles((currentModeToRun == "Face Bang" and hipThrustAngle or -hipThrustAngle), 0, 0)[span_446](start_span)[span_446](end_span)
+                elseif rootJoint then[span_447](start_span)[span_447](end_span)
+                    rootJoint.C0 = CFrame.new()[span_448](start_span)[span_448](end_span)
                 end
             end)
             
-            pcall(function()
-                for _, v in pairs(myChar:GetDescendants()) do
-                    if v:IsA("BasePart") then v.CanCollide = false end
+            pcall(function()[span_449](start_span)[span_449](end_span)
+                for _, v in pairs(myChar:GetDescendants()) do[span_450](start_span)[span_450](end_span)
+                    if v:IsA("BasePart") then v.CanCollide = false end[span_451](start_span)[span_451](end_span)
                 end
             end)
         end) 
