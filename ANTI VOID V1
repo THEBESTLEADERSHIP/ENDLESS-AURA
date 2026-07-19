@@ -65,9 +65,10 @@ else
 end
 
 -- ========================================================
--- 3. CORE ENGINE
+-- 3. CORE ENGINE (New NaN Logic Injected)
 -- ========================================================
-pcall(function() Workspace.FallenPartsDestroyHeight = -999999999999 end)
+-- Yahan aapki script ki main logic lagayi hai jo parts ko destroy hone se rokti hai
+pcall(function() Workspace.FallenPartsDestroyHeight = 0/0 end) 
 
 local shieldActive = false
 local uiTriggered = false
@@ -91,17 +92,17 @@ local function showVoidText()
     
     local lbl = Instance.new("TextLabel", gui)
     lbl.Size = UDim2.new(0, 400, 0, 70)
-    lbl.Position = UDim2.new(0.5, -200, 0.75, 0) -- Center se thoda niche down
+    lbl.Position = UDim2.new(0.5, -200, 0.75, 0)
     lbl.BackgroundTransparency = 1
     lbl.TextColor3 = Color3.fromRGB(255, 0, 0)
     lbl.Font = Enum.Font.GothamBold
-    lbl.TextSize = 38 -- Yahan size chota kiya hai (55 se 38)
+    lbl.TextSize = 38 
     lbl.Text = "Aɴᴛɪ Vᴏɪᴅ"
     lbl.TextTransparency = 0
 
     local stroke = Instance.new("UIStroke", lbl)
     stroke.Color = Color3.fromRGB(0, 0, 0)
-    stroke.Thickness = 4.5 -- Stroke thickness bhi thodi adjust ki hai compact look ke liye
+    stroke.Thickness = 4.5 
 
     task.delay(2, function()
         local tween = TweenService:Create(lbl, TweenInfo.new(0.4), {TextTransparency = 1})
@@ -161,6 +162,7 @@ _G[CORE_TAG] = RunService.Heartbeat:Connect(function()
         end
         hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
 
+        -- Jab player void depth me jaye
         if root.Position.Y < -50 then
             showVoidText()
             spawnShield(char)
