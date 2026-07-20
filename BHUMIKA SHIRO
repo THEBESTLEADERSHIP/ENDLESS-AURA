@@ -21,7 +21,7 @@ MenuBlur.Size = 24
 MenuBlur.Enabled = true
 MenuBlur.Parent = Lighting
 
--- Background Music Setup (With Resume Feature)
+-- Background Music Setup
 local AudioSound = Instance.new("Sound")
 AudioSound.Name = "EndlessSpammerAudio"
 AudioSound.SoundId = "rbxassetid://111066375253683"
@@ -37,109 +37,60 @@ ClickSFX.SoundId = "rbxassetid://140014208317483"
 ClickSFX.Volume = 1
 ClickSFX.Parent = ScreenGui
 
--- Font Style (Robo Style)
+-- Font Style
 local ROBO_FONT = Enum.Font.RobotoMono
 
--- Theme Static Colors
+-- Theme Colors
 local BG_COLOR = Color3.fromRGB(18, 15, 20)           -- Soft Dark Glass BG
-local NORMAL_PINK = Color3.fromRGB(255, 105, 180)     -- Normal Solid Pink (For Bhumika)
+local NORMAL_PINK = Color3.fromRGB(255, 105, 180)     -- Normal Solid Pink
 local SOFT_PINK = Color3.fromRGB(255, 182, 193)       -- Soft Light Pink
 local WHITE_COLOR = Color3.fromRGB(255, 255, 255)     -- Pure White
 local BOX_BG = Color3.fromRGB(30, 25, 32)            -- Box Background
 local BORDER_COLOR = Color3.fromRGB(70, 50, 65)
 
--- Active Pattern Separator (Default: _____)
+-- Active Pattern Separator
 local currentSymbol = "_____"
 
--- Main Floating Image Toggle Button (Bounded inside 16:9 Screen & Outer Menu Area)
-local ToggleBtn = Instance.new("ImageButton")
-ToggleBtn.Size = UDim2.new(0, 48, 0, 48)
-ToggleBtn.Position = UDim2.new(0, 20, 0.5, -24)
+---------------------------------------------------------
+-- RIGHT CORNER TOGGLE BUTTON (💢)
+---------------------------------------------------------
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 42, 0, 42)
+-- Positioning strictly at top-right corner without leaving 16:9 boundary
+ToggleBtn.Position = UDim2.new(1, -50, 0, 10)
 ToggleBtn.BackgroundColor3 = BG_COLOR
 ToggleBtn.BackgroundTransparency = 0.1
-ToggleBtn.Image = "rbxassetid://89561719395862"
-ToggleBtn.ScaleType = Enum.ScaleType.Fit
+ToggleBtn.Text = "💢"
+ToggleBtn.TextSize = 22
+ToggleBtn.TextColor3 = WHITE_COLOR
+ToggleBtn.Font = ROBO_FONT
 ToggleBtn.BorderSizePixel = 0
-ToggleBtn.Active = true
+ToggleBtn.Visible = false -- Starts hidden because Menu opens by default
 ToggleBtn.Parent = ScreenGui
 
 local BtnCorner = Instance.new("UICorner")
-BtnCorner.CornerRadius = UDim.new(1, 0)
+BtnCorner.CornerRadius = UDim.new(0, 8)
 BtnCorner.Parent = ToggleBtn
 
 local BtnStroke = Instance.new("UIStroke")
 BtnStroke.Thickness = 2
 BtnStroke.Parent = ToggleBtn
 
--- Dynamic Bounded Dragging Logic (Screen Boundaries + Outer Menu Edge Lock)
-local draggingToggle = false
-local dragStartPos, startButtonPos
-
-ToggleBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		draggingToggle = true
-		dragStartPos = input.Position
-		startButtonPos = ToggleBtn.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				draggingToggle = false
-			end
-		end)
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if draggingToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-		local delta = input.Position - dragStartPos
-		local camera = workspace.CurrentCamera
-		local viewportSize = camera and camera.ViewportSize or Vector2.new(1920, 1080)
-		
-		-- Screen limits with padding so button never leaves screen
-		local minX, maxX = 10, viewportSize.X - 58
-		local minY, maxY = 10, viewportSize.Y - 58
-		
-		local rawX = startButtonPos.X.Offset + delta.X
-		local rawY = startButtonPos.Y.Offset + delta.Y
-		
-		local clampedX = math.clamp(rawX, minX, maxX)
-		local clampedY = math.clamp(rawY, minY, maxY)
-
-		-- Prevent entering inside the menu bounding box area (Center Lock Guard)
-		local menuCenterX = viewportSize.X / 2 - 65
-		local menuCenterY = viewportSize.Y / 2
-		local menuMinX, menuMaxX = menuCenterX - 170, menuCenterX + 300
-		local menuMinY, menuMaxY = menuCenterY - 130, menuCenterY + 130
-
-		if clampedX > menuMinX and clampedX < menuMaxX and clampedY > menuMinY and clampedY < menuMaxY then
-			-- Push button outside menu boundaries to nearest outer edge
-			local distToLeft = math.abs(clampedX - menuMinX)
-			local distToRight = math.abs(clampedX - menuMaxX)
-			if distToLeft < distToRight then
-				clampedX = menuMinX
-			else
-				clampedX = menuMaxX
-			end
-		end
-
-		ToggleBtn.Position = UDim2.new(0, clampedX, 0, clampedY)
-	end
-end)
-
--- Hover Animation for Toggle Button
-ToggleBtn.MouseEnter:Connect(function()
-	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 52, 0, 52)}):Play()
-end)
-ToggleBtn.MouseLeave:Connect(function()
-	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 48, 0, 48)}):Play()
-end)
-
--- UI Container
+---------------------------------------------------------
+-- MAIN UI CONTAINER (Scales perfectly to screen)
+---------------------------------------------------------
 local MainContainer = Instance.new("Frame")
 MainContainer.Size = UDim2.new(1, 0, 1, 0)
 MainContainer.BackgroundTransparency = 1
 MainContainer.Visible = true
 MainContainer.Parent = ScreenGui
+
+local MainFrameWrapper = Instance.new("Frame")
+MainFrameWrapper.Size = UDim2.new(0, 450, 0, 240)
+MainFrameWrapper.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrameWrapper.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrameWrapper.BackgroundTransparency = 1
+MainFrameWrapper.Parent = MainContainer
 
 -- Helper function to style text boxes
 local function styleTextBox(box, placeholder, parent)
@@ -164,17 +115,14 @@ local function styleTextBox(box, placeholder, parent)
 	boxStroke.Parent = box
 end
 
--- 1. Main Menu Box (Screen Center Lock)
+-- 1. Main Menu Box
 local MainMenu = Instance.new("Frame")
-MainMenu.Size = UDim2.new(0, 320, 0, 240)
-MainMenu.AnchorPoint = Vector2.new(0.5, 0.5)
-MainMenu.Position = UDim2.new(0.5, -65, 0.5, 0)
+MainMenu.Size = UDim2.new(0, 320, 1, 0)
+MainMenu.Position = UDim2.new(0, 0, 0, 0)
 MainMenu.BackgroundColor3 = BG_COLOR
 MainMenu.BackgroundTransparency = 0.15
 MainMenu.BorderSizePixel = 0
-MainMenu.Active = true
-MainMenu.Draggable = false
-MainMenu.Parent = MainContainer
+MainMenu.Parent = MainFrameWrapper
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 10)
@@ -214,7 +162,7 @@ TitleLine1.TextXAlignment = Enum.TextXAlignment.Left
 TitleLine1.Text = "Eɴᴅʟᴇss Aᴜʀᴀ 🌸"
 TitleLine1.Parent = HeaderFrame
 
--- Custom Line 2 (Bhumika NORMAL PINK, Shiro WHITE)
+-- Custom Line 2
 local Line2Container = Instance.new("Frame")
 Line2Container.Size = UDim2.new(1, -50, 0, 16)
 Line2Container.Position = UDim2.new(0, 48, 0, 22)
@@ -251,25 +199,23 @@ MainDivider.Position = UDim2.new(0.03, 0, 0, 45)
 MainDivider.BorderSizePixel = 0
 MainDivider.Parent = MainMenu
 
--- TARGET 1
+-- TARGET INPUTS
 local Target1 = Instance.new("TextBox")
 Target1.Size = UDim2.new(0.44, 0, 0, 30)
 Target1.Position = UDim2.new(0.04, 0, 0, 56)
 styleTextBox(Target1, "TARGET 1", MainMenu)
 
--- TARGET 2
 local Target2 = Instance.new("TextBox")
 Target2.Size = UDim2.new(0.44, 0, 0, 30)
 Target2.Position = UDim2.new(0.52, 0, 0, 56)
 styleTextBox(Target2, "TARGET 2", MainMenu)
 
--- TARGET 3
 local Target3 = Instance.new("TextBox")
 Target3.Size = UDim2.new(0.92, 0, 0, 30)
 Target3.Position = UDim2.new(0.04, 0, 0, 96)
 styleTextBox(Target3, "TARGET 3", MainMenu)
 
--- DELAY TITLE LABEL
+-- DELAY TITLE & SPEED BOX
 local DelayLabel = Instance.new("TextLabel")
 DelayLabel.Size = UDim2.new(0.92, 0, 0, 18)
 DelayLabel.Position = UDim2.new(0.04, 0, 0, 134)
@@ -281,7 +227,6 @@ DelayLabel.TextXAlignment = Enum.TextXAlignment.Left
 DelayLabel.Text = "⚡ DELAY (SECONDS)"
 DelayLabel.Parent = MainMenu
 
--- SPEED / DELAY BOX
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Size = UDim2.new(0.92, 0, 0, 30)
 SpeedBox.Position = UDim2.new(0.04, 0, 0, 156)
@@ -290,13 +235,12 @@ SpeedBox.Text = "0.8"
 
 -- 2. Side Controls Menu
 local SideMenu = Instance.new("Frame")
-SideMenu.Size = UDim2.new(0, 120, 0, 240)
-SideMenu.AnchorPoint = Vector2.new(0.5, 0.5)
-SideMenu.Position = UDim2.new(0.5, 165, 0.5, 0) 
+SideMenu.Size = UDim2.new(0, 120, 1, 0)
+SideMenu.Position = UDim2.new(0, 330, 0, 0) 
 SideMenu.BackgroundColor3 = BG_COLOR
 SideMenu.BackgroundTransparency = 0.15
 SideMenu.BorderSizePixel = 0
-SideMenu.Parent = MainContainer
+SideMenu.Parent = MainFrameWrapper
 
 local SideCorner = Instance.new("UICorner")
 SideCorner.CornerRadius = UDim.new(0, 10)
@@ -306,29 +250,44 @@ local SideStroke = Instance.new("UIStroke")
 SideStroke.Thickness = 2
 SideStroke.Parent = SideMenu
 
--- Side Menu Title
-local SideTitle = Instance.new("TextLabel")
-SideTitle.Size = UDim2.new(1, 0, 0, 30)
-SideTitle.BackgroundTransparency = 0.4
-SideTitle.TextColor3 = WHITE_COLOR
-SideTitle.Font = ROBO_FONT
-SideTitle.TextSize = 12
-SideTitle.Text = "[ CONTROLS ]"
-SideTitle.Parent = SideMenu
+-- Side Menu Title Frame with Close Button [X]
+local SideTitleFrame = Instance.new("Frame")
+SideTitleFrame.Size = UDim2.new(1, 0, 0, 30)
+SideTitleFrame.BackgroundTransparency = 0.4
+SideTitleFrame.Parent = SideMenu
 
 local SideTitleCorner = Instance.new("UICorner")
 SideTitleCorner.CornerRadius = UDim.new(0, 10)
-SideTitleCorner.Parent = SideTitle
+SideTitleCorner.Parent = SideTitleFrame
+
+local SideTitle = Instance.new("TextLabel")
+SideTitle.Size = UDim2.new(1, -24, 1, 0)
+SideTitle.BackgroundTransparency = 1
+SideTitle.TextColor3 = WHITE_COLOR
+SideTitle.Font = ROBO_FONT
+SideTitle.TextSize = 11
+SideTitle.Text = "CONTROLS"
+SideTitle.Parent = SideTitleFrame
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 24, 1, 0)
+CloseBtn.Position = UDim2.new(1, -24, 0, 0)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = WHITE_COLOR
+CloseBtn.Font = ROBO_FONT
+CloseBtn.TextSize = 12
+CloseBtn.Parent = SideTitleFrame
 
 -- Start Button
 local StartBtn = Instance.new("TextButton")
-StartBtn.Size = UDim2.new(0.88, 0, 0, 38)
-StartBtn.Position = UDim2.new(0.06, 0, 0, 42)
+StartBtn.Size = UDim2.new(0.88, 0, 0, 35)
+StartBtn.Position = UDim2.new(0.06, 0, 0, 38)
 StartBtn.BackgroundColor3 = Color3.fromRGB(20, 50, 35)
 StartBtn.BackgroundTransparency = 0.2
 StartBtn.TextColor3 = Color3.fromRGB(150, 255, 200)
 StartBtn.Font = ROBO_FONT
-StartBtn.TextSize = 13
+StartBtn.TextSize = 12
 StartBtn.Text = "START"
 StartBtn.BorderSizePixel = 0
 StartBtn.Parent = SideMenu
@@ -344,13 +303,13 @@ StartStroke.Parent = StartBtn
 
 -- Stop Button
 local StopBtn = Instance.new("TextButton")
-StopBtn.Size = UDim2.new(0.88, 0, 0, 38)
-StopBtn.Position = UDim2.new(0.06, 0, 0, 88)
+StopBtn.Size = UDim2.new(0.88, 0, 0, 35)
+StopBtn.Position = UDim2.new(0.06, 0, 0, 78)
 StopBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 35)
 StopBtn.BackgroundTransparency = 0.2
 StopBtn.TextColor3 = NORMAL_PINK
 StopBtn.Font = ROBO_FONT
-StopBtn.TextSize = 13
+StopBtn.TextSize = 12
 StopBtn.Text = "STOP"
 StopBtn.BorderSizePixel = 0
 StopBtn.Parent = SideMenu
@@ -366,7 +325,7 @@ StopStroke.Parent = StopBtn
 -- Pattern Label Under Controls
 local PatLabel = Instance.new("TextLabel")
 PatLabel.Size = UDim2.new(1, 0, 0, 16)
-PatLabel.Position = UDim2.new(0, 0, 0, 134)
+PatLabel.Position = UDim2.new(0, 0, 0, 120)
 PatLabel.BackgroundTransparency = 1
 PatLabel.TextColor3 = SOFT_PINK
 PatLabel.Font = ROBO_FONT
@@ -376,13 +335,13 @@ PatLabel.Parent = SideMenu
 
 -- Pattern Grid Frame (4 Small Buttons)
 local PatternGrid = Instance.new("Frame")
-PatternGrid.Size = UDim2.new(0.9, 0, 0, 78)
-PatternGrid.Position = UDim2.new(0.05, 0, 0, 154)
+PatternGrid.Size = UDim2.new(0.9, 0, 0, 90)
+PatternGrid.Position = UDim2.new(0.05, 0, 0, 138)
 PatternGrid.BackgroundTransparency = 1
 PatternGrid.Parent = SideMenu
 
 local UIGridLayout = Instance.new("UIGridLayout")
-UIGridLayout.CellSize = UDim2.new(0, 48, 0, 34)
+UIGridLayout.CellSize = UDim2.new(0, 48, 0, 38)
 UIGridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
 UIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIGridLayout.Parent = PatternGrid
@@ -441,7 +400,9 @@ for i = 1, 4 do
 	end)
 end
 
+---------------------------------------------------------
 -- WHITE-PINK RGB BLINKING SYSTEM
+---------------------------------------------------------
 RunService.RenderStepped:Connect(function()
 	local time = tick() * 3
 	local sineWave = (math.sin(time) + 1) / 2
@@ -452,38 +413,38 @@ RunService.RenderStepped:Connect(function()
 	MainStroke.Color = currentRGB
 	SideStroke.Color = currentRGB
 	MainDivider.BackgroundColor3 = currentRGB
-	SideTitle.BackgroundColor3 = currentRGB
+	SideTitleFrame.BackgroundColor3 = currentRGB
 	StopStroke.Color = currentRGB
 end)
 
--- Smooth Toggle Animation
-local isOpen = true
-ToggleBtn.MouseButton1Click:Connect(function()
+---------------------------------------------------------
+-- UI TOGGLE & HIDE LOGIC
+---------------------------------------------------------
+local function openUI()
 	ClickSFX:Play()
-	
-	isOpen = not isOpen
-	if isOpen then
-		MainContainer.Visible = true
-		MenuBlur.Enabled = true
-		AudioSound:Resume()
-		
-		TweenService:Create(MainMenu, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 320, 0, 240)}):Play()
-		TweenService:Create(SideMenu, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 120, 0, 240)}):Play()
-	else
-		MenuBlur.Enabled = false
-		AudioSound:Pause()
-		
-		local t1 = TweenService:Create(MainMenu, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
-		local t2 = TweenService:Create(SideMenu, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
-		t1:Play()
-		t2:Play()
-		t1.Completed:Connect(function()
-			if not isOpen then MainContainer.Visible = false end
-		end)
-	end
-end)
+	ToggleBtn.Visible = false
+	MainContainer.Visible = true
+	MenuBlur.Enabled = true
+	AudioSound:Resume()
+end
 
--- Universal Chat Core
+local function closeUI()
+	ClickSFX:Play()
+	MainContainer.Visible = false
+	MenuBlur.Enabled = false
+	AudioSound:Pause()
+	ToggleBtn.Visible = true
+end
+
+-- Open via Corner 💢 Button
+ToggleBtn.MouseButton1Click:Connect(openUI)
+
+-- Close via Side Control ✕ Button
+CloseBtn.MouseButton1Click:Connect(closeUI)
+
+---------------------------------------------------------
+-- UNIVERSAL CHAT CORE
+---------------------------------------------------------
 local function sendChatMessage(message)
 	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
 		local textChannel = TextChatService.TextChannels.RBXGeneral
@@ -501,7 +462,9 @@ local function sendChatMessage(message)
 	end
 end
 
--- Line-by-Line Spammer Loop
+---------------------------------------------------------
+-- SPAMMER LOOP
+---------------------------------------------------------
 local spamming = false
 StartBtn.MouseButton1Click:Connect(function()
 	if spamming then return end
