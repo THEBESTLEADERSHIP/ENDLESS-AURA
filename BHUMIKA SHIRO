@@ -1,0 +1,547 @@
+-- [[ Endless Aura | White-Pink Soft RGB Theme ]] --
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+-- ScreenGui Setup
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "EndlessSpammerUI_V16"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
+
+-- Blur Effect Setup
+local MenuBlur = Instance.new("BlurEffect")
+MenuBlur.Name = "EndlessSpammerBlur"
+MenuBlur.Size = 24
+MenuBlur.Enabled = true
+MenuBlur.Parent = Lighting
+
+-- Background Music Setup (With Resume Feature)
+local AudioSound = Instance.new("Sound")
+AudioSound.Name = "EndlessSpammerAudio"
+AudioSound.SoundId = "rbxassetid://111066375253683"
+AudioSound.Volume = 1
+AudioSound.Looped = true
+AudioSound.Parent = ScreenGui
+AudioSound:Play()
+
+-- Button Click SFX Setup
+local ClickSFX = Instance.new("Sound")
+ClickSFX.Name = "EndlessClickSFX"
+ClickSFX.SoundId = "rbxassetid://140014208317483"
+ClickSFX.Volume = 1
+ClickSFX.Parent = ScreenGui
+
+-- Font Style (Robo Style)
+local ROBO_FONT = Enum.Font.RobotoMono
+
+-- Theme Static Colors
+local BG_COLOR = Color3.fromRGB(18, 15, 20)           -- Soft Dark Glass BG
+local NORMAL_PINK = Color3.fromRGB(255, 105, 180)     -- Normal Solid Pink (For Bhumika)
+local SOFT_PINK = Color3.fromRGB(255, 182, 193)       -- Soft Light Pink
+local WHITE_COLOR = Color3.fromRGB(255, 255, 255)     -- Pure White
+local BOX_BG = Color3.fromRGB(30, 25, 32)            -- Box Background
+local BORDER_COLOR = Color3.fromRGB(70, 50, 65)
+
+-- Active Pattern Separator (Default: _____)
+local currentSymbol = "_____"
+
+-- Main Floating Image Toggle Button (Draggable)
+local ToggleBtn = Instance.new("ImageButton")
+ToggleBtn.Size = UDim2.new(0, 48, 0, 48)
+ToggleBtn.Position = UDim2.new(0, 20, 0.5, -24)
+ToggleBtn.BackgroundColor3 = BG_COLOR
+ToggleBtn.BackgroundTransparency = 0.1
+ToggleBtn.Image = "rbxassetid://89561719395862"
+ToggleBtn.ScaleType = Enum.ScaleType.Fit
+ToggleBtn.BorderSizePixel = 0
+ToggleBtn.Active = true
+ToggleBtn.Parent = ScreenGui
+
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(1, 0)
+BtnCorner.Parent = ToggleBtn
+
+local BtnStroke = Instance.new("UIStroke")
+BtnStroke.Thickness = 2
+BtnStroke.Parent = ToggleBtn
+
+-- Floating Button Dragging Script
+local draggingToggle = false
+local dragInputToggle, dragStartToggle, startPosToggle
+
+ToggleBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		draggingToggle = true
+		dragStartToggle = input.Position
+		startPosToggle = ToggleBtn.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				draggingToggle = false
+			end
+		end)
+	end
+end)
+
+ToggleBtn.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInputToggle = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInputToggle and draggingToggle then
+		local delta = input.Position - dragStartToggle
+		ToggleBtn.Position = UDim2.new(
+			startPosToggle.X.Scale,
+			startPosToggle.X.Offset + delta.X,
+			startPosToggle.Y.Scale,
+			startPosToggle.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- Hover Animation for Toggle Button
+ToggleBtn.MouseEnter:Connect(function()
+	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 52, 0, 52)}):Play()
+end)
+ToggleBtn.MouseLeave:Connect(function()
+	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 48, 0, 48)}):Play()
+end)
+
+-- UI Container
+local MainContainer = Instance.new("Frame")
+MainContainer.Size = UDim2.new(1, 0, 1, 0)
+MainContainer.BackgroundTransparency = 1
+MainContainer.Visible = true
+MainContainer.Parent = ScreenGui
+
+-- Helper function to style text boxes
+local function styleTextBox(box, placeholder, parent)
+	box.BackgroundColor3 = BOX_BG
+	box.BackgroundTransparency = 0.3
+	box.TextColor3 = WHITE_COLOR
+	box.PlaceholderText = placeholder
+	box.PlaceholderColor3 = Color3.fromRGB(150, 140, 150)
+	box.Text = ""
+	box.TextSize = 12
+	box.Font = ROBO_FONT
+	box.BorderSizePixel = 0
+	box.Parent = parent
+	
+	local boxCorner = Instance.new("UICorner")
+	boxCorner.CornerRadius = UDim.new(0, 6)
+	boxCorner.Parent = box
+	
+	local boxStroke = Instance.new("UIStroke")
+	boxStroke.Color = BORDER_COLOR
+	boxStroke.Thickness = 1
+	boxStroke.Parent = box
+end
+
+-- 1. Main Menu Box (Screen Center Lock)
+local MainMenu = Instance.new("Frame")
+MainMenu.Size = UDim2.new(0, 320, 0, 240)
+MainMenu.AnchorPoint = Vector2.new(0.5, 0.5)
+MainMenu.Position = UDim2.new(0.5, -65, 0.5, 0)
+MainMenu.BackgroundColor3 = BG_COLOR
+MainMenu.BackgroundTransparency = 0.15
+MainMenu.BorderSizePixel = 0
+MainMenu.Active = true
+MainMenu.Draggable = false
+MainMenu.Parent = MainContainer
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainMenu
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Thickness = 2
+MainStroke.Parent = MainMenu
+
+-- TOP HEADER CONTAINER
+local HeaderFrame = Instance.new("Frame")
+HeaderFrame.Size = UDim2.new(1, 0, 0, 45)
+HeaderFrame.BackgroundTransparency = 1
+HeaderFrame.Parent = MainMenu
+
+-- Logo Image
+local LOGOImage = Instance.new("ImageLabel")
+LOGOImage.Size = UDim2.new(0, 32, 0, 32)
+LOGOImage.Position = UDim2.new(0, 8, 0, 6)
+LOGOImage.BackgroundTransparency = 1
+LOGOImage.Image = "rbxassetid://129299711445020"
+LOGOImage.Parent = HeaderFrame
+
+local LogoCorner = Instance.new("UICorner")
+LogoCorner.CornerRadius = UDim.new(0, 6)
+LogoCorner.Parent = LOGOImage
+
+-- Title Line 1
+local TitleLine1 = Instance.new("TextLabel")
+TitleLine1.Size = UDim2.new(1, -50, 0, 16)
+TitleLine1.Position = UDim2.new(0, 48, 0, 6)
+TitleLine1.BackgroundTransparency = 1
+TitleLine1.TextColor3 = WHITE_COLOR
+TitleLine1.Font = ROBO_FONT
+TitleLine1.TextSize = 13
+TitleLine1.TextXAlignment = Enum.TextXAlignment.Left
+TitleLine1.Text = "Eɴᴅʟᴇss Aᴜʀᴀ 🌸"
+TitleLine1.Parent = HeaderFrame
+
+-- Custom Line 2 (Bhumika NORMAL PINK, Shiro WHITE)
+local Line2Container = Instance.new("Frame")
+Line2Container.Size = UDim2.new(1, -50, 0, 16)
+Line2Container.Position = UDim2.new(0, 48, 0, 22)
+Line2Container.BackgroundTransparency = 1
+Line2Container.Parent = HeaderFrame
+
+local TextBhumika = Instance.new("TextLabel")
+TextBhumika.Size = UDim2.new(0, 75, 1, 0)
+TextBhumika.BackgroundTransparency = 1
+TextBhumika.TextColor3 = NORMAL_PINK
+TextBhumika.Font = ROBO_FONT
+TextBhumika.TextSize = 11
+TextBhumika.TextXAlignment = Enum.TextXAlignment.Left
+TextBhumika.Text = "🩷Bʜᴜᴍɪᴋᴀ"
+TextBhumika.Parent = Line2Container
+
+TextBhumika.Size = UDim2.new(0, TextBhumika.TextBounds.X + 2, 1, 0)
+
+local TextShiro = Instance.new("TextLabel")
+TextShiro.Size = UDim2.new(1, -TextBhumika.Size.X.Offset, 1, 0)
+TextShiro.Position = UDim2.new(0, TextBhumika.Size.X.Offset, 0, 0)
+TextShiro.BackgroundTransparency = 1
+TextShiro.TextColor3 = WHITE_COLOR
+TextShiro.Font = ROBO_FONT
+TextShiro.TextSize = 11
+TextShiro.TextXAlignment = Enum.TextXAlignment.Left
+TextShiro.Text = " X Sʜɪʀᴏ🤍 Sᴘᴀᴍᴍᴇʀ"
+TextShiro.Parent = Line2Container
+
+-- Main Header Divider Line
+local MainDivider = Instance.new("Frame")
+MainDivider.Size = UDim2.new(0.94, 0, 0, 1)
+MainDivider.Position = UDim2.new(0.03, 0, 0, 45)
+MainDivider.BorderSizePixel = 0
+MainDivider.Parent = MainMenu
+
+-- TARGET 1
+local Target1 = Instance.new("TextBox")
+Target1.Size = UDim2.new(0.44, 0, 0, 30)
+Target1.Position = UDim2.new(0.04, 0, 0, 56)
+styleTextBox(Target1, "TARGET 1", MainMenu)
+
+-- TARGET 2
+local Target2 = Instance.new("TextBox")
+Target2.Size = UDim2.new(0.44, 0, 0, 30)
+Target2.Position = UDim2.new(0.52, 0, 0, 56)
+styleTextBox(Target2, "TARGET 2", MainMenu)
+
+-- TARGET 3
+local Target3 = Instance.new("TextBox")
+Target3.Size = UDim2.new(0.92, 0, 0, 30)
+Target3.Position = UDim2.new(0.04, 0, 0, 96)
+styleTextBox(Target3, "TARGET 3", MainMenu)
+
+-- DELAY TITLE LABEL
+local DelayLabel = Instance.new("TextLabel")
+DelayLabel.Size = UDim2.new(0.92, 0, 0, 18)
+DelayLabel.Position = UDim2.new(0.04, 0, 0, 134)
+DelayLabel.BackgroundTransparency = 1
+DelayLabel.TextColor3 = SOFT_PINK
+DelayLabel.Font = ROBO_FONT
+DelayLabel.TextSize = 11
+DelayLabel.TextXAlignment = Enum.TextXAlignment.Left
+DelayLabel.Text = "⚡ DELAY (SECONDS)"
+DelayLabel.Parent = MainMenu
+
+-- SPEED / DELAY BOX
+local SpeedBox = Instance.new("TextBox")
+SpeedBox.Size = UDim2.new(0.92, 0, 0, 30)
+SpeedBox.Position = UDim2.new(0.04, 0, 0, 156)
+styleTextBox(SpeedBox, "Delay in seconds...", MainMenu)
+SpeedBox.Text = "0.8"
+
+-- 2. Side Controls Menu
+local SideMenu = Instance.new("Frame")
+SideMenu.Size = UDim2.new(0, 120, 0, 240)
+SideMenu.AnchorPoint = Vector2.new(0.5, 0.5)
+SideMenu.Position = UDim2.new(0.5, 165, 0.5, 0) 
+SideMenu.BackgroundColor3 = BG_COLOR
+SideMenu.BackgroundTransparency = 0.15
+SideMenu.BorderSizePixel = 0
+SideMenu.Parent = MainContainer
+
+local SideCorner = Instance.new("UICorner")
+SideCorner.CornerRadius = UDim.new(0, 10)
+SideCorner.Parent = SideMenu
+
+local SideStroke = Instance.new("UIStroke")
+SideStroke.Thickness = 2
+SideStroke.Parent = SideMenu
+
+-- Side Menu Title
+local SideTitle = Instance.new("TextLabel")
+SideTitle.Size = UDim2.new(1, 0, 0, 30)
+SideTitle.BackgroundTransparency = 0.4
+SideTitle.TextColor3 = WHITE_COLOR
+SideTitle.Font = ROBO_FONT
+SideTitle.TextSize = 12
+SideTitle.Text = "[ CONTROLS ]"
+SideTitle.Parent = SideMenu
+
+local SideTitleCorner = Instance.new("UICorner")
+SideTitleCorner.CornerRadius = UDim.new(0, 10)
+SideTitleCorner.Parent = SideTitle
+
+-- Start Button
+local StartBtn = Instance.new("TextButton")
+StartBtn.Size = UDim2.new(0.88, 0, 0, 38)
+StartBtn.Position = UDim2.new(0.06, 0, 0, 42)
+StartBtn.BackgroundColor3 = Color3.fromRGB(20, 50, 35)
+StartBtn.BackgroundTransparency = 0.2
+StartBtn.TextColor3 = Color3.fromRGB(150, 255, 200)
+StartBtn.Font = ROBO_FONT
+StartBtn.TextSize = 13
+StartBtn.Text = "START"
+StartBtn.BorderSizePixel = 0
+StartBtn.Parent = SideMenu
+
+local StartCorner = Instance.new("UICorner")
+StartCorner.CornerRadius = UDim.new(0, 6)
+StartCorner.Parent = StartBtn
+
+local StartStroke = Instance.new("UIStroke")
+StartStroke.Color = Color3.fromRGB(100, 255, 180)
+StartStroke.Thickness = 1
+StartStroke.Parent = StartBtn
+
+-- Stop Button
+local StopBtn = Instance.new("TextButton")
+StopBtn.Size = UDim2.new(0.88, 0, 0, 38)
+StopBtn.Position = UDim2.new(0.06, 0, 0, 88)
+StopBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 35)
+StopBtn.BackgroundTransparency = 0.2
+StopBtn.TextColor3 = NORMAL_PINK
+StopBtn.Font = ROBO_FONT
+StopBtn.TextSize = 13
+StopBtn.Text = "STOP"
+StopBtn.BorderSizePixel = 0
+StopBtn.Parent = SideMenu
+
+local StopCorner = Instance.new("UICorner")
+StopCorner.CornerRadius = UDim.new(0, 6)
+StopCorner.Parent = StopBtn
+
+local StopStroke = Instance.new("UIStroke")
+StopStroke.Thickness = 1
+StopStroke.Parent = StopBtn
+
+-- Pattern Label Under Controls
+local PatLabel = Instance.new("TextLabel")
+PatLabel.Size = UDim2.new(1, 0, 0, 16)
+PatLabel.Position = UDim2.new(0, 0, 0, 134)
+PatLabel.BackgroundTransparency = 1
+PatLabel.TextColor3 = SOFT_PINK
+PatLabel.Font = ROBO_FONT
+PatLabel.TextSize = 10
+PatLabel.Text = "STYLE PATTERN"
+PatLabel.Parent = SideMenu
+
+-- Pattern Grid Frame (4 Small Buttons)
+local PatternGrid = Instance.new("Frame")
+PatternGrid.Size = UDim2.new(0.9, 0, 0, 78)
+PatternGrid.Position = UDim2.new(0.05, 0, 0, 154)
+PatternGrid.BackgroundTransparency = 1
+PatternGrid.Parent = SideMenu
+
+local UIGridLayout = Instance.new("UIGridLayout")
+UIGridLayout.CellSize = UDim2.new(0, 48, 0, 34)
+UIGridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
+UIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIGridLayout.Parent = PatternGrid
+
+local patternSymbols = {
+	[1] = "_____",
+	[2] = "`````",
+	[3] = "~~~~~",
+	[4] = "-----"
+}
+
+local patternLabels = {
+	[1] = "_",
+	[2] = "`",
+	[3] = "~",
+	[4] = "-"
+}
+
+local patternBtns = {}
+
+for i = 1, 4 do
+	local pBtn = Instance.new("TextButton")
+	pBtn.BackgroundColor3 = BOX_BG
+	pBtn.BackgroundTransparency = 0.2
+	pBtn.TextColor3 = (i == 1) and NORMAL_PINK or WHITE_COLOR
+	pBtn.Font = ROBO_FONT
+	pBtn.TextSize = 14
+	pBtn.Text = patternLabels[i]
+	pBtn.BorderSizePixel = 0
+	pBtn.Parent = PatternGrid
+
+	local pCorner = Instance.new("UICorner")
+	pCorner.CornerRadius = UDim.new(0, 5)
+	pCorner.Parent = pBtn
+
+	local pStroke = Instance.new("UIStroke")
+	pStroke.Color = (i == 1) and NORMAL_PINK or BORDER_COLOR
+	pStroke.Thickness = 1
+	pStroke.Parent = pBtn
+
+	patternBtns[i] = {Btn = pBtn, Stroke = pStroke}
+
+	pBtn.MouseButton1Click:Connect(function()
+		ClickSFX:Play()
+		currentSymbol = patternSymbols[i]
+
+		for idx, item in ipairs(patternBtns) do
+			if idx == i then
+				item.Btn.TextColor3 = NORMAL_PINK
+				item.Stroke.Color = NORMAL_PINK
+			else
+				item.Btn.TextColor3 = WHITE_COLOR
+				item.Stroke.Color = BORDER_COLOR
+			end
+		end
+	end)
+end
+
+-- WHITE-PINK RGB BLINKING SYSTEM
+RunService.RenderStepped:Connect(function()
+	local time = tick() * 3
+	local sineWave = (math.sin(time) + 1) / 2
+	
+	local currentRGB = Color3.fromRGB(255, 255, 255):Lerp(Color3.fromRGB(255, 105, 180), sineWave)
+	
+	BtnStroke.Color = currentRGB
+	MainStroke.Color = currentRGB
+	SideStroke.Color = currentRGB
+	MainDivider.BackgroundColor3 = currentRGB
+	SideTitle.BackgroundColor3 = currentRGB
+	StopStroke.Color = currentRGB
+end)
+
+-- Smooth Toggle Animation
+local isOpen = true
+ToggleBtn.MouseButton1Click:Connect(function()
+	ClickSFX:Play()
+	
+	isOpen = not isOpen
+	if isOpen then
+		MainContainer.Visible = true
+		MenuBlur.Enabled = true
+		AudioSound:Resume()
+		
+		TweenService:Create(MainMenu, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 320, 0, 240)}):Play()
+		TweenService:Create(SideMenu, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 120, 0, 240)}):Play()
+	else
+		MenuBlur.Enabled = false
+		AudioSound:Pause()
+		
+		local t1 = TweenService:Create(MainMenu, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+		local t2 = TweenService:Create(SideMenu, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+		t1:Play()
+		t2:Play()
+		t1.Completed:Connect(function()
+			if not isOpen then MainContainer.Visible = false end
+		end)
+	end
+end)
+
+-- Universal Chat Core
+local function sendChatMessage(message)
+	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+		local textChannel = TextChatService.TextChannels.RBXGeneral
+		if textChannel then
+			textChannel:SendAsync(message)
+		end
+	else
+		local defaultChatSystemChatEvents = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+		if defaultChatSystemChatEvents then
+			local sayMessageRequest = defaultChatSystemChatEvents:FindFirstChild("SayMessageRequest")
+			if sayMessageRequest and sayMessageRequest:IsA("RemoteEvent") then
+				sayMessageRequest:FireServer(message, "All")
+			end
+		end
+	end
+end
+
+-- Line-by-Line Spammer Loop
+local spamming = false
+StartBtn.MouseButton1Click:Connect(function()
+	if spamming then return end
+	spamming = true
+	StartBtn.Text = "RUNNING..."
+	
+	task.spawn(function()
+		while spamming do
+			local name1 = (Target1.Text ~= "") and Target1.Text or "Target 1"
+			local name2 = (Target2.Text ~= "") and Target2.Text or "Target 2"
+			local name3 = (Target3.Text ~= "") and Target3.Text or "Target 3"
+			
+			local delayTime = tonumber(SpeedBox.Text) or 0.8
+			local creditLine = "SCRIPT BY 🤍SHIRO×BHUMIKA⭐\n"
+			local sym = currentSymbol
+			
+			local patterns = {
+				creditLine .. "🖤" .. sym .. "CHI" .. sym .. "🖤\n[ " .. name1 .. " ]__TMX MEH OBSIDIAN\n[ " .. name2 .. " ]__TMY MEH ONYX\n[ " .. name3 .. " ]__TMZ MEH PEARL\n🖤" .. sym .. "CHI" .. sym .. "🖤",
+				creditLine .. "🤍" .. sym .. "CHI" .. sym .. "🤍\n[ " .. name1 .. " ]__TMX MEH SNOW\n[ " .. name2 .. " ]__TMY MEH IVORY\n[ " .. name3 .. " ]__TMZ MEH FROST\n🤍" .. sym .. "CHI" .. sym .. "🤍",
+				creditLine .. "🎀" .. sym .. "CHI" .. sym .. "🎀\n[ " .. name1 .. " ]__TMX MEH RIBBON\n[ " .. name2 .. " ]__TMY MEH BLOSSOM\n[ " .. name3 .. " ]__TMZ MEH ROSE\n🎀" .. sym .. "CHI" .. sym .. "🎀",
+				creditLine .. "🌸" .. sym .. "CHI" .. sym .. "🌸\n[ " .. name1 .. " ]__TMX MEH PETAL\n[ " .. name2 .. " ]__TMY MEH BLOOM\n[ " .. name3 .. " ]__TMZ MEH SAKURA\n🌸" .. sym .. "CHI" .. sym .. "🌸",
+				creditLine .. "🌷" .. sym .. "CHI" .. sym .. "🌷\n[ " .. name1 .. " ]__TMX MEH TULIP\n[ " .. name2 .. " ]__TMY MEH LILY\n[ " .. name3 .. " ]__TMZ MEH ORCHID\n🌷" .. sym .. "CHI" .. sym .. "🌷",
+				creditLine .. "🌹" .. sym .. "CHI" .. sym .. "🌹\n[ " .. name1 .. " ]__TMX MEH RUBY\n[ " .. name2 .. " ]__TMY MEH VELVET\n[ " .. name3 .. " ]__TMZ MEH CRIMSON\n🌹" .. sym .. "CHI" .. sym .. "🌹",
+				creditLine .. "🦋" .. sym .. "CHI" .. sym .. "🦋\n[ " .. name1 .. " ]__TMX MEH BUTTERFLY\n[ " .. name2 .. " ]__TMY MEH WINGS\n[ " .. name3 .. " ]__TMZ MEH SHADOW\n🦋" .. sym .. "CHI" .. sym .. "🦋",
+				creditLine .. "✨" .. sym .. "CHI" .. sym .. "✨\n[ " .. name1 .. " ]__TMX MEH DIAMOND\n[ " .. name2 .. " ]__TMY MEH CRYSTAL\n[ " .. name3 .. " ]__TMZ MEH SHINE\n✨" .. sym .. "CHI" .. sym .. "✨",
+				creditLine .. "💎" .. sym .. "CHI" .. sym .. "💎\n[ " .. name1 .. " ]__TMX MEH GEM\n[ " .. name2 .. " ]__TMY MEH OPAL\n[ " .. name3 .. " ]__TMZ MEH SAPPHIRE\n💎" .. sym .. "CHI" .. sym .. "💎",
+				creditLine .. "🌙" .. sym .. "CHI" .. sym .. "🌙\n[ " .. name1 .. " ]__TMX MEH MOON\n[ " .. name2 .. " ]__TMY MEH ECLIPSE\n[ " .. name3 .. " ]__TMZ MEH STARLIGHT\n🌙" .. sym .. "CHI" .. sym .. "🌙",
+				creditLine .. "⭐" .. sym .. "CHI" .. sym .. "⭐\n[ " .. name1 .. " ]__TMX MEH STAR\n[ " .. name2 .. " ]__TMY MEH NOVA\n[ " .. name3 .. " ]__TMZ MEH COMET\n⭐" .. sym .. "CHI" .. sym .. "⭐",
+				creditLine .. "☁️" .. sym .. "CHI" .. sym .. "☁️\n[ " .. name1 .. " ]__TMX MEH CLOUD\n[ " .. name2 .. " ]__TMY MEH MIST\n[ " .. name3 .. " ]__TMZ MEH SKY\n☁️" .. sym .. "CHI" .. sym .. "☁️",
+				creditLine .. "❄️" .. sym .. "CHI" .. sym .. "❄️\n[ " .. name1 .. " ]__TMX MEH ICE\n[ " .. name2 .. " ]__TMY MEH BLIZZARD\n[ " .. name3 .. " ]__TMZ MEH GLACIER\n❄️" .. sym .. "CHI" .. sym .. "❄️",
+				creditLine .. "🎭" .. sym .. "CHI" .. sym .. "🎭\n[ " .. name1 .. " ]__TMX MEH MASK\n[ " .. name2 .. " ]__TMY MEH SHADOW\n[ " .. name3 .. " ]__TMZ MEH PHANTOM\n🎭" .. sym .. "CHI" .. sym .. "🎭",
+				creditLine .. "♠️" .. sym .. "CHI" .. sym .. "♠️\n[ " .. name1 .. " ]__TMX MEH ACE\n[ " .. name2 .. " ]__TMY MEH QUEEN\n[ " .. name3 .. " ]__TMZ MEH JOKER\n♠️" .. sym .. "CHI" .. sym .. "♠️",
+				creditLine .. "♣️" .. sym .. "CHI" .. sym .. "♣️\n[ " .. name1 .. " ]__TMX MEH CLOVER\n[ " .. name2 .. " ]__TMY MEH LUCK\n[ " .. name3 .. " ]__TMZ MEH ROYAL\n♣️" .. sym .. "CHI" .. sym .. "♣️",
+				creditLine .. "♦️" .. sym .. "CHI" .. sym .. "♦️\n[ " .. name1 .. " ]__TMX MEH RUBY\n[ " .. name2 .. " ]__TMY MEH CARDINAL\n[ " .. name3 .. " ]__TMZ MEH SCARLET\n♦️" .. sym .. "CHI" .. sym .. "♦️",
+				creditLine .. "👑" .. sym .. "CHI" .. sym .. "👑\n[ " .. name1 .. " ]__TMX MEH KING\n[ " .. name2 .. " ]__TMY MEH QUEEN\n[ " .. name3 .. " ]__TMZ MEH EMPRESS\n👑" .. sym .. "CHI" .. sym .. "👑",
+				creditLine .. "⚜️" .. sym .. "CHI" .. sym .. "⚜️\n[ " .. name1 .. " ]__TMX MEH ROYAL\n[ " .. name2 .. " ]__TMY MEH NOBLE\n[ " .. name3 .. " ]__TMZ MEH MAJESTIC\n⚜️" .. sym .. "CHI" .. sym .. "⚜️",
+				creditLine .. "🕊️" .. sym .. "CHI" .. sym .. "🕊️\n[ " .. name1 .. " ]__TMX MEH DOVE\n[ " .. name2 .. " ]__TMY MEH ANGEL\n[ " .. name3 .. " ]__TMZ MEH SERAPH\n🕊️" .. sym .. "CHI" .. sym .. "🕊️",
+				creditLine .. "🌺" .. sym .. "CHI" .. sym .. "🌺\n[ " .. name1 .. " ]__TMX MEH HIBISCUS\n[ " .. name2 .. " ]__TMY MEH BLOOM\n[ " .. name3 .. " ]__TMZ MEH FLORA\n🌺" .. sym .. "CHI" .. sym .. "🌺",
+				creditLine .. "🍒" .. sym .. "CHI" .. sym .. "🍒\n[ " .. name1 .. " ]__TMX MEH CHERRY\n[ " .. name2 .. " ]__TMY MEH BERRY\n[ " .. name3 .. " ]__TMZ MEH SWEET\n🍒" .. sym .. "CHI" .. sym .. "🍒",
+				creditLine .. "🧿" .. sym .. "CHI" .. sym .. "🧿\n[ " .. name1 .. " ]__TMX MEH MYSTIC\n[ " .. name2 .. " ]__TMY MEH AURA\n[ " .. name3 .. " ]__TMZ MEH SPIRIT\n🧿" .. sym .. "CHI" .. sym .. "🧿",
+				creditLine .. "🦢" .. sym .. "CHI" .. sym .. "🦢\n[ " .. name1 .. " ]__TMX MEH SWAN\n[ " .. name2 .. " ]__TMY MEH GRACE\n[ " .. name3 .. " ]__TMZ MEH ELEGANCE\n🦢" .. sym .. "CHI" .. sym .. "🦢",
+				creditLine .. "🩶" .. sym .. "CHI" .. sym .. "🩶\n[ " .. name1 .. " ]__TMX MEH SILVER\n[ " .. name2 .. " ]__TMY MEH STEEL\n[ " .. name3 .. " ]__TMZ MEH CHROME\n🩶" .. sym .. "CHI" .. sym .. "🩶",
+				creditLine .. "🌼" .. sym .. "CHI" .. sym .. "🌼\n[ " .. name1 .. " ]__TMX MEH DAISY\n[ " .. name2 .. " ]__TMY MEH SPRING\n[ " .. name3 .. " ]__TMZ MEH GARDEN\n🌼" .. sym .. "CHI" .. sym .. "🌼",
+				creditLine .. "🪞" .. sym .. "CHI" .. sym .. "🪞\n[ " .. name1 .. " ]__TMX MEH MIRROR\n[ " .. name2 .. " ]__TMY MEH REFLECT\n[ " .. name3 .. " ]__TMZ MEH GLASS\n🪞" .. sym .. "CHI" .. sym .. "🪞",
+				creditLine .. "🕯️" .. sym .. "CHI" .. sym .. "🕯️\n[ " .. name1 .. " ]__TMX MEH CANDLE\n[ " .. name2 .. " ]__TMY MEH FLAME\n[ " .. name3 .. " ]__TMZ MEH GLOW\n🕯️" .. sym .. "CHI" .. sym .. "🕯️",
+				creditLine .. "🎐" .. sym .. "CHI" .. sym .. "🎐\n[ " .. name1 .. " ]__TMX MEH BREEZE\n[ " .. name2 .. " ]__TMY MEH WIND\n[ " .. name3 .. " ]__TMZ MEH WHISPER\n🎐" .. sym .. "CHI" .. sym .. "🎐",
+				creditLine .. "🪄" .. sym .. "CHI" .. sym .. "🪄\n[ " .. name1 .. " ]__TMX MEH MAGIC\n[ " .. name2 .. " ]__TMY MEH SPELL\n[ " .. name3 .. " ]__TMZ MEH ENCHANT\n🪄" .. sym .. "CHI" .. sym .. "🪄"
+			}
+			
+			for _, currentPattern in ipairs(patterns) do
+				if not spamming then break end
+				sendChatMessage(currentPattern)
+				task.wait(delayTime)
+			end
+		end
+	end)
+end)
+
+StopBtn.MouseButton1Click:Connect(function()
+	spamming = false
+	StartBtn.Text = "START"
+end)
