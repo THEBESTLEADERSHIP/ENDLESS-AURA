@@ -8,11 +8,23 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 
+-- 1. AUTO-CLEANUP ON RE-EXECUTION (Destroy Old UI & Stop Running Spammers)
+local oldGui = game.CoreGui:FindFirstChild("EndlessSpammerUI_V16")
+if oldGui then
+	oldGui:Destroy()
+end
+
+local oldBlur = Lighting:FindFirstChild("EndlessSpammerBlur")
+if oldBlur then
+	oldBlur:Destroy()
+end
+
 -- ScreenGui Setup
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "EndlessSpammerUI_V17"
+ScreenGui.Name = "EndlessSpammerUI_V16"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true -- True full screen boundary handling
 
 -- Blur Effect Setup
 local MenuBlur = Instance.new("BlurEffect")
@@ -21,7 +33,7 @@ MenuBlur.Size = 24
 MenuBlur.Enabled = true
 MenuBlur.Parent = Lighting
 
--- Background Music Setup
+-- Background Music Setup (With Resume Feature)
 local AudioSound = Instance.new("Sound")
 AudioSound.Name = "EndlessSpammerAudio"
 AudioSound.SoundId = "rbxassetid://111066375253683"
@@ -37,24 +49,24 @@ ClickSFX.SoundId = "rbxassetid://140014208317483"
 ClickSFX.Volume = 1
 ClickSFX.Parent = ScreenGui
 
--- Font Style
+-- Font Style (Robo Style)
 local ROBO_FONT = Enum.Font.RobotoMono
 
 -- Theme Static Colors
-local BG_COLOR = Color3.fromRGB(18, 15, 20)
-local NORMAL_PINK = Color3.fromRGB(255, 105, 180)
-local SOFT_PINK = Color3.fromRGB(255, 182, 193)
-local WHITE_COLOR = Color3.fromRGB(255, 255, 255)
-local BOX_BG = Color3.fromRGB(30, 25, 32)
+local BG_COLOR = Color3.fromRGB(18, 15, 20)           -- Soft Dark Glass BG
+local NORMAL_PINK = Color3.fromRGB(255, 105, 180)     -- Normal Solid Pink (For Bhumika)
+local SOFT_PINK = Color3.fromRGB(255, 182, 193)       -- Soft Light Pink
+local WHITE_COLOR = Color3.fromRGB(255, 255, 255)     -- Pure White
+local BOX_BG = Color3.fromRGB(30, 25, 32)            -- Box Background
 local BORDER_COLOR = Color3.fromRGB(70, 50, 65)
 
--- Active Pattern Separator
+-- Active Pattern Separator (Default: _____)
 local currentSymbol = "_____"
 
--- Main Floating Toggle Button (Strictly Constrained Dragging)
+-- Main Floating Image Toggle Button (Draggable + Screen Bounded)
 local ToggleBtn = Instance.new("ImageButton")
-ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
-ToggleBtn.Position = UDim2.new(0, 15, 0.5, -22)
+ToggleBtn.Size = UDim2.new(0, 48, 0, 48)
+ToggleBtn.Position = UDim2.new(0, 20, 0.5, -24)
 ToggleBtn.BackgroundColor3 = BG_COLOR
 ToggleBtn.BackgroundTransparency = 0.1
 ToggleBtn.Image = "rbxassetid://89561719395862"
@@ -71,7 +83,7 @@ local BtnStroke = Instance.new("UIStroke")
 BtnStroke.Thickness = 2
 BtnStroke.Parent = ToggleBtn
 
--- Dragging System for Toggle Button (Screen Safe Bounds)
+-- Floating Button Dragging Script (Clamped to Screen)
 local draggingToggle = false
 local dragInputToggle, dragStartToggle, startPosToggle
 
@@ -98,25 +110,37 @@ end)
 UserInputService.InputChanged:Connect(function(input)
 	if input == dragInputToggle and draggingToggle then
 		local delta = input.Position - dragStartToggle
-		local viewport = workspace.CurrentCamera.ViewportSize
+		local viewportSize = workspace.CurrentCamera.ViewportSize
 		
-		local newX = math.clamp(startPosToggle.X.Offset + delta.X, 5, viewport.X - 50)
-		local newY = math.clamp(startPosToggle.Y.Offset + delta.Y, 5, viewport.Y - 50)
+		local newX = math.clamp(startPosToggle.X.Offset + delta.X, 0, viewportSize.X - 48)
+		local newY = math.clamp(startPosToggle.Y.Offset + delta.Y, 0, viewportSize.Y - 48)
 		
-		ToggleBtn.Position = UDim2.new(startPosToggle.X.Scale, newX, startPosToggle.Y.Scale, newY)
+		ToggleBtn.Position = UDim2.new(
+			startPosToggle.X.Scale,
+			newX,
+			startPosToggle.Y.Scale,
+			newY
+		)
 	end
 end)
 
--- UI Wrapper Container (Exact Aspect Fit Anchor Center)
+-- Hover Animation for Toggle Button
+ToggleBtn.MouseEnter:Connect(function()
+	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 52, 0, 52)}):Play()
+end)
+ToggleBtn.MouseLeave:Connect(function()
+	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 48, 0, 48)}):Play()
+end)
+
+-- UI Container (Prevents Overflow)
 local MainContainer = Instance.new("Frame")
-MainContainer.Size = UDim2.new(0, 440, 0, 230)
-MainContainer.AnchorPoint = Vector2.new(0.5, 0.5)
-MainContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainContainer.Size = UDim2.new(1, 0, 1, 0)
 MainContainer.BackgroundTransparency = 1
 MainContainer.Visible = true
+MainContainer.ClipsDescendants = true
 MainContainer.Parent = ScreenGui
 
--- Helper function to style text boxes safely
+-- Helper function to style text boxes
 local function styleTextBox(box, placeholder, parent)
 	box.BackgroundColor3 = BOX_BG
 	box.BackgroundTransparency = 0.3
@@ -124,13 +148,13 @@ local function styleTextBox(box, placeholder, parent)
 	box.PlaceholderText = placeholder
 	box.PlaceholderColor3 = Color3.fromRGB(150, 140, 150)
 	box.Text = ""
-	box.TextSize = 11
+	box.TextSize = 12
 	box.Font = ROBO_FONT
 	box.BorderSizePixel = 0
 	box.Parent = parent
 	
 	local boxCorner = Instance.new("UICorner")
-	boxCorner.CornerRadius = UDim.new(0, 5)
+	boxCorner.CornerRadius = UDim.new(0, 6)
 	boxCorner.Parent = box
 	
 	local boxStroke = Instance.new("UIStroke")
@@ -139,18 +163,20 @@ local function styleTextBox(box, placeholder, parent)
 	boxStroke.Parent = box
 end
 
--- 1. Main Menu Box
+-- 1. Main Menu Box (Center-Fit & Bounded inside Screen)
 local MainMenu = Instance.new("Frame")
-MainMenu.Size = UDim2.new(0, 300, 0, 230)
-MainMenu.Position = UDim2.new(0, 0, 0, 0)
+MainMenu.Size = UDim2.new(0, 320, 0, 240)
+MainMenu.AnchorPoint = Vector2.new(0.5, 0.5)
+MainMenu.Position = UDim2.new(0.5, -65, 0.5, 0)
 MainMenu.BackgroundColor3 = BG_COLOR
 MainMenu.BackgroundTransparency = 0.15
 MainMenu.BorderSizePixel = 0
+MainMenu.Active = true
 MainMenu.ClipsDescendants = true
 MainMenu.Parent = MainContainer
 
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 8)
+MainCorner.CornerRadius = UDim.new(0, 10)
 MainCorner.Parent = MainMenu
 
 local MainStroke = Instance.new("UIStroke")
@@ -159,58 +185,60 @@ MainStroke.Parent = MainMenu
 
 -- TOP HEADER CONTAINER
 local HeaderFrame = Instance.new("Frame")
-HeaderFrame.Size = UDim2.new(1, 0, 0, 40)
+HeaderFrame.Size = UDim2.new(1, 0, 0, 45)
 HeaderFrame.BackgroundTransparency = 1
 HeaderFrame.Parent = MainMenu
 
 -- Logo Image
 local LOGOImage = Instance.new("ImageLabel")
-LOGOImage.Size = UDim2.new(0, 28, 0, 28)
+LOGOImage.Size = UDim2.new(0, 32, 0, 32)
 LOGOImage.Position = UDim2.new(0, 8, 0, 6)
 LOGOImage.BackgroundTransparency = 1
 LOGOImage.Image = "rbxassetid://129299711445020"
 LOGOImage.Parent = HeaderFrame
 
 local LogoCorner = Instance.new("UICorner")
-LogoCorner.CornerRadius = UDim.new(0, 5)
+LogoCorner.CornerRadius = UDim.new(0, 6)
 LogoCorner.Parent = LOGOImage
 
 -- Title Line 1
 local TitleLine1 = Instance.new("TextLabel")
-TitleLine1.Size = UDim2.new(1, -45, 0, 15)
-TitleLine1.Position = UDim2.new(0, 42, 0, 5)
+TitleLine1.Size = UDim2.new(1, -50, 0, 16)
+TitleLine1.Position = UDim2.new(0, 48, 0, 6)
 TitleLine1.BackgroundTransparency = 1
 TitleLine1.TextColor3 = WHITE_COLOR
 TitleLine1.Font = ROBO_FONT
-TitleLine1.TextSize = 12
+TitleLine1.TextSize = 13
 TitleLine1.TextXAlignment = Enum.TextXAlignment.Left
 TitleLine1.Text = "Eɴᴅʟᴇss Aᴜʀᴀ 🌸"
 TitleLine1.Parent = HeaderFrame
 
--- Title Line 2
+-- Custom Line 2 (Bhumika NORMAL PINK, Shiro WHITE)
 local Line2Container = Instance.new("Frame")
-Line2Container.Size = UDim2.new(1, -45, 0, 15)
-Line2Container.Position = UDim2.new(0, 42, 0, 20)
+Line2Container.Size = UDim2.new(1, -50, 0, 16)
+Line2Container.Position = UDim2.new(0, 48, 0, 22)
 Line2Container.BackgroundTransparency = 1
 Line2Container.Parent = HeaderFrame
 
 local TextBhumika = Instance.new("TextLabel")
-TextBhumika.Size = UDim2.new(0, 65, 1, 0)
+TextBhumika.Size = UDim2.new(0, 75, 1, 0)
 TextBhumika.BackgroundTransparency = 1
 TextBhumika.TextColor3 = NORMAL_PINK
 TextBhumika.Font = ROBO_FONT
-TextBhumika.TextSize = 10
+TextBhumika.TextSize = 11
 TextBhumika.TextXAlignment = Enum.TextXAlignment.Left
 TextBhumika.Text = "🩷Bʜᴜᴍɪᴋᴀ"
 TextBhumika.Parent = Line2Container
 
+TextBhumika.Size = UDim2.new(0, TextBhumika.TextBounds.X + 2, 1, 0)
+
 local TextShiro = Instance.new("TextLabel")
-TextShiro.Size = UDim2.new(1, -65, 1, 0)
-TextShiro.Position = UDim2.new(0, 65, 0, 0)
+TextShiro.Size = UDim2.new(1, -TextBhumika.Size.X.Offset, 1, 0)
+TextShiro.Position = UDim2.new(0, TextBhumika.Size.X.Offset, 0, 0)
 TextShiro.BackgroundTransparency = 1
 TextShiro.TextColor3 = WHITE_COLOR
 TextShiro.Font = ROBO_FONT
-TextShiro.TextSize = 10
+TextShiro.TextSize = 11
 TextShiro.TextXAlignment = Enum.TextXAlignment.Left
 TextShiro.Text = " X Sʜɪʀᴏ🤍 Sᴘᴀᴍᴍᴇʀ"
 TextShiro.Parent = Line2Container
@@ -218,51 +246,52 @@ TextShiro.Parent = Line2Container
 -- Main Header Divider Line
 local MainDivider = Instance.new("Frame")
 MainDivider.Size = UDim2.new(0.94, 0, 0, 1)
-MainDivider.Position = UDim2.new(0.03, 0, 0, 40)
+MainDivider.Position = UDim2.new(0.03, 0, 0, 45)
 MainDivider.BorderSizePixel = 0
 MainDivider.Parent = MainMenu
 
 -- TARGET 1
 local Target1 = Instance.new("TextBox")
-Target1.Size = UDim2.new(0.44, 0, 0, 28)
-Target1.Position = UDim2.new(0.04, 0, 0, 48)
+Target1.Size = UDim2.new(0.44, 0, 0, 30)
+Target1.Position = UDim2.new(0.04, 0, 0, 56)
 styleTextBox(Target1, "TARGET 1", MainMenu)
 
 -- TARGET 2
 local Target2 = Instance.new("TextBox")
-Target2.Size = UDim2.new(0.44, 0, 0, 28)
-Target2.Position = UDim2.new(0.52, 0, 0, 48)
+Target2.Size = UDim2.new(0.44, 0, 0, 30)
+Target2.Position = UDim2.new(0.52, 0, 0, 56)
 styleTextBox(Target2, "TARGET 2", MainMenu)
 
 -- TARGET 3
 local Target3 = Instance.new("TextBox")
-Target3.Size = UDim2.new(0.92, 0, 0, 28)
-Target3.Position = UDim2.new(0.04, 0, 0, 84)
+Target3.Size = UDim2.new(0.92, 0, 0, 30)
+Target3.Position = UDim2.new(0.04, 0, 0, 96)
 styleTextBox(Target3, "TARGET 3", MainMenu)
 
 -- DELAY TITLE LABEL
 local DelayLabel = Instance.new("TextLabel")
-DelayLabel.Size = UDim2.new(0.92, 0, 0, 15)
-DelayLabel.Position = UDim2.new(0.04, 0, 0, 120)
+DelayLabel.Size = UDim2.new(0.92, 0, 0, 18)
+DelayLabel.Position = UDim2.new(0.04, 0, 0, 134)
 DelayLabel.BackgroundTransparency = 1
 DelayLabel.TextColor3 = SOFT_PINK
 DelayLabel.Font = ROBO_FONT
-DelayLabel.TextSize = 10
+DelayLabel.TextSize = 11
 DelayLabel.TextXAlignment = Enum.TextXAlignment.Left
 DelayLabel.Text = "⚡ DELAY (SECONDS)"
 DelayLabel.Parent = MainMenu
 
 -- SPEED / DELAY BOX
 local SpeedBox = Instance.new("TextBox")
-SpeedBox.Size = UDim2.new(0.92, 0, 0, 28)
-SpeedBox.Position = UDim2.new(0.04, 0, 0, 138)
+SpeedBox.Size = UDim2.new(0.92, 0, 0, 30)
+SpeedBox.Position = UDim2.new(0.04, 0, 0, 156)
 styleTextBox(SpeedBox, "Delay in seconds...", MainMenu)
 SpeedBox.Text = "0.8"
 
--- 2. Side Controls Menu Frame
+-- 2. Side Controls Menu
 local SideMenu = Instance.new("Frame")
-SideMenu.Size = UDim2.new(0, 130, 0, 230)
-SideMenu.Position = UDim2.new(0, 310, 0, 0)
+SideMenu.Size = UDim2.new(0, 120, 0, 240)
+SideMenu.AnchorPoint = Vector2.new(0.5, 0.5)
+SideMenu.Position = UDim2.new(0.5, 165, 0.5, 0) 
 SideMenu.BackgroundColor3 = BG_COLOR
 SideMenu.BackgroundTransparency = 0.15
 SideMenu.BorderSizePixel = 0
@@ -270,42 +299,42 @@ SideMenu.ClipsDescendants = true
 SideMenu.Parent = MainContainer
 
 local SideCorner = Instance.new("UICorner")
-SideCorner.CornerRadius = UDim.new(0, 8)
+SideCorner.CornerRadius = UDim.new(0, 10)
 SideCorner.Parent = SideMenu
 
 local SideStroke = Instance.new("UIStroke")
 SideStroke.Thickness = 2
 SideStroke.Parent = SideMenu
 
--- Side Title
+-- Side Menu Title
 local SideTitle = Instance.new("TextLabel")
-SideTitle.Size = UDim2.new(1, 0, 0, 26)
+SideTitle.Size = UDim2.new(1, 0, 0, 30)
 SideTitle.BackgroundTransparency = 0.4
 SideTitle.TextColor3 = WHITE_COLOR
 SideTitle.Font = ROBO_FONT
-SideTitle.TextSize = 11
+SideTitle.TextSize = 12
 SideTitle.Text = "[ CONTROLS ]"
 SideTitle.Parent = SideMenu
 
 local SideTitleCorner = Instance.new("UICorner")
-SideTitleCorner.CornerRadius = UDim.new(0, 8)
+SideTitleCorner.CornerRadius = UDim.new(0, 10)
 SideTitleCorner.Parent = SideTitle
 
 -- Start Button
 local StartBtn = Instance.new("TextButton")
-StartBtn.Size = UDim2.new(0.88, 0, 0, 32)
-StartBtn.Position = UDim2.new(0.06, 0, 0, 34)
+StartBtn.Size = UDim2.new(0.88, 0, 0, 38)
+StartBtn.Position = UDim2.new(0.06, 0, 0, 42)
 StartBtn.BackgroundColor3 = Color3.fromRGB(20, 50, 35)
 StartBtn.BackgroundTransparency = 0.2
 StartBtn.TextColor3 = Color3.fromRGB(150, 255, 200)
 StartBtn.Font = ROBO_FONT
-StartBtn.TextSize = 12
+StartBtn.TextSize = 13
 StartBtn.Text = "START"
 StartBtn.BorderSizePixel = 0
 StartBtn.Parent = SideMenu
 
 local StartCorner = Instance.new("UICorner")
-StartCorner.CornerRadius = UDim.new(0, 5)
+StartCorner.CornerRadius = UDim.new(0, 6)
 StartCorner.Parent = StartBtn
 
 local StartStroke = Instance.new("UIStroke")
@@ -315,45 +344,45 @@ StartStroke.Parent = StartBtn
 
 -- Stop Button
 local StopBtn = Instance.new("TextButton")
-StopBtn.Size = UDim2.new(0.88, 0, 0, 32)
-StopBtn.Position = UDim2.new(0.06, 0, 0, 72)
+StopBtn.Size = UDim2.new(0.88, 0, 0, 38)
+StopBtn.Position = UDim2.new(0.06, 0, 0, 88)
 StopBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 35)
 StopBtn.BackgroundTransparency = 0.2
 StopBtn.TextColor3 = NORMAL_PINK
 StopBtn.Font = ROBO_FONT
-StopBtn.TextSize = 12
+StopBtn.TextSize = 13
 StopBtn.Text = "STOP"
 StopBtn.BorderSizePixel = 0
 StopBtn.Parent = SideMenu
 
 local StopCorner = Instance.new("UICorner")
-StopCorner.CornerRadius = UDim.new(0, 5)
+StopCorner.CornerRadius = UDim.new(0, 6)
 StopCorner.Parent = StopBtn
 
 local StopStroke = Instance.new("UIStroke")
 StopStroke.Thickness = 1
 StopStroke.Parent = StopBtn
 
--- Pattern Title Label
+-- Pattern Label Under Controls
 local PatLabel = Instance.new("TextLabel")
-PatLabel.Size = UDim2.new(1, 0, 0, 14)
-PatLabel.Position = UDim2.new(0, 0, 0, 110)
+PatLabel.Size = UDim2.new(1, 0, 0, 16)
+PatLabel.Position = UDim2.new(0, 0, 0, 134)
 PatLabel.BackgroundTransparency = 1
 PatLabel.TextColor3 = SOFT_PINK
 PatLabel.Font = ROBO_FONT
-PatLabel.TextSize = 9
+PatLabel.TextSize = 10
 PatLabel.Text = "STYLE PATTERN"
 PatLabel.Parent = SideMenu
 
--- Pattern Container Grid
+-- Pattern Grid Frame (4 Small Buttons)
 local PatternGrid = Instance.new("Frame")
-PatternGrid.Size = UDim2.new(0.9, 0, 0, 95)
-PatternGrid.Position = UDim2.new(0.05, 0, 0, 126)
+PatternGrid.Size = UDim2.new(0.9, 0, 0, 78)
+PatternGrid.Position = UDim2.new(0.05, 0, 0, 154)
 PatternGrid.BackgroundTransparency = 1
 PatternGrid.Parent = SideMenu
 
 local UIGridLayout = Instance.new("UIGridLayout")
-UIGridLayout.CellSize = UDim2.new(0, 52, 0, 38)
+UIGridLayout.CellSize = UDim2.new(0, 48, 0, 34)
 UIGridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
 UIGridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIGridLayout.Parent = PatternGrid
@@ -386,7 +415,7 @@ for i = 1, 4 do
 	pBtn.Parent = PatternGrid
 
 	local pCorner = Instance.new("UICorner")
-	pCorner.CornerRadius = UDim.new(0, 4)
+	pCorner.CornerRadius = UDim.new(0, 5)
 	pCorner.Parent = pBtn
 
 	local pStroke = Instance.new("UIStroke")
@@ -412,10 +441,11 @@ for i = 1, 4 do
 	end)
 end
 
--- Dynamic Soft RGB System
+-- WHITE-PINK RGB BLINKING SYSTEM
 RunService.RenderStepped:Connect(function()
 	local time = tick() * 3
 	local sineWave = (math.sin(time) + 1) / 2
+	
 	local currentRGB = Color3.fromRGB(255, 255, 255):Lerp(Color3.fromRGB(255, 105, 180), sineWave)
 	
 	BtnStroke.Color = currentRGB
@@ -426,7 +456,7 @@ RunService.RenderStepped:Connect(function()
 	StopStroke.Color = currentRGB
 end)
 
--- Safe UI Toggle Animation
+-- Smooth Toggle Animation
 local isOpen = true
 ToggleBtn.MouseButton1Click:Connect(function()
 	ClickSFX:Play()
@@ -437,8 +467,8 @@ ToggleBtn.MouseButton1Click:Connect(function()
 		MenuBlur.Enabled = true
 		AudioSound:Resume()
 		
-		TweenService:Create(MainMenu, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 300, 0, 230)}):Play()
-		TweenService:Create(SideMenu, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 130, 0, 230)}):Play()
+		TweenService:Create(MainMenu, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 320, 0, 240)}):Play()
+		TweenService:Create(SideMenu, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 120, 0, 240)}):Play()
 	else
 		MenuBlur.Enabled = false
 		AudioSound:Pause()
@@ -453,7 +483,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Universal Chat Core Engine
+-- Universal Chat Core
 local function sendChatMessage(message)
 	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
 		local textChannel = TextChatService.TextChannels.RBXGeneral
@@ -471,7 +501,7 @@ local function sendChatMessage(message)
 	end
 end
 
--- Spammer Loop
+-- Line-by-Line Spammer Loop
 local spamming = false
 StartBtn.MouseButton1Click:Connect(function()
 	if spamming then return end
