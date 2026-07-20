@@ -51,7 +51,7 @@ local BORDER_COLOR = Color3.fromRGB(70, 50, 65)
 -- Active Pattern Separator (Default: _____)
 local currentSymbol = "_____"
 
--- Main Floating Image Toggle Button (Draggable + Screen Clamp Fixed)
+-- Main Floating Image Toggle Button (Draggable)
 local ToggleBtn = Instance.new("ImageButton")
 ToggleBtn.Size = UDim2.new(0, 48, 0, 48)
 ToggleBtn.Position = UDim2.new(0, 20, 0.5, -24)
@@ -71,7 +71,7 @@ local BtnStroke = Instance.new("UIStroke")
 BtnStroke.Thickness = 2
 BtnStroke.Parent = ToggleBtn
 
--- Floating Button Dragging Script (Strict Screen Bounds Clamped)
+-- Floating Button Dragging Script
 local draggingToggle = false
 local dragInputToggle, dragStartToggle, startPosToggle
 
@@ -97,17 +97,13 @@ end)
 
 UserInputService.InputChanged:Connect(function(input)
 	if input == dragInputToggle and draggingToggle then
-		local viewportSize = workspace.CurrentCamera.ViewportSize
 		local delta = input.Position - dragStartToggle
-		
-		local newX = startPosToggle.X.Offset + delta.X
-		local newY = startPosToggle.Y.Offset + delta.Y
-
-		-- Clamp values to screen bounds (16:9 & all screen safety)
-		local clampedX = math.clamp(newX, 0, viewportSize.X - ToggleBtn.AbsoluteSize.X)
-		local clampedY = math.clamp(newY, 0, viewportSize.Y - ToggleBtn.AbsoluteSize.Y)
-
-		ToggleBtn.Position = UDim2.new(0, clampedX, 0, clampedY)
+		ToggleBtn.Position = UDim2.new(
+			startPosToggle.X.Scale,
+			startPosToggle.X.Offset + delta.X,
+			startPosToggle.Y.Scale,
+			startPosToggle.Y.Offset + delta.Y
+		)
 	end
 end)
 
@@ -119,7 +115,7 @@ ToggleBtn.MouseLeave:Connect(function()
 	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 48, 0, 48)}):Play()
 end)
 
--- UI Container (Scaled Clamped Safe Overlay)
+-- UI Container
 local MainContainer = Instance.new("Frame")
 MainContainer.Size = UDim2.new(1, 0, 1, 0)
 MainContainer.BackgroundTransparency = 1
@@ -149,7 +145,7 @@ local function styleTextBox(box, placeholder, parent)
 	boxStroke.Parent = box
 end
 
--- 1. Main Menu Box (Screen Safe Center Fixed)
+-- 1. Main Menu Box (Screen Center Lock)
 local MainMenu = Instance.new("Frame")
 MainMenu.Size = UDim2.new(0, 320, 0, 240)
 MainMenu.AnchorPoint = Vector2.new(0.5, 0.5)
