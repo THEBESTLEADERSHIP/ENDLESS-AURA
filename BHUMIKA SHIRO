@@ -8,23 +8,11 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 
--- 1. AUTO-CLEANUP ON RE-EXECUTION (Destroy Old UI & Stop Running Spammers)
-local oldGui = game.CoreGui:FindFirstChild("EndlessSpammerUI_V16")
-if oldGui then
-	oldGui:Destroy()
-end
-
-local oldBlur = Lighting:FindFirstChild("EndlessSpammerBlur")
-if oldBlur then
-	oldBlur:Destroy()
-end
-
 -- ScreenGui Setup
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "EndlessSpammerUI_V16"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true -- True full screen boundary handling
 
 -- Blur Effect Setup
 local MenuBlur = Instance.new("BlurEffect")
@@ -63,7 +51,7 @@ local BORDER_COLOR = Color3.fromRGB(70, 50, 65)
 -- Active Pattern Separator (Default: _____)
 local currentSymbol = "_____"
 
--- Main Floating Image Toggle Button (Draggable + Screen Bounded)
+-- Main Floating Image Toggle Button (Draggable + Screen Clamp Fixed)
 local ToggleBtn = Instance.new("ImageButton")
 ToggleBtn.Size = UDim2.new(0, 48, 0, 48)
 ToggleBtn.Position = UDim2.new(0, 20, 0.5, -24)
@@ -83,7 +71,7 @@ local BtnStroke = Instance.new("UIStroke")
 BtnStroke.Thickness = 2
 BtnStroke.Parent = ToggleBtn
 
--- Floating Button Dragging Script (Clamped to Screen)
+-- Floating Button Dragging Script (Strict Screen Bounds Clamped)
 local draggingToggle = false
 local dragInputToggle, dragStartToggle, startPosToggle
 
@@ -109,18 +97,17 @@ end)
 
 UserInputService.InputChanged:Connect(function(input)
 	if input == dragInputToggle and draggingToggle then
-		local delta = input.Position - dragStartToggle
 		local viewportSize = workspace.CurrentCamera.ViewportSize
+		local delta = input.Position - dragStartToggle
 		
-		local newX = math.clamp(startPosToggle.X.Offset + delta.X, 0, viewportSize.X - 48)
-		local newY = math.clamp(startPosToggle.Y.Offset + delta.Y, 0, viewportSize.Y - 48)
-		
-		ToggleBtn.Position = UDim2.new(
-			startPosToggle.X.Scale,
-			newX,
-			startPosToggle.Y.Scale,
-			newY
-		)
+		local newX = startPosToggle.X.Offset + delta.X
+		local newY = startPosToggle.Y.Offset + delta.Y
+
+		-- Clamp values to screen bounds (16:9 & all screen safety)
+		local clampedX = math.clamp(newX, 0, viewportSize.X - ToggleBtn.AbsoluteSize.X)
+		local clampedY = math.clamp(newY, 0, viewportSize.Y - ToggleBtn.AbsoluteSize.Y)
+
+		ToggleBtn.Position = UDim2.new(0, clampedX, 0, clampedY)
 	end
 end)
 
@@ -132,12 +119,11 @@ ToggleBtn.MouseLeave:Connect(function()
 	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 48, 0, 48)}):Play()
 end)
 
--- UI Container (Prevents Overflow)
+-- UI Container (Scaled Clamped Safe Overlay)
 local MainContainer = Instance.new("Frame")
 MainContainer.Size = UDim2.new(1, 0, 1, 0)
 MainContainer.BackgroundTransparency = 1
 MainContainer.Visible = true
-MainContainer.ClipsDescendants = true
 MainContainer.Parent = ScreenGui
 
 -- Helper function to style text boxes
@@ -163,7 +149,7 @@ local function styleTextBox(box, placeholder, parent)
 	boxStroke.Parent = box
 end
 
--- 1. Main Menu Box (Center-Fit & Bounded inside Screen)
+-- 1. Main Menu Box (Screen Safe Center Fixed)
 local MainMenu = Instance.new("Frame")
 MainMenu.Size = UDim2.new(0, 320, 0, 240)
 MainMenu.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -172,7 +158,7 @@ MainMenu.BackgroundColor3 = BG_COLOR
 MainMenu.BackgroundTransparency = 0.15
 MainMenu.BorderSizePixel = 0
 MainMenu.Active = true
-MainMenu.ClipsDescendants = true
+MainMenu.Draggable = false
 MainMenu.Parent = MainContainer
 
 local MainCorner = Instance.new("UICorner")
@@ -295,7 +281,6 @@ SideMenu.Position = UDim2.new(0.5, 165, 0.5, 0)
 SideMenu.BackgroundColor3 = BG_COLOR
 SideMenu.BackgroundTransparency = 0.15
 SideMenu.BorderSizePixel = 0
-SideMenu.ClipsDescendants = true
 SideMenu.Parent = MainContainer
 
 local SideCorner = Instance.new("UICorner")
