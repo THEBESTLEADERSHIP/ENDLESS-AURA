@@ -1354,7 +1354,7 @@ OR SABSE ACHI BAAT EGO EMPIRE APNA BETA HAI]]
     btn("🛡️ANTI FLING", T3, function(b) task.spawn(function() while b:GetAttribute("T") do player.Character.HumanoidRootPart.Velocity = Vector3.zero; player.Character.HumanoidRootPart.RotVelocity = Vector3.zero task.wait() end end) end)
     
     -- TAB 4: SPAM
-    btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet(""))() end, true)
+    btn("SHIRO×BHUMIKA🖤", T4, function() loadstring(game:HttpGet("https://raw.githubusercontent.com/THEBESTLEADERSHIP/ENDLESS-AURA/refs/heads/main/BHUMIKA%20SHIRO"))() end, true)
     btn("💢NAMELESS SPAMMER", T4, function() loadstring(game:HttpGet(""))() end, true)
     btn("🌟BHUMIKA SPAMMER", T4, function() loadstring(game:HttpGet(""))() end, true)
     btn("📜WORDS SPAMMER", T4, function() loadstring(game:HttpGet("https://pastebin.com/raw/V27NiC4e"))() end, true)
