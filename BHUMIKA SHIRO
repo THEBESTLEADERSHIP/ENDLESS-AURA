@@ -10,7 +10,7 @@ local Lighting = game:GetService("Lighting")
 
 -- ScreenGui Setup
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "EndlessSpammerUI_V16"
+ScreenGui.Name = "EndlessSpammerUI_V17"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
@@ -42,7 +42,7 @@ local ROBO_FONT = Enum.Font.RobotoMono
 
 -- Theme Static Colors
 local BG_COLOR = Color3.fromRGB(18, 15, 20)           -- Soft Dark Glass BG
-local NORMAL_PINK = Color3.fromRGB(255, 105, 180)     -- Normal Solid Pink (For Bhumika)
+local NORMAL_PINK = Color3.fromRGB(255, 105, 180)     -- Normal Solid Pink
 local SOFT_PINK = Color3.fromRGB(255, 182, 193)       -- Soft Light Pink
 local WHITE_COLOR = Color3.fromRGB(255, 255, 255)     -- Pure White
 local BOX_BG = Color3.fromRGB(30, 25, 32)            -- Box Background
@@ -51,7 +51,7 @@ local BORDER_COLOR = Color3.fromRGB(70, 50, 65)
 -- Active Pattern Separator (Default: _____)
 local currentSymbol = "_____"
 
--- Main Floating Image Toggle Button (Draggable)
+-- Main Floating Image Toggle Button (Draggable with Strict Limits)
 local ToggleBtn = Instance.new("ImageButton")
 ToggleBtn.Size = UDim2.new(0, 48, 0, 48)
 ToggleBtn.Position = UDim2.new(0, 20, 0.5, -24)
@@ -70,50 +70,6 @@ BtnCorner.Parent = ToggleBtn
 local BtnStroke = Instance.new("UIStroke")
 BtnStroke.Thickness = 2
 BtnStroke.Parent = ToggleBtn
-
--- Floating Button Dragging Script
-local draggingToggle = false
-local dragInputToggle, dragStartToggle, startPosToggle
-
-ToggleBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		draggingToggle = true
-		dragStartToggle = input.Position
-		startPosToggle = ToggleBtn.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				draggingToggle = false
-			end
-		end)
-	end
-end)
-
-ToggleBtn.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInputToggle = input
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if input == dragInputToggle and draggingToggle then
-		local delta = input.Position - dragStartToggle
-		ToggleBtn.Position = UDim2.new(
-			startPosToggle.X.Scale,
-			startPosToggle.X.Offset + delta.X,
-			startPosToggle.Y.Scale,
-			startPosToggle.Y.Offset + delta.Y
-		)
-	end
-end)
-
--- Hover Animation for Toggle Button
-ToggleBtn.MouseEnter:Connect(function()
-	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 52, 0, 52)}):Play()
-end)
-ToggleBtn.MouseLeave:Connect(function()
-	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 48, 0, 48)}):Play()
-end)
 
 -- UI Container
 local MainContainer = Instance.new("Frame")
@@ -195,7 +151,7 @@ TitleLine1.TextXAlignment = Enum.TextXAlignment.Left
 TitleLine1.Text = "Eɴᴅʟᴇss Aᴜʀᴀ 🌸"
 TitleLine1.Parent = HeaderFrame
 
--- Custom Line 2 (Bhumika NORMAL PINK, Shiro WHITE)
+-- Custom Line 2
 local Line2Container = Instance.new("Frame")
 Line2Container.Size = UDim2.new(1, -50, 0, 16)
 Line2Container.Position = UDim2.new(0, 48, 0, 22)
@@ -421,6 +377,88 @@ for i = 1, 4 do
 		end
 	end)
 end
+
+-- ADVANCED DRAGGING WITH SCREEN & MENU BOX CLAMPING
+local draggingToggle = false
+local dragStartToggle, startPosToggle
+
+ToggleBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		draggingToggle = true
+		dragStartToggle = input.Position
+		startPosToggle = ToggleBtn.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				draggingToggle = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if draggingToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - dragStartToggle
+		local camera = workspace.CurrentCamera
+		local viewportSize = camera and camera.ViewportSize or Vector2.new(1000, 1000)
+		
+		-- Target absolute pixel position
+		local targetX = startPosToggle.X.Offset + delta.X + (startPosToggle.X.Scale * viewportSize.X)
+		local targetY = startPosToggle.Y.Offset + delta.Y + (startPosToggle.Y.Scale * viewportSize.Y)
+		
+		local btnWidth = ToggleBtn.AbsoluteSize.X
+		local btnHeight = ToggleBtn.AbsoluteSize.Y
+		
+		-- 1. Clamp to Screen Boundaries (Edge Limits)
+		targetX = math.clamp(targetX, 0, viewportSize.X - btnWidth)
+		targetY = math.clamp(targetY, 0, viewportSize.Y - btnHeight)
+		
+		-- 2. Prevent Overlapping with Menu Box when Visible
+		if MainContainer.Visible then
+			-- Combined Combined Boundaries of MainMenu + SideMenu
+			local menuMinX = MainMenu.AbsolutePosition.X - 5
+			local menuMinY = MainMenu.AbsolutePosition.Y - 5
+			local menuMaxX = SideMenu.AbsolutePosition.X + SideMenu.AbsoluteSize.X + 5
+			local menuMaxY = MainMenu.AbsolutePosition.Y + MainMenu.AbsoluteSize.Y + 5
+			
+			local btnMinX = targetX
+			local btnMaxX = targetX + btnWidth
+			local btnMinY = targetY
+			local btnMaxY = targetY + btnHeight
+			
+			-- Check Collision with Menu Box Area
+			if btnMaxX > menuMinX and btnMinX < menuMaxX and btnMaxY > menuMinY and btnMinY < menuMaxY then
+				-- Find closest edge to push the button outside
+				local distLeft = math.abs(btnMaxX - menuMinX)
+				local distRight = math.abs(btnMinX - menuMaxX)
+				local distTop = math.abs(btnMaxY - menuMinY)
+				local distBottom = math.abs(btnMinY - menuMaxY)
+				
+				local minDist = math.min(distLeft, distRight, distTop, distBottom)
+				
+				if minDist == distLeft then
+					targetX = menuMinX - btnWidth
+				elseif minDist == distRight then
+					targetX = menuMaxX
+				elseif minDist == distTop then
+					targetY = menuMinY - btnHeight
+				elseif minDist == distBottom then
+					targetY = menuMaxY
+				end
+			end
+		end
+		
+		ToggleBtn.Position = UDim2.new(0, targetX, 0, targetY)
+	end
+end)
+
+-- Hover Animation for Toggle Button
+ToggleBtn.MouseEnter:Connect(function()
+	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 52, 0, 52)}):Play()
+end)
+ToggleBtn.MouseLeave:Connect(function()
+	TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {Size = UDim2.new(0, 48, 0, 48)}):Play()
+end)
 
 -- WHITE-PINK RGB BLINKING SYSTEM
 RunService.RenderStepped:Connect(function()
